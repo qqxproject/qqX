@@ -605,6 +605,81 @@ function releases_truenas-scale() {
     web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep wplink | cut -d'>' -f2 | fv -M -Q
 }
 
+## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
+function get_ubuntu-server() {
+    local HASH="" ; local ISO="" ; local NAME="live-server" ; local URL="" ; local DATA="" ; local RelMax=
+    if [[ "${RELEASE}" == "daily"* ]]; then URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
+    else URL="https://releases.ubuntu.com/${RELEASE}"
+    fi
+    case "${RELEASE}" in 14*|16*) NAME="server";;
+    esac
+    if web_check "${URL}/SHA256SUMS"; then
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    else
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/MD5SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        ISO=$(cut -d' ' -f3 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    fi
+    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
+        make_vm_config "${OS}-devel.iso"
+    else
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+    fi
+}
+function get_ubuntu() {
+    local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
+    if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
+        # Ubuntu Studio daily-live images are in the dvd directory  @ feb 2025 no longer the case
+        RELEASE="dvd"
+    fi
+    if [[ "${RELEASE}" == "jammy-daily" ]]; then
+        if [[ "${OS}" == "ubuntustudio" ]]; then URL="https://cdimage.ubuntu.com/${OS}/jammy/dvd/current"
+        else URL="https://cdimage.ubuntu.com/${OS}/jammy/daily-live/current"
+        fi
+        VM_PATH="${OS}-jammy-live"
+    elif [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
+        VM_PATH="${OS}-${RELEASE}"
+    elif [ "${OS}" == "ubuntu" ]; then
+        URL="https://releases.ubuntu.com/${RELEASE}"
+    else
+        URL="https://cdimage.ubuntu.com/${OS}/releases/${RELEASE}/release"
+    fi
+    if web_check "${URL}/SHA256SUMS"; then
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    else
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/MD5SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    fi
+    if [ -z "${ISO}" ] || [ -z "${HASH}" ]; then
+        echo "$(pretty_name "${OS}") ${RELEASE} is currently unavailable. Please select other OS/Release combination"
+        exit 1
+    fi
+    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
+        make_vm_config "${OS}-devel.iso"
+    elif [[ "${RELEASE}" == "jammy-daily" ]]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-jammy-live.iso"
+        make_vm_config "${OS}-jammy-live.iso"
+    else
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+    fi
+}
+
 ## FIX invalid VOID folders (use 'current' only as some folders have variants)
 function releases_void() {
     web_pipe "https://repo-default.voidlinux.org/live/current" | grep -e '<a href=' | grep x86 | grep 'base\.iso' | grep -v musl | cut -d'-' -f4 | tr -cd '[:graph:]'
