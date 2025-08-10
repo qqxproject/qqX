@@ -937,11 +937,11 @@ QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors=
 printf "Webget NOT used\n" > "/tmp/qGet_webget_report.txt"
 
 case "${1}" in
-    --mirrors)
-        CheckMirrors=1 ; shift
-    ;;
     --info-line)
         os_info "$2" ; exit 1
+    ;;
+    --rel-notes)
+        distro_release_notes "$2" ; exit 1
     ;;
     --full-check|--check|-check)
         OPERATION="test" ; shift
@@ -968,11 +968,15 @@ case "${1}" in
             test_all "${1}"
             exit 0
         fi ;;
+    --mirrors)
+        CheckMirrors=1 ; shift
+    ;;
     --help|-help|--h|-h)
         help_message
         printf "\n\nExtra qqX commands: \n\nfrom a terminal opened in a qqX 'built-in' folder"
         printf "\n\n----------------------------- ./quickget -------------------------------"
         printf "\n\n  --info-line       Output the OS info line in raw field separated format for alternative processing"
+        printf "\n\n  --rel-notes       Output the additional release and installation notes, if supplied"
         printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qGet_FullResult.txt\""
         printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
         printf "\n\n  --quiet-check     [os] [release] [edition] : Only log check image URL(s) to file \"/tmp/qGet_QuietResult.txt\""

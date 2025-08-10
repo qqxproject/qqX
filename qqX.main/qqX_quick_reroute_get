@@ -671,15 +671,12 @@ function_quick_get_wrap ()  {
           fi
 
           if [[ $QG_Modpath ]]; then
-            QGW_OS_RelNotes="$(grep "$QGW_OS_Arr_NameSelected)" "$QG_Modpath" | grep -m 1 'RelNotes=' | cut -d '=' -f 2)"
-          fi
-          if [[ $QGW_OS_RelNotes ]] ; then
-            QGW_OS_RelNotes="${QGW_OS_RelNotes//';;'/}"
-            QGW_OS_RelNotes="${QGW_OS_RelNotes//'"'/}"
-            QGW_OS_RelNotes="$(tr '|' '\n' <<< "$QGW_OS_RelNotes")"
-            printColor "\n\n  Release Notes:"
-            printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes"
-            printf "\n"
+            QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
+            if [[ $QGW_OS_RelNotes ]] ; then
+              printColor "\n\n  Release Notes:"
+              printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes"
+              printf "\n"
+            fi
           fi
 
           if [[ "$QGW_OS_Arr_NameSelected" == "macos"* ]]; then
