@@ -93,7 +93,14 @@ elif [[ ! $UserTerm ]]; then
 
     printf "\n  %s\n\n" "${TermGrep[@]}"
     printf "  Some lightweight terminals may not be compatible (See 'known-issues')"
-    [[ $UserTerm == "gnome-terminal" ]] && printf "\n\n  'gnome-terminal' is also used by various desktops, such as Mint Cinnamon, Budgie and Ubuntu ..."
+    if [[ $UserTerm == "gnome-terminal" ]]; then
+      printf "\n\n  'gnome-terminal' is also used by various desktops, such as Mint Cinnamon, Budgie and Ubuntu ..."
+        if ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry ; then
+        printf "\n\n   However some distros are aliasing 'gnome-terminal' as a call to kgx / gnome console"
+        printf "\n\n   CAUTION:  either select 'kgx' or install the non-aliased version ...."
+          UserTerm="kgx"
+        fi
+    fi
     printf "\n\n  Checking the menubar for help > about, could show the name ...."
     printf "\n\n  Enter the number of your Terminal Emulator,  or  [n] none of these, do more tests \n\n"
     read -rp "  >  "  UserTerm_PID
@@ -256,7 +263,14 @@ while [[ ! $UserTerm_Found ]]; do
   fi
 
   # Add any modifiers here, if needed
-  [[ "$UserTerm" == gnome-terminal* ]] &&  UserTerm="gnome-terminal"
+  if [[ "$UserTerm" == gnome-terminal* ]]; then
+    UserTerm="gnome-terminal"
+    if ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry ; then
+        printf "\n\n   However some distros are aliasing 'gnome-terminal' as a call to kgx / gnome console"
+        printf "\n\n   CAUTION:  either select 'kgx' or install the non-aliased version ...."
+      UserTerm="kgx"
+    fi
+  fi
 
   if [[ $UserTerm ]] ; then
     echColor " $ProbTerm UserTerm is $UserTerm" ; echo

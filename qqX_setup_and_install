@@ -38,6 +38,7 @@ fi
 # Priority is given to main stream user bases and those offering geometry parameters
 # 85% of users are probably covered by the first four: "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal"
 # Over 95% probably when "qterminal" and "alacritty" are added.
+# But 08/2025 add a kgx check as some Gnome distros are using 'Gnome Console' aka kgx as an alias call for Gnome Terminal ....
 
 # There are several popular post-install terminals with various special feature sets.
 # However, it is very unlikely to find these and these alone. An underlying standard desktop environment terminal
@@ -59,8 +60,9 @@ fi
 # Users with Window Managers, not Desktop Envs will be familiar with terminals and settings at the cmd line
 # However add some well known interfaces where possible, eg. urxvt that comes with 'i3' as this helps with running of QF
 
+
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
-set "$@" -- "alacritty" "kitty" "foot"
+set "$@" -- "kgx" "alacritty" "kitty" "foot"
 
 while [ -n "$1" ] ; do
   if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX.termlist"
@@ -82,9 +84,15 @@ fi
 DefWidth=150
 DefHeight=45
 
-if [ "$UserTerm" = "gnome-terminal" ]; then
-  "$UserTerm" --geometry ${DefWidth}x${DefHeight} --wait -- "./qqX.system/qqX_system_install"
-
+if [ "$UserTerm" = "kgx" ]; then
+  "$UserTerm" --wait -- "./qqX.system/qqX_system_install"
+elif [ "$UserTerm" = "gnome-terminal" ]; then
+  if gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry ; then
+    "$UserTerm" --geometry ${DefWidth}x${DefHeight} --wait -- "./qqX.system/qqX_system_install"
+  else
+    UserTerm="kgx"
+    "$UserTerm" --wait -- "./qqX.system/qqX_system_install"
+  fi
 elif [ "$UserTerm" = "konsole" ]; then
   "$UserTerm" --hide-menubar --hide-tabbar --notransparency -p TerminalColumns=145 -p TerminalRows=50  -e  "./qqX.system/qqX_system_install"
 

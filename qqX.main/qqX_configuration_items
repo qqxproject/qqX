@@ -290,9 +290,8 @@ check_conf_file_for_typos () {
 function_conf_error () {
   ErrorMenuSelect= ; NewSetupFlag=
   # clear any accidental initial double pressing of the enter key occuring while experiencing the error
-  read -r -t 0.1
-  read -r -t 0.1
-  read -r -t 0.1
+  read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
+
   if [[ $NewFileTuneUp_JustDone ]]; then NewFileTuneUp_JustDone= ; return ; fi
 
   printColor "\n\n  qqX Settings, VM folder & conf file(s)"

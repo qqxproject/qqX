@@ -228,7 +228,6 @@ XDG_GUI_desktop_PathName="$XDG_GUI_desktop_Folder/$XDG_GUI_desktop_Name"
 
 
 function print_manual_uninstall_notes {
-
   cat << Notes
 
   Manual uninstall, standard procedure  >>  remove the hidden .qqX folder from $HOME
@@ -239,16 +238,13 @@ function print_manual_uninstall_notes {
   From qqX 1.6 onwards also remove  sudo rm -r /usr/share/qqX
 
 Notes
-
 }
 
 ## TERMINAL:
 
 function print_terminal_notes {
-
   # See https://stackoverflow.com/questions/22697688/how-to-cat-eof-a-file-containing-code
   # ( NB use of escape EOF, or quotes, not used )
-
   cat << Notes
 
   TO MANUALLY SPECIFY the terminal name, the installer script's 'UserTerm' variable may be used.
@@ -273,7 +269,6 @@ function print_terminal_notes {
   For example, 'qterminal' which also uses PIXELS.  Try 1500 x 1000.
 
 Notes
-
 }
 
 ## SET TERMINAL SIZES & PROFILE
@@ -633,7 +628,13 @@ if [[ ! $SkipMkLauncher ]]; then
 
   if grep -qs Exec "$XDG_GUI_desktop_Folder/qqX.desktop"; then
     CurrentTerm="$(grep Exec "$XDG_GUI_desktop_Folder/qqX.desktop" | cut -d' ' -f1 | cut -d= -f2  2>/dev/null)"
-    [[ $CurrentTerm ]] && printf "\n\n  The current qqX launcher is using '%s'" "$CurrentTerm"
+    if [[ $CurrentTerm ]]; then
+      printf "\n\n  The current qqX launcher is using '%s'" "$CurrentTerm"
+      if [[ $CurrentTerm == "gnome-terminal" ]] && ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry ; then
+        printf "\n\n  however some distros are aliasing 'gnome-terminal' as a call to kgx / gnome console"
+        printf "\n\n  CAUTION:  either select 'kgx' or install the non-aliased version ...."
+      fi
+    fi
   fi
 
   if [[ $UserTerm || $CustomTerminalProfile ]]; then
@@ -792,6 +793,7 @@ if [[ ! $SkipMkLauncher ]]; then
   # Some listed terminals will be entered into the 'else' section at the end, eg qterminal & urxvt
 
   SelectedTerminalProfile=
+  [[ $UserTerm == "gnome-terminal" ]] && ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry && UserTerm="kgx"
 
   if [[ -e "$HOME/.qqX/qqX_term.conf" ]]; then
     # allows for zero entry profiles having been written
@@ -800,6 +802,7 @@ if [[ ! $SkipMkLauncher ]]; then
     GrepLine="$(eval grep -s  UserTerm  "$HOME/.qqX/qqX_term.conf")"
     [[ $GrepLine ]] && eval "$GrepLine"
     # generates "$CustomTerminalProfile" & "$UserTerm"
+    [[ $UserTerm == "gnome-terminal" ]] && ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry && UserTerm="kgx"
   elif [[ $UserTerm == "mate-terminal" ]]; then SelectedTerminalProfile="$MateTerminalProfile"
   elif [[ $UserTerm == "gnome-terminal" ]]; then SelectedTerminalProfile="$GnomeTerminalProfile"
   elif [[ $UserTerm == "xfce4-terminal" ]]; then SelectedTerminalProfile="$XfceTerminalProfile"
@@ -910,6 +913,8 @@ if [[ ! $SkipMkLauncher ]]; then
       # needs quotes  - plus REVIEW  -e  deprecation in other terminals
       if [[ $CustomTerminalProfile ]]; then
         echo "Exec=$UserTerm $CustomTerminalProfile " '"' "$qqX_Std_File_Path %f" '"'
+      elif [[ $UserTerm == "kgx" ]]; then
+        echo "Exec=$UserTerm -- $qqX_Std_File_Path "'"'" %f"'"'
       elif [[ $UserTerm == "gnome-terminal" ]]; then
         echo "Exec=$UserTerm $SelectedTerminalProfile -- $qqX_Std_File_Path "'"'" %f"'"'
       elif [[ $SelectedTerminalProfile ]]; then
@@ -957,13 +962,14 @@ fi
 Start_qqX=
 GrepExecLine="$(grep -s Exec "$XDG_GUI_desktop_Folder/qqX.desktop")"
 if [[ $GrepExecLine ]]; then GrepExecLine="${GrepExecLine/'Exec='/}" ; Start_qqX="${GrepExecLine/'%f'/}" ; fi
+if grep -qs 'kgx' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then  Start_qqX="${Start_qqX/' -- '/' --wait -- '}" ; fi
 if grep -qs 'gnome-terminal' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then  Start_qqX="${Start_qqX/' -- '/' --wait -- '}" ; fi
 
 End_Install=
 if [[ $Current_qqX_Version ]]; then
   printf  "\n\n  Upgrade changes are now complete \n\n"
 else
-  printColor  "\n\n  Install process finished:  "
+  printColor  "\n\n  Install process finished:  "s
   printf "\n\n\n  Start qqX straight from the system's MAIN MENU,"
   printf   "\n  by typing 'qqX' the terminal, or by mouse clicks on VM or ISO files ..."
   printf "\n\n  Start qqX to edit the settings file, or before starting"
