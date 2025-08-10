@@ -943,6 +943,9 @@ case "${1}" in
     --rel-notes)
         distro_release_notes "$2" ; exit 1
     ;;
+    --mirrors)
+        CheckMirrors=1 ; shift
+    ;;
     --full-check|--check|-check)
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
@@ -968,9 +971,6 @@ case "${1}" in
             test_all "${1}"
             exit 0
         fi ;;
-    --mirrors)
-        CheckMirrors=1 ; shift
-    ;;
     --help|-help|--h|-h)
         help_message
         printf "\n\nExtra qqX commands: \n\nfrom a terminal opened in a qqX 'built-in' folder"
