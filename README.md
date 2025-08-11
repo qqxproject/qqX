@@ -8,9 +8,15 @@ SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.b
 
 - Easier to use interface harnesses extra features from upstream Qemu and the Linux desktop
 
-## [Latest release 1.13.03](https://github.com/qqxproject/qqX/releases/latest)
+## [Latest release 1.13.04](https://github.com/qqxproject/qqX/releases/latest)
 
-Further upgrades to new web pages system, plus earlier:
+## 1.13.04
+
+Collection of several small updates, small improvements and small bugfixes
+
+Includes earlier:
+
+- Upgrades to new web pages system
 
 - Massive upgrade for QuickGet, fixes, sorts and adds over 25 distros
 
