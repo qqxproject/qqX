@@ -113,7 +113,9 @@ function os_info {
         anduinos)         INFO="Anduin OS|-|https://www.anduinos.com/|Ubuntu-based Linux distribution that aims to facilitate developers transitioning from Windows.";;
         archcraft)        INFO="Archcraft|-|https://archcraft.io/|Collection of minimal Linux distributions, based on Arch Linux.";;
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
+        edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
         elementary)       INFO="Elementary OS|-|https://elementary.io/|Streamlined Gnome/Vala/Flatpak distro: Thoughtful, capable, and ethical replacement for Windows and macOS.";;
+        endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
@@ -132,6 +134,8 @@ function distro_release_notes {
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
+        elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
+        endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
         nitrux)           RelNotes="08/2025 ISO releases have been suspended for changes from KDE to Hyprland and the Cachy kernel. See https://nxos.org/news/news-farewell-nx-desktop-and-plasma/";;
@@ -605,6 +609,81 @@ function releases_truenas-scale() {
     web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep wplink | cut -d'>' -f2 | fv -M -Q
 }
 
+## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
+function get_ubuntu-server() {
+    local HASH="" ; local ISO="" ; local NAME="live-server" ; local URL="" ; local DATA="" ; local RelMax=
+    if [[ "${RELEASE}" == "daily"* ]]; then URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
+    else URL="https://releases.ubuntu.com/${RELEASE}"
+    fi
+    case "${RELEASE}" in 14*|16*) NAME="server";;
+    esac
+    if web_check "${URL}/SHA256SUMS"; then
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    else
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/MD5SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        ISO=$(cut -d' ' -f3 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    fi
+    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
+        make_vm_config "${OS}-devel.iso"
+    else
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+    fi
+}
+function get_ubuntu() {
+    local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
+    if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
+        # Ubuntu Studio daily-live images are in the dvd directory  @ feb 2025 no longer the case
+        RELEASE="dvd"
+    fi
+    if [[ "${RELEASE}" == "jammy-daily" ]]; then
+        if [[ "${OS}" == "ubuntustudio" ]]; then URL="https://cdimage.ubuntu.com/${OS}/jammy/dvd/current"
+        else URL="https://cdimage.ubuntu.com/${OS}/jammy/daily-live/current"
+        fi
+        VM_PATH="${OS}-jammy-live"
+    elif [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
+        VM_PATH="${OS}-${RELEASE}"
+    elif [ "${OS}" == "ubuntu" ]; then
+        URL="https://releases.ubuntu.com/${RELEASE}"
+    else
+        URL="https://cdimage.ubuntu.com/${OS}/releases/${RELEASE}/release"
+    fi
+    if web_check "${URL}/SHA256SUMS"; then
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    else
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/MD5SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    fi
+    if [ -z "${ISO}" ] || [ -z "${HASH}" ]; then
+        echo "$(pretty_name "${OS}") ${RELEASE} is currently unavailable. Please select other OS/Release combination"
+        exit 1
+    fi
+    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
+        make_vm_config "${OS}-devel.iso"
+    elif [[ "${RELEASE}" == "jammy-daily" ]]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-jammy-live.iso"
+        make_vm_config "${OS}-jammy-live.iso"
+    else
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+    fi
+}
+
 ## FIX invalid VOID folders (use 'current' only as some folders have variants)
 function releases_void() {
     web_pipe "https://repo-default.voidlinux.org/live/current" | grep -e '<a href=' | grep x86 | grep 'base\.iso' | grep -v musl | cut -d'-' -f4 | tr -cd '[:graph:]'
@@ -943,6 +1022,9 @@ case "${1}" in
     --rel-notes)
         distro_release_notes "$2" ; exit 1
     ;;
+    --mirrors)
+        CheckMirrors=1 ; shift
+    ;;
     --full-check|--check|-check)
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
@@ -968,9 +1050,6 @@ case "${1}" in
             test_all "${1}"
             exit 0
         fi ;;
-    --mirrors)
-        CheckMirrors=1 ; shift
-    ;;
     --help|-help|--h|-h)
         help_message
         printf "\n\nExtra qqX commands: \n\nfrom a terminal opened in a qqX 'built-in' folder"
