@@ -37,7 +37,7 @@ function  main_menu_actions {
       else
         # BUT use these for lookups, given https://cloud.google.com/translate/docs/languages#automl
         # And that @ 2025, the following have DIRECT PAIR Google data files:
-        Iso_639_1_List="af ar az bg bn ca cs cy da de el es et fa fi fr gl gu hi hr ht hu id is it iw ja ka ko lt lv mr ms nl no pa pl pt "
+        Iso_639_1_List="af ar az bg bn ca cs cy da de el es et fa fi fr gl gu hi hr ht hu id is it ja ka ko lt lv mr ms nl no pa pl pt "
         Iso_639_1_List+="ro ru sk sl sq sr sv sw th tr uk ur vi zh"
         # Note, this normally includes zh-TW, but as standard zh is official in TW, just use zh as it's simpler to do ....
         # See https://en.wikipedia.org/wiki/Taiwan  REVIEW
