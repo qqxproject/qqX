@@ -888,7 +888,7 @@ iso_select_mount_and_boot () {
     printColor "\n\n  ISO formated disk images may be copied into the individual VM folder"
     printf "\n\n  A shared 'live boot' ISO can be added to the Shared Drive folder, if Shared Drive has been set up."
     printf "\n\n  One or more may be added.  If more than one, an ISO should be selected from the list."
-    printf "\n\n  Current Quickemu code is retricted to one only to be present as mounted at a time."
+    printf "\n\n  Current Quickemu code is restricted to one only being mounted at a time."
     printf "\n\n  To auto-mount an ISO when the VM is selected, set 'fixed_iso=\"VM_InstanceName/name.iso\"' in the .conf file"
     printf "\n\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for partition management."
     printf "\n\n  Some iso's may not work as secondary boots, notably Kolibri."
