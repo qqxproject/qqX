@@ -438,9 +438,8 @@ move_rename_Selected_VM () {
     sleep 2 ;  return
   fi
 
-  MoveFail=
-  Move_VM_Option=
-  MvTargetIsLinked=
+  MoveFail= ; Move_VM_Option= ; MvTargetIsLinked=
+  Mv_OldFolderPath= ; Mv_OldConfPath= ; Mv_OldCurVMfolder=
 
   if stat "$1" 2>/dev/null | grep -q "symbolic" ; then
     printColor "\n\n  Symbolically linked to real path "; printf "%s " "$(realpath "$1")"
@@ -500,6 +499,7 @@ move_rename_Selected_VM () {
 
     Mv_OldFolderPath="$(realpath "$VM_InstanceName")"
     Mv_OldConfPath="$(realpath "${VM_InstanceName}.conf")"
+    Mv_OldCurVMfolder="$(realpath "$Current_VM_Folder")"
 
     # set mv to use 'r' as multi-purpose
     Move_VM_Option="r"
@@ -510,21 +510,22 @@ move_rename_Selected_VM () {
     else printColor "\n ERROR changing folder \n" ; Move_VM_Option=
     fi
 
+    CurrentFolder="$(pwd)"
+    show_current_group_folder_list
+
   fi
 
   if [[ $Move_VM_Option == "r" ]]; then
 
     CurrentFolder="$(pwd)"
-    show_current_group_folder_list
-
-    printf "\n\n  Currently Containing:   "
+    printf "\n\n  Grouping Folder '%s' currently contains:"  "$Current_VM_Folder"
     list_current_folder_instance_names
 
     while true; do
 
       Mv_NewName=
       Current_VM_Folder_NameError=
-      printf "\n\n\n  Selected Distro '%s' & .conf file to be RE-NAMED and edited or Linked"  "$1"
+      printf "\n\n\n  Selected Distro '%s' & .conf file to be RE-NAMED or edited or Linked"  "$1"
       printColor "\n\n  Please give a new VM name" ; [[ $Mv_NewConf_Dir ]] && printf "  or [n] no-change  [ln] make link"
       printf "\n\n  eg. tux-33-alpha  emu-44-mate  or [b] to go back \n\n"
       read -rp "  >  "  Mv_NewName
@@ -539,7 +540,14 @@ move_rename_Selected_VM () {
 
     done
 
-    if [[ $Mv_NewName == "b" ]]; then  Move_VM_Option= ; Mv_NewName= ; Move_FolderOption= ; Move_VM_Option= ; Mv_NewConf_Dir= ; return ; fi
+    if [[ $Mv_NewName == "b" ]]; then
+      Move_VM_Option= ; Mv_NewName= ; Move_FolderOption= ; Move_VM_Option= ; Mv_NewConf_Dir=
+      if [[ $Mv_OldCurVMfolder ]]; then
+        Current_VM_Folder="$Mv_OldCurVMfolder"
+        cd "$Current_VM_Folder" || printColor "\n\n INTERNAL ERROR: failed to return to the original folder ??\n\n"
+      fi
+      return
+    fi
 
     Mv_NewName_Return=
     if [[ $Mv_NewName != "$VM_InstanceName" ]]; then printf "\n\n  Renaming to '%s' " "$Mv_NewName"
@@ -550,7 +558,12 @@ move_rename_Selected_VM () {
     read -rp "  >  "  Mv_NewName_Return
 
     if [[ $Mv_NewName_Return ]]; then
-      Mv_NewName_Return= ; Move_VM_Option= ; Mv_NewName= ; Move_FolderOption= ; Move_VM_Option= ; Mv_NewConf_Dir= ; return
+      Mv_NewName_Return= ; Move_VM_Option= ; Mv_NewName= ; Move_FolderOption= ; Move_VM_Option= ; Mv_NewConf_Dir=
+      if [[ $Mv_OldCurVMfolder ]]; then
+        Current_VM_Folder="$Mv_OldCurVMfolder"
+        cd "$Current_VM_Folder" || printColor "\n\n INTERNAL ERROR: failed to return to the original folder ??\n\n"
+      fi
+      return
     fi
     if [[ $MakeLinksOnly ]]; then
       if [[ $Mv_NewConf_Dir ]]; then
