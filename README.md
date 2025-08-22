@@ -2,9 +2,9 @@
 
 SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.builtins/freespirit/quickemu) / [QUICKGET](https://github.com/qqxproject/qqX/blob/main/qqX.builtins/freespirit/quickget)
 
-![qqX-vmm](https://github.com/qqxproject/qqX/assets/3956806/18e5c495-8072-49a5-8b9c-e1302549efcf)
+![qqX-next-level-quickemu-front-end](https://github.com/user-attachments/assets/dd8a478f-805f-4c1b-882d-e3c3f09fdb43)
 
-[Adds huge number of fixes, tools and general improvements to the popular Quickemu system](https://qqxproject.org/docs/FreeBird)
+[Adds a huge number of fixes, tools and general improvements to the popular Quickemu system](https://qqxproject.org/docs/FreeBird)
 
 - Easier to use interface harnesses extra features from upstream Qemu and the Linux desktop
 
