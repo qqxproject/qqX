@@ -99,6 +99,7 @@ function  main_menu_actions {
   elif [[ $MainMenuChoice == "mv" || $MainMenuChoice == "rn" || $MainMenuChoice == "ln" ]]; then
 
     move_rename_Selected_VM  "$VM_InstanceName"  "$VM_Conf_File"
+    [[ $Loop_Diagnostics ]] && printf "\n\n Post MV RN LN :" &&  main_loop_diagnostics && read_main_drive_and_img_iso_conf_vars && printf "\n\n"
     return
 
   elif [[ $MainMenuChoice == "hdw" ]] ; then

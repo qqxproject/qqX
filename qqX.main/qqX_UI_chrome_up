@@ -212,6 +212,8 @@ show_qqX_title_bar() {
     printf "\n"
   fi
 
+  [[ $Loop_Diagnostics ]] && printf "\n\n Post show_qqX_title_bar :" &&  main_loop_diagnostics  && printf "\n\n"
+
 }
 
 function show_qqX_general_help {
