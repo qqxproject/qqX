@@ -43,7 +43,7 @@ find_web_browser() {
 }
 
 find_sys_lang() {
-	TxLang= ; ListedSysLang=
+	TxLang= ; ListedSysLang= ; ShowTxTexts=
 	# @ 2025, the following have DIRECT PAIR Google data files, so use these for lookups:
 	# See https://cloud.google.com/translate/docs/languages#automl
 	Iso_639_1_List="af ar az bg bn ca cs cy da de el en es et fa fi fr gl gu hi hr ht hu id is it ja ka ko lt lv mr ms nl no pa pl pt "
@@ -61,10 +61,12 @@ find_sys_lang() {
 	if [[ ! $ListedSysLang ]] || [[ $ListedSysLang == "en" ]]; then TxLang="it"
 	elif [[ $ListedSysLang ]]; then  TxLang="$ListedSysLang"
 	fi
+	# Set qqX show non EN flag
+	[[ $ListedSysLang ]] && [[ $ListedSysLang != "en" ]] && ShowTxTexts=1
 }
 
 find_translate_text() {
-	grep -A 500 TxTxt=\""$1"\" "$(pwd)/qqX.system/translate.from.english.txt" | grep -m 1 -B 500 'TxTxt_End' \
+	grep -A 500 -F TxTxt=\""$1"\" "$(pwd)/qqX.system/translate.from.english.txt" | grep -m 1 -B 500 'TxTxt_End' \
 	| grep "${TxLang}=" | cut -d '=' -f 2- | tr -d '"' 2>/dev/null
 }
 
@@ -85,7 +87,7 @@ open_installer_tx_screens_in_browser() {
 	# make extra sure that a target lang is present, even if English instructions were shown
 	if [[ ! $TxLang ]]; then TxLang="it"
 	fi
-	if [[ $WebBrowser ]]; then printColor "\n\n  %s %s " "$OpenTx1" "$WebBrowser"
+	if [[ $WebBrowser ]]; then printColor "\n\n  %s '%s'" "$OpenTx1" "$WebBrowser"
 	else printColor "\n\n  %s" "$OpenTx2"
 	fi
 	printf "\n\n  [b] %s \"https://qqxproject.org/docs/Translation\" \n\n" "$OpenTx3"
