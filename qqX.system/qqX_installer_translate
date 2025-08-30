@@ -42,29 +42,25 @@ find_web_browser() {
 	fi
 }
 
-find_translation_lang() {
-	TxLang= ; SystemLang=
-	# Use these for lookups, given https://cloud.google.com/translate/docs/languages#automl
-	# And that @ 2025, the following have DIRECT PAIR Google data files:
+find_sys_lang() {
+	TxLang= ; ListedSysLang=
+	# @ 2025, the following have DIRECT PAIR Google data files, so use these for lookups:
+	# See https://cloud.google.com/translate/docs/languages#automl
 	Iso_639_1_List="af ar az bg bn ca cs cy da de el en es et fa fi fr gl gu hi hr ht hu id is it ja ka ko lt lv mr ms nl no pa pl pt "
 	Iso_639_1_List+="ro ru sk sl sq sr sv sw th tr uk ur vi zh"
-	# Note, this normally includes zh-TW, but as standard zh is official in TW, just use zh > See https://en.wikipedia.org/wiki/Taiwan
-	if grep -qs  "${LANG:0:2}" <<< "$Iso_639_1_List"; then SystemLang="${LANG:0:2}"
-	elif grep -qs  "${GDM_LANG:0:2}" <<< "$Iso_639_1_List"; then SystemLang="${GDM_LANG:0:2}"
-	elif grep -qs  "${LANGUAGE:0:2}" <<< "$Iso_639_1_List"; then SystemLang="${LANGUAGE:0:2}"
+	# Simplified Chinese is also official in TW, keep it simple and use plain 'zh', skip zh-TW  See https://en.wikipedia.org/wiki/Taiwan
+	# Plus check if System Lang is 'en', which has been added for grep purposes
+	if grep -qs  "${LANG:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${LANG:0:2}"
+	elif grep -qs  "${GDM_LANG:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${GDM_LANG:0:2}"
+	elif grep -qs  "${LANGUAGE:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${LANGUAGE:0:2}"
 	fi
-	# And where 'en' has been added for grep purposes as TxLang must be non-original (non en), otherwise Google complains
-	[[ ! $SystemLang ]] && SystemLang="en"
-	[[ $SystemLang == "en" ]] && TxLang="it"
-	# And where caps vars are from std env
-	if [[ ! $TxLang ]]; then
-		if grep -qs  "${LANG:0:2}" <<< "$Iso_639_1_List"; then TxLang="${LANG:0:2}"
-		elif grep -qs  "${GDM_LANG:0:2}" <<< "$Iso_639_1_List"; then TxLang="${GDM_LANG:0:2}"
-		elif grep -qs  "${LANGUAGE:0:2}" <<< "$Iso_639_1_List"; then TxLang="${LANGUAGE:0:2}"
-		fi
+	# If Listed Lang not present OR if System Lang is 'en', then set TxLang to something
+	# or something different that is known to work, otherwise Google complains.
+	# This way, non-listed targets can still be set from the browser top bar
+	# whilst basic English (lingua franca) instructions still remain available for the qqX interface.
+	if [[ ! $ListedSysLang ]] || [[ $ListedSysLang == "en" ]]; then TxLang="it"
+	elif [[ $ListedSysLang ]]; then  TxLang="$ListedSysLang"
 	fi
-	# If not present in list, set to something known to work
-	[[ ! $TxLang ]] && TxLang="it"
 }
 
 find_translate_text() {
@@ -78,17 +74,19 @@ open_installer_tx_screens_in_browser() {
 	local OpenTx3="to go back, more help is available at:"
 	local OpenTx4="Opening Translated qqX Installation notes in Browser"
 	local OpenTx5="ERROR: Browser or WebPages not found"
-	if [[ $SystemLang != "en" ]] && [[ $TxLang ]]; then
+	# translate only if System Lang found in list, otherwise leave tx instructions in English
+	if [[ $ListedSysLang ]] && [[ $ListedSysLang != "en" ]] && [[ $TxLang ]]; then
 		OpenTx1="$(find_translate_text "$OpenTx1")"
 		OpenTx2="$(find_translate_text "$OpenTx2")"
 		OpenTx3="$(find_translate_text "$OpenTx3")"
 		OpenTx4="$(find_translate_text "$OpenTx4")"
 		OpenTx5="$(find_translate_text "$OpenTx5")"
 	fi
-	if [[ $WebBrowser ]]; then
-		printColor "\n\n  %s %s " "$OpenTx1" "$WebBrowser"
-	else
-		printColor "\n\n  %s" "$OpenTx2"
+	# make extra sure that a target lang is present, even if English instructions were shown
+	if [[ ! $TxLang ]]; then TxLang="it"
+	fi
+	if [[ $WebBrowser ]]; then printColor "\n\n  %s %s " "$OpenTx1" "$WebBrowser"
+	else printColor "\n\n  %s" "$OpenTx2"
 	fi
 	printf "\n\n  [b] %s \"https://qqxproject.org/docs/Translation\" \n\n" "$OpenTx3"
 	read -rp "  >  "  TxSetCode
