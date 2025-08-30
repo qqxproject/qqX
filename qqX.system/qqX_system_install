@@ -930,7 +930,7 @@ if [[ ! $SkipMkLauncher ]]; then
       # MimeType section used only for right click, open with, menu functions   # one line, or causes errors
 
       printf "MimeType=application/x-qemu-disk;application/x-cd-image;application/vnd.efi.iso\n"
-      echo "Keywords=qqX;qqx;qqX-Project;quickemu;quickget;qemu;kvm;KVM;qcow2;vm;VM;virt;;virtual-machine;emulator"
+      echo "Keywords=qqX;qqx;qqX-Project;;qqxproject;quickemu;quickget;qemu;kvm;KVM;qcow2;vm;VM;virt;;virtual-machine;emulator"
       echo "#"
       echo "#https://specifications.freedesktop.org/desktop-entry-spec/latest/"
 
