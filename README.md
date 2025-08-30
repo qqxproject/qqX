@@ -2,34 +2,38 @@
 
 SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.builtins/freespirit/quickemu) / [QUICKGET](https://github.com/qqxproject/qqX/blob/main/qqX.builtins/freespirit/quickget)
 
+[Adds fixes, tools and improvements to the popular Quickemu system](https://qqxproject.org/docs/FreeBird)
+
+- Huge easy build range of _installation-ready_ distros and desktops
+
 ![qqX-vmm](https://github.com/qqxproject/qqX/assets/3956806/18e5c495-8072-49a5-8b9c-e1302549efcf)
 
-[Adds huge number of fixes, tools and general improvements to the popular Quickemu system](https://qqxproject.org/docs/FreeBird)
+- Rapid development, simplified interface system, for extra features from Qemu and the Linux desktop
 
-- Easier to use interface harnesses extra features from upstream Qemu and the Linux desktop
+- Safe, simple to follow code, carefully written and carefully checked
 
-## [Latest release 1.13.04](https://github.com/qqxproject/qqX/releases/latest)
+-----
 
-## 1.13.04
+Recent Highlights Include:
 
-Collection of several small updates, small improvements and small bugfixes
+- **Massive upgrades for QuickGet, fixes, sorts and adds over 30 distros**
 
-Includes earlier:
+- and a new Quickget filter system
 
-- Upgrades to new web pages system
+- Upgrades to new web pages system with improved translation
 
-- Massive upgrade for QuickGet, fixes, sorts and adds over 25 distros
-
-- New Quickget filter system
-
-- Fixes for qqX right click and Text Editor issues in Gnome
-
-Includes earlier downstream fixes for Quickemu issues:
+Plus downstream fixes for Quickemu issues:
 
 - Qemu version 10.0.0
 
 - Windows Installer
 
-See web pages and release notes for full details:
+-----
 
-### [https://qqxproject.org](https://qqxproject.org/)
+[https://qqxproject.org](https://qqxproject.org/)
+
+Allows easy running of Linux, Windows, MacOS, etc with Qemu / KVM
+
+See web pages for full details
+
+-----
