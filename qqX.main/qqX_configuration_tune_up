@@ -96,6 +96,10 @@ function_config_tune_up ()  {
 
   printColor "\n\n  CHECK ME: \n\n"
   cat "$TuneUpTargetFile"
+
+  if [[ $ShowTxTexts ]]; then printColor  "  [tx] %s" "$MainTxOptionLine"
+  else printf  "  [tx] %s" "$MainTxOptionLine"
+  fi
   printColor "\n\n  All changes made here, may be reversed:"
   printf "\n\n  A backup of your current configuration has now been date recorded & placed in the Distro Folder"
 
@@ -114,20 +118,24 @@ function_config_tune_up ()  {
   Conf_SysQE_Pointer="$(head -n 1 "$TuneUpTargetFile" | grep '#!' | grep "$QE_SystemFilePath" )"
   [[ "$Conf_SysQE_Pointer" == *'builtins'* ]] && Conf_SysQE_Pointer=
 
-  ConfEdit_Qstart=
-
-  if [[ "$Conf_qqX_Pointer" != *"$Installed_qqX_Path"* ]]; then
-    printColor "\n\n  Change the start line to point to qqX ?   "
-  elif [[ $QE_SystemFilePath ]]; then
-    printColor "\n\n  Stay with the start line pointing to qqX ?   "
-  fi
-  if [[ -e "$QE_SystemFilePath" ]]; then
-    printColor "(set as System, if unsure)"
-  fi
-  printf "\n\n  [enter] yes, continue with 'qqX'   "
-  [[ $QE_SystemFilePath ]] && printf "[no] use System %s   " "$QE_SystemFilePath"
-  printf "[q] quit tune-up, leave as is, or delete \n\n"
-  read -rp "  >  "  ConfEdit_Qstart
+  while true; do
+    ConfEdit_Qstart=
+    if [[ "$Conf_qqX_Pointer" != *"$Installed_qqX_Path"* ]]; then
+      printColor "\n\n  Change the start line to point to qqX ?   "
+    elif [[ $QE_SystemFilePath ]]; then
+      printColor "\n\n  Stay with the start line pointing to qqX ?   "
+    fi
+    if [[ -e "$QE_SystemFilePath" ]]; then
+      printColor "(set as System, if unsure)"
+    fi
+    printf "\n\n  [enter] yes, continue with 'qqX'   "
+    [[ $QE_SystemFilePath ]] && printf "[no] use System %s   " "$QE_SystemFilePath"
+    printf "[q] quit tune-up, leave as is, or delete \n\n"
+    read -rp "  >  "  ConfEdit_Qstart
+    if [[ $ConfEdit_Qstart == "tx" ]]; then main_translation_menu
+    else break
+    fi
+  done
 
   if [[ $ConfEdit_Qstart == "q" ]]; then
     printColor "\n  POST-INSTALL Linux distros:"
