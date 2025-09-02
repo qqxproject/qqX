@@ -228,7 +228,16 @@ function show_qqX_general_help {
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"
     printf "\n  Translations:  https://qqxproject.org/docs/Translation   Release Notes:  https://qqxproject.org/docs/Release-Notes"
     printf "\n\n  For SETTINGS and user modes, see notes in the general settings file"
-    printColor  "\n\n  [enter] to return  [f] FreeBird notes  [c] command line & mouse notes  [w] Online: HELP PAGES and FAQs"
+    printf  "\n\n  [f] FreeBird notes  [c] command line & mouse notes"
+    if [[ $WebBrowser ]]; then
+      printColor "\n\n  [w] Online: HELP PAGES and FAQs"
+      if [[ $ShowTxTexts ]]; then printColor  "  [tx] %s" "$MainTxOptionLine"
+      else printf  "  [tx] %s" "$MainTxOptionLine"
+      fi
+    else
+      printColor "\n\n  Check settings: Web Browser not found ??  https://qqxproject.org/docs/FAQs-and-Help"
+    fi
+    printf  "\n\n  [enter] to return"
     printf "\n\n"
     [[ $HelpSelect ]] || read -rp "  >  "  HelpSelect
 
@@ -248,6 +257,9 @@ function show_qqX_general_help {
       fi
       printf "\n\n  [enter] to return \n\n"
       read -rp  "  >  " HelpSelect
+
+    elif [[ $HelpSelect == "tx" ]]; then
+      HelpSelect= ; main_translation_menu
 
     elif [[ $HelpSelect == "w" ]]; then
       HelpSelect=
