@@ -731,8 +731,13 @@ qcow2_filemanagement_launcher () {
     # Needs to run script in a separate terminal to ensure qqX main does NOT get elevated permissions
     { printf "\n qqX_MainFolder=\"%s\"" "$qqX_MainFolder"
       printf "\n qqX_CustomFolder=\"%s\"" "$qqX_CustomFolder"
+      printf "\n qqX_LibraryFolder=\"%s\"" "$qqX_LibraryFolder"
       printf "\n FileManager=\"%s\"" "$FileManager"
       printf "\n TextEditor=\"%s\"" "$TextEditor"
+      printf "\n ListedSysLang=\"%s\"" "$ListedSysLang"
+      printf "\n TxLang=\"%s\"" "$TxLang"
+      printf "\n ShowTxTexts=\"%s\"" "$ShowTxTexts"
+      printf "\n MainTxOptionLine=\"%s\"" "$MainTxOptionLine"
       printf "\n WebBrowser=\"%s\"" "$WebBrowser"
       printf "\n Default_VM_Folder=\"%s\"" "$Default_VM_Folder"
       printf "\n VM_Conf_Dir=\"%s\"" "$VM_Conf_Dir"

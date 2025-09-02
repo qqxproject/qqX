@@ -27,6 +27,9 @@
 
 # shellcheck disable=SC1090,SC2034,SC2154
 
+# Side routines, such QF, get vars passed to them via temp files, but need the function code
+SideRoutine=
+grep -qs "qqX_filemanage" <<< "$(ps aux)" && SideRoutine=1
 
 find_sys_lang() {
 	ListedSysLang= ; TxLang= ; ShowTxTexts=
@@ -59,7 +62,7 @@ find_sys_lang() {
 }
 
 # run on first load, also runs on settings refresh
-find_sys_lang ; findSysLangBoot=1
+if [[ ! $SideRoutine ]] ; then find_sys_lang ; findSysLangBoot=1 ; fi
 
 find_translate_text() {
 	local Target= ; if [[ $2 == "TxLang" ]]; then Target="$TxLang" ; else Target="$ListedSysLang" ; fi
@@ -74,7 +77,7 @@ tx_main_option_line() {
 }
 
 # run on first load, also runs on settings refresh
-tx_main_option_line
+if [[ ! $SideRoutine ]] ; then tx_main_option_line ; fi
 
 open_main_tx_screens_in_browser() {
 	printf "\n  %s ... \n\n" "$OpenTx4"
