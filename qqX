@@ -172,6 +172,7 @@ ConfClearanceLog="/tmp/qqX_ConfClearance_Log.txt"
 source "$qqX_MainFolder/qqX_Initialize"
 source "$qqX_MainFolder/qqX_read_main_settings"
 source "$qqX_MainFolder/qqX_UI_chrome_up"
+source "$qqX_MainFolder/qqX_main_translation"
 
 [[ $Loop_Diagnostics ]] && printf "\n\n QE_SourcePath = %s \n\n QG_SourcePath = %s \n"  "$QE_SourcePath" "$QG_SourcePath"
 

@@ -55,7 +55,7 @@ find_sys_lang() {
 	elif grep -qs  "${LANGUAGE:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${LANGUAGE:0:2}"
 	fi
 	# If Listed Lang not present OR if System Lang is 'en', then set TxLang to something
-	# or something different that is known to work, otherwise Google complains.
+	# or something different that is known to work, otherwise Google can complain.
 	# This way, non-listed targets can still be set from the browser top bar
 	# whilst basic English (lingua franca) instructions still remain available for the qqX interface.
 	if [[ ! $ListedSysLang ]] || [[ $ListedSysLang == "en" ]]; then TxLang="it"
@@ -66,7 +66,7 @@ find_sys_lang() {
 }
 
 find_translate_text() {
-	grep -A 500 -F TxTxt=\""$1"\" "$(pwd)/qqX.system/translate.from.english.txt" | grep -m 1 -B 500 'TxTxt_End' \
+	grep -A 500 -F TxTxt=\""$1"\" "$(pwd)/qqX.lib/translate.from.english.txt" | grep -m 1 -B 500 'TxTxt_End' \
 	| grep "${TxLang}=" | cut -d '=' -f 2- | tr -d '"' 2>/dev/null
 }
 

@@ -23,60 +23,7 @@ function  main_menu_actions {
 
   elif [[ $MainMenuChoice == "tx" ]]; then
 
-    TxLang=
-    if [[ $Default_TxLang ]]; then TxLang="$Default_TxLang"
-    else
-      if [[ $UseWikiList ]]; then
-        # https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes   Those two char that have been assigned:
-        Iso_639_1_List="aa ab ae af ak am an ar as av ay az ba be bg bi bm bn bo br bs ca ce ch co cr cs cu cv cy da de dv dz ee el en eo es et eu "
-        Iso_639_1_List+="fa ff fi fj fo fr fy ga gd gl gn gu gv ha he hi ho hr ht hu hy hz ia id ie ig ii ik io is it iu ja jv ka kg ki kj kk kl km "
-        Iso_639_1_List+="kn ko kr ks ku kv kw ky la lb lg li ln lo lt lu lv mg mh mi mk ml mn mr ms mt my na nb nd ne ng nl nn no nr nv ny oc oj om "
-        Iso_639_1_List+="or os pa pi pl ps pt qu rm rn ro ru rw sa sc sd se sg si sk sl sm sn so sq sr ss st su sv sw ta te tg th ti tk tl tn to tr "
-        Iso_639_1_List+="ts tt tw ty ug uk ur uz ve vi vo wa wo xh yi yo za zh zu"
-        # also see https://en.wikipedia.org/wiki/Comparison_of_machine_translation_applications#Multi-pair_translations  REVIEW
-      else
-        # BUT use these for lookups, given https://cloud.google.com/translate/docs/languages#automl
-        # And that @ 2025, the following have DIRECT PAIR Google data files:
-        Iso_639_1_List="af ar az bg bn ca cs cy da de el es et fa fi fr gl gu hi hr ht hu id is it ja ka ko lt lv mr ms nl no pa pl pt "
-        Iso_639_1_List+="ro ru sk sl sq sr sv sw th tr uk ur vi zh"
-        # Note, this normally includes zh-TW, but as standard zh is official in TW, just use zh as it's simpler to do ....
-        # See https://en.wikipedia.org/wiki/Taiwan  REVIEW
-      fi
-
-      [[ ! $TxLang ]] && TxLang="it"
-      if grep -qs  "${LANG:0:2}" <<< "$Iso_639_1_List"; then TxLang="${LANG:0:2}"
-      elif grep -qs  "${GDM_LANG:0:2}" <<< "$Iso_639_1_List"; then TxLang="${GDM_LANG:0:2}"
-      elif grep -qs  "${LANGUAGE:0:2}" <<< "$Iso_639_1_List"; then TxLang="${LANGUAGE:0:2}"
-      fi
-      [[ $TxLang == "en" ]] && TxLang="it"
-      # Where caps vars are from std env, hopefully without creeping-in conflict from Quickemu vars system ...
-      # and where TxLang must be non-original (non en) or Google complains
-    fi
-    printf "\n\n  For General notes on translation see: \n\n  https://qqxproject.org/docs/Translation"
-    printf "\n\n  Google Chrome or Microsoft Edge are recommended"
-    printf "\n\n  Or https://translate.google.com in Firefox and others"
-    printColor "\n\n  [enter] to attempt Google auto-translate of settings to '%s' using %s " "$TxLang" "$WebBrowser"
-    printColor "\n\n  [t] open 'translate.google' in %s  [T] open qqX translation notes  [b] to go back "  "$WebBrowser"
-    printf "\n\n  This link may need pasting to the webpages tab:"
-    printf " \n\n  https://github.com/qqxproject/qqX/blob/main/qqX_settings \n\n"
-    read -rp "  >  "  TxSetCode
-    if [[ ! $TxSetCode ]]; then
-      printf "\n  Opening Browser ... \n\n"
-      (nohup &> /dev/null  "$WebBrowser"  \
-      "https://github-com.translate.goog/qqxproject/qqX/blob/main/qqX_settings?_x_tr_sl=en&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
-      || web_browser_not_found_message
-      sleep 1
-    elif [[ $TxSetCode == "t" ]]; then
-      printf "\n  Opening Google Translate in Browser ... \n\n"
-      (nohup &> /dev/null  "$WebBrowser" "https://translate.google.com"  & ) || web_browser_not_found_message
-      sleep 1
-    elif [[ $TxSetCode == "T" ]]; then
-      printf "\n  Opening qqX Translation notes in Browser ... \n\n"
-      (nohup &> /dev/null  "$WebBrowser" "https://qqxproject.org/docs/Translation"  & ) || web_browser_not_found_message
-      sleep 1
-    else
-      TxSetCode= ; return
-    fi
+    main_translation_menu
 
   elif [[ $MainMenuChoice == "w" ]]; then
 

@@ -445,14 +445,15 @@ qqX_edit_settings() {
     else
 
       (nohup &> /dev/null   "$TextEditor" "$qqX_SettingsFile" )  || texteditor_not_found_message
+      sleep 1
       if [[ $DefaultFolderError ]]; then
         printColor "\n\n  A qqX restart is required ...."
         printf "\n\n  [enter] to close \n\n"
         read -rp "  >  "
         exit directly
       else
-        sleep 1
         printColor "\n  refreshing sources and arrays .... \n\n"
+        # time that file needs to save and close properly has been added into the refresh routine
         SettingsFileAdjusted=1
         refresh_sources_and_load_VM_arrays
       fi
@@ -511,6 +512,7 @@ function refresh_conf_vars_and_values {
     VM_Conf_File="$(basename "$VM_Conf_File")"
     if [[ ! -e "$VM_Conf_Dir/$VM_Conf_File" ]]; then function_conf_error  "Conf Refresh:  WRONG FOLDER/FILE ," ; fi
 
+    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
     source "$ConfClearanceLog"
     SecondDrive=
     SharedDrive=
@@ -532,9 +534,12 @@ function refresh_conf_vars_and_values {
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 1:" &&  main_loop_diagnostics
 
-    # clear & re-populate the ConfClearanceLog with current fields, for the next occasion
+    # CLEAR & RE-POPULATE the ConfClearanceLog with current fields, for the next occasion
 
+    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
     printf "#%s/%s" "$VM_Conf_Dir" "$VM_InstanceName"  > "$ConfClearanceLog"
+
+    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
     mapfile -t ConfClearance_Arr < "$VM_Conf_Dir/$VM_Conf_File"
 
     for Line in "${ConfClearance_Arr[@]}"; do
@@ -544,16 +549,19 @@ function refresh_conf_vars_and_values {
           Line="$(cut -d'=' -f1 <<< "$Line")"
           Line="$Line""="
           [[ "$Line" == *'#'* ]] && Line="${Line/'#'/}"
-
         fi
         printf "\n\n%s" "$Line" >> "$ConfClearanceLog"
         # Note that commented out lines need including, in case the comment marker gets removed
       fi
-
     done
 
+    # make sure any settings edits have finished writing
+    # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
+    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
     source "$ConfClearanceLog"
+    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
+    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
     source "$VM_Conf_Dir/$VM_Conf_File"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 2:" &&  main_loop_diagnostics

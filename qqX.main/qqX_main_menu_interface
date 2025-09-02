@@ -191,7 +191,9 @@ else
       if [[ $SelectArrayError ]]; then printColor "\n\n  Settings Error = %s"  "$SelectArrayError" ; SelectArrayError=
       elif [[ $DefaultFolderError ]]; then printColor "\n\n  Settings Error = Default Folder NOT found" ; DefaultFolderError=
       elif [[ $ExtraFolderError ]]; then printColor "\n\n  Settings Error = %s  NOT found"  "$ExtraFolderError" ; ExtraFolderError=
-      else [[ ! $FileManager_Run  ]] && printf "\n\n  Settings have been refreshed and reloaded ...."
+      elif [[ ! $FileManager_Run  ]]; then
+        [[ $ConfSettingsAdjusted ]] &&  printf "\n\n  .conf Settings have been refreshed and reloaded ...."
+        [[ $SettingsFileAdjusted ]] &&  printf "\n\n  General Settings have been refreshed and reloaded ...."
       fi
       ConfSettingsAdjusted=
       SettingsFileAdjusted=
@@ -360,7 +362,10 @@ else
 
     fi
 
-    printf  "\n\n  [set] open settings file in text editor  [tx] translate settings in browser  [conf] view or edit .conf file"
+    if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
+    else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
+    fi
+    printf "   [set] open settings file in text editor  [conf] view or edit .conf file"
     printf  "\n\n"
 
     if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"; fi

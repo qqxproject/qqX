@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+
+#  qqX project: main qqX translation functions
+
+##  Copyright (c)  Alex Genovese   https://github.com/qqxproject
+#   SMALL CODE SNIPPETS eg the function printColor MAY BE USED
+#   PERMISSIVELY in projects as MIT or similar, providing CLEAR ATTRIBUTIONS are shown.
+
+# 	Otherwise:
+
+# Licence  GPL3   https://www.gnu.org/licenses
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# https://www.gnu.org/licenses
+
+# IF CODE IN GENERAL BECOMES USED IN ANY OTHER PROJECT,
+# THE GPL3 LICENCE APPLIES & YOU SHOULD SHOW CLEAR ATTRIBUTIONS.
+
+# shellcheck disable=SC1090,SC2034,SC2154
+
+
+find_sys_lang() {
+	ListedSysLang= ; TxLang= ; ShowTxTexts=
+	# @ 2025, the following have DIRECT PAIR Google data files, so use these for lookups:
+	# See https://cloud.google.com/translate/docs/languages#automl
+	Iso_639_1_List="af ar az bg bn ca cs cy da de el en es et fa fi fr gl gu hi hr ht hu id is it ja ka ko lt lv mr ms nl no pa pl pt "
+	Iso_639_1_List+="ro ru sk sl sq sr sv sw th tr uk ur vi zh"
+	# Simplified Chinese is also official in TW, keep it simple and use plain 'zh', skip zh-TW  See https://en.wikipedia.org/wiki/Taiwan
+	# Plus check if System Lang is 'en', which has been added for grep purposes
+	if [[ $Default_TxLang ]] && grep -qs "${Default_TxLang:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${Default_TxLang:0:2}"
+	elif grep -qs  "${LANG:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${LANG:0:2}"
+	elif grep -qs  "${GDM_LANG:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${GDM_LANG:0:2}"
+	elif grep -qs  "${LANGUAGE:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${LANGUAGE:0:2}"
+	else ListedSysLang=
+	fi
+	# If Listed Lang not present OR if System Lang is 'en', then SET TxLang TO SOMETHING
+	# or something different that is KNOWN TO WORK, otherwise Google can complain.
+	# This way, non-listed targets can still be set from the browser top bar (or will run forced)
+	# whilst basic English (lingua franca) instructions still remain available for the qqX interface.
+	if [[ $Forced_TxLang ]]; then TxLang="$Forced_TxLang"
+	elif [[ ! $ListedSysLang ]] || [[ $ListedSysLang == "en" ]]; then
+		ListedSysLang= ; TxLang="it"
+	elif [[ $ListedSysLang ]]; then TxLang="$ListedSysLang"
+	fi
+	# default behaviour, if not $ListedSysLang then show the builtin English
+	[[ $ListedSysLang == "en" ]] && ListedSysLang=
+	# Set qqX show tx flag
+	[[ $ListedSysLang ]] && ShowTxTexts=1
+	# echo "ListedSysLang=$ListedSysLang TxLang=$TxLang ShowTxTexts=$ShowTxTexts Default_TxLang=$Default_TxLang Forced_TxLang=$Forced_TxLang" ; sleep 2
+}
+
+# run on first load, also runs on settings refresh
+find_sys_lang ; findSysLangBoot=1
+
+find_translate_text() {
+	local Target= ; if [[ $2 == "TxLang" ]]; then Target="$TxLang" ; else Target="$ListedSysLang" ; fi
+	grep -A 500 -F TxTxt=\""$1"\" "$qqX_LibraryFolder/translate.from.english.txt" | grep -m 1 -B 500 'TxTxt_End' \
+	| grep "${Target}=" | cut -d '=' -f 2- | tr -d '"' 2>/dev/null
+}
+
+tx_main_option_line() {
+	MainTxOptionLine="Translate from English"
+	if [[ $ShowTxTexts ]]; then MainTxOptionLine="$(find_translate_text "Translate from English")"
+	fi
+}
+
+# run on first load, also runs on settings refresh
+tx_main_option_line
+
+open_main_tx_screens_in_browser() {
+	printf "\n  %s ... \n\n" "$OpenTx4"
+	if [[ $1 == "settings" ]]; then
+		(nohup &> /dev/null  "$WebBrowser"  \
+		"https://github-com.translate.goog/qqxproject/qqX/blob/main/qqX_settings?_x_tr_sl=en&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		|| printf "\n\n  %s \n\n" "$OpenTx5"
+	elif [[ $1 == "main" ]]; then
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Main-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		|| printf "\n\n  %s \n\n" "$OpenTx5"
+	elif [[ $1 == "gt" ]]; then
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Download-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		|| printf "\n\n  %s \n\n" "$OpenTx5"
+	elif [[ $1 == "tune" ]]; then
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Tune-Up-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		|| printf "\n\n  %s \n\n" "$OpenTx5"
+	elif [[ $1 == "disks" ]]; then
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Disk-Management-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		|| printf "\n\n  %s \n\n" "$OpenTx5"
+	else
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		|| printf "\n\n  %s \n\n" "$OpenTx5"
+	fi
+	sleep 1
+}
+
+main_translation_menu() {
+
+	local OpenTx1="[enter] for Google auto-translation of text using"
+	local OpenTx2="Unable to locate a Web Browser, which is needed for Google translation"
+	local OpenTx3="to go back, more help is available at:"
+	local OpenTx4="Opening qqX translation pages in Browser"
+	local OpenTx5="ERROR: Browser or WebPages not found"
+	local OpenTx6="[s] settings - [m] main and VM menus - [d] disks and snapshots"
+	local OpenTx7="[gt] download and get ISOs - [t] adjust and optimize"
+	local OpenTx8=""
+	[[ ! $TxLang ]] && TxLang="it"
+	OpenTx8="$(find_translate_text "TxLang_LangName" TxLang)"
+	[[ ! $OpenTx8 ]] && OpenTx8="$TxLang"
+
+	# translate only if System Lang found in list, otherwise leave tx instructions in English
+	if [[ $ListedSysLang ]]; then
+		OpenTx1="$(find_translate_text "$OpenTx1")"
+		OpenTx2="$(find_translate_text "$OpenTx2")"
+		OpenTx3="$(find_translate_text "$OpenTx3")"
+		OpenTx4="$(find_translate_text "$OpenTx4")"
+		OpenTx5="$(find_translate_text "$OpenTx5")"
+		OpenTx6="$(find_translate_text "$OpenTx6")"
+		OpenTx7="$(find_translate_text "$OpenTx7")"
+	fi
+
+	if [[ $WebBrowser ]]; then
+		printColor "\n\n  %s '%s' > %s" "$OpenTx1" "$WebBrowser" "$OpenTx8"
+		printf "\n\n  %s" "$OpenTx6"
+		printf "\n\n  %s" "$OpenTx7"
+	else printColor "\n\n  %s" "$OpenTx2"
+	fi
+	TxSetCode=
+	printf "\n\n  [b] %s \"https://qqxproject.org/docs/Translation\" \n\n" "$OpenTx3"
+	read -rp "  >  "  TxSetCode
+
+	case "$TxSetCode" in
+		b|B) return ;;
+		s|S) open_main_tx_screens_in_browser settings;;
+		m|M) open_main_tx_screens_in_browser main;;
+		d|D) open_main_tx_screens_in_browser disks;;
+		gt|GT) open_main_tx_screens_in_browser gt;;
+		t|T) open_main_tx_screens_in_browser tune;;
+		*) open_main_tx_screens_in_browser intro;;
+	esac
+
+}
