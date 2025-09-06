@@ -97,11 +97,30 @@ if [ -z "$(command -v bash)" ] || [ "$(echo "$BASH_VERSION" | cut -d. -f1)" -lt 
   fi
 fi
 
+##  Check we are in the right place
+if [[ ! -d "$(pwd)/qqX.system" ]]; then
+  printf  "\n\n  ERROR  qqX install script must be run from inside the original qqX folder \n\n"
+  sleep 8  ; exit 1
+fi
+
 # Posix caller in the main folder will look in the system folder for this script
 # but the installer was originally designed to work from the main folder, so move there:
 if [[ ! -d "./qqX.system" ]]; then
   cd .. || echo "  Problems switching to main folder"
 fi
+
+#  Chrome up the display
+source "qqX.system/qqX_add_in_boot_level_chrome"
+
+# add in the settings updater
+source "qqX.system/qqX_settings_update_transposer"
+
+# add in the translator, as early as possible
+source "qqX.system/qqX_installer_translate"
+
+find_sys_lang
+find_web_browser
+#ShowTxTexts=1 ; TxLang="it" ; ListedSysLang="it"
 
 HideFHSwarnings=     # To disable FHS warnings. Set =1
 
@@ -170,6 +189,7 @@ while true ; do
     printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk' ..."
     InstallationAlert=1
   fi
+  InstallationAlert=1
   if [[ ! $(type -p qemu-system-x86_64) ]]; then
     # REVIEW Arm compatibility
     printf "\n\n  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system etc ..."
@@ -178,12 +198,16 @@ while true ; do
 
   if [[ ! $InstallationAlert ]]; then  break
   else
-    InstallationAlert=
-    printf "\n\n  A second terminal can be opened and software installed ... \n\n  Return here to re-check:"
+    cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
+    printColor "\n\n  [tx]  Translate from English"
+    [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
+    printf "\n"
+    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... \n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
     [[ $InstallationAlert == "q" ]] &&  exit
-    [[ $InstallationAlert == "c" ]] &&  break
+    if [[ $InstallationAlert == "c" || $InstallationAlert == "i" ]]; then InstallationAlert= ; break ; fi
+    if [[ $InstallationAlert == "tx" ]]; then sleep 0.6 ; open_installer_tx_screens_in_browser ; printf "\033c" ; fi
   fi
 
 done
@@ -327,21 +351,6 @@ KonsoleTerminalProfile_Taller=" --title $KonsoleTitle --hide-menubar --hide-tabb
 KonsoleTerminalProfile_Standard=" --title $KonsoleTitle --hide-menubar --hide-tabbar --notransparency -p TerminalColumns=${Term_Width} -p TerminalRows=${Term_Height}"
 KonsoleTerminalProfile_HostSize=" --title $KonsoleTitle --hide-menubar --hide-tabbar --notransparency"
 
-##  Check we are in the right place
-if [[ ! -d "$(pwd)/qqX.system" ]]; then
-  printf  "\n\n  ERROR  qqX install script must be run from inside the original qqX folder \n\n"
-  sleep 8  ; exit 1
-fi
-
-#  Chrome up the display
-source "qqX.system/qqX_add_in_boot_level_chrome"
-
-# add in the settings updater
-source "qqX.system/qqX_settings_update_transposer"
-
-# add in the translator
-source "qqX.system/qqX_installer_translate"
-
 ## START
 
 printf "\033c"
@@ -375,9 +384,6 @@ printf "\033c"
 echo
 qqX_logo_title  "quickemu quickget X terminal project - setup, install, uninstall & update script for qqX $New_qqX_Version "
 
-find_sys_lang
-find_web_browser
-# ShowTxTexts=1 ; TxLang="it" ; ListedSysLang="it"
 printColor "\n   [tx]  Translate from English"
 [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
 printf "\n"
@@ -388,7 +394,6 @@ if [[ ! -e "./qqX_settings" ]] && [[ ! -e "./qqX" ]] && [[ ! -d  "./qqX.system" 
 
 else
 
-  InstallSelect=
   if [[ $(type -p qqX) ]]; then
     # do grep as older versions won't return 'qqX --version'
     Current_qqX_Path="$(type -p qqX)"
@@ -406,6 +411,8 @@ else
   printf "\n\n  and if re-run, that only you or trusted people have had access to them where they are stored."
   printf "\n\n  If in doubt, download a fresh copy. "
 
+  InstallSelect=
+
   while true; do
     printColor "\n\n  [enter] to auto-install from this terminal"
     [[ $ShowTxTexts ]] && printColor "   [tx]  %s" "$(find_translate_text "Translate from English")"
@@ -413,6 +420,7 @@ else
     [[ $(type -p qqx) || $(type -p qqX) ]] &&  printf "\n\n  [u] un-install scripts and settings  [enter] re-install/upgrade"
     printf "   [m] use manual installation"
     printf "   [q] to quit \n\n"
+
     read -rp "   >  "  InstallSelect
 
     if [[ $InstallSelect == "tx" ]]; then
@@ -420,6 +428,7 @@ else
       InstallSelect= ; printf "\n"
     else break
     fi
+
   done
 
   if [[ $InstallSelect == "q" ]]; then
