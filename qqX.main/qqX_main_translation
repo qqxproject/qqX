@@ -82,23 +82,22 @@ if [[ ! $SideRoutine ]] ; then tx_main_option_line ; fi
 open_main_tx_screens_in_browser() {
 	printf "\n  %s ... \n\n" "$OpenTx4"
 	if [[ $1 == "settings" ]]; then
-		(nohup &> /dev/null  "$WebBrowser"  \
-		"https://github-com.translate.goog/qqxproject/qqX/blob/main/qqX_settings?_x_tr_sl=en&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Settings?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "main" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Main-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Main-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "gt" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Download-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Download-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "tune" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Tune-Up-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Tune-Up-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "disks" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Disk-Management-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Disk-Management-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	else
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	fi
 	sleep 1
