@@ -189,7 +189,6 @@ while true ; do
     printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk' ..."
     InstallationAlert=1
   fi
-  InstallationAlert=1
   if [[ ! $(type -p qemu-system-x86_64) ]]; then
     # REVIEW Arm compatibility
     printf "\n\n  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system etc ..."
@@ -407,9 +406,8 @@ else
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
 
-  printf "\n  Good Practice:  Make sure these scripts have been securely downloaded "
-  printf "\n\n  and if re-run, that only you or trusted people have had access to them where they are stored."
-  printf "\n\n  If in doubt, download a fresh copy. "
+  printf "\n  Always make sure these scripts have been safely downloaded and stored."
+  printf "\n\n  See https://github.com/qqxproject/qqX for latest releases, for starring or adding to watch lists."
 
   InstallSelect=
 
