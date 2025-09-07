@@ -16,11 +16,13 @@ SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.b
 
 Recent Highlights Include:
 
-- **Massive upgrades for QuickGet, fixes, sorts and adds over 30 distros**
+- New 51 language auto-translation system
+
+- **Massive upgrades for QuickGet, that fixes, sorts and adds over 30 distros**
 
 - and a new Quickget filter system
 
-- Upgrades to new web pages system with improved translation
+- Upgrades to new web pages
 
 Plus downstream fixes for Quickemu issues:
 
@@ -37,3 +39,5 @@ Allows easy running of Linux, Windows, MacOS, etc with Qemu / KVM
 See web pages for full details
 
 -----
+
+[Translate from English](https://qqxproject-org.translate.goog/?_x_tr_sl=auto&_x_tr_tl=it&_x_tr_hl=en&_x_tr_pto=wapp) - - 从英语翻译 - - 영어에서 번역하십시오 - - Μεταφράστε από τα Αγγλικά - - ترجمة من اللغة الإنجليزية
