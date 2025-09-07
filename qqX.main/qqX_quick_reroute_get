@@ -845,11 +845,13 @@ function_quick_get_wrap ()  {
       if [[ $WebBrowser ]]; then
         [[ $QGW_OS_HomePage ]] && printf "  [w] to open listed page with web browser"
         printf "  [W] qqX webpages"
+        if [[ $ShowTxTexts ]]; then printColor  "  [tx] %s" "$MainTxOptionLine"
+        else printf  "  [tx] %s" "$MainTxOptionLine"
+        fi
       fi
-
       printf "  [b] back to main menu \n\n"
       read -rp "  >  "  QGW_List_NumSelected
-      printf "\n\n"
+      printf "\n"
 
       if [[ $QGW_List_NumSelected == "s" || $QGW_List_NumSelected == "p" || $QGW_List_NumSelected == "r" || $QGW_List_NumSelected == "b" ]]; then
 
@@ -862,6 +864,8 @@ function_quick_get_wrap ()  {
         GT_Exit=1
         function_quick_get_wrap
         break
+
+      elif [[ $QGW_List_NumSelected == "tx" ]]; then main_translation_menu ; printf "\n"
 
       elif [[ $QGW_List_NumSelected == "w" ||  $QGW_List_NumSelected == "W" ]]; then
 

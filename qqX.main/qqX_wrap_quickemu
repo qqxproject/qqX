@@ -385,9 +385,7 @@ function load_quickemu_cases_and_actions {
 
 load_quickemu_cases_and_actions
 
-
 function refresh_and_load_quickemu_sources {
-
   system_code_check_and_warn
   find_quickemu_source_functions_and_vars
   load_quickemu_special_vars
@@ -396,7 +394,5 @@ function refresh_and_load_quickemu_sources {
   find_quick_version_numbers
   qemu_version_check
   clear_custom_boot_vars
-
 }
-
 

@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+#  qqX project: early stage translation add-ins for the system_install script
+
+##  Copyright (c)  Alex Genovese   https://github.com/qqxproject
+#   SMALL CODE SNIPPETS eg the function printColor MAY BE USED
+#   PERMISSIVELY in projects as MIT or similar, providing CLEAR ATTRIBUTIONS are shown.
+
+# 	Otherwise:
+
+# Licence  GPL3   https://www.gnu.org/licenses
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# https://www.gnu.org/licenses
+
+# IF CODE IN GENERAL BECOMES USED IN ANY OTHER PROJECT,
+# THE GPL3 LICENCE APPLIES & YOU SHOULD SHOW CLEAR ATTRIBUTIONS.
+
+# shellcheck disable=SC1090,SC2034,SC2154
+
+find_web_browser() {
+	WebBrowser="$(xdg-settings get default-web-browser 2>/dev/null)"
+	if [[ $WebBrowser ]]; then XDG_Web=1 ; else XDG_Web=
+	fi
+	WebBrowser="${WebBrowser/'.desktop'/}"
+	if [[ "$WebBrowser" == *'firefox'* ]]; then WebBrowser="firefox"
+	elif [[ "$WebBrowser" == *'falkon'* ]]; then WebBrowser="falkon"
+	elif [[ $(type -p 'google-chrome') ]]; then  WebBrowser="google-chrome"
+	elif [[ $(type -p falkon) ]]; then  WebBrowser="falkon"
+	elif [[ $(type -p midori) ]]; then  WebBrowser="midori"
+	elif [[ $XDG_Web ]]; then WebBrowser="xdg-open"
+	else WebBrowser=
+	fi
+}
+
+find_sys_lang() {
+	TxLang= ; ListedSysLang= ; ShowTxTexts=
+	# @ 2025, the following have DIRECT PAIR Google data files, so use these for lookups:
+	# See https://cloud.google.com/translate/docs/languages#automl
+	Iso_639_1_List="af ar az bg bn ca cs cy da de el en es et fa fi fr gl gu hi hr ht hu id is it ja ka ko lt lv mr ms nl no pa pl pt "
+	Iso_639_1_List+="ro ru sk sl sq sr sv sw th tr uk ur vi zh"
+	# Simplified Chinese is also official in TW, keep it simple and use plain 'zh', skip zh-TW  See https://en.wikipedia.org/wiki/Taiwan
+	# Plus check if System Lang is 'en', which has been added for grep purposes
+	if grep -qs  "${LANG:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${LANG:0:2}"
+	elif grep -qs  "${GDM_LANG:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${GDM_LANG:0:2}"
+	elif grep -qs  "${LANGUAGE:0:2}" <<< "$Iso_639_1_List"; then ListedSysLang="${LANGUAGE:0:2}"
+	fi
+	# If Listed Lang not present OR if System Lang is 'en', then set TxLang to something
+	# or something different that is known to work, otherwise Google can complain.
+	# This way, non-listed targets can still be set from the browser top bar
+	# whilst basic English (lingua franca) instructions still remain available for the qqX interface.
+	if [[ ! $ListedSysLang ]] || [[ $ListedSysLang == "en" ]]; then TxLang="it"
+	elif [[ $ListedSysLang ]]; then  TxLang="$ListedSysLang"
+	fi
+	# Set qqX show non EN flag
+	[[ $ListedSysLang ]] && [[ $ListedSysLang != "en" ]] && ShowTxTexts=1
+}
+
+find_translate_text() {
+	grep -A 500 -F TxTxt=\""$1"\" "$(pwd)/qqX.lib/translate.from.english.txt" | grep -m 1 -B 500 'TxTxt_End' \
+	| grep "${TxLang}=" | cut -d '=' -f 2- | tr -d '"' 2>/dev/null
+}
+
+open_installer_tx_screens_in_browser() {
+	local OpenTx1="[enter] for Google auto-translate of installation text using"
+	local OpenTx2="Unable to locate a Web Browser, which is needed for Google translation"
+	local OpenTx3="to go back, more help is available at:"
+	local OpenTx4="Opening Translated qqX Installation notes in Browser"
+	local OpenTx5="ERROR: Browser or WebPages not found"
+	# translate only if System Lang found in list, otherwise leave tx instructions in English
+	if [[ $ListedSysLang ]] && [[ $ListedSysLang != "en" ]] && [[ $TxLang ]]; then
+		OpenTx1="$(find_translate_text "$OpenTx1")"
+		OpenTx2="$(find_translate_text "$OpenTx2")"
+		OpenTx3="$(find_translate_text "$OpenTx3")"
+		OpenTx4="$(find_translate_text "$OpenTx4")"
+		OpenTx5="$(find_translate_text "$OpenTx5")"
+	fi
+	# make extra sure that a target lang is present, even if English instructions were shown
+	if [[ ! $TxLang ]]; then TxLang="it"
+	fi
+	if [[ $WebBrowser ]]; then printColor "\n\n  %s '%s'" "$OpenTx1" "$WebBrowser"
+	else printColor "\n\n  %s" "$OpenTx2"
+	fi
+	printf "\n\n  [b] %s \"https://qqxproject.org/docs/Translation\" \n\n" "$OpenTx3"
+	read -rp "  >  "  TxSetCode
+	if [[ ! $TxSetCode ]]; then
+		printf "\n  %s ... \n\n" "$OpenTx4"
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Installation-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp"  & ) \
+		|| printf "\n\n  %s \n\n" "$OpenTx5"
+		sleep 1
+	else
+		TxSetCode= ; return
+	fi
+}

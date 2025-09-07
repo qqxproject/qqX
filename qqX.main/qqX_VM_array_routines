@@ -387,9 +387,19 @@ refresh_sources_and_load_VM_arrays() {
   KVM_MSR_Error=
   ShowUtilsMenu=
   ForceCustomBootStyle=
+  Default_TxLang=
+  Forced_TxLang=
 
+  sleep 1
   [[ ! -f $qqX_SettingsFile ]] && function_conf_error "qqX_SettingsFile"
+  # make sure any settings edits have finished writing, see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
+  while grep -qs "$qqX_SettingsFile" <<< "$(ps aux)" ; do sleep 1 ; done
   source "$qqX_SettingsFile"
+
+  # only need to run once on boot, otherwise run on refresh
+  if [[ $findSysLangBoot ]]; then findSysLangBoot=
+  else find_sys_lang ; tx_main_option_line
+  fi
 
   # reset $X_Shade value
   printColor () {

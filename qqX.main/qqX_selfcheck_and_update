@@ -138,22 +138,22 @@ function download_new_release {
     if [[ ! $qqX_UpdateAvail ]] ; then
       printColor "\n\n  No new release found ...."
     else
-      if [[ ! $qqX_Latest_SecureTarBall_Addr ]]; then printf "\n\n  Only Non-SHA checked download available (?)\n"
-      fi
+      [[ ! $qqX_Latest_SecureTarBall_Addr ]] && printf "\n\n  Only Non-SHA checked download available (?)\n"
       printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
+      # if can handle new format, otherwise leave notes as blank
       if floatversion -Q --gt "$qqX_Version  1.13.02 " ; then
-        # only if can handle new format, otherwise leave blank rather than a print a potential mess
-        printColor "\n\n  %s" "$qqX_Latest_ReleaseNumber"
+        AboutWidth="$(tput cols)"
+        printf "\n  %s\n" "$qqX_Latest_ReleaseNumber"
         #shellcheck disable=SC1003  # the double \
         mapfile -t AboutReleaseArray <<< "$(grep body  "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4 | cut -d'\' -f2- | tr '\\' '\n' \
         | grep -e ^'n' | cut -d'n' -f2-)"
-        for Line in "${AboutReleaseArray[@]}" ; do  if [[ "$Line" != *'+1'* ]] ; then printColor "\n\n  %s"  "$Line" ; fi ; done
+        for Line in "${AboutReleaseArray[@]}" ; do  if [[ "$Line" != *'+1'* ]] ; then printColor "  %s\n" "$(fmt -uw "$AboutWidth" <<< "$Line")" ; fi ; done
       else
-        printf "\n\n  %s   >>   %s"  "$qqX_Version"  "$qqX_Latest_ReleaseNumber"
+        printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Latest_ReleaseNumber"
       fi
     fi
 
-    printf "\n\n\n"
+    printf "\n"
     while true ; do
       if [[ $qqX_UpdateAvail ]]; then
         printf "  Neatly download the release into its own sub-folder at: "

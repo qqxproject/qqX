@@ -97,11 +97,30 @@ if [ -z "$(command -v bash)" ] || [ "$(echo "$BASH_VERSION" | cut -d. -f1)" -lt 
   fi
 fi
 
+##  Check we are in the right place
+if [[ ! -d "$(pwd)/qqX.system" ]]; then
+  printf  "\n\n  ERROR  qqX install script must be run from inside the original qqX folder \n\n"
+  sleep 8  ; exit 1
+fi
+
 # Posix caller in the main folder will look in the system folder for this script
 # but the installer was originally designed to work from the main folder, so move there:
 if [[ ! -d "./qqX.system" ]]; then
   cd .. || echo "  Problems switching to main folder"
 fi
+
+#  Chrome up the display
+source "qqX.system/qqX_add_in_boot_level_chrome"
+
+# add in the settings updater
+source "qqX.system/qqX_settings_update_transposer"
+
+# add in the translator, as early as possible
+source "qqX.system/qqX_installer_translate"
+
+find_sys_lang
+find_web_browser
+#ShowTxTexts=1 ; TxLang="it" ; ListedSysLang="it"
 
 HideFHSwarnings=     # To disable FHS warnings. Set =1
 
@@ -178,12 +197,16 @@ while true ; do
 
   if [[ ! $InstallationAlert ]]; then  break
   else
-    InstallationAlert=
-    printf "\n\n  A second terminal can be opened and software installed ... \n\n  Return here to re-check:"
+    cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
+    printColor "\n\n  [tx]  Translate from English"
+    [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
+    printf "\n"
+    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... \n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
     [[ $InstallationAlert == "q" ]] &&  exit
-    [[ $InstallationAlert == "c" ]] &&  break
+    if [[ $InstallationAlert == "c" || $InstallationAlert == "i" ]]; then InstallationAlert= ; break ; fi
+    if [[ $InstallationAlert == "tx" ]]; then sleep 0.6 ; open_installer_tx_screens_in_browser ; printf "\033c" ; fi
   fi
 
 done
@@ -327,34 +350,17 @@ KonsoleTerminalProfile_Taller=" --title $KonsoleTitle --hide-menubar --hide-tabb
 KonsoleTerminalProfile_Standard=" --title $KonsoleTitle --hide-menubar --hide-tabbar --notransparency -p TerminalColumns=${Term_Width} -p TerminalRows=${Term_Height}"
 KonsoleTerminalProfile_HostSize=" --title $KonsoleTitle --hide-menubar --hide-tabbar --notransparency"
 
-##  Check we are in the right place
-if [[ ! -d "$(pwd)/qqX.system" ]]; then
-  printf  "\n\n  ERROR  qqX install script must be run from inside the original qqX folder \n\n"
-  sleep 8  ; exit 1
-fi
-
-#  Chrome up the display
-source "qqX.system/qqX_add_in_boot_level_chrome"
-
-# and add in the settings updater
-source "qqX.system/qqX_settings_update_transposer"
-
 ## START
 
 printf "\033c"
-echo
-qqX_logo_title  "quickemu quickget X terminal project - setup, install, uninstall & update script for qqX $New_qqX_Version "
 
 if [[ "$(whoami)" == root ]]; then
-
   UserLand_Name="$(users)"
   printColor "\n\n  User-Interactive Scripts:\n\n  Root installation is not currently available. "
   printColor "\n\n  Select a trusted UserLand folder (%s) etc\n\n" "$UserLand_Name"
   read -rp "  See setup script and installation notes  > "
   #  Root will not have xdg data ....
-
 fi
-
 echo
 
 ## PROBE SYSTEM ENVIRONMENT
@@ -363,32 +369,30 @@ LinuxType=$(uname -o)
 LinuxMachine=$(uname -m)
 
 if [[ ! $LinuxType ]] || [[ "$LinuxType" != *Linux ]] && [[ $LinuxMachine != "x86_64" ]] ; then
-
   printf "\n\n  ERROR OS found: %s  %s "  "$LinuxType"  "$LinuxMachine"
   printColor "\n\n  @ 2023 Quickemu scripts are intended for 64 bit LINUX X86 distributions only \n\n"
   printf   "\n  Make sure that you have read this script and the docs before continuing \n\n"
   read -rp "  Use 'ctrl-c' to exit or [enter] to continue > "
-
 fi
 
 if [[ -d "/mnt/c/Windows" ]]; then WSL_Install=1 ; else WSL_Install= ; fi
-
 
 # INITIAL MENU:
 
 printf "\033c"
 echo
+qqX_logo_title  "quickemu quickget X terminal project - setup, install, uninstall & update script for qqX $New_qqX_Version "
 
-qqX_logo_title  "quickemu quickget X terminal project - setup script $New_qqX_Version "
+printColor "\n   [tx]  Translate from English"
+[[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
+printf "\n"
 
 if [[ ! -e "./qqX_settings" ]] && [[ ! -e "./qqX" ]] && [[ ! -d  "./qqX.system" ]] && [[ ! -d  "./qqX.main" ]] && [[ ! -d  "./qqX.builtins" ]]; then
 
-  printColor "\n\n  ERROR  qqX source files not found \n\n"
-  sleep 5; exit 1
+  printColor "\n\n  ERROR  qqX source files not found \n\n" ; sleep 5; exit 1
 
 else
 
-  InstallSelect=
   if [[ $(type -p qqX) ]]; then
     # do grep as older versions won't return 'qqX --version'
     Current_qqX_Path="$(type -p qqX)"
@@ -402,15 +406,28 @@ else
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
 
-  printf "\n  Good Practice:  Make sure these scripts have been securely downloaded "
-  printf "\n\n  and if re-run, that only you or trusted people have had access to them where they are stored."
-  printf "\n\n  If in doubt, download a fresh copy. "
+  printf "\n  Always make sure these scripts have been safely downloaded and stored."
+  printf "\n\n  See https://github.com/qqxproject/qqX for latest releases, for starring or adding to watch lists."
 
-  printColor "\n\n  [enter] to auto-install from this terminal"
-  [[ $(type -p qqx) || $(type -p qqX) ]] &&  printf "\n\n  [u] un-install scripts and settings  [enter] re-install/upgrade"
-  printf "   [m] use manual installation"
-  printf "   [q] to quit \n\n"
-  read -rp "   >  "  InstallSelect
+  InstallSelect=
+
+  while true; do
+    printColor "\n\n  [enter] to auto-install from this terminal"
+    [[ $ShowTxTexts ]] && printColor "   [tx]  %s" "$(find_translate_text "Translate from English")"
+
+    [[ $(type -p qqx) || $(type -p qqX) ]] &&  printf "\n\n  [u] un-install scripts and settings  [enter] re-install/upgrade"
+    printf "   [m] use manual installation"
+    printf "   [q] to quit \n\n"
+
+    read -rp "   >  "  InstallSelect
+
+    if [[ $InstallSelect == "tx" ]]; then
+      sleep 0.6 ; open_installer_tx_screens_in_browser
+      InstallSelect= ; printf "\n"
+    else break
+    fi
+
+  done
 
   if [[ $InstallSelect == "q" ]]; then
 
@@ -420,56 +437,44 @@ else
 
     printf "\n\n"
     print_manual_uninstall_notes
-
     printColor "\n\n  Remove any qqX taskbar icons BEFORE proceeding. Some distros may need this."
-
     qqX_RemovalTarget="$(type -p qqx)"
     qqX_RemovalTarget_X="$(type -p qqX)"
     qqX_Remove=
-
     printColor "\n\n  [y] sudo auto removal of qqX scripts and settings and builtins."
     printf " \n\n  All VM folders will be left as they are ... [enter] to quit \n\n"
     read -rp "  >  "  qqX_Remove
     printf "\n\n"
 
     if [[ $qqX_Remove == "y" ]]; then
-
       [[ $qqX_RemovalTarget ]] && sudo rm "$qqX_RemovalTarget"
       [[ $qqX_RemovalTarget_X ]] && sudo rm "$qqX_RemovalTarget_X"
       [[ -d "/usr/share/qqX" ]] && sudo rm -r "/usr/share/qqX"
       [[ -d "$HOME/.qqX" ]] && rm -r "$HOME/.qqX"
-
       [[ -e "$XDG_GUI_desktop_Folder/qqX.desktop"  ]] && sudo rm "$XDG_GUI_desktop_Folder/qqX.desktop"
       [[ $(type -p update-desktop-database) ]] && sudo update-desktop-database  "$XDG_GUI_desktop_Folder"
-
       printColor "\n\n  Auto-closure of this script may not happen in some desktop environments ... "
       printColor "\n\n  Removal processing complete \n\n"
       read -rp "  [enter] to quit  >  "
       printf "\n\n"
       tput cnorm
       exit
-
     else   sleep 0.6 ; exit
-
     fi
 
   else
 
     # install / re-install  > includes option [r]
-
     SeparateSudo=
 
     if  [[ $InstallSelect == "m" ]] ; then
 
       printf "\n\n  Open another terminal IN THE SOURCE FOLDER"
       printf   "\n  where the following commands should be issued:"
-
       printColor "\n\n  sudo cp \"qqX\" \"%s\" " "$qqX_Std_File_Path"
       printColor "\n\n  sudo ln -s \"%s\" \"%s\" " "$qqX_Std_File_Path" "$qqX_Std_lc_Link_Path"
-
       printf "\n\n  From qqX 1.6 onwards, a folder /usr/share/qqX should also be created"
       printf   "\n  for the subfolders and files of qqX.main and from 1.8 onwards of qqX.builtins"
-
       printf "\n\n  Existing builtin, main and lib folders should be cleaned. "
       printf   "\n  Custom should be left as is."
 
@@ -491,7 +496,6 @@ else
       printf "\n\n  Auto-install is needed for desktop launchers and shortcuts"
       printf "\n"
       print_manual_uninstall_notes
-
       printColor "\n  [enter] changed mind, use auto-install   [y] to confirm action completed \n\n"
       read -rp  "  >  "  SeparateSudo
       printf "\n"
@@ -930,7 +934,7 @@ if [[ ! $SkipMkLauncher ]]; then
       # MimeType section used only for right click, open with, menu functions   # one line, or causes errors
 
       printf "MimeType=application/x-qemu-disk;application/x-cd-image;application/vnd.efi.iso\n"
-      echo "Keywords=qqX;qqx;qqX-Project;quickemu;quickget;qemu;kvm;KVM;qcow2;vm;VM;virt;;virtual-machine;emulator"
+      echo "Keywords=qqX;qqx;qqX-Project;;qqxproject;quickemu;quickget;qemu;kvm;KVM;qcow2;vm;VM;virt;;virtual-machine;emulator"
       echo "#"
       echo "#https://specifications.freedesktop.org/desktop-entry-spec/latest/"
 

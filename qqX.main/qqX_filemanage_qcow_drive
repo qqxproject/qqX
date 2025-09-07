@@ -35,8 +35,11 @@ if [[ $1 == "--qqf" ]]; then qqf_CmdLineStart=1 ; shift
 else  qqf_CmdLineStart=
 fi
 
+# make sure any settings edits have finished writing, see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
+while grep -qs "/tmp/qqX_nbd_vars" <<< "$(ps aux)" ; do sleep 1 ; done
 source "/tmp/qqX_nbd_vars"
 source "$qqX_MainFolder/qqX_UI_chrome_up"
+source "$qqX_MainFolder/qqX_main_translation"
 
 if [[ $Trace_InputVars ]]; then  echo "Args: $*"  ; echo
 fi
@@ -145,6 +148,11 @@ while true; do
   qqX_logo_printf_title "File Manager Utility for mounting/unmounting and for connecting QCOW2 drives"
   [[ "$(basename "$0")" == custom* ]] && printColor "  -  custom version"
   printf "\n"
+
+  if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
+  else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
+  fi
+
   printf "\n\n  This terminal window is PROCESS SEPARATED from qqX and may be LEFT OPEN, repositioned or minimized"
   printf "\n\n  The elevated permissions required to prepare the drives will remain isolated."
   printf "\n\n  Any opening of new qqF windows will terminate other qqF instances that are running."
@@ -271,6 +279,7 @@ while true; do
       printf "\n qqf_Input_Drivepath=\"%s\" \n" "$qqf_Input_Drivepath" >> "/tmp/qqX_nbd_vars"
     fi
     source "/tmp/qqX_nbd_vars" ; load_qf_defaults ; HideRefreshMsgs=1
+  elif [[ $qf_DriveSelect == "tx" ]]; then main_translation_menu
   elif [[ $qf_DriveSelect == "q" ]]; then exit directly
   else
 

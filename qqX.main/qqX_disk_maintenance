@@ -170,71 +170,79 @@ function manage_and_repair_disks {
   if [[ ! $DiskManage ]]; then drives_and_snapshots  select  as_disk_util
   fi
 
-  if [[ ! -e "$Selected_Drive" ]]; then printf "\n\n  [b] go back to main menu"
-  else
-
-    printf "\n\n  Selected Drive is %s " "$Selected_DriveName"
-    check_disk_is_okay  "$Selected_Drive"
-    if [[ $DiskChkStatus != "Okay" ]]; then printColor "\n\n  Status:  %s"  "$DiskChkStatus"
-    else printf "\n\n  Status:  %s  > No errors "  "$DiskChkStatus"
-    fi
-    DiskSize_Envelope="$("$QEMU_IMG" info "$Selected_Drive" | grep -m 1 'virtual size:')"
-    DiskSize_Envelope="${DiskSize_Envelope/'virtual size: '/}"
-    DiskSize_Occupied="$("$QEMU_IMG" info "$Selected_Drive" | grep -m 1 'disk size:')"
-    DiskSize_Occupied="${DiskSize_Occupied/'disk size: '/}"
-
-    if [[ $DiskChkStatus == "Okay" ]]; then
-      printf "\n\n  Theoretical Envelope: %s  containing  %s " "$DiskSize_Envelope" "$DiskSize_Occupied"
-      printf "\n\n  Copy on Write and snapshots can sometimes make envelope size appear to be lower than the contents ..."
-      printf "\n\n  File Length greater than Disk Size can cause size mis-reportage and indicate a need to tidy and compress"
-      printf "\n\n  Small differences may be ignored and may later become self adjusted by Qemu background operations"
-      check_if_disk_needs_a_cleanup  "$Selected_Drive"
-      [[ $DiskDisparity -ge "1" ]] && printColor "\n\n  DISK.QCOW2 may need an [rd] clean up "
-    fi
-
-    if [[ $DiskChkExitCode == "3" || $DiskChkExitCode == "2" ]]; then
-      printf "\n\n  Standard repair uses multithreads. Use slow method if standard fails."
-      [[ $DiskChkExitCode == "2" ]] && printf "\n\n  WARNING - Full repair may cause some data loss if there are damaged data clusters ..."
-    fi
-
-    # Check there is disk free space to make a backup
-    if [[ "$DiskSize_Occupied" == *'KiB'* ]] || [[ "$DiskSize_Occupied" == *'MiB'* ]] ; then DiskSize_GiB_OnDisk="1"
-    else DiskSize_GiB_OnDisk="${DiskSize_Occupied/'GiB'/}"; DiskSize_GiB_OnDisk="${DiskSize_GiB_OnDisk//' '/}"
-    fi
-
-    DiskFreeGiB_OnHost="$(df -H --output=avail . | tail -n 1)"
-    DiskFreeGiB_OnHost="${DiskFreeGiB_OnHost/G/}"
-    DiskFreeGiB_OnHost="${DiskFreeGiB_OnHost//' '/}"
-
-    printColor "\n\n  Space required for creating a mandatory BACK-UP: %s  " "${DiskSize_GiB_OnDisk}G"
-
-    if [[ $(bc <<< "$DiskFreeGiB_OnHost < ($DiskSize_GiB_OnDisk + 10)") == "1" ]]; then
-      printf "\n\n  WARNING %s : insufficient or very low space." "${DiskFreeGiB_OnHost}G"
-    else
-      printf "\n\n  Available disk space on host drive: %s"  "${DiskFreeGiB_OnHost}G"
-      printf "\n\n\n"
-      if [[ $DiskChkExitCode == "3" ]]; then printColor "  [lk] basic leaks repair  [LK] slow method"
-      elif [[ $DiskChkExitCode == "2" ]]; then printColor "  [full] attempt complex repair  [FULL] slow method"
-      else printColor "  [rd] reduce only - clear ALL snapshots, remove deleted files & tidy 'empty' space   [rz] resize the envelope"
-      fi
-      printf "\n\n  The virtual machine should not be running & not started elsewhere"
-      # use pgrep with -x exact match to avoid 'kvm-cleanup' processes being detected
-      [[ $(pgrep -x kvm) ]] &&  printColor "\n\n  VIRTUAL MACHINE ACTIVITY has been DETECTED \n"
-    fi
-
-    printf "\n\n  Backups may be easily renamed and reused as previously using the file manager"
-    printf "\n\n  All snapshots and data will be SAFELY retained ...   [b] return to main menu "
-
-  fi
-
-  printf "\n"
-  DiskManage=
-  DiskStorageChanges=
-
   while true; do
+    if [[ ! -e "$Selected_Drive" ]]; then printf "\n\n  [b] go back to main menu"
+    else
+
+      printf "\n\n  Selected Drive is %s " "$Selected_DriveName"
+      check_disk_is_okay  "$Selected_Drive"
+      if [[ $DiskChkStatus != "Okay" ]]; then printColor "\n\n  Status:  %s"  "$DiskChkStatus"
+      else printf "\n\n  Status:  %s  > No errors "  "$DiskChkStatus"
+      fi
+
+      if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
+      else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
+      fi
+
+      DiskSize_Envelope="$("$QEMU_IMG" info "$Selected_Drive" | grep -m 1 'virtual size:')"
+      DiskSize_Envelope="${DiskSize_Envelope/'virtual size: '/}"
+      DiskSize_Occupied="$("$QEMU_IMG" info "$Selected_Drive" | grep -m 1 'disk size:')"
+      DiskSize_Occupied="${DiskSize_Occupied/'disk size: '/}"
+
+      if [[ $DiskChkStatus == "Okay" ]]; then
+        printf "\n\n  Theoretical Envelope: %s  containing  %s " "$DiskSize_Envelope" "$DiskSize_Occupied"
+        printf "\n\n  Copy on Write and snapshots can sometimes make envelope size appear to be lower than the contents ..."
+        printf "\n\n  File Length greater than Disk Size can cause size mis-reportage and indicate a need to tidy and compress"
+        printf "\n\n  Small differences may be ignored and may later become self adjusted by Qemu background operations"
+        check_if_disk_needs_a_cleanup  "$Selected_Drive"
+        [[ $DiskDisparity -ge "1" ]] && printColor "\n\n  DISK.QCOW2 may need an [rd] clean up "
+      fi
+
+      if [[ $DiskChkExitCode == "3" || $DiskChkExitCode == "2" ]]; then
+        printf "\n\n  Standard repair uses multithreads. Use slow method if standard fails."
+        [[ $DiskChkExitCode == "2" ]] && printf "\n\n  WARNING - Full repair may cause some data loss if there are damaged data clusters ..."
+      fi
+
+      # Check there is disk free space to make a backup
+      if [[ "$DiskSize_Occupied" == *'KiB'* ]] || [[ "$DiskSize_Occupied" == *'MiB'* ]] ; then DiskSize_GiB_OnDisk="1"
+      else DiskSize_GiB_OnDisk="${DiskSize_Occupied/'GiB'/}"; DiskSize_GiB_OnDisk="${DiskSize_GiB_OnDisk//' '/}"
+      fi
+
+      DiskFreeGiB_OnHost="$(df -H --output=avail . | tail -n 1)"
+      DiskFreeGiB_OnHost="${DiskFreeGiB_OnHost/G/}"
+      DiskFreeGiB_OnHost="${DiskFreeGiB_OnHost//' '/}"
+
+      printColor "\n\n  Space required for creating a mandatory BACK-UP: %s  " "${DiskSize_GiB_OnDisk}G"
+
+      if [[ $(bc <<< "$DiskFreeGiB_OnHost < ($DiskSize_GiB_OnDisk + 10)") == "1" ]]; then
+        printf "\n\n  WARNING %s : insufficient or very low space." "${DiskFreeGiB_OnHost}G"
+      else
+        printf "\n\n  Available disk space on host drive: %s"  "${DiskFreeGiB_OnHost}G"
+        printf "\n\n\n"
+        if [[ $DiskChkExitCode == "3" ]]; then printColor "  [lk] basic leaks repair  [LK] slow method"
+        elif [[ $DiskChkExitCode == "2" ]]; then printColor "  [full] attempt complex repair  [FULL] slow method"
+        else printColor "  [rd] reduce only - clear ALL snapshots, remove deleted files & tidy 'empty' space   [rz] resize the envelope"
+        fi
+        printf "\n\n  The virtual machine should not be running & not started elsewhere"
+        # use pgrep with -x exact match to avoid 'kvm-cleanup' processes being detected
+        [[ $(pgrep -x kvm) ]] &&  printColor "\n\n  VIRTUAL MACHINE ACTIVITY has been DETECTED \n"
+      fi
+
+      printf "\n\n  Backups may be easily renamed and reused as previously using the file manager"
+      printf "\n\n  All snapshots and data will be SAFELY retained ...   [b] return to main menu "
+
+    fi
+
+    printf "\n"
+    DiskStorageChanges=
+    DiskManage=
     printf "\n"
     read -rp "  >  "  DiskManage
-    [[ $DiskManage ]] && break
+    if [[ $DiskManage ]]; then
+      if [[ $DiskManage == "tx" ]]; then main_translation_menu
+      else break
+      fi
+    fi
   done
 
   # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-convert
@@ -731,8 +739,13 @@ qcow2_filemanagement_launcher () {
     # Needs to run script in a separate terminal to ensure qqX main does NOT get elevated permissions
     { printf "\n qqX_MainFolder=\"%s\"" "$qqX_MainFolder"
       printf "\n qqX_CustomFolder=\"%s\"" "$qqX_CustomFolder"
+      printf "\n qqX_LibraryFolder=\"%s\"" "$qqX_LibraryFolder"
       printf "\n FileManager=\"%s\"" "$FileManager"
       printf "\n TextEditor=\"%s\"" "$TextEditor"
+      printf "\n ListedSysLang=\"%s\"" "$ListedSysLang"
+      printf "\n TxLang=\"%s\"" "$TxLang"
+      printf "\n ShowTxTexts=\"%s\"" "$ShowTxTexts"
+      printf "\n MainTxOptionLine=\"%s\"" "$MainTxOptionLine"
       printf "\n WebBrowser=\"%s\"" "$WebBrowser"
       printf "\n Default_VM_Folder=\"%s\"" "$Default_VM_Folder"
       printf "\n VM_Conf_Dir=\"%s\"" "$VM_Conf_Dir"
