@@ -4,13 +4,15 @@ SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.b
 
 [Adds fixes, tools and improvements to the popular Quickemu system](https://qqxproject.org/docs/FreeBird)
 
-- Huge easy build range of _installation-ready_ distros and desktops
+- Rapid development, simplified interface system, for extra features from Qemu and the Linux desktop
 
 ![qqX-vmm](https://github.com/qqxproject/qqX/assets/3956806/18e5c495-8072-49a5-8b9c-e1302549efcf)
 
-- Rapid development, simplified interface system, for extra features from Qemu and the Linux desktop
-
 - Safe, simple to follow code, carefully written and carefully checked
+
+- Huge, easy build range of _installation-ready_ distros and desktops
+
+- Fully compatible with existing Quickemu builds
 
 -----
 
@@ -24,7 +26,7 @@ Recent Highlights Include:
 
 - Upgrades to new web pages
 
-Plus downstream fixes for Quickemu issues:
+Plus downstream fixes for current Quickemu issues:
 
 - Qemu version 10.0.0
 
@@ -34,7 +36,7 @@ Plus downstream fixes for Quickemu issues:
 
 [https://qqxproject.org](https://qqxproject.org/)
 
-Allows easy running of Linux, Windows, MacOS, etc with Qemu / KVM
+- Allows easy running of Linux, Windows, MacOS, etc with Qemu / KVM
 
 See web pages for full details
 
