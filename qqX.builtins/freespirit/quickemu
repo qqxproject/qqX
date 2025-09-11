@@ -1018,7 +1018,7 @@ function configure_display() {
             AUDIO_DRIVER="pipewire"
         fi
     elif ! pidof pulseaudio >/dev/null 2>&1; then
-      AUDIO_DRIVER="alsa"
+        AUDIO_DRIVER="alsa"
     fi
 
     # Setup the appropriate audio device based on the display output
@@ -2063,7 +2063,7 @@ VMPATH=""
 # shellcheck disable=SC2155
 readonly LAUNCHER=$(basename "${0}")
 readonly DISK_MIN_SIZE=$((197632 * 8))
-readonly VERSION="FS 4.9.8.05"
+readonly VERSION="FS 4.9.8.07"
 
 # TODO: Make this run the native architecture binary
 ARCH_VM="x86_64"
