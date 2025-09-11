@@ -1095,6 +1095,8 @@ function_quick_get_wrap ()  {
     if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
       printf "\n\n  Microsoft servers may not report back accurately, may block repeat attempts or may need manual download ... "
       show_distro_homepage_check_results
+      # clear any previous distro tmps that test_iso would have made
+      printf "" > "/tmp/qmod-dl-url" ; printf "" > "/tmp/qmod-dl-size"
       DL_PotentialOkay=1
     else test_iso_url
     fi
@@ -1413,7 +1415,11 @@ function_quick_get_wrap ()  {
     printf "\n\n  May take a moment to start, if servers are slow:"
     printColor "\n\n  Use [c] to STOP ALL current downloads, [d] to delete "
     printColor "\n\n  Or  [c] then [r] to restart on a new server or to force a download re-check ..."
-    printf "\n\n\n  Quickget output & download reportage: "
+    if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
+      printf "\n\n\n  Modified Quickget output & download reportage: "
+    else
+      printf "\n\n\n  Quickget output & download reportage: "
+    fi
     # stop flashing cursor
     tput civis
 
@@ -1710,7 +1716,7 @@ function_quick_get_wrap ()  {
     VM_Conf_File="$(basename "$New_VM_Conf_File")"
     refresh_sources_and_load_VM_arrays
     NewFileTuneUp=1
-    cp "/tmp/qmod-dl-url" "$VM_Conf_Dir/$VM_InstanceName/dl-url.txt"
+    [[ "$(cat "/tmp/qmod-dl-url")" ]] && cp "/tmp/qmod-dl-url" "$VM_Conf_Dir/$VM_InstanceName/dl-url.txt"
     function_config_tune_up  "$VM_Conf_Dir/$VM_Conf_File"
     # make sure values have been read, and at the least basic in case the tune up utility gets skipped
     refresh_conf_vars_and_values

@@ -97,8 +97,8 @@ function_config_tune_up ()  {
   printColor "\n\n  CHECK ME: \n\n"
   cat "$TuneUpTargetFile"
 
-  if [[ $ShowTxTexts ]]; then printColor  "  [tx] %s" "$MainTxOptionLine"
-  else printf  "  [tx] %s" "$MainTxOptionLine"
+  if [[ $ShowTxTexts ]]; then printColor  "\n  [tx] %s" "$MainTxOptionLine"
+  else printf  "\n  [tx] %s" "$MainTxOptionLine"
   fi
   printColor "\n\n  All changes made here, may be reversed:"
   printf "\n\n  A backup of your current configuration has now been date recorded & placed in the Distro Folder"
@@ -428,7 +428,8 @@ function_config_tune_up ()  {
     && [[ "$Line" != 'cpu_cores='* ]] && [[ "$Line" != 'ram='* ]] && [[ "$Line" != '#tpm='* ]]  && [[ "$Line" != 'tpm='* ]] \
     && [[ "$Line" != *'cureboot='* ]]; then
       [[ "$Line" == '# Secure Boot'* ]] && continue
-      [[ "$Line" == '# for Windows'* ]] && continue
+      [[ "$Line" == '# For Windows'* ]] && continue
+      [[ "$Line" == '# although early'* ]] && continue
       printf "%s\n" "$Line" >> "$TuneUpTargetDraft"
     fi
   done
@@ -457,9 +458,10 @@ function_config_tune_up ()  {
       printf "\n\n  Secure Boot should normally be set to \"off\" but early 2025 Insider betas are now requesting this feature."
       printf "\n\n  Tests on 2025 Insider are showing seemingly successful outcomes when set to \"on\" \n"
 
+      # NB any added comments with '=' will get filtered
       ConfLine="$(grep -s '# for Windows, normally' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
-        printf "\n\n# for Windows, normally set tpm as on & secureboot as off, although early 2025 insider betas are now needing secureboot=\"on\""  >> "$TuneUpTargetDraft"
+        printf "\n\n# For Windows, normally set tpm as on & secureboot as off,\n# although early 2025 insider betas are now needing secureboot as \"on\"\n"  >> "$TuneUpTargetDraft"
       fi
       {   printf "\ntpm=\"on\""
           printf "\nsecureboot=\"off\"\n\n"
