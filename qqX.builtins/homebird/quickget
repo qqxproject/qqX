@@ -3,7 +3,31 @@
 #  - https://www.shellcheck.net/wiki/SC2317
 #  - Disable globally because many functions are called indirectly
 # shellcheck disable=SC2317,SC2329
-# Use qqX C.UTF-8 locale, not:  export LC_ALL=C
+
+# For qqX use with C.UTF-8 locale, not:  export LC_ALL=C
+
+# This section enables testing via './quickget --check distroname' from a terminal opened in the built-ins folder:
+if [[ -e "$(pwd)/qqX_quickget_mods" ]]; then
+    if [[ $(pgrep -aAi qqX 2>/dev/null) ]] ; then
+        printf "\n\n  qqX running elsewhere ... \n\n" ; exit 1
+    else
+        OriginalPATH="$PATH"
+        CurrentFolder="$(pwd)"
+        if [[ -e "/usr/share/qqX/qqX.lib/fv" ]]; then qqX_LibraryFolder="/usr/share/qqX/qqX.lib"
+        else printf "\n\n  qqX libraries not found .... \n\n" ; exit 1
+        fi
+        export PATH="$CurrentFolder:${qqX_LibraryFolder}:${OriginalPATH}"
+        if  grep -sqi 'C.utf8' <<< "$(locale -a)"; then export "LC_NUMERIC=C.UTF-8" ; export "LC_COLLATE=C.UTF-8"
+        else export "LC_NUMERIC=C" ; export "LC_COLLATE=C"
+        fi
+    fi
+elif [[ "$PATH" != *'qqX'* ]]; then
+    printf "\n  This individual code branch is intended to be run as a qqX built-in."
+    printf "\n\n  qqX mod files and libraries have not been found ... ?"
+    printf "\n\n  If running from a cloned Quickemu fork, you need to switch branches"
+    printf "\n  or need to download qqX and run from a terminal opened in the FreeSpirit folder. \n\n"
+    exit 1
+fi
 
 function cleanup() {
     if [ -n "$(jobs -p)" ]; then
@@ -11,11 +35,9 @@ function cleanup() {
     fi
 }
 
-function os_info() {
-    local SIMPLE_NAME=""
+function os_info_QG() {
     local INFO=""
-    SIMPLE_NAME="${1}"
-    case ${SIMPLE_NAME} in
+    case "$1" in
         #name)            INFO="PrettyName|Credentials|Homepage|Info";;
         alma)             INFO="AlmaLinux|-|https://almalinux.org/|Community owned and governed, forever-free enterprise Linux distribution, focused on long-term stability, providing a robust production-grade platform. AlmaLinux OS is binary compatible with RHEL®.";;
         alpine)           INFO="Alpine Linux|-|https://alpinelinux.org/|Security-oriented, lightweight Linux distribution based on musl libc and busybox.";;
@@ -35,6 +57,7 @@ function os_info() {
         cachyos)          INFO="CachyOS|-|https://cachyos.org/|Designed to deliver lightning-fast speeds and stability, ensuring a smooth and enjoyable computing experience every time you use it.";;
         centos-stream)    INFO="CentOS Stream|-|https://www.centos.org/centos-stream/|Continuously delivered distro that tracks just ahead of Red Hat Enterprise Linux (RHEL) development, positioned as a midstream between Fedora Linux and RHEL.";;
         chimeralinux)     INFO="Chimera Linux|anon:chimera root:chimera|https://chimera-linux.org/|Modern, general-purpose non-GNU Linux distribution.";;
+        clearlinux)       INFO="Clear Linux|-|https://www.clearlinux.org/|Clear Linux OS is an open source, rolling release Linux distribution optimized for performance and security, from the Cloud to the Edge, designed for customization, and manageability.";;
         crunchbang++)     INFO="Crunchbangplusplus|-|https://www.crunchbangplusplus.org/|The classic minimal crunchbang feel, now with debian 12 bookworm.";;
         debian)           INFO="Debian|-|https://www.debian.org/|Complete Free Operating System with perfect level of ease of use and stability.";;
         deepin)           INFO="Deepin|-|https://www.deepin.org/|Beautiful UI design, intimate human-computer interaction, and friendly community environment make you feel at home.";;
@@ -100,12 +123,12 @@ function os_info() {
         tails)            INFO="Tails|-|https://tails.net/|Portable operating system that protects against surveillance and censorship.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Highly modular based system with community build extensions.";;
         trisquel)         INFO="Trisquel-|https://trisquel.info/|Fully free operating system for home users, small enterprises and educational centers.";;
-        truenas-core)     INFO="TrueNAS Core|-|https://www.truenas.com/truenas-core/|World’s most popular storage OS because it gives you the power to build your own professional-grade storage system to use in a variety of data-intensive applications without any software costs.";;
+        truenas-core)     INFO="TrueNAS Core|-|https://www.truenas.com/truenas-core/|World's most popular storage OS because it gives you the power to build your own professional-grade storage system to use in a variety of data-intensive applications without any software costs.";;
         truenas-scale)    INFO="TrueNAS Scale|-|https://www.truenas.com/truenas-scale/|Open Source Hyperconverged Infrastructure (HCI) solution. In addition to powerful scale-out storage capabilities, SCALE adds Linux Containers and VMs (KVM) so apps run closer to data.";;
         tuxedo-os)        INFO="Tuxedo OS|-|https://www.tuxedocomputers.com/en/|KDE Ubuntu LTS designed to go with their Linux hardware.";;
         ubuntu)           INFO="Ubuntu|-|https://ubuntu.com/|Complete desktop Linux operating system, freely available with both community and professional support.";;
         ubuntu-budgie)    INFO="Ubuntu Budgie|-|https://ubuntubudgie.org/|Community developed distribution, integrating the Budgie Desktop Environment with Ubuntu at its core.";;
-        ubuntucinnamon)   INFO="Ubuntu Cinnamon|-|https://ubuntucinnamon.org/|Community-driven, featuring Linux Mint’s Cinnamon Desktop with Ubuntu at the core, packed fast and full of features, here is the most traditionally modern desktop you will ever love.";;
+        ubuntucinnamon)   INFO="Ubuntu Cinnamon|-|https://ubuntucinnamon.org/|Community-driven, featuring Linux Mint's Cinnamon Desktop with Ubuntu at the core, packed fast and full of features, here is the most traditionally modern desktop you will ever love.";;
         ubuntukylin)      INFO="Ubuntu Kylin|-|https://ubuntukylin.com/|Universal desktop operating system for personal computers, laptops, and embedded devices. It is dedicated to bringing a smarter user experience to users all over the world.";;
         ubuntu-mate)      INFO="Ubuntu MATE|-|https://ubuntu-mate.org/|Stable, easy-to-use operating system with a configurable desktop environment. It is ideal for those who want the most out of their computers and prefer a traditional desktop metaphor. Using Mate desktop.";;
         ubuntu-server)    INFO="Ubuntu Server|-|https://ubuntu.com/server|Brings economic and technical scalability to your datacentre, public or private. Whether you want to deploy an OpenStack cloud, a Kubernetes cluster or a 50,000-node render farm, Ubuntu Server delivers the best value scale-out performance available.";;
@@ -114,7 +137,7 @@ function os_info() {
         vanillaos)        INFO="Vanilla OS|-|https://vanillaos.org/|Immutable Gnome DE based on Debian Sid and DistroBox. Designed to be a reliable and productive operating system for your daily work.";;
         void)             INFO="Void Linux|anon:voidlinux|https://voidlinux.org/|General purpose operating system. Its package system allows you to quickly install, update and remove software; software is provided in binary packages or can be built directly from sources.";;
         vxlinux)          INFO="VX Linux|-|https://vxlinux.org/|Pre-configured, secure systemd-free Plasma desktop with focus on convenience, performance and simplicity. Based on the excellent Void Linux.";;
-        windows)          INFO="Windows|-|https://www.microsoft.com/en-us/windows/|Whether you’re gaming, studying, running a business, or running a household, Windows helps you get it done.";;
+        windows)          INFO="Windows|-|https://www.microsoft.com/en-us/windows/|Whether you're gaming, studying, running a business, or running a household, Windows helps you get it done.";;
         windows-server)   INFO="Windows Server|-|https://www.microsoft.com/en-us/windows-server/|Platform for building an infrastructure of connected applications, networks, and web services.";;
         xubuntu)          INFO="Xubuntu|-|https://xubuntu.org/|Elegant and easy to use operating system. Xubuntu comes with Xfce, which is a stable, light and configurable desktop environment.";;
         zorin)            INFO="Zorin OS|-|https://zorin.com/os/|Alternative to Windows and macOS designed to make your computer faster, more powerful, secure, and privacy-respecting.";;
@@ -382,7 +405,7 @@ function test_all() {
         if [[ $(type -t "editions_${OS}") == function ]]; then
             for EDITION in $(editions_"${OS}"); do
                 validate_release releases_"${OS}"
-                URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)
+                URL=$(get_"${OS}" "$RELEASE" | cut -d' ' -f1 | head -n 1)
                 if [ "${OPERATION}" == "show" ]; then
                     test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
                 elif [ "${OPERATION}" == "test" ]; then
@@ -441,6 +464,7 @@ function os_support() {
     cachyos \
     centos-stream \
     chimeralinux \
+    clearlinux \
     crunchbang++ \
     debian \
     deepin \
@@ -649,6 +673,10 @@ function releases_chimeralinux() {
 
 function editions_chimeralinux() {
     echo base gnome
+}
+
+function releases_clearlinux() {
+    echo latest
 }
 
 function releases_crunchbang++() {
@@ -875,13 +903,13 @@ function releases_nitrux() {
 }
 
 function releases_nixos() {
-    # Lists unstable plus the two most recent releases
+    # Lists unstable plus the most recent release
     #shellcheck disable=SC2046
-    echo unstable $(web_pipe "https://nix-channels.s3.amazonaws.com/?delimiter=/" | grep -o -E 'nixos-[[:digit:]]+\.[[:digit:]]+' | cut -d- -f2 | sort -nru | head -n +2)
+    echo unstable $(web_pipe "https://nix-channels.s3.amazonaws.com/?delimiter=/" | grep -o -E 'nixos-[[:digit:]]+\.[[:digit:]]+' | cut -d- -f2 | sort -nru | head -n +1)
 }
 
 function editions_nixos() {
-    echo "minimal plasma gnome"
+    echo "minimal graphical"
 }
 
 function releases_nobara() {
@@ -908,7 +936,9 @@ function releases_openbsd() {
 
 function releases_openindiana() {
     #shellcheck disable=SC2046,SC2005
-    echo $(web_pipe "https://dlc.openindiana.org/isos/hipster/" | grep link | cut -d'/' -f 1 | cut -d '"' -f4 | sort -r | tail -n +2 | head -n 5)
+    #echo $(web_pipe "https://dlc.openindiana.org/isos/hipster/" | grep link | cut -d'/' -f 1 | cut -d '"' -f4 | sort -r | tail -n +2 | head -n 5)
+    echo $(web_pipe "https://dlc.openindiana.org/isos/hipster/" | grep 'href="./2' | cut -d'/' -f 2 | sort -r |  head -n 5)
+
 }
 
 function editions_openindiana() {
@@ -1215,13 +1245,13 @@ function check_hash() {
 # Download a file from the web and pipe it to stdout
 function web_pipe() {
     #curl --disable --silent --location "${1}"
-    curl --disable -sLf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 "${1}"
+    curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 4 --max-time 20 "${1}"
 }
 
 # Download a JSON file from the web and pipe it to stdout
 function web_pipe_json() {
     #curl --disable --silent --location --header "Accept: application/json" "${1}"
-    curl --disable -sLf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --header "Accept: application/json" "${1}"
+    curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 4 --max-time 20 --header "Accept: application/json" "${1}"
 }
 
 # Download a file from the web
@@ -1302,7 +1332,7 @@ function web_redirect() {
     # Check for URL redirections
     # Output to nonexistent directory so the download fails fast
     #REDIRECT_URL=$(curl --disable --silent --location --fail --write-out '%{url_effective}' --output /var/cache/${RANDOM}/${RANDOM} "${URL}" )
-    REDIRECT_URL=$(curl --disable -sLf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --write-out '%{url_effective}' --output /var/cache/${RANDOM}/${RANDOM} "${URL}" )
+    REDIRECT_URL=$(curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 4 --max-time 20 --write-out '%{url_effective}' --output /var/cache/${RANDOM}/${RANDOM} "${URL}" )
     if [ "${REDIRECT_URL}" != "${URL}" ]; then
         echo "${REDIRECT_URL}"
     else
@@ -1314,7 +1344,7 @@ function web_redirect() {
 function web_check() {
     local HEADERS=()
     local URL="${1}"
-    # Process any headers
+    # Normally just a URL. Mac OS has URL as $1 then followed by repeated headers requests.
     while (( "$#" )); do
         if [ "${1}" == "--header" ]; then
             HEADERS+=("${1}" "${2}")
@@ -1323,8 +1353,13 @@ function web_check() {
             shift
         fi
     done
+    # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
+    [[ $URL ]] && [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]] && return 1
     #curl --disable --silent --location --head --output /dev/null --fail --connect-timeout 30 --max-time 30 --retry 3 "${HEADERS[@]}" "${URL}"
-    curl --disable -sLf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --head --output /dev/null   "${HEADERS[@]}" "${URL}"
+    if curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 4 --max-time 20 --head "${HEADERS[@]}" "${URL}" \
+    | grep -si 'HTTP/' | tail -n 1 | grep -qs '200' ; then  return 0
+    else return 1
+    fi
 }
 
 function zsync_get() {
@@ -1383,70 +1418,74 @@ function make_vm_config() {
     fi
     IMAGE_FILE="${1}"
     ISO_FILE="${2}"
-    case "${OS}" in
-        batocera)
-            GUEST="batocera"
-            IMAGE_TYPE="img";;
-        custom)
-            GUEST="${CUSTOM_OS}"
-            IMAGE_TYPE="${CUSTOM_IMAGE_TYPE}";;
-        dragonflybsd)
-            GUEST="dragonflybsd"
-            IMAGE_TYPE="iso";;
-        easyos)
-            GUEST="linux"
-            IMAGE_TYPE="img";;
-        freebsd|ghostbsd)
-            GUEST="freebsd"
-            IMAGE_TYPE="iso";;
-        haiku)
-            GUEST="haiku"
-            IMAGE_TYPE="iso";;
-        freedos)
-            GUEST="freedos"
-            IMAGE_TYPE="iso";;
-        kolibrios)
-            GUEST="kolibrios"
-            IMAGE_TYPE="iso";;
-        macos)
-            GUEST="macos"
-            IMAGE_TYPE="img";;
-        netbsd)
-            GUEST="netbsd"
-            IMAGE_TYPE="iso";;
-        openbsd)
-            GUEST="openbsd"
-            IMAGE_TYPE="iso";;
-        openindiana)
-            GUEST="solaris"
-            IMAGE_TYPE="iso";;
-        reactos)
-            GUEST="reactos"
-            IMAGE_TYPE="iso";;
-        truenas*)
-            GUEST="truenas"
-            IMAGE_TYPE="iso";;
-        ubuntu*)
-            GUEST="linux"
-            IMAGE_TYPE="iso"
-            # If there is a point in the release, check if it is less than 16.04
-            if [[ "${RELEASE}" != *"daily"* ]]; then
-                if [ "${RELEASE//./}" -lt 1604 ]; then
-                    GUEST="linux_old"
-                fi
-            fi
-            ;;
-        windows)
-            GUEST="windows"
-            IMAGE_TYPE="iso";;
-        windows-server)
-            GUEST="windows-server"
-            IMAGE_TYPE="iso";;
-        *)
-            GUEST="linux"
-            IMAGE_TYPE="iso";;
-    esac
 
+    if [[ $(type -t "guest_type_${OS}") == function ]]; then
+        "guest_type_${OS}"
+    else
+        case "${OS}" in
+            batocera)
+                GUEST="batocera"
+                IMAGE_TYPE="img";;
+            custom)
+                GUEST="${CUSTOM_OS}"
+                IMAGE_TYPE="${CUSTOM_IMAGE_TYPE}";;
+            dragonflybsd)
+                GUEST="dragonflybsd"
+                IMAGE_TYPE="iso";;
+            easyos)
+                GUEST="linux"
+                IMAGE_TYPE="img";;
+            freebsd|ghostbsd)
+                GUEST="freebsd"
+                IMAGE_TYPE="iso";;
+            haiku)
+                GUEST="haiku"
+                IMAGE_TYPE="iso";;
+            freedos)
+                GUEST="freedos"
+                IMAGE_TYPE="iso";;
+            kolibrios)
+                GUEST="kolibrios"
+                IMAGE_TYPE="iso";;
+            macos)
+                GUEST="macos"
+                IMAGE_TYPE="img";;
+            netbsd)
+                GUEST="netbsd"
+                IMAGE_TYPE="iso";;
+            openbsd)
+                GUEST="openbsd"
+                IMAGE_TYPE="iso";;
+            openindiana)
+                GUEST="solaris"
+                IMAGE_TYPE="iso";;
+            reactos)
+                GUEST="reactos"
+                IMAGE_TYPE="iso";;
+            truenas*)
+                GUEST="truenas"
+                IMAGE_TYPE="iso";;
+            ubuntu*)
+                GUEST="linux"
+                IMAGE_TYPE="iso"
+                # If there is a point in the release, check if it is less than 16.04
+                if [[ "${RELEASE}" != *"daily"* ]]; then
+                    if [ "${RELEASE//./}" -lt 1604 ]; then
+                        GUEST="linux_old"
+                    fi
+                fi
+                ;;
+            windows)
+                GUEST="windows"
+                IMAGE_TYPE="iso";;
+            windows-server)
+                GUEST="windows-server"
+                IMAGE_TYPE="iso";;
+            *)
+                GUEST="linux"
+                IMAGE_TYPE="iso";;
+        esac
+    fi
     CONF_FILE="${VM_PATH}.conf"
 
     if [ ! -e "${CONF_FILE}" ]; then
@@ -1462,98 +1501,103 @@ EOF
         if [ -n "${ISO_FILE}" ]; then
             echo "fixed_iso=\"${VM_PATH}/${ISO_FILE}\"" >> "${CONF_FILE}"
         fi
-
-        # OS specific tweaks
-        case ${OS} in
-            alma|athenaos|centos-stream|endless|garuda|gentoo|kali|nixos|oraclelinux|popos|rockylinux)
-                echo "disk_size=\"32G\"" >> "${CONF_FILE}";;
-            openindiana)
-                echo "boot=\"legacy\"" >> "${CONF_FILE}"
-                echo "disk_size=\"32G\"" >> "${CONF_FILE}";;
-            batocera)
-                echo "disk_size=\"8G\"" >> "${CONF_FILE}";;
-            bazzite)
+        if [[ $(type -t "config_${OS}") == function ]]; then
+            "config_${OS}"
+        else
+            # OS specific tweaks
+            case ${OS} in
+                alma|athenaos|centos-stream|endless|garuda|gentoo|kali|nixos|oraclelinux|popos|rockylinux)
+                    echo "disk_size=\"32G\"" >> "${CONF_FILE}";;
+                openindiana)
+                    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+                    echo "disk_size=\"32G\"" >> "${CONF_FILE}";;
+                batocera)
+                    echo "disk_size=\"8G\"" >> "${CONF_FILE}";;
+                bazzite)
+                    echo "disk_size=\"64G\"" >> "${CONF_FILE}";;
+            clearlinux)
                 echo "disk_size=\"64G\"" >> "${CONF_FILE}";;
-            dragonflybsd|haiku|openbsd|netbsd|slackware|slax|tails|tinycore)
-                echo "boot=\"legacy\"" >> "${CONF_FILE}";;
-            deepin)
+                dragonflybsd|haiku|openbsd|netbsd|slackware|slax|tails|tinycore)
+                    echo "boot=\"legacy\"" >> "${CONF_FILE}";;
+                deepin)
+                    echo "disk_size=\"64G\"" >> "${CONF_FILE}"
+                    echo "ram=\"4G\"" >> "${CONF_FILE}"
+                    ;;
+                freedos)
+                    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+                    echo "disk_size=\"4G\"" >> "${CONF_FILE}"
+                    echo "ram=\"256M\"" >> "${CONF_FILE}"
+                    ;;
+                kolibrios)
+                    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+                    echo "disk_size=\"2G\"" >> "${CONF_FILE}"
+                    echo "ram=\"128M\"" >> "${CONF_FILE}"
+                    ;;
+                slint)
+                    echo "disk_size=\"50G\"" >> "${CONF_FILE}"
+                    ;;
+                slitaz)
+                    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+                    echo "disk_size=\"4G\"" >> "${CONF_FILE}"
+                    echo "ram=\"512M\"" >> "${CONF_FILE}"
+                    ;;
+                truenas-scale|truenas-core)
+                    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+                    # the rest is non-functional
+                    # echo "bootdrive_size=\"5G\"" >> "${CONF_FILE}" # boot drive
+                    # echo "1stdrive_size=\"20G\"" >> "${CONF_FILE}" # for testing
+                    # echo "2nddrive_size=\"20G\"" >> "${CONF_FILE}" # again, for testing
+                    ;;
+                ubuntu-server)
+                    # 22.04+ fails on LVM build if disk size is < 10G
+                    # 22.04.1 fails on auto-install if TPM is disabled
+                    echo "disk_size=\"10G\"" >> "${CONF_FILE}"
+                    echo "ram=\"4G\"" >> "${CONF_FILE}"
+                    if [[ "${RELEASE}" == *"22.04"* ]]; then
+                        echo "tpm=\"on\"" >> "${CONF_FILE}"
+                    fi
+                    ;;
+                vanillaos)
+                    ## Minimum is 50G for abroot, but a 64GB is allocated to give some headroom
+                    echo "disk_size=\"64G\"" >> "${CONF_FILE}"
+                    ;;
+                zorin)
+                    case ${EDITION} in
+                        education64|edulite64) echo "disk_size=\"32G\"" >> "${CONF_FILE}";;
+                    esac;;
+                reactos)
+                    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+                    echo "disk_size=\"12G\"" >> "${CONF_FILE}"
+                    echo "ram=\"2048M\"" >> "${CONF_FILE}"
+                    ;;
+                macos)
+                    echo "disk_size=\"128G\"" >> "${CONF_FILE}"
+                    echo "macos_release=\"${RELEASE}\"" >> "${CONF_FILE}"
+                    # https://github.com/quickemu-project/quickemu/issues/438
+                    if [ "${RELEASE}" == "monterey" ]; then
+                        echo "cpu_cores=2" >> "${CONF_FILE}"
+                    fi
+                    ;;
+                proxmox-ve)
+                    echo "disk_size=\"20G\"" >> "${CONF_FILE}"
+                    echo "ram=\"4G\"" >> "${CONF_FILE}"
+                    ;;
+            esac
+
+            if [ "${OS}" == "ubuntu" ] && [[ ${RELEASE} == *"daily"*  ]]; then
+                # Minimum to install lobster testing is 18GB but 32GB are allocated for headroom
+                echo "disk_size=\"32G\"" >> "${CONF_FILE}"
+            fi
+
+            if [[ "${OS}" == "windows"* ]]; then
                 echo "disk_size=\"64G\"" >> "${CONF_FILE}"
-                echo "ram=\"4G\"" >> "${CONF_FILE}"
-                ;;
-            freedos)
-                echo "boot=\"legacy\"" >> "${CONF_FILE}"
-                echo "disk_size=\"4G\"" >> "${CONF_FILE}"
-                echo "ram=\"256M\"" >> "${CONF_FILE}"
-                ;;
-            kolibrios)
-                echo "boot=\"legacy\"" >> "${CONF_FILE}"
-                echo "disk_size=\"2G\"" >> "${CONF_FILE}"
-                echo "ram=\"128M\"" >> "${CONF_FILE}"
-                ;;
-            slint)
-                echo "disk_size=\"50G\"" >> "${CONF_FILE}"
-                ;;
-            slitaz)
-                echo "boot=\"legacy\"" >> "${CONF_FILE}"
-                echo "disk_size=\"4G\"" >> "${CONF_FILE}"
-                echo "ram=\"512M\"" >> "${CONF_FILE}"
-                ;;
-            truenas-scale|truenas-core)
-                echo "boot=\"legacy\"" >> "${CONF_FILE}"
-                # the rest is non-functional
-                # echo "bootdrive_size=\"5G\"" >> "${CONF_FILE}" # boot drive
-                # echo "1stdrive_size=\"20G\"" >> "${CONF_FILE}" # for testing
-                # echo "2nddrive_size=\"20G\"" >> "${CONF_FILE}" # again, for testing
-                ;;
-            ubuntu-server)
-                # 22.04+ fails on LVM build if disk size is < 10G
-                # 22.04.1 fails on auto-install if TPM is disabled
-                echo "disk_size=\"10G\"" >> "${CONF_FILE}"
-                echo "ram=\"4G\"" >> "${CONF_FILE}"
-                if [[ "${RELEASE}" == *"22.04"* ]]; then
-                    echo "tpm=\"on\"" >> "${CONF_FILE}"
-                fi
-                ;;
-            vanillaos)
-                ## Minimum is 50G for abroot, but a 64GB is allocated to give some headroom
-                echo "disk_size=\"64G\"" >> "${CONF_FILE}"
-                ;;
-            zorin)
-                case ${EDITION} in
-                    education64|edulite64) echo "disk_size=\"32G\"" >> "${CONF_FILE}";;
-                esac;;
-            reactos)
-                echo "boot=\"legacy\"" >> "${CONF_FILE}"
-                echo "disk_size=\"12G\"" >> "${CONF_FILE}"
-                echo "ram=\"2048M\"" >> "${CONF_FILE}"
-                ;;
-            macos)
-                echo "disk_size=\"128G\"" >> "${CONF_FILE}"
-                echo "macos_release=\"${RELEASE}\"" >> "${CONF_FILE}"
-                # https://github.com/quickemu-project/quickemu/issues/438
-                if [ "${RELEASE}" == "monterey" ]; then
-                    echo "cpu_cores=2" >> "${CONF_FILE}"
-                fi
-                ;;
-            proxmox-ve)
-                echo "disk_size=\"20G\"" >> "${CONF_FILE}"
-                echo "ram=\"4G\"" >> "${CONF_FILE}"
-                ;;
-        esac
+            fi
 
-        if [ "${OS}" == "ubuntu" ] && [[ ${RELEASE} == *"daily"*  ]]; then
-            # Minimum to install lobster testing is 18GB but 32GB are allocated for headroom
-            echo "disk_size=\"32G\"" >> "${CONF_FILE}"
-        fi
-
-        if [[ "${OS}" == "windows"* ]]; then
-            echo "disk_size=\"64G\"" >> "${CONF_FILE}"
-        fi
-
-        # Enable TPM for Windows 11 and Windows Server 2022
-        if [[ "${OS}" == "windows" && "${RELEASE}" == "11" || "${OS}" == "windows-server" && "${RELEASE}" == "2022" ]]; then
-            echo "tpm=\"on\"" >> "${CONF_FILE}"
-            echo "secureboot=\"off\"" >> "${CONF_FILE}"
+            # Enable TPM for Windows 11 and Windows Server 2022
+            if [[ "${OS}" == "windows" && "${RELEASE}" == "11" || "${OS}" == "windows-server" && "${RELEASE}" == "2022" ]]; then
+                echo "tpm=\"on\"" >> "${CONF_FILE}"
+                echo "secureboot=\"off\"" >> "${CONF_FILE}"
+            fi
         fi
     fi
     echo -e "\nTo start your $(pretty_name "${OS}") virtual machine run:"
@@ -1758,6 +1802,19 @@ function get_chimeralinux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+function get_clearlinux() {
+    local HASH=""
+    local ISO=""
+    local URL=""
+    local RELEASE=""
+
+    RELEASE=$(curl -s https://cdn.download.clearlinux.org/releases/ | grep -oE "[0-9]+" | sort -nr | head -1)
+    ISO="clear-${RELEASE}-live-desktop.iso"
+    URL="https://cdn.download.clearlinux.org/releases/${RELEASE}/clear"
+    HASH=$(web_pipe "${URL}/${ISO}-SHA512SUMS" | grep "${ISO}" | cut -d' ' -f 1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 function get_crunchbang++() {
     local HASH=""
     local ISO=""
@@ -1921,14 +1978,17 @@ function get_freebsd() {
 function get_freedos() {
     local HASH=""
     local ISO=""
-    local URL="https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/${RELEASE}/official"
+    local BASE_URL="https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/${RELEASE}"
+    local URL=""
     case ${RELEASE} in
-        1.2) ISO="FD12CD.iso"
+        1.2) URL="${BASE_URL}/official"
+             ISO="FD12CD.iso"
              HASH=$(web_pipe "${URL}/FD12.sha" | grep "${ISO}" | cut -d' ' -f1);;
-        1.3) ISO="FD13-LiveCD.zip"
+        1.3) URL="${BASE_URL}/official"
+             ISO="FD13-LiveCD.zip"
              HASH=$(web_pipe "${URL}/verify.txt" | grep -A 8 "sha256sum" | grep "${ISO}" | cut -d' ' -f1);;
-        1.4) ISO="FD14-LiveCD.zip"
-             URL="${URL/'/official'/}"
+        1.4) URL="${BASE_URL}"
+             ISO="FD14-LiveCD.zip"
              HASH=$(web_pipe "${URL}/verify.txt" | grep -A 8 "sha256sum" | grep "${ISO}" | cut -d' ' -f1);;
     esac
     echo "${URL}/${ISO} ${HASH}"
@@ -2273,13 +2333,12 @@ function get_nitrux() {
 
 function get_nixos() {
     local HASH=""
-    # Adapt the plasma edition according to the NixOS release
+    # NixOS "gnome" and "plasma" ISOs are unified as "graphical" since 25.05
+    # https://github.com/NixOS/nixpkgs/pull/355893
     case "${EDITION}" in
-        plasma)
-            if [ "${RELEASE}" == "23.11" ]; then
-                EDITION+="5"
-            else
-                EDITION+="6"
+        plasma6|gnome)
+            if [[ "${RELEASE}" == "25.05" || "${RELEASE}" == "unstable" ]]; then
+                EDITION="graphical"
             fi
             ;;
     esac
@@ -3159,7 +3218,7 @@ function download_windows_server() {
     local url="https://www.microsoft.com/en-us/evalcenter/download-$windows_version"
 
     echo " - Parsing download page: ${url}"
-    iso_download_page_html="$(curl --disable -sLf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --max-filesize 1M --proto =https --tlsv1.2 --http1.1 -- "$url")" || {
+    iso_download_page_html="$(curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 4 --max-time 20 --continue-at - --max-filesize 1M --proto =https --tlsv1.2 --http1.1 -- "$url")" || {
         handle_curl_error $?
         return $?
     }
@@ -3232,7 +3291,7 @@ function download_windows_server() {
     # Follow redirect so proceeding log message is useful
     # This is a request we make this Fido doesn't
     # We don't need to set "--max-filesize" here because this is a HEAD request and the output is to /dev/null anyway
-    iso_download_link="$(curl --disable -sLf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --o /dev/null --write-out "%{url_effective}" --head --proto =https --tlsv1.2 --http1.1 -- "$iso_download_link")" || {
+    iso_download_link="$(curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 4 --max-time 20 --continue-at - --o /dev/null --write-out "%{url_effective}" --head --proto =https --tlsv1.2 --http1.1 -- "$iso_download_link")" || {
         # This should only happen if the Microsoft servers are down
         handle_curl_error $?
         return $?
@@ -3483,50 +3542,53 @@ function create_vm() {
     if [ -n "${HASH}" ]; then
         check_hash "${ISO}" "${HASH}"
     fi
-
-    case "${OS}" in
-        batocera)
-            if [[ ${ISO} = *".gz"* ]]; then
-                gzip -d "${VM_PATH}/${ISO}"
-                ISO="${ISO/.gz/}"
-            fi;;
-        dragonflybsd)
-            #  Could be other OS iso files compressed with bzip2 or gzip
-            #  but for now we'll keep this to know cases
-            if [[ ${ISO} = *".bz2"* ]]; then
-                bzip2 -d  "${VM_PATH}/${ISO}"
-                ISO="${ISO/.bz2/}"
-            fi;;
-        easyos)
-            if [[ ${ISO} = *".img"* ]]; then
-                ${QEMU_IMG} convert -f raw -O qcow2 "${VM_PATH}/${ISO}" "${VM_PATH}/disk.qcow2"
-                ISO="${ISO/.img/}"
-            fi;;
-        freedos)
-            if [[ ${ISO} = *".zip"* ]]; then
-                unzip -qo "${VM_PATH}/${ISO}" -d "${VM_PATH}"
-                rm -f "${VM_PATH}/${ISO}"
-                ISO="$(ls -1 "${VM_PATH}/"*.iso)"
-                ISO="$(basename "${ISO}")"
-            fi;;
-        kolibrios)
-            if [[ ${ISO} = *".7z" ]]; then
-                if [ -z "$(command -v 7z)" ]; then echo "ERROR! '7zip' needs installing. Unable to extract file."
-                else
-                    7z e "${VM_PATH}/${ISO}" -o"${VM_PATH}" >/dev/null 2>&1
+    if [[ $(type -t "finalize_${OS}") == function ]]; then
+        "finalize_${OS}"
+    else
+        case "${OS}" in
+            batocera)
+                if [[ ${ISO} = *".gz"* ]]; then
+                    gzip -d "${VM_PATH}/${ISO}"
+                    ISO="${ISO/.gz/}"
+                fi ;;
+            dragonflybsd)
+                #  Could be other OS iso files compressed with bzip2 or gzip
+                #  but for now we'll keep this to know cases
+                if [[ ${ISO} = *".bz2"* ]]; then
+                    bzip2 -d  "${VM_PATH}/${ISO}"
+                    ISO="${ISO/.bz2/}"
+                fi ;;
+            easyos)
+                if [[ ${ISO} = *".img"* ]]; then
+                    ${QEMU_IMG} convert -f raw -O qcow2 "${VM_PATH}/${ISO}" "${VM_PATH}/disk.qcow2"
+                    ISO="${ISO/.img/}"
+                fi ;;
+            freedos)
+                if [[ ${ISO} = *".zip"* ]]; then
+                    unzip -qo "${VM_PATH}/${ISO}" -d "${VM_PATH}"
                     rm -f "${VM_PATH}/${ISO}"
                     ISO="$(ls -1 "${VM_PATH}/"*.iso)"
                     ISO="$(basename "${ISO}")"
-                fi
-            fi;;
-        reactos)
-            if [[ ${ISO} = *".zip"* ]]; then
-                unzip -qo "${VM_PATH}/${ISO}" -d "${VM_PATH}"
-                rm -f "${VM_PATH}/${ISO}"
-                ISO="$(ls -1 "${VM_PATH}/"*.iso)"
-                ISO="$(basename "${ISO}")"
-            fi;;
-    esac
+                fi ;;
+            kolibrios)
+                if [[ ${ISO} = *".7z" ]]; then
+                    if [ -z "$(command -v 7z)" ]; then echo "ERROR! '7zip' needs installing. Unable to extract file."
+                    else
+                        7z e "${VM_PATH}/${ISO}" -o"${VM_PATH}" >/dev/null 2>&1
+                        rm -f "${VM_PATH}/${ISO}"
+                        ISO="$(ls -1 "${VM_PATH}/"*.iso)"
+                        ISO="$(basename "${ISO}")"
+                    fi
+                fi ;;
+            reactos)
+                if [[ ${ISO} = *".zip"* ]]; then
+                    unzip -qo "${VM_PATH}/${ISO}" -d "${VM_PATH}"
+                    rm -f "${VM_PATH}/${ISO}"
+                    ISO="$(ls -1 "${VM_PATH}/"*.iso)"
+                    ISO="$(basename "${ISO}")"
+                fi ;;
+        esac
+    fi
     make_vm_config "${ISO}"
 }
 
@@ -3654,8 +3716,8 @@ Supported Operating Systems:\n\n' "$(${QUICKEMU} --version)" "${CURL_VERSION}"
 
 trap cleanup EXIT
 
-if ((BASH_VERSINFO[0] < 4)); then
-    echo "Sorry, you need bash 4.0 or newer to run this script."
+if ((BASH_VERSINFO[0] < 5)); then
+    echo "Sorry, you need bash 5.0 or newer to run this script."
     exit 1
 fi
 
@@ -3675,7 +3737,11 @@ if [ ! -x "${QEMU_IMG}" ]; then
     exit 1
 fi
 
-#TODO: Deprecate `list`, `list_csv`, and `list_json` in favor of `--list`, `--list-csv`, and `--list-json`
+mapfile -t -d':' PathArr <<< "$PATH"
+for QG_Modpath in "${PathArr[@]}"; do
+    [[ -e "$QG_Modpath/qqX_quickget_mods" ]] && source "$QG_Modpath/qqX_quickget_mods" && break
+done
+
 case "${1}" in
     --download|-download)
         OPERATION="download"
@@ -3703,7 +3769,7 @@ case "${1}" in
     --version|-version)
         #WHERE=$(dirname "${BASH_SOURCE[0]}")
         #"${WHERE}/quickemu" --version
-        echo "HB 4.9.8.05"
+        echo "HB 4.9.8.06"
         exit 0;;
     --help|-help|--h|-h)
         help_message
@@ -3770,6 +3836,8 @@ if [ -n "${2}" ]; then
             fi
         else
             show_os_info "${OS}"
+            echo -en " - Releases:\t"
+            "releases_${OS}" | fmt -w 80
             echo -e " - Editions:\t$("editions_${OS}" | fmt -w 80)"
             echo -e "\nERROR! You must specify an edition."
             exit 1

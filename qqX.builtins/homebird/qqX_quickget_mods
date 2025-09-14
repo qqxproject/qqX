@@ -42,7 +42,7 @@ osAddList=" anduinos bluestar "
 #osAddList+=" another "
 
 # osRemoveList for distros that are problematic or no longer maintained, but still listed by Quickget
-osRemoveList=" arcolinux clearlinux holoiso truenas-core vxlinux "
+osRemoveList=" arcolinux holoiso truenas-core vxlinux "
 #osRemoveList+=" another and-one-more "
 
 osSupported="$(os_support)"
@@ -113,13 +113,9 @@ function os_info {
         anduinos)         INFO="Anduin OS|-|https://www.anduinos.com/|Ubuntu-based Linux distribution that aims to facilitate developers transitioning from Windows.";;
         archcraft)        INFO="Archcraft|-|https://archcraft.io/|Collection of minimal Linux distributions, based on Arch Linux.";;
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
-        edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
-        elementary)       INFO="Elementary OS|-|https://elementary.io/|Streamlined Gnome/Vala/Flatpak distro: Thoughtful, capable, and ethical replacement for Windows and macOS.";;
-        endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
-        trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
         void)             INFO="Void Linux|anon:voidlinux|https://voidlinux.org/|Non-Systemd desktop operating system based on Runit. Software is provided in binary packages or can be built directly from sources.";;
     esac
@@ -134,12 +130,8 @@ function distro_release_notes {
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
-        elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
-        endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
-        fedora)           RelNotes="09/2025 Tested as ALL working but there are possibly new unlisted editions. See website, for more.";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
-        nitrux)           RelNotes="08/2025 ISO releases have been suspended for changes from KDE to Hyprland and the Cachy kernel. See https://nxos.org/news/news-farewell-nx-desktop-and-plasma/";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
     esac
@@ -230,16 +222,6 @@ function get_anduinos {
     printf "%s" "$EDITION" > "/tmp/qGet.Mods.GET.data.txt"
 }
 
-## FIX Arch - Pre-emptively for PR  https://github.com/quickemu-project/quickemu/pull/1709
-function get_archlinux() {
-    local HASH=""
-    local ISO=""
-    local URL="https://geo.mirror.pkgbuild.com"
-    ISO=$(web_pipe "https://archlinux.org/releng/releases/json/" | jq -r '.releases[0].iso_url')
-    HASH=$(web_pipe "https://archlinux.org/releng/releases/json/" | jq -r '.releases[0].sha256_sum')
-    echo "${URL}${ISO} ${HASH}"
-}
-
 ## FIX artix community editions and hash grep
 function get_artixlinux() {
     local HASH="" ; local ISO=""
@@ -275,8 +257,7 @@ function releases_bluestar {
     echo "latest"
 }
 function get_bluestar {
-    BlueStarRelease="$(web_pipe https://sourceforge.net/projects/bluestarlinux/files/distro/ \
-    | grep green | grep title | cut -d'=' -f4 | cut -d':' -f1 | cut -d'/' -f3)"
+    BlueStarRelease="$(web_pipe https://sourceforge.net/projects/bluestarlinux/ | tr ' ' '\n' | grep -s -e '\.iso')"
     BlueStarIso="https://sourceforge.net/projects/bluestarlinux/files/distro/${BlueStarRelease}"
     BlueStarHash="https://sourceforge.net/projects/bluestarlinux/files/distro/${BlueStarRelease/iso/md5}"
     BlueStarHash="$(web_pipe "$BlueStarHash" | cut -d' ' -f1)"
@@ -291,12 +272,6 @@ function editions_bodhi() {
     fi
 }
 
-## REDUCE release count - over 20 is too many!
-function releases_dragonflybsd() {
-    # If you remove "".bz2" from the end of the searched URL, you will get only the current release
-   web_pipe "https://mirror-master.dragonflybsd.org/iso-images/" | grep -E -o '"dfly-x86_64-.*_REL.iso.bz2"' | grep -o -E '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | fv -M 5 -qs
-}
-
 ## FIX Easy OS release list
 function releases_easyos() {
     local ALL_RELEASES="" ; local YEAR=""
@@ -309,7 +284,7 @@ function releases_easyos() {
     echo "${ALL_RELEASES}"
 }
 
-## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
+## FIX Cosmic Atomic
 function get_fedora() {
     local HASH="" ; local ISO="" ; local JSON="" ; local URL="" ; local VARIANT=""
     case ${EDITION} in
@@ -386,20 +361,9 @@ function get_kdeneon() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## FIX omit dirs only having an RC sub-folder
-function releases_linuxlite() {
-    local ReleasesList= ; local ReleasesTrue= ; i=0
-    ReleasesList="$(floatversion -M 5 -qs "$(web_pipe "https://sourceforge.net/projects/linux-lite/files/" | grep -s 'class="name')")"
-    for ChkRel in $ReleasesList; do
-        web_check "https://sourceforge.net/projects/linux-lite/files/${ChkRel}/linux-lite-${ChkRel}-64bit.iso" &&  ReleasesTrue+="$ChkRel "
-        ((i++)) ; [[ $i -gt 3 ]] && break
-    done
-    echo "$ReleasesTrue"
-}
-
-## UPGRADE only one release ... make dynamic
+## TWEAK  only 9 now ... REVIEW make dynamic?
 function releases_mageia() {
-    web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
+    echo 9
 }
 
 ## FIX sway
@@ -482,25 +446,6 @@ function get_opensuse() {
     echo "$URL/${ISO} $HASH"
 }
 
-## FIX - make sure integers -gt 9 can be used ...
-# eg. 6.10 and 10.0 > OracleLinux-R6-U10-Server-x86_64-dvd.iso and OracleLinux-R10-U0-x86_64-dvd.iso
-function releases_oraclelinux() {
-    #echo 9.3 9.2 9.1 9.0 8.9 8.8 8.7 8.6 8.5 8.4 7.9 7.8 7.7
-    floatversion -qs -M 4  "$(web_pipe "https://yum.oracle.com/oracle-linux-isos.html" | grep -s -e '<td><strong>')"
-}
-function get_oraclelinux() {
-    local HASH="" ; local ISO="" ; local VER_MAJ= ; local VER_MIN=
-    #local VER_MAJ=${RELEASE::1} #local VER_MIN=${RELEASE:2:1}
-    VER_MAJ=${RELEASE/.*/} ; VER_MIN=${RELEASE/*./}
-    local URL="https://yum.oracle.com/ISOS/OracleLinux/OL${VER_MAJ}/u${VER_MIN}/x86_64"
-    case ${VER_MAJ} in
-        7) ISO="OracleLinux-R${VER_MAJ}-U${VER_MIN}-Server-x86_64-dvd.iso";;
-        *) ISO="OracleLinux-R${VER_MAJ}-U${VER_MIN}-x86_64-dvd.iso";;
-    esac
-    HASH=$(web_pipe "https://linux.oracle.com/security/gpg/checksum/OracleLinux-R${VER_MAJ}-U${VER_MIN}-Server-x86_64.checksum" | grep "${ISO}" | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
-}
-
 ## FIX hashes and folders
 function releases_parrotsec() {
   # July 2025 > only latest folder now has iso's
@@ -517,11 +462,6 @@ function get_parrotsec() {
     URL="https://deb.parrot.sh/parrot/iso/${LATEST}"
     HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -B 30 'sha384' | grep "${ISO}" | cut -d' ' -f1)"
     echo "${URL}/${ISO} ${HASH}"
-}
-
-## REDUCE release count - 14 is too many!
-function releases_rockylinux() {
-    web_pipe "http://dl.rockylinux.org/vault/rocky/" | grep "^<a href" | grep -v full | grep -v RC | grep -v ISO | cut -d'"' -f2 | tr -d / | fv -M 4 -qs
 }
 
 ## FIX  SLINT (only 15.0, and hopefully higher, has downloadable iso's)
@@ -591,98 +531,9 @@ function get_spirallinux() {
     echo "${URL}/${ISO}" "${HASH}"
 }
 
-## FIX hash checker - base is now 256
-function get_trisquel() {
-    local HASH="" ; local ISO="" ;local URL="https://mirrors.ocf.berkeley.edu/trisquel-images"
-    case ${EDITION} in
-        mate) ISO="trisquel_${RELEASE}_amd64.iso";;
-        lxde) ISO="trisquel-mini_${RELEASE}_amd64.iso";;
-        kde) ISO="triskel_${RELEASE}_amd64.iso";;
-        sugar) ISO="trisquel-sugar_${RELEASE}_amd64.iso";;
-    esac
-    HASH=$(web_pipe "${URL}/${ISO}.sha256" | grep "${ISO}" | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
-}
-
-
 ## IMPROVE make dynamic
 function releases_truenas-scale() {
     web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep wplink | cut -d'>' -f2 | fv -M -Q
-}
-
-## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
-function get_ubuntu-server() {
-    local HASH="" ; local ISO="" ; local NAME="live-server" ; local URL="" ; local DATA="" ; local RelMax=
-    if [[ "${RELEASE}" == "daily"* ]]; then URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
-    else URL="https://releases.ubuntu.com/${RELEASE}"
-    fi
-    case "${RELEASE}" in 14*|16*) NAME="server";;
-    esac
-    if web_check "${URL}/SHA256SUMS"; then
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    else
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/MD5SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
-        ISO=$(cut -d' ' -f3 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    fi
-    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
-        make_vm_config "${OS}-devel.iso"
-    else
-        web_get "${URL}/${ISO}" "${VM_PATH}"
-        check_hash "${ISO}" "${HASH}"
-        make_vm_config "${ISO}"
-    fi
-}
-function get_ubuntu() {
-    local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
-    if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
-        # Ubuntu Studio daily-live images are in the dvd directory  @ feb 2025 no longer the case
-        RELEASE="dvd"
-    fi
-    if [[ "${RELEASE}" == "jammy-daily" ]]; then
-        if [[ "${OS}" == "ubuntustudio" ]]; then URL="https://cdimage.ubuntu.com/${OS}/jammy/dvd/current"
-        else URL="https://cdimage.ubuntu.com/${OS}/jammy/daily-live/current"
-        fi
-        VM_PATH="${OS}-jammy-live"
-    elif [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
-        VM_PATH="${OS}-${RELEASE}"
-    elif [ "${OS}" == "ubuntu" ]; then
-        URL="https://releases.ubuntu.com/${RELEASE}"
-    else
-        URL="https://cdimage.ubuntu.com/${OS}/releases/${RELEASE}/release"
-    fi
-    if web_check "${URL}/SHA256SUMS"; then
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    else
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/MD5SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    fi
-    if [ -z "${ISO}" ] || [ -z "${HASH}" ]; then
-        echo "$(pretty_name "${OS}") ${RELEASE} is currently unavailable. Please select other OS/Release combination"
-        exit 1
-    fi
-    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
-        make_vm_config "${OS}-devel.iso"
-    elif [[ "${RELEASE}" == "jammy-daily" ]]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-jammy-live.iso"
-        make_vm_config "${OS}-jammy-live.iso"
-    else
-        web_get "${URL}/${ISO}" "${VM_PATH}"
-        check_hash "${ISO}" "${HASH}"
-        make_vm_config "${ISO}"
-    fi
 }
 
 ## FIX invalid VOID folders (use 'current' only as some folders have variants)
@@ -868,33 +719,29 @@ function web_get() {
     fi
 
     if [ "${DIR}" != "$(pwd)" ] && ! mkdir -p "${DIR}" 2>/dev/null; then
-        echo "ERROR: Unable to create directory ${DIR}" ; exit 1
+        echo "ERROR! Unable to create directory ${DIR}"
+        exit 1
     fi
-    #  Allow qqX or any external process to pick up the FINALIZED VM-NAME
+    #  Allow qqX or any external process to pick up the FINALIZED NAME
     # - avoids overwrites eg windows 'unattended'
     # - external proc should clear this file before starting so the grep test will function
     if ! grep -sq 'New_VM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
         printf "New_VM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
     fi
     if [[ ${OS} != windows && ${OS} != macos && ${OS} != windows-server ]]; then
-        echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}" ; echo "- URL: ${URL}"
+        echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}"
+        echo "- URL: ${URL}"
     fi
     # Add retries to the standard Quickemu 4.9.x method:
     # --continue-at -  will continue/resume a previous file transfer but we need to make sure we actually have a connection to start with ...
-    tput civis ; echo
-    local CurlParallel=
-    Curl_NoPara=1 # Freespirit only, for moment. Plus TODO toggle
-    if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
-        CurlParallel="--parallel" ; printf "\n\n  Multiplexed parallel download: \n\n"
-    fi
-    if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
-    --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
-        # qqX needs to take control here, use exit instead  # $CurlParallel - unquoted
-        if pgrep qqX >/dev/null ; then echo ; tput cnorm ; exit
-        else echo "ERROR: Failed to download ${URL} with curl." ; tput cnorm ; echo ; rm -f "${DIR}/${FILE}"
+    if ! curl --disable -Lf --retry 6 --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - --output "${DIR}/${FILE}" \
+    --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
+        # qqX needs to take control here, use exit instead
+        if pgrep qqX >/dev/null ; then echo ; exit
+        else
+            echo "ERROR! Failed to download ${URL} with curl." ; rm -f "${DIR}/${FILE}"
         fi
     fi
-    tput cnorm ; echo
 }
 
 
@@ -1021,12 +868,6 @@ QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors=
 printf "Webget NOT used\n" > "/tmp/qGet_webget_report.txt"
 
 case "${1}" in
-    --info-line)
-        os_info "$2" ; exit 1
-    ;;
-    --rel-notes)
-        distro_release_notes "$2" ; exit 1
-    ;;
     --mirrors)
         CheckMirrors=1 ; shift
     ;;
@@ -1059,8 +900,6 @@ case "${1}" in
         help_message
         printf "\n\nExtra qqX commands: \n\nfrom a terminal opened in a qqX 'built-in' folder"
         printf "\n\n----------------------------- ./quickget -------------------------------"
-        printf "\n\n  --info-line       Output the OS info line in raw field separated format for alternative processing"
-        printf "\n\n  --rel-notes       Output the additional release and installation notes, if supplied"
         printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qGet_FullResult.txt\""
         printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
         printf "\n\n  --quiet-check     [os] [release] [edition] : Only log check image URL(s) to file \"/tmp/qGet_QuietResult.txt\""

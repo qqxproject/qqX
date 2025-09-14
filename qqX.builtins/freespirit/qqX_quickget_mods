@@ -887,9 +887,9 @@ function web_get() {
     if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
         CurlParallel="--parallel" ; printf "\n\n  Multiplexed parallel download: \n\n"
     fi
-    if ! curl --disable -Lf "$CurlParallel" --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
+    if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
     --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
-        # qqX needs to take control here, use exit instead
+        # qqX needs to take control here, use exit instead  # $CurlParallel - unquoted
         if pgrep qqX >/dev/null ; then echo ; tput cnorm ; exit
         else echo "ERROR: Failed to download ${URL} with curl." ; tput cnorm ; echo ; rm -f "${DIR}/${FILE}"
         fi
