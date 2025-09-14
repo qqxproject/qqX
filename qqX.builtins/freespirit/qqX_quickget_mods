@@ -868,8 +868,7 @@ function web_get() {
     fi
 
     if [ "${DIR}" != "$(pwd)" ] && ! mkdir -p "${DIR}" 2>/dev/null; then
-        echo "ERROR! Unable to create directory ${DIR}"
-        exit 1
+        echo "ERROR: Unable to create directory ${DIR}" ; exit 1
     fi
     #  Allow qqX or any external process to pick up the FINALIZED NAME
     # - avoids overwrites eg windows 'unattended'
@@ -883,14 +882,15 @@ function web_get() {
     fi
     # Add retries to the standard Quickemu 4.9.x method:
     # --continue-at -  will continue/resume a previous file transfer but we need to make sure we actually have a connection to start with ...
+    tput civis
     if ! curl --disable -Lf --retry 6 --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - --output "${DIR}/${FILE}" \
     --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
         # qqX needs to take control here, use exit instead
-        if pgrep qqX >/dev/null ; then echo ; exit
-        else
-            echo "ERROR! Failed to download ${URL} with curl." ; rm -f "${DIR}/${FILE}"
+        if pgrep qqX >/dev/null ; then echo ; tput cnorm ; exit
+        else echo "ERROR: Failed to download ${URL} with curl." ; tput cnorm ; rm -f "${DIR}/${FILE}"
         fi
     fi
+    tput cnorm
 }
 
 
