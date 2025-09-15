@@ -883,9 +883,8 @@ function web_get() {
     # --continue-at -  will continue/resume a previous file transfer but we need to make sure we actually have a connection to start with ...
     tput civis ; echo
     local CurlParallel=
-    Curl_NoPara=1 # Freespirit only, for moment. Plus TODO toggle
     if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
-        CurlParallel="--parallel" ; printf "\n\n  Multiplexed parallel download: \n\n"
+        CurlParallel="--parallel" ; printf "  Multiplexed parallel download: \n\n"
     fi
     if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
     --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
@@ -1069,6 +1068,13 @@ case "${1}" in
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."
         printf "\n\n----------------------------------------------------------------------------------\n\n"
         exit 0 ;;
+
+    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possibile:
+
+    --curl-no-para)
+        Curl_NoPara=1 ; shift
+    ;;
+
 esac
 
 ##########################################

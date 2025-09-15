@@ -126,8 +126,9 @@ function quickemu {
       fi
 
       if [[ $BootStyle == "fast" ]] && [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]]; then
-        printf "  [enter] to continue \n\n"
-        read -rp "  >  "
+        printf "  [enter] to continue  [b] to go back \n\n"
+        read -rp "  >  " LiveDoubleCheck
+        [[ $LiveDoubleCheck ]] && return
       fi
 
       if [[ $Mounted_ISO_Return ]]; then  return

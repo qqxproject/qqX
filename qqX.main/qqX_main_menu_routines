@@ -347,21 +347,18 @@ function_delete_Selected_VM () {
   read -rp "  >  "   Delete_VM_Option
 
   if [[ $Delete_VM_Option == "y" ]]; then
-
     printf "\n\n  Folder & .conf file being deleted ... "
     rm -f -r "$1"
     rm -f "$2"
-
   else
-
     if [[ $TrashingAvailable ]] && [[ $Delete_VM_Option != "n" ]]; then
       printf "\n\n  Moving files to the bin ... "
       gio trash "$1"
       gio trash "$2"
     else  printf "\n\n  Returning to folder: %s (no files deleted)" "$1"
     fi  # https://specifications.freedesktop.org/trash-spec/trashspec-latest.html
-
   fi
+  read -r -t 0.2 ; read -r -t 0.2
 
   printColor "\n\n  [enter] to return or continue \n\n"
   read -rp "  > "
@@ -381,9 +378,9 @@ function_delete_Selected_VM () {
     refresh_sources_and_load_VM_arrays
   fi
   Delete_VM_Option=
-
+  # clear any accidental initial double pressing of the enter key
+  read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
 }
-
 
 function_rename_conf_dirnames () {
 

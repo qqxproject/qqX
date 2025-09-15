@@ -765,6 +765,7 @@ function_quick_get_wrap ()  {
 
     [[ $ShowQGetLists ]] && { echo "Raw RE "; echo "$QGW_ReleasesEditions_ListRaw"; echo; }
 
+    QGW_EditionsFunction=
     if [[ "$QGW_ReleasesEditions_ListRaw" == *'Languages'* ]]; then
       # is Windows (has its own internal array)
       QGW_Releases_ListRaw="$(grep -B 10  Languages  <<< "$QGW_ReleasesEditions_ListRaw" | grep -v Languages)"
@@ -817,8 +818,8 @@ function_quick_get_wrap ()  {
 
       elif [[ ${#QGW_Releases_Array[@]} -eq 1 ]] ; then
 
-        printf "  One Release only:  %s " "${QGW_Releases_Array[0]}"
-        printf "\n\n  Editions choice may be be possible."
+        printf "\n  One Release only >  %s " "${QGW_Releases_Array[0]}"
+        printf " >  but Editions choice may be be possible:"
         printColor "\n\n  [enter] to continue"
 
       else
@@ -990,6 +991,7 @@ function_quick_get_wrap ()  {
         fi
 
         if [[ ! ${QGW_Editions_Array[*]} ]]; then
+          printf "\n"
           if [[ $QGW_EditionsFunction && "${QGW_StockEditions_Array[*]}" && "${#QGW_Releases_Array[@]}" -gt 1 ]]; then
             printf "  Further selection not available in this release"
             printColor "\n\n  Stock List (%s), all Releases: \n\n" "$QGW_Editions_StockListTotal"
@@ -1088,7 +1090,7 @@ function_quick_get_wrap ()  {
       QWG_NewVM_Name="${QGW_OS_Arr_NameSelected}"
     fi
 
-    printColor "  Selected:  %s "  "$QWG_NewVM_Name"
+    printColor "  Checking %s "  "$QWG_NewVM_Name"
 
     # TEST DOWNLOAD URL is correct and is good to go,
     # except Windows, where you get blocked if there too many calls, but should be 'potentially okay'
@@ -1155,10 +1157,12 @@ function_quick_get_wrap ()  {
       elif [[ ! $QGW_Download_BadLink ]]; then
         show_current_group_folder_list
         printf "\n\n\n"
-        printf "  Selected:  %s"  "$QWG_NewVM_Name"
-        [[ ! $DL_PotentialOkay ]] &&  printf "   MAY NOT BE WORKING CORRECTLY"
-        printf "\n\n"
-        printColor "  %s"   "$QWG_Conf_Dir"
+        printf "  DOWNLOADING:  "
+        printColor "%s"  "$QWG_NewVM_Name"
+        printf "   TO:  "
+        printf "%s"   "$QWG_Conf_Dir"
+        [[ ! $DL_PotentialOkay ]] &&  printf "\n\n   MAY NOT BE WORKING CORRECTLY ...."
+        printf "\n"
       fi
 
       # If NOT sync updating, list other copies of similar VM's in the target folder
@@ -1169,6 +1173,21 @@ function_quick_get_wrap ()  {
         DailyVMsPresent=
         HyphenatedNewname=
         check_new_vm_folder_name  "$QWG_NewVM_Name"
+        # and display download method / options where available
+        if [[ ! $MainMenuZsync ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
+          if grep -qs 'curl-no-para' "$QG_Modpath"; then
+            if [[ $Curl_NoPara ]]; then printf "\n\n  Downloads are set to serial mode"
+            else printf "\n\n  qqX has enabled download multiplexing"
+            fi
+            printf "  [sp] for serial/parallel toggle"
+          else printf "\n\n  Download multiplexing is available on your host machine: \n\n  Use [b] to switch to qqX FreeSpirit and test it out ..."
+          fi
+        fi
+      fi
+
+      if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]] && [[ ! $(type -p mkisofs) ]]; then
+        printColor "\n\n\n  Caution: Installation of 'mkisofs' (genisoimage/cdrtools/cdrkit/xorriso) is NEEDED for a smooth Windows Desktop setup:"
+        printf "\n\n  Use [b] to see qqX help and the Windows installation guide ...\n"
       fi
 
       if [[ "${#QGW_Releases_Array[@]}" -gt 1 ]] || [[ "${#QGW_Editions_Array[@]}" -gt 1 ]]; then
@@ -1226,7 +1245,7 @@ function_quick_get_wrap ()  {
           fi
           # clear any accidental initial double pressing of the enter key
           read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
-          if [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then  printf  "\n\n  [enter] Start the download  "
+          if [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then  printColor  "\n\n  [enter] Start the download to THIS folder \n\n  "
           else printColor  "\n\n  [enter] Start the download  "
           fi
 
@@ -1320,6 +1339,10 @@ function_quick_get_wrap ()  {
           sleep 1
         ;;
 
+        sp)
+          if [[ $Curl_NoPara ]]; then Curl_NoPara= ; else Curl_NoPara=1 ; fi
+        ;;
+
         *)
           if [[ $QGW_Download_BadLink ]]; then
             QGW_BadLink_ReTest=1 ; test_iso_url
@@ -1390,8 +1413,8 @@ function_quick_get_wrap ()  {
       }
       remove_old_rcksum_files
     else
-      printf "  Once a download and initial setup up has finished, the new folder and .conf file may be easily moved"
-      printf "\n\n  and/or edited before running. Part downloads can usually be re-started."
+      printf "  Once a download and initial setup up has finished, the new folder and .conf file MAY BE EASILY MOVED"
+      printf "\n\n  and/or edited before running. Part downloads CAN USUALLY BE RE-STARTED."
     fi
 
     function show_rcksum_progress {
@@ -1412,11 +1435,12 @@ function_quick_get_wrap ()  {
 		read -r -t 0.2
 		read -r -t 0.2
 
-    printf "\n\n  May take a moment to start, if servers are slow:"
+    printf "\n\n\n  May take a moment to start, and pauses may occur, if servers are slow"
+    [[ ! $MainMenuZsync ]] && printf "\n\n  The downloader has been set to AUTO-RESUME and to pick up where it left off \n"
     printColor "\n\n  Use [c] to STOP ALL current downloads, [d] to delete "
-    printColor "\n\n  Or  [c] then [r] to restart on a new server or to force a download re-check ..."
+    printColor "\n\n  Or  [c] then [r] to force a restart on a new server or to force a download re-check ..."
     if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
-      printf "\n\n\n  Modified Quickget output & download reportage: "
+      printf "\n\n\n  Modified Quickget output & download reportage \n\n  Avoid forced restarts where possible: "
     else
       printf "\n\n\n  Quickget output & download reportage: "
     fi
@@ -1444,7 +1468,9 @@ function_quick_get_wrap ()  {
 
     function run_distro_download {
 
-      quickget "$QGW_DownloadSelection" &
+      if [[ $Curl_NoPara ]]; then quickget --curl-no-para "$QGW_DownloadSelection" &
+      else  quickget "$QGW_DownloadSelection" &
+      fi
       qGetPid="$!"
 
       # zsync:

@@ -186,7 +186,7 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p mkisofs) ]]; then
-    printf "\n\n  A command line 'mkisofs' (genisoimage) installation is needed for some distro downloads..."
+    printf "\n\n  For Windows downloads, installation of 'mkisofs' (via: genisoimage, cdrtools, cdrkit or xorriso) is required ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
