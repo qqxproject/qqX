@@ -20,6 +20,8 @@ Recent Highlights Include:
 
 - Multiplexed parallel downloads and downloader UX improvements
 
+- Updates to builtins
+
 - New 51 language auto-translation system
 
 - **Massive upgrades for QuickGet, that fixes, sorts and adds over 30 distros**
