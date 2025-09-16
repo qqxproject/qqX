@@ -136,6 +136,7 @@ function distro_release_notes {
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
         elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
+        fedora)           RelNotes="09/2025 Tested as ALL working but there are possibly new unlisted editions. See website, for more.";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
         nitrux)           RelNotes="08/2025 ISO releases have been suspended for changes from KDE to Hyprland and the Cachy kernel. See https://nxos.org/news/news-farewell-nx-desktop-and-plasma/";;
@@ -308,7 +309,7 @@ function releases_easyos() {
     echo "${ALL_RELEASES}"
 }
 
-## FIX Cosmic Atomic
+## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
 function get_fedora() {
     local HASH="" ; local ISO="" ; local JSON="" ; local URL="" ; local VARIANT=""
     case ${EDITION} in
@@ -867,29 +868,32 @@ function web_get() {
     fi
 
     if [ "${DIR}" != "$(pwd)" ] && ! mkdir -p "${DIR}" 2>/dev/null; then
-        echo "ERROR! Unable to create directory ${DIR}"
-        exit 1
+        echo "ERROR: Unable to create directory ${DIR}" ; exit 1
     fi
-    #  Allow qqX or any external process to pick up the FINALIZED NAME
+    #  Allow qqX or any external process to pick up the FINALIZED VM-NAME
     # - avoids overwrites eg windows 'unattended'
     # - external proc should clear this file before starting so the grep test will function
     if ! grep -sq 'New_VM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
         printf "New_VM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
     fi
     if [[ ${OS} != windows && ${OS} != macos && ${OS} != windows-server ]]; then
-        echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}"
-        echo "- URL: ${URL}"
+        echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}" ; echo "- URL: ${URL}"
     fi
     # Add retries to the standard Quickemu 4.9.x method:
     # --continue-at -  will continue/resume a previous file transfer but we need to make sure we actually have a connection to start with ...
-    if ! curl --disable -Lf --retry 6 --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - --output "${DIR}/${FILE}" \
-    --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
-        # qqX needs to take control here, use exit instead
-        if pgrep qqX >/dev/null ; then echo ; exit
-        else
-            echo "ERROR! Failed to download ${URL} with curl." ; rm -f "${DIR}/${FILE}"
+    tput civis ; echo
+    local CurlParallel=
+    if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
+        CurlParallel="--parallel" ; printf "  Multiplexed parallel download: \n\n"
+    fi
+    if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
+    --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
+        # qqX needs to take control here, use exit instead  # $CurlParallel - unquoted
+        if pgrep qqX >/dev/null ; then echo ; tput cnorm ; exit
+        else echo "ERROR: Failed to download ${URL} with curl." ; tput cnorm ; echo ; rm -f "${DIR}/${FILE}"
         fi
     fi
+    tput cnorm ; echo
 }
 
 
@@ -1064,6 +1068,13 @@ case "${1}" in
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."
         printf "\n\n----------------------------------------------------------------------------------\n\n"
         exit 0 ;;
+
+    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possibile:
+
+    --curl-no-para)
+        Curl_NoPara=1 ; shift
+    ;;
+
 esac
 
 ##########################################

@@ -18,6 +18,8 @@ SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.b
 
 Recent Highlights Include:
 
+- Multiplexed parallel downloads and downloader UX improvements
+
 - New 51 language auto-translation system
 
 - **Massive upgrades for QuickGet, that fixes, sorts and adds over 30 distros**
@@ -30,7 +32,7 @@ Plus downstream fixes for current Quickemu issues:
 
 - Qemu version 10.0.0
 
-- Windows Installer
+- Windows Installer (and Windows Iso builds)
 
 -----
 

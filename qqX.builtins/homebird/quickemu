@@ -1,8 +1,31 @@
 #!/usr/bin/env bash
-# Use qqX C.UTF-8 locale, not:  export LC_ALL=C
 
-if ((BASH_VERSINFO[0] < 4)); then
-    echo "Sorry, you need bash 4.0 or newer to run this script."
+# For qqX use with C.UTF-8 locale, not:  export LC_ALL=C
+# This section enables testing via './quickget --check distroname' from a terminal opened in the built-ins folder:
+if [[ -e "$(pwd)/qqX_quickget_mods" ]]; then
+    if [[ $(pgrep -aAi qqX 2>/dev/null) ]] ; then
+        printf "\n  qqX running elsewhere ... \n\n" ; exit 1
+    else
+        OriginalPATH="$PATH"
+        CurrentFolder="$(pwd)"
+        if [[ -e "/usr/share/qqX/qqX.lib/fv" ]]; then qqX_LibraryFolder="/usr/share/qqX/qqX.lib"
+        else printf "\n  qqX libraries not found .... \n\n" ; exit 1
+        fi
+        export PATH="$CurrentFolder:${qqX_LibraryFolder}:${OriginalPATH}"
+        if  grep -sqi 'C.utf8' <<< "$(locale -a)"; then export "LC_NUMERIC=C.UTF-8" ; export "LC_COLLATE=C.UTF-8"
+        else export "LC_NUMERIC=C" ; export "LC_COLLATE=C"
+        fi
+    fi
+elif [[ "$PATH" != *'qqX'* ]]; then
+    printf "\n  This individual code branch is intended to be run as a qqX built-in."
+    printf "\n\n  qqX mod files and libraries have not been found ... ?"
+    printf "\n\n  If running from a cloned Quickemu fork, you need to switch branches"
+    printf "\n  or need to download qqX and run from a terminal opened in the FreeSpirit folder. \n\n"
+    exit 1
+fi
+
+if ((BASH_VERSINFO[0] < 5)); then
+    echo "Sorry, you need bash 5.0 + or newer to run this script."
     exit 1
 fi
 
@@ -347,7 +370,7 @@ function configure_cpu() {
 
     function ignore_non_robust_for_now {
 
-        # causes telescoped/nested VM's to fail ... 
+        # causes telescoped/nested VM's to fail ...
         # macos host not supported with qqX (yet)
         # qqX uses different aarch methods
 
@@ -403,6 +426,16 @@ function configure_cpu() {
         fi
     fi
 
+    # SMM is also required for Linux guests when Secure Boot is enabled
+    if [ "${secureboot}" == "on" ]; then
+        if [ "${guest_os}" == "linux" ]; then
+        # SMM is not available on QEMU for macOS via Homebrew
+            if [ "${OS_KERNEL}" == "Linux" ]; then
+                SMM="on"
+            fi
+        fi
+    fi
+
     case ${guest_os} in
         batocera|freedos|haiku|solaris) MACHINE_TYPE="pc";;
         kolibrios|reactos)
@@ -414,18 +447,18 @@ function configure_cpu() {
         # A CPU with SSE4.2 support is required for >= macOS Catalina
         # A CPU with AVX2 support is required for >= macOS Ventura
 
-        # qqX mod based on 
+        # qqX mod based on
         # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2115516935
         # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
         # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
 
-        # Skylake-Server-v3 should be default 
-        # See https://en.wikipedia.org/wiki/IMac_Pro#Technical_specifications 
+        # Skylake-Server-v3 should be default
+        # See https://en.wikipedia.org/wiki/IMac_Pro#Technical_specifications
         # Also retains IBRS spectre mitigation
         # Tests suggest edit of .conf file to cpu_cores="8"  ie 4 core x 2 threads for MacOS to recognise Xeon
         # Will work both with cpu_cores="16" and ="32" but 'About' will show Cpu as unrecognised, only sysctl will show the CPU name ...
         # Other Xeon oddballs like 14 or 28 don't boot, even when forced.
-        # CascadeLake is Mac Pro 2019 but is practically identical to Skylake 
+        # CascadeLake is Mac Pro 2019 but is practically identical to Skylake
         # Whilst switching from Sky to Cascade still leaves 'About' displaying iMacPro 2017 ...
 
         #CPU_MODEL="Haswell-v2"
@@ -449,7 +482,7 @@ function configure_cpu() {
             case ${macos_release} in
                 ventura|sonoma|sequoia)
                     # A CPU with AVX2 support is required for >= macOS Ventura
-                    if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then 
+                    if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
                         echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
                         echo "       Try macOS Monterey or Big Sur."
                         exit 1
@@ -489,7 +522,7 @@ function configure_cpu() {
             case ${macos_release} in
                 ventura|sonoma|sequoia)
                     # A CPU with AVX2 support is required for >= macOS Ventura
-                    if check_cpu_flag sse4_2 && check_cpu_flag avx2; then 
+                    if check_cpu_flag sse4_2 && check_cpu_flag avx2; then
                         CPU+=",+avx2,+sse4.1,+sse4.2"
                     else
                         echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 and AVX2 support."
@@ -537,8 +570,8 @@ function configure_cpu() {
             done
         fi
 
-        # Only diff to Skylake is = PKU  AVX512VNNI  SPEC_CTRL  SPEC_CTRL_SSBD  
-        # plus the VMX which is to be ignored, unless Host = Intel ?? REVIEW 
+        # Only diff to Skylake is = PKU  AVX512VNNI  SPEC_CTRL  SPEC_CTRL_SSBD
+        # plus the VMX which is to be ignored, unless Host = Intel ?? REVIEW
         # But Qemu doesn't allow spec ctrl for V3, at least
         # And avx512_vnni has underscore in lscpu but not hyphenated in qemu, so:
         if [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
@@ -546,7 +579,7 @@ function configure_cpu() {
             if ! check_cpu_flag "avx512_vnni"; then CPU+=",avx512vnni=off" ; fi
         fi
 
-        [[ $UseHostOverWrite ]] && CPU="-cpu host,kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off" 
+        [[ $UseHostOverWrite ]] && CPU="-cpu host,kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
 
         # Disable S3 support in the VM to prevent macOS suspending during install
         GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1 -device isa-applesmc,osk=$(echo "bheuneqjbexolgurfrjbeqfthneqrqcyrnfrqbagfgrny(p)NccyrPbzchgreVap" | tr 'A-Za-z' 'N-ZA-Mn-za-m')"
@@ -756,8 +789,8 @@ function configure_bios() {
         if [ -n "${EFI_CODE}" ] || [ ! -e "${EFI_CODE}" ]; then
             case ${secureboot} in
                 on) # shellcheck disable=SC2054,SC2140
-                    ovmfs=("${SHARE_PATH}/OVMF/OVMF_CODE_4M.secboot.fd","${SHARE_PATH}/OVMF/OVMF_VARS_4M.fd" \
-                        "${SHARE_PATH}/edk2/ovmf/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2/ovmf/OVMF_VARS.fd" \
+                    ovmfs=("${SHARE_PATH}/OVMF/OVMF_CODE_4M.secboot.fd","${SHARE_PATH}/OVMF/OVMF_VARS_4M.ms.fd" \
+                        "${SHARE_PATH}/edk2/ovmf/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2/ovmf/OVMF_VARS.secboot.fd" \
                         "${SHARE_PATH}/OVMF/x64/OVMF_CODE.secboot.fd","${SHARE_PATH}/OVMF/x64/OVMF_VARS.fd" \
                         "${SHARE_PATH}/edk2-ovmf/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2-ovmf/OVMF_VARS.fd" \
                         "${SHARE_PATH}/qemu/ovmf-x86_64-smm-ms-code.bin","${SHARE_PATH}/qemu/ovmf-x86_64-smm-ms-vars.bin" \
@@ -835,7 +868,7 @@ function configure_bios() {
 
 function configure_os_quirks() {
 
-    if [ "${guest_os}" == "batocera" ] || [ "${guest_os}" == "freedos" ] || [ "${guest_os}" == "haiku" ] || [ "${guest_os}" == "kolibrios" ]; then
+    if [ "${guest_os}" == "batocera" ] || [ "${guest_os}" == "haiku" ] || [ "${guest_os}" == "kolibrios" ]; then
         NET_DEVICE="rtl8139"
     fi
 
@@ -846,7 +879,8 @@ function configure_os_quirks() {
     case ${guest_os} in
         windows-server) NET_DEVICE="e1000";;
         *bsd|linux*|windows) NET_DEVICE="virtio-net";;
-        freedos) sound_card="sb16";;
+        freedos) sound_card="sb16"
+                 NET_DEVICE="pcnet";;
         *solaris) usb_controller="xhci"
                   sound_card="ac97";;
         reactos) NET_DEVICE="e1000"
@@ -1504,7 +1538,7 @@ function vm_boot() {
                 args+=(-drive media=cdrom,index=2,file="${fixed_iso}")
             else
                 echo; echo "ERROR!  Windows download incomplete:"
-                echo "Required ISO files 'virtio-win.iso' and 'unattended.iso' not found." 
+                echo "Required ISO files 'virtio-win.iso' and 'unattended.iso' not found."
                 exit 1
             fi
         else
@@ -2029,7 +2063,7 @@ VMPATH=""
 # shellcheck disable=SC2155
 readonly LAUNCHER=$(basename "${0}")
 readonly DISK_MIN_SIZE=$((197632 * 8))
-readonly VERSION="HB 4.9.8.04"
+readonly VERSION="HB 4.9.8.05"
 
 # TODO: Make this run the native architecture binary
 ARCH_VM="x86_64"
@@ -2053,7 +2087,9 @@ if [ "${OS_KERNEL}" == "Darwin" ]; then
 fi
 
 QEMU_VER_LONG=$(${QEMU_IMG} --version | head -n 1 | awk '{print $3}')
-QEMU_VER_SHORT=$(echo "${QEMU_VER_LONG//./}" | cut -c1-2)
+# strip patch version and remove dots. 6.0.0 => 60 / 10.0.0 => 100
+# shellcheck disable=SC2001
+QEMU_VER_SHORT=$(echo "${QEMU_VER_LONG%.*}" | sed 's/\.//g')
 if [ "${QEMU_VER_SHORT}" -lt 60 ]; then
     echo "ERROR! QEMU 6.0.0 or newer is required, detected ${QEMU_VER_LONG}."
     exit 1

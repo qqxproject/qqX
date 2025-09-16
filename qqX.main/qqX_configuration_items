@@ -551,7 +551,8 @@ function refresh_conf_vars_and_values {
           [[ "$Line" == *'#'* ]] && Line="${Line/'#'/}"
         fi
         printf "\n\n%s" "$Line" >> "$ConfClearanceLog"
-        # Note that commented out lines need including, in case the comment marker gets removed
+        # Note that commented out lines need including, in case the comment marker gets removed during a settings edit
+        # BUT NB any added comments with '=' will get filtered
       fi
     done
 

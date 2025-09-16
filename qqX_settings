@@ -58,6 +58,12 @@ Default_TxLang=""
 #  Note that forced languages will normally show internal pop-ups in English but alternatives may be default set, if direct pair listed above.
 Forced_TxLang=""
 
+## DOWNLOADS
+# From qqX 1.13.06, starting with FreeSpirit, the new Curl feature of parallel multiplexed downloads has been enabled.
+# Type 'curl -help all' at the cmd line to see if your version of Curl wil support this feature.
+# Multiplexing may normally be toggled from within the download menus, if needed (?) Set here, to "1", to default disable.
+Curl_NoPara=
+
 ## Other SETTINGS SECTIONS AVAILABLE:
 
   #   VM SELECTOR INTERFACE

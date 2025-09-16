@@ -117,7 +117,7 @@ VM_loader_selector_and_menu () {
 
           printf "\n\n  [number] to select a VM         "
           [[ ! $ShowFindPoint ]] && ShowFindPoint=32
-          if [[ $VM_ElementCount -ge "$ShowFindPoint" ]]; then  printf "   [set] edit settings  [fd] find distro"
+          if [[ $VM_ElementCount -ge "$ShowFindPoint" ]]; then  printf "   [fd] find distro   [set] edit settings"
           else printf "   [set] view or edit settings file"
           fi
           printf "   [A-%s] change menu style %s"  "$LastSelectStyleAvailable"  "$VM_SelectorStyle"
@@ -178,13 +178,11 @@ VM_loader_selector_and_menu () {
         VM_Selection=
         return
 
-      elif [[ $VM_Selection == "fd" ]]; then  FD_help_notes
-
       elif [[ "$VM_Selection" == fd* ]]; then
 
-        if [[  "$VM_Selection" == 'fd c '*  ]]; then  FD_Phrase="${VM_Selection/'fd c '/}"
-        elif [[  "$VM_Selection" == 'fd s '*  ]]; then  FD_Start="${VM_Selection/'fd s '/}"
-        else  FD_help_notes
+        [[ "$VM_Selection" != *' '* ]] && FD_help_notes
+        if [[  "${VM_Selection,,}" == 'fd c '*  ]]; then  FD_Phrase="${VM_Selection/'fd c '/}"
+        elif [[  "${VM_Selection,,}" == 'fd s '*  ]]; then  FD_Start="${VM_Selection/'fd s '/}"
         fi
 
       elif [[ "$VM_Selection" == [A-Z] ]]; then
@@ -300,11 +298,12 @@ VM_loader_selector_and_menu () {
 }
 
 FD_help_notes () {
-  printColor "\n\n  Find Distro - Use multi-part cmd at the standard prompt:"
-  printf "\n\n  Contains      fd c search-phrase"
-  printf "\n\n  Starts with   fd s [a-z] or phrase"
-  printColor "\n\n  [enter] to continue \n\n"
-  read -rp "  >  "
+  printColor "\n\n  Find Distro Help - Use multi-part command, either at this prompt, or at the standard prompt"
+  printf "\n\n  Search letters or phrases are case insensitive"
+  printf "\n\n  Contains:      fd c letters or phrase"
+  printf "\n\n  Starts with:   fd s letters or phrase"
+  printColor "\n\n  [multi-part cmd] to search  [enter] to return\n\n"
+  read -rp "  >  "  VM_Selection
 }
 
 

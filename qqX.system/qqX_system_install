@@ -185,6 +185,10 @@ while true ; do
     printf "\n\n  A command line '7zip'/'p7zip/p7zip-plugins' installation is needed for some distro downloads..."
     InstallationAlert=1
   fi
+  if [[ ! $(type -p mkisofs) ]]; then
+    printf "\n\n  For Windows downloads, installation of 'mkisofs' (via: genisoimage, cdrtools, cdrkit or xorriso) is required ..."
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p spicy) ]]; then
     printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk' ..."
     InstallationAlert=1

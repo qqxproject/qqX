@@ -45,7 +45,7 @@ else
       printf  "  [u] show UTILS & technical"
       [[ $KVM_MSR_Error || $KVM_MSR_Warn ]] && printf  "   [m]  msrs help "
 
-      if [[ $LiveBoot ]]; then
+      if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
           printf "\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
@@ -150,6 +150,13 @@ else
         printColor "\n\n  [c]  start VM using custom args with %s %s" "$MenuCustomSystem" "$MenuCustomMachine"
         printf "\n\n  [C]  toggle normal/custom menu  or  use normal:  [d] or [df] > sdl   [s] or [sf] > spice   [g] std gtk "
         printf "\n\n  [ce] edit custom args file    [qd] open Qemu docs in browser"
+
+      elif [[ $LiveBoot && $LiveBootMissing ]]; then
+
+        printColor "\n\n   Hopefully, just a few a tweaks:  "
+        if [[ $img || $iso ]]; then  printColor "%s  %s ??" "$img" "$iso"
+        else printColor "No Image or ISO listed ??"
+        fi
 
       else
 
@@ -365,7 +372,10 @@ else
     if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
     else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
     fi
-    printf "   [set] open settings file in text editor  [conf] view or edit .conf file"
+    printf "   [set] open settings file in text editor  "
+    if [[ $LiveBootMissing ]]; then printColor "[conf] view or edit .conf file"
+    else  printf "[conf] view or edit .conf file"
+    fi
     printf  "\n\n"
 
     if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"; fi
