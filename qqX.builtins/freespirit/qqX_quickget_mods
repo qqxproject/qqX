@@ -412,6 +412,19 @@ function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
 }
 
+## FIX url and hash, plus make dynamic (if list happens to show up)
+function get_siduction() {
+    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ; local Data=
+    NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
+    URL="https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/${EDITION}"
+    Data="$(web_pipe "${URL}"| grep .iso.md5)"
+    VERSION="$(cut -d'-' -f2 <<< "$Data" | fv -M)"
+    DATE="$(grep "${VERSION}" <<< "$Data" | cut -d'-' -f6 | cut -d'.' -f1)"
+    ISO="siduction-${VERSION}-${NAME}-${EDITION}-amd64-${DATE}.iso"
+    HASH=$(web_pipe "${URL}/${ISO}.md5" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIX sway
 function get_manjaro() {
     local HASH="" ; local ISO="" ; local MANIFEST="" ; local URL="" ; local TYPE="official"
