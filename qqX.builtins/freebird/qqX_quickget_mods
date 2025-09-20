@@ -412,19 +412,6 @@ function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
 }
 
-## FIX url and hash, plus make dynamic (if list happens to show up)
-function get_siduction() {
-    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ; local Data=
-    NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
-    URL="https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/${EDITION}"
-    Data="$(web_pipe "${URL}"| grep .iso.md5)"
-    VERSION="$(cut -d'-' -f2 <<< "$Data" | fv -M)"
-    DATE="$(grep "${VERSION}" <<< "$Data" | cut -d'-' -f6 | cut -d'.' -f1)"
-    ISO="siduction-${VERSION}-${NAME}-${EDITION}-amd64-${DATE}.iso"
-    HASH=$(web_pipe "${URL}/${ISO}.md5" | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
-}
-
 ## FIX manjaro sway
 function get_manjaro() {
     local HASH="" ; local ISO="" ; local MANIFEST="" ; local URL="" ; local TYPE="official"
@@ -541,10 +528,38 @@ function get_parrotsec() {
     HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -B 30 'sha384' | grep "${ISO}" | cut -d' ' -f1)"
     echo "${URL}/${ISO} ${HASH}"
 }
+## FIX mate, update url and make dynamic
+function releases_pclinuxos() {
+    echo latest
+}
+function editions_pclinuxos() {
+    echo kde kde-darkstar mate xfce
+}
+function get_pclinuxos() {
+    local HASH= ; local ISO= ; local URL= ; local RelMax= ; local RelChk="${EDITION}-2"
+    URL="https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso/"
+    RelMax="$(web_pipe "$URL" | grep -e "$RelChk" | tr '=' '\n' | grep iso | fv -M)"
+    HASH="$(web_pipe "${URL}/pclinuxos64-${EDITION}-${RelMax}.md5sum" | cut -d' ' -f1)"
+    ISO="pclinuxos64-${EDITION}-${RelMax}.iso"
+    echo "${URL}/${ISO} ${HASH}"
+}
 
 ## REDUCE release count - 14 is too many!
 function releases_rockylinux() {
     web_pipe "http://dl.rockylinux.org/vault/rocky/" | grep "class=\"link" | grep -v -e 'full' -e  'RC' -e  'ISO' -e 'Parent'| tr -d / | fv -M 4 -qs
+}
+
+## FIX url and hash, plus make dynamic (if list happens to show up)
+function get_siduction() {
+    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ; local Data=
+    NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
+    URL="https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/${EDITION}"
+    Data="$(web_pipe "${URL}"| grep .iso.md5)"
+    VERSION="$(cut -d'-' -f2 <<< "$Data" | fv -M)"
+    DATE="$(grep "${VERSION}" <<< "$Data" | cut -d'-' -f6 | cut -d'.' -f1)"
+    ISO="siduction-${VERSION}-${NAME}-${EDITION}-amd64-${DATE}.iso"
+    HASH=$(web_pipe "${URL}/${ISO}.md5" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
 }
 
 ## FIX  SLINT (only 15.0, and hopefully higher, has downloadable iso's)
