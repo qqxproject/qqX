@@ -397,6 +397,16 @@ function releases_linuxlite() {
     echo "$ReleasesTrue"
 }
 
+## FIX update mirror
+function get_linuxmint() {
+    local HASH=""
+    local ISO="linuxmint-${RELEASE}-${EDITION}-64bit.iso"
+    #local URL="https://mirror.bytemark.co.uk/linuxmint/stable/${RELEASE}"
+    local URL="https://mirror.rackspace.com/linuxmint/iso/stable/${RELEASE}"
+    HASH=$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## UPGRADE only one release ... make dynamic
 function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
