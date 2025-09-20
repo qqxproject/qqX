@@ -544,9 +544,9 @@ function releases_sparkylinux() {
 function editions_sparkylinux() {
     # May 2025 > listing task tends to exceed quickget's capabilities but July 2025 now allows Mods installer notes
     # Website subject to change, plus older specialist versions still being listed in addition to the newer ones
-    if [[ ! $RELEASE ]]; then  echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI  MinimalGUI_32bit MinimalCLI_32bit"
+    if [[ ! $RELEASE ]]; then  echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
     elif [[ $RELEASE == "Rolling" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
-    elif [[ $RELEASE == "Stable" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI MinimalGUI_32bit MinimalCLI_32bit"
+    elif [[ $RELEASE == "Stable" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
     fi
 }
 function get_sparkylinux() {
@@ -555,8 +555,11 @@ function get_sparkylinux() {
     # Stable    https://sourceforge.net/projects/sparkylinux/files/base/sparkylinux-7.7-x86_64-minimalgui.iso/download
     # Rolling   https://sourceforge.net/projects/sparkylinux/files/lxqt/sparkylinux-2025.03-x86_64-lxqt.iso/download
     # Rolling   https://sourceforge.net/projects/sparkylinux/files/base/sparkylinux-2025.03-x86_64-minimalgui.iso/download
+    #           https://sourceforge.net/projects/sparkylinux/files/lxqt/sparkylinux-2025.09-x86_64-lxqt.iso/download
+    #           https://sourceforge.net/projects/sparkylinux/files/mate/sparkylinux-2025.09-x86_64-mate.iso/download
     # But not all roll at the same speed:
     # eg.       https://sourceforge.net/projects/sparkylinux/files/kde/sparkylinux-2024.12-x86_64-kde.iso/download
+
     EDITION="${EDITION,,}"
     case "$EDITION" in
         minimalcli*)    SparkyFolder="cli" ;;
@@ -564,12 +567,11 @@ function get_sparkylinux() {
                   *)    SparkyFolder="$EDITION" ;;
     esac
     URL="https://sourceforge.net/projects/sparkylinux/files/${SparkyFolder}"
-    if [[ $RELEASE == "Rolling" ]]; then ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep 2'[[:digit:]]')"
-    else ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep -v 2'[[:digit:]]' | fv -Q -M)"
+    if [[ $RELEASE == "Rolling" ]]; then ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep 2'[[:digit:]]' | fv -M )"
+    else ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep -v 2'[[:digit:]]' | fv -M )"
     fi
-    if [[ "$EDITION" == *'32bit'* ]]; then EDITION="${EDITION/_32bit/}" ; ISO="sparkylinux-${ReleaseNumber}-i686-${EDITION}.iso"
-    else ISO="sparkylinux-${ReleaseNumber}-x86_64-${EDITION}.iso"
-    fi
+    # Minimal 32 bit discontinued @ 2025 09 and needs fv -M as sometimes has two editions in archive
+    ISO="sparkylinux-${ReleaseNumber}-x86_64-${EDITION}.iso"
     HASH="$(web_pipe "${URL}/${ISO}.allsums.txt" | head -n 2 | grep 'iso' | cut -d' ' -f1)"
     echo "${URL}/${ISO}" "${HASH}"
 }
