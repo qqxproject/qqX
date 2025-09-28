@@ -49,7 +49,9 @@ else
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
           printf "\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
-          printColor "  See https://qqxproject.org/docs/Guides/Windows-OS for walk-thru"
+          printColor "  IMPORTANT >>> read the TL;DR for setting up the INITIAL DRIVERS at https://qqxproject.org/docs/Guides/Windows-OS"
+          printf "\n\n  MAKE SURE to follow the pictures in the installer section"
+          printf "\n\n  MAKE SURE to follow up with virtio-win-gt-x64.msi  <<< IMPORTANT \n"
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
