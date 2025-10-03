@@ -886,8 +886,18 @@ iso_select_mount_and_boot () {
 
     IsoList=()
     mapfile -t IsoList <<< "$(ls "$VM_InstanceName"/*.iso 2>/dev/null)"
+
+    ImgList=()
+    mapfile -t ImgList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+
+    if [[ ${IsoList[0]} && ${ImgList[0]} ]]; then
+      mapfile -t -O "${#IsoList[@]}" IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+    else
+      mapfile -t IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+    fi
+    # https://stackoverflow.com/a/53091662/27611101
+
     if [[ $SharedDrive ]]; then
-      #https://stackoverflow.com/a/53091662/27611101
       if [[ ${IsoList[0]} ]]; then
         mapfile -t -O "${#IsoList[@]}" IsoList <<< "$(ls "$(dirname "$SharedDrive")"/*.iso 2>/dev/null)"
       else
@@ -895,7 +905,7 @@ iso_select_mount_and_boot () {
       fi
     fi
 
-    printColor "\n\n  ISO formated disk images may be copied into the individual VM folder"
+    printColor "\n\n  ISO/IMG formated disk images may be copied into the individual VM folder"
     printf "\n\n  A shared 'live boot' ISO can be added to the Shared Drive folder, if Shared Drive has been set up."
     printf "\n\n  One or more may be added.  If more than one, an ISO should be selected from the list."
     printf "\n\n  Current Quickemu code is restricted to one only being mounted at a time."
