@@ -140,25 +140,27 @@ function check_screen_percentage_and_output {
       fi
     fi
 
-    if [[ $SDL_ScreenSize ]]; then
+    # Windows new installs will do silly 250% scaling if large initial values are used
+    if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]]; then
+      [[ $Mon_xRes -le 1920 ]] && SDL_ScreenSize="1280x720"
+      [[ $Mon_xRes -le 2560 ]] && SDL_ScreenSize="1920x1080"
+      [[ $Mon_xRes -le 3840 ]] && SDL_ScreenSize="2560x1440"
+    fi
 
+    if [[ $SDL_ScreenSize ]]; then
       xRes="$(cut -d 'x' -f 1 <<< "$SDL_ScreenSize")"
       yRes="$(cut -d 'x' -f 2 <<< "$SDL_ScreenSize")"
       xRes="$(tr -cd "[:digit:]" <<< "$xRes")"
       yRes="$(tr -cd "[:digit:]" <<< "$yRes")"
-
       if [[ ! $xRes || ! $yRes ]]; then
         printColor "\n\n  ERROR: check specified sizes in settings \n\n "
         SDL_ScreenSize_Error="> display size error"
       fi
-
     elif [[ $SDL_ScreenPercent ]]; then
-
       xRes="$(bc <<< "scale=0; $Mon_xRes*$SDL_ScreenPercent/100")"
       yRes="$(bc <<< "scale=0; $Mon_yRes*$SDL_ScreenPercent/100")"
       SDL_ScreenSize_Cmd=" --width $xRes --height $yRes"
       SDL_ScreenSize="${xRes}x${yRes}"
-
     else
       xRes=1152 && yRes=648
     fi

@@ -47,6 +47,7 @@ else
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
+          check_screen_percentage_and_output
           printf "\n\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
           printColor "  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
@@ -57,12 +58,11 @@ else
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
         fi
       elif [[ "${VM_InstanceName,,}" == *windows* ]] && [[ "$Mounted_ISO" == *virtio* ]]; then
-        printColor "\n\n\n  IF everything is working and booting correctly:"
-        # main menu routines will nullify a 'fixed_iso' link to non existent images
-        # printf "\n\n [conf] the 'fixed_iso' line in the conf file may now be removed using the editor"
-        printf "\n\n  [f] the 'unattended' folder, the 'virtio' and 'unattended' ISO's may now all be removed"
-        printColor "\n\n  OR: "
-        printf "[f] the 'disk.qcow2' drive may be removed if you wish to retry ..."
+        printColor "\n\n\n  Everything should now be working and booting correctly,"
+        # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
+        printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may now be safely removed."
+        printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
+        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
         printf "\n"
       else
         printf "   [bm] > "
