@@ -47,15 +47,23 @@ else
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
-          printf "\n\n"
+          printf "\n\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
-          printColor "\n  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
+          printColor "  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
           printf "\n\n  However, take a moment to overview things at https://qqxproject.org/docs/Guides/Windows-OS"
           printf "\n\n  MAKE SURE to have followed the 'swtpm' and 'mkisofs' setup   <<< IMPORTANT \n"
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
         fi
+      elif [[ "${VM_InstanceName,,}" == *windows* ]] && [[ "$Mounted_ISO" == *virtio* ]]; then
+        printColor "\n\n\n  IF everything is working and booting correctly:"
+        # main menu routines will nullify a 'fixed_iso' link to non existent images
+        # printf "\n\n [conf] the 'fixed_iso' line in the conf file may now be removed using the editor"
+        printf "\n\n  [f] the 'unattended' folder, the 'virtio' and 'unattended' ISO's may now all be removed"
+        printColor "\n\n  OR: "
+        printf "[f] the 'disk.qcow2' drive may be removed if you wish to retry ..."
+        printf "\n"
       else
         printf "   [bm] > "
         if [[ $BootStyle == "fast" ]]; then
@@ -169,7 +177,7 @@ else
 
         printColor  "\n\n  [d]   start with SDL display"
 
-        if [[ $guest_os == "windows" ]]; then  printColor "   (size as set in Windows)"
+        if [[ $guest_os == "windows" ]]; then  printColor "   (size as set by qqX and/or by Windows)"
         elif [[ $guest_os == "macos" ]] && [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then  printColor " (size determined by MacOS with this QE version)"
         elif [[ "$SDL_ScreenSize_Cmd" == *screenpct* ]]; then printColor " (%s%%)    [df]  97%% "  "$SDL_ScreenPercent"
         elif [[ "$SDL_ScreenSize_Cmd" == *width* ]] && [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
