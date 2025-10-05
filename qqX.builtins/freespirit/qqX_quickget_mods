@@ -1256,7 +1256,7 @@ function web_get() {
     tput civis ; echo
     local CurlParallel=
     if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
-        CurlParallel="--parallel" ; printf "  Multiplexed parallel download: \n\n"
+        CurlParallel="--parallel" ; printf "  qqX multiplexed parallel download: \n\n"
     fi
     if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
     --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
