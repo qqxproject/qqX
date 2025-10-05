@@ -545,7 +545,7 @@ function refresh_conf_vars_and_values {
     mapfile -t ConfClearance_Arr < "$VM_Conf_Dir/$VM_Conf_File"
 
     for Line in "${ConfClearance_Arr[@]}"; do
-      if [[ $Line ]] && [[ "$Line" == *'='* ]]; then
+      if [[ $Line ]] && [[ "$Line" == *'='* ]] && [[ "$(tr -cd "[:graph:]" <<< "$Line" | head -c 1)" != '#' ]]; then
         if [[ "$Line" == *'QemuError_VM_Filter'* ]]; then Line='QemuError_VM_Filter=()'
         else
           Line="$(cut -d'=' -f1 <<< "$Line")"
@@ -553,8 +553,7 @@ function refresh_conf_vars_and_values {
           [[ "$Line" == *'#'* ]] && Line="${Line/'#'/}"
         fi
         printf "\n\n%s" "$Line" >> "$ConfClearanceLog"
-        # Note that commented out lines need including, in case the comment marker gets removed during a settings edit
-        # BUT NB any added comments with '=' will get filtered
+        # ver 1.14 - enhance allowing through commented lines containing '=' and other characters
       fi
     done
 
