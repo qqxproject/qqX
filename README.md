@@ -6,41 +6,47 @@ SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.b
 
 - Rapid development, simplified interface system, for extra features from Qemu and the Linux desktop
 
-![qqX-vmm](https://github.com/qqxproject/qqX/assets/3956806/18e5c495-8072-49a5-8b9c-e1302549efcf)
+- Allows easy running of Linux, Windows, MacOS, etc with Qemu / KVM
 
-- Safe, simple to follow code, carefully written and carefully checked
+![qqX-vmm](https://github.com/qqxproject/qqX/assets/3956806/18e5c495-8072-49a5-8b9c-e1302549efcf)
 
 - Huge, easy build range of _installation-ready_ distros and desktops
 
-- Fully compatible with existing Quickemu builds
+- Comprehensive disk management utilities
+
+- [Fully compatible](https://qqxproject.org/docs/FAQs-and-Help#qqx-and-quickemu-compatibilty) with existing Quickemu builds
 
 -----
 
 Recent Highlights Include:
 
-- Multiplexed parallel downloads and downloader UX improvements
+- **Massive upgrades for QuickGet, that fix, sort and add over 30 distros**
 
-- Updates to builtins
+- A new fully automated Windows installer [(now in testing)](https://github.com/qqxproject/qqX/archive/refs/heads/dev-next.zip)
 
-- New 51 language auto-translation system
+- Multiplexed parallel downloads with enhanced stop/start
 
-- **Massive upgrades for QuickGet, that fixes, sorts and adds over 30 distros**
+- 51 language auto-translation system
 
-- and a new Quickget filter system
+Plus numerous downstream fixes for _current_ Quickemu issues
 
-- Upgrades to new web pages
+-----
 
-Plus downstream fixes for current Quickemu issues:
+CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
-- Qemu version 10.0.0
+Ordinary users, who are taking a leap of faith, are being rewarded
 
-- Windows Installer (and Windows Iso builds)
+> After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
+
+More stars and endorsements hopefully to come
+
+Any qqX built machines will still run using Quickemu and you can always switch or go back to QuickGUI
+
+Developers who understand modern scripting should find the code easy to follow and are welcome to contribute
 
 -----
 
 [https://qqxproject.org](https://qqxproject.org/)
-
-- Allows easy running of Linux, Windows, MacOS, etc with Qemu / KVM
 
 See web pages for full details
 
