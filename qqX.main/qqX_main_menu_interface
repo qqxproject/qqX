@@ -121,7 +121,25 @@ else
       printColor "\n\n  ---------------------------------------------------------------------------- "
 
     fi
-    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS "
+
+    SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
+    [[ $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
+    [[ $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
+
+    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
+    if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
+    else printf "   main (%s)" "$SnapCountMain"
+    fi
+    if [[ $SharedDrive ]]; then
+      if [[ $SnapCountShared -gt 15 ]]; then printColor "  shared (%s)" "$SnapCountShared"
+      else printf "  shared (%s)" "$SnapCountShared"
+      fi
+    fi
+    if [[ $SecondDrive ]]; then
+      if [[ $SnapCountSecond -gt 15 ]]; then printColor "  second (%s)" "$SnapCountSecond"
+      else printf "  second (%s)" "$SnapCountSecond"
+      fi
+    fi
     printf "\n"
 
     if [[ ! $ShowUtilsMenu ]]; then

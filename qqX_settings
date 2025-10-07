@@ -72,6 +72,7 @@ Curl_NoPara=
   #   EDITOR & BROWSER PROGRAMS
   #   BOOT DEFAULTS, MSR, LOCALE, SCREENS and SIZES
   #   SHARED or SECOND DRIVES
+  #   SNAPSHOTS
   #   ERROR HANDLING
   #   QEMU VERSIONING
   #   qqX CUSTOM BOOTING & EXTRA ARGS
@@ -297,11 +298,12 @@ VM_SelectorStyle="A"
 
 ##  SHARED or SECOND DRIVES:
 
-# May be auto-created in qqX via the utils menu.
 # The Shared drive is a useful when in SDL mode & available to all VMs while a Second drive is a quick way to expand
 # an individual VM's storage. Use Gparted, 'Disks' or similar, inside a VM, to set a file table, format and mount.
 
-# Give SharedDrive *full* location here  eg. ="$Default_VM_Folder/SharedDrive/shared.qcow2"
+# Use the utils menu to auto-create. Drive locations may be moved.
+
+# For NON-default SharedDrive give *full* location here  eg. ="$Default_VM_Folder/SharedDrive/shared.qcow2"
 # SET SharedDrive_Conf as ="no-shared" IN THE .CONF FILE to individually stop the Shared Drive from loading
   SharedDrive=""
 
@@ -314,6 +316,16 @@ VM_SelectorStyle="A"
 # SharedDrive always loads as 'virtio-blk-pci'   See https://en.wikipedia.org/wiki/MacOS_version_history
 
 # qqX adds SecondDrives to the .CONF FILE, eg as ="Windows-11/storage.qcow2"
+# Adjust location from the conf file.
+
+#  -------------------------------------------------------------------------------------------------------------------
+
+##   SNAPSHOTS
+
+# Point at which the Main Menu highlights an potentially excessive number of snapshots
+  # SnapCountAlertPoint=
+
+# This and other settings to be added later: Current setting for ver 1.14 = '15'
 
 #  -------------------------------------------------------------------------------------------------------------------
 
