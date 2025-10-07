@@ -174,8 +174,7 @@ show_main_menu_header () {
 
 }
 
-# When a VM_InstanceName exists, check the VM disk is not corrupt  (quickemu default name only)
-# https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
+# CHECK the VM disk is not corrupt and that snapshots are present:
 
 check_disk_is_okay () {
 
@@ -193,16 +192,16 @@ check_disk_is_okay () {
   fi
 
   DiskChkExitCode= ;  DiskChkStatus=
+  local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
-  if [[ -e "$DiskCheckFolderName/$DiskCheck_Disk" ]]; then
-
-    # Disk won't exist if new (or named differently REVIEW )
+  if [[ -e "$Selected_ChkDrive" ]]; then
+    # Disk won't exist if VM is newly downloaded or live, so only check or return Status, if disk is present.
     # Qemu-img with '-q' only outputs if error & on outputs on stderr   The exit status remains separately recorded.
-    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk"
-    else "$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk"  2>/dev/null ; fi
-
-    # Note "Okay"  is also used as a flag  > caution if changing   # REVIEW  could also be flagged using:
-    # DiskChkMsg="$("$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk" 2>&1)"
+    # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
+    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive"
+    else "$QEMU_IMG" check -q "$Selected_ChkDrive"  2>/dev/null
+    fi
+    # NB "Okay"  is also used as a global flag  > caution if changing
     case "$?" in
       0) DiskChkStatus="Okay" ;;
       1) DiskChkStatus="Check unable to be completed" ;;
@@ -212,6 +211,13 @@ check_disk_is_okay () {
          DiskChkExitCode=3  ;;
      63) DiskChkStatus="Checks are not supported by the image format -- not qcow2 ??" ;;
     esac
+  fi
+  if [[ $DiskChkStatus == "Okay" ]]; then
+    # at least one snap should be present
+    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then
+      SnapTitle="$(date +%b%d.%H.%M)"
+      "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
+    fi
   fi
 }
 

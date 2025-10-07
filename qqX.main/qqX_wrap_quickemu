@@ -95,7 +95,7 @@ function find_quickemu_source_functions_and_vars {
   grep -A 300 'VERSION=' "/tmp/qmod-qe-all-vars-temp" | tail -n +2  >> "/tmp/qmod-qe-rw-vars-temp"
 
   # BUT don't source as this yet as it is only a repeat of qe-rw-vars-temp
-  # with QEMU_IMG checker which has been replaced (at the start of qqX)
+  # with QEMU_IMG checker which has been replaced (during the initialization of qqX)
   # and the 3 strangely & unexplainedly read-only vars which need special treatment ...
 
   # Quickemu 4.9.5 adds in a few lines after the readonly ....
