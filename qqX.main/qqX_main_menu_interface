@@ -61,6 +61,7 @@ else
         printColor "\n\n\n  Everything should now be working and booting correctly,"
         # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
         printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may now be safely removed."
+        printColor "\n\n  Windows could possibly request a boot ISO but it is unlikely. Archive or Delete."
         printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
         [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
         printf "\n"
