@@ -191,7 +191,7 @@ check_disk_is_okay () {
     if [[ $2 ]]; then DiskCheck_Disk="$2" ; else DiskCheck_Disk="disk.qcow2"; fi
   fi
 
-  DiskChkExitCode= ;  DiskChkStatus=
+  DiskChkExitCode= ;  DiskChkStatus=  ; DiskChkAddSnap=
   local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
   if [[ -e "$Selected_ChkDrive" ]]; then
@@ -213,8 +213,16 @@ check_disk_is_okay () {
     esac
   fi
   if [[ $DiskChkStatus == "Okay" ]]; then
-    # at least one snap should be present
-    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then
+    # at least one recent snap should be present
+    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
+    else
+      DiskChkEpochTime="$(date +%s)"
+      LastSnapDate="$("$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | tail -n 1 | awk '{print $5}')"
+      LastSnapEpochTime="$(date -d "$LastSnapDate" +%s)"
+      # where 1209600 = 14 days
+      [[ $((DiskChkEpochTime-LastSnapEpochTime)) -gt 1209600 ]] && DiskChkAddSnap=1
+    fi
+    if [[ $DiskChkAddSnap ]] ; then
       SnapTitle="$(date +%b%d.%H.%M)"
       "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
     fi
