@@ -180,9 +180,18 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
 
     # Using $VERSION $VMDIR and other internal quickemu variables  & adding the qqX extra args:
 
-    { printf "\n#  qqX:  This file is NOT used by quickemu to run the VM but could run it if the script is placed"
-      printf "\n\n#  in the calling folder, where the .conf file is located, and if it is given execute permission"
-      printf "\n\n#  You may need to cross check with qqX Args file as qqX may have issued a modified version ... \n\n"
+    { printf "\n#  Quickemu stores the final Qemu invocation in memory, not in a file."
+      printf "\n#  Any modification of this file will NOT affect either qqX or Quickemu."
+      printf "\n\n#  This .sh file is an output LOG of the Qemu invocation that QuickEmu assembles."
+      printf "\n\n#  It is retained for qqX development purposes only,"
+      printf "\n#  allowing you to cross check the qqX Args file against the ordinary version."
+      printf "\n\n#  Details on modifying and tuning the invocation are in the qqX advanced customisation webpages."
+      printf "\n\n#  For TEST PURPOSES, it will run the VM in PURE Quickemu mode if the script is placed"
+      printf "\n#  in the calling folder, where the .conf file is located, and if it is given execute permission."
+      printf "\n\n#  Any test failures of this script indicate a possible base problem with Quickemu itself,"
+      printf "\n#  or with the distro or with the distro installation."
+      printf "\n\n#  Conversely, and only, if the Virtual Machine ONLY boots with this script,"
+      printf "\n#  are problems indicated with qqX.\n\n"
     } >> "${VMDIR}/${VMNAME}.sh"
 
     echo "${QEMU}" "${SHELL_ARGS}${ExtraArgs}${SharedDriveArgs}${SecondDriveArgs}" >> "${VMDIR}/${VMNAME}.sh"
@@ -298,8 +307,6 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
       for Line in "${QE_echo_Arr[@]}"; do
         if [[ "$Line" == *'-name'* ]]; then
           printf "\n\n\n%s" "$Line"
-          printf "\n\n\nNote, the .sh file is NOT used by quickemu to run the VM but it will run it if the script is placed"
-          printf "\n\nin the calling folder, where the .conf file is located, and if it is given execute permission ..."
         elif [[ "$Line" == *'/usr/bin/env bas'* ]]; then true
         elif [[ ! "$(tr -cd '[:print:]' <<< "$Line")" ]]; then true
         else  printf "\n\n%s" "$Line"
