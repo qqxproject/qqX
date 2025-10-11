@@ -63,10 +63,15 @@ print_quickget_and_folder_choices () {
   # listing function, originally for use inside 'function_quick_get_wrap'
   # adapted with $2 EITHER as number per line OR for alpha zooming filter
   # and for use for listing target folder selections for installing or moving VM's
+  # OR with highlighter, giving $2 as 'HL' and $3 as known valid integer
 
   declare -n  QGW_List_ArrName="$1"
   [[ $ShowQGetLists ]] && { printf "\n print choices transfer arr: "; printf "\n %s" "${QGW_List_ArrName[@]}"; printf "\n\n"; }
   QGW_List_Arr_ItemLength=14
+  local HighLightNumber=
+
+  if [[ $2 == "HL" ]]; then shift; HighLightNumber="$2"; shift
+  fi
 
   if [[ "$2" == [1-9] ]]; then QGW_List_NewLinePoint="$2"; else QGW_List_NewLinePoint="7"; fi
   # default QGW_List_NewLinePoint = 7  but some functions may reduce this to as low as 2 or 3
@@ -113,7 +118,11 @@ print_quickget_and_folder_choices () {
       QGW_TxArr+=("$TxVar")
 
     elif [[ ! $QGW_List_UbuntuOthers ]] && [[ ! $QGW_List_AlphaFilter || ${QGW_List_Arr_Item:0:1} == "$QGW_List_AlphaFilter" ]] ; then
-      printf "  %3d)  %-${QGW_List_Arr_ItemLength}s  "  "$QGW_List_DisplayNum"  "$QGW_List_Arr_Item"; ((QGW_List_NewLineCounter+=1))
+      if [[ $HighLightNumber ]] && [[ $QGW_List_ArrNum -eq "$HighLightNumber" ]]; then
+        printColor "  %3d)  %-${QGW_List_Arr_ItemLength}s  "  "$QGW_List_DisplayNum"  "$QGW_List_Arr_Item"; ((QGW_List_NewLineCounter+=1))
+      else
+        printf "  %3d)  %-${QGW_List_Arr_ItemLength}s  "  "$QGW_List_DisplayNum"  "$QGW_List_Arr_Item"; ((QGW_List_NewLineCounter+=1))
+      fi
     fi
 
     ((QGW_List_ArrNum+=1));  ((QGW_List_DisplayNum+=1))
@@ -918,12 +927,13 @@ function_quick_get_wrap ()  {
       fi
       #  See https://github.com/quickemu-project/quickemu/issues/1113
       printf "\n\n"
+      local HighLightNumber="10"
       if [[ $QGW_Release_Arr_NameSelected == "8"  ||  $QGW_Release_Arr_NameSelected == "10-ltsc" ]]; then
         printf "\n\n  WARNING:  Outdated code. This release can no longer be downloaded"
         printColor "\n\n  [b] back to main menu \n\n"
       else
-        print_quickget_and_folder_choices  "QGW_WinLangs_Array"
-        printColor "\n\n  Give LIST number of Language   [b] back to main menu \n\n"
+        print_quickget_and_folder_choices  "QGW_WinLangs_Array" HL "$HighLightNumber"
+        printColor "\n\n  [enter] for ${QGW_WinLangs_Array[$HighLightNumber]}  OR  [number] to select    [b] back to main menu \n\n"
       fi
       read -rp "  >  "  QGW_List_NumSelected
       printf "\n"
@@ -932,6 +942,7 @@ function_quick_get_wrap ()  {
         QGW_Release_Arr_NumSelected= ; QGW_Release_Arr_NameSelected= ; QGW_Edition_Arr_NameSelected= ; QGW_Edition_Arr_NumSelected=
         function_quick_get_wrap ; return
       else
+        [[ ! $QGW_List_NumSelected ]] && QGW_List_NumSelected=$((HighLightNumber+1))
         [[ $QGW_List_NumSelected -gt "${#QGW_WinLangs_Array[@]}" ]] && QGW_List_NumSelected="${#QGW_WinLangs_Array[@]}"
         # Uses Lang as edition
         QGW_Edition_Arr_NumSelected=$((QGW_List_NumSelected-1))
