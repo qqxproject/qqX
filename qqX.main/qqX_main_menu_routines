@@ -194,11 +194,11 @@ check_disk_is_okay () {
   DiskChkExitCode= ;  DiskChkStatus=  ; DiskChkAddSnap=
   local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
-  if [[ -e "$Selected_ChkDrive" ]]; then
+  if [[ -e "$Selected_ChkDrive" ]] && [[ ! $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
     # Disk won't exist if VM is newly downloaded or live, so only check or return Status, if disk is present.
-    # Qemu-img with '-q' only outputs if error & on outputs on stderr   The exit status remains separately recorded.
+    # Qemu-img with '-q' should only output if error & only outputs on stderr   The exit status remains separately recorded.
     # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
-    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive"
+    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive" 2>/dev/null
     else "$QEMU_IMG" check -q "$Selected_ChkDrive"  2>/dev/null
     fi
     # NB "Okay"  is also used as a global flag  > caution if changing
@@ -212,8 +212,8 @@ check_disk_is_okay () {
      63) DiskChkStatus="Checks are not supported by the image format -- not qcow2 ??" ;;
     esac
   fi
-  if [[ $DiskChkStatus == "Okay" ]]; then
-    # at least one recent snap should be present
+  if [[ $DiskChkStatus == "Okay" ]] && [[ ! $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+    # at least one recent snap should be present (if disk is of sufficient size)
     if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
     else
       DiskChkEpochTime="$(date +%s)"
@@ -240,20 +240,22 @@ check_if_disk_needs_a_cleanup  () {
   fi
   local VirtualSize= ; local FileLength= ; local DiskSize= ; local DiskData=
   DiskDisparity=0
-  DiskData="$(qemu-img info "$DiskCheckFolderName/$DiskCheck_Disk" 2>/dev/null)"
-  # make sure units match and disk is of significant size
-  VirtualSize="$(grep -s 'virtual size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  FileLength="$(grep -s 'file length' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  DiskSize="$(grep -s -m1 'disk size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  if [[ $VirtualSize && $FileLength && $DiskSize ]]; then
-    if [[ "$(bc -l <<< "$FileLength > ($DiskSize*2.1)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=4
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
-    elif [[ $VirtualSize -le 32 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
-    elif [[ $VirtualSize -le 64 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
-    elif [[ $VirtualSize -le 96 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
-    else DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+25)" 2>/dev/null)"
+  if [[ -e "$DiskCheckFolderName/$DiskCheck_Disk" ]]; then
+    DiskData="$(qemu-img info "$DiskCheckFolderName/$DiskCheck_Disk" 2>/dev/null)"
+    # make sure units match and disk is of significant size
+    VirtualSize="$(grep -s 'virtual size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    FileLength="$(grep -s 'file length' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    DiskSize="$(grep -s -m1 'disk size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    if [[ $VirtualSize && $FileLength && $DiskSize ]]; then
+      if [[ "$(bc -l <<< "$FileLength > ($DiskSize*2.1)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=4
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
+      elif [[ $VirtualSize -le 32 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
+      elif [[ $VirtualSize -le 64 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
+      elif [[ $VirtualSize -le 96 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
+      else DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+25)" 2>/dev/null)"
+      fi
     fi
   fi
   # bc's math library (-l) should refuse garbage, so if Qemu info layout changes then 'DiskDisparity' should theoretically be null.

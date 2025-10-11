@@ -53,6 +53,12 @@ else
           printColor "  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
           printf "\n\n  However, take a moment to overview things at https://qqxproject.org/docs/Guides/Windows-OS"
           printf "\n\n  MAKE SURE to have followed the 'swtpm' and 'mkisofs' setup   <<< IMPORTANT \n"
+          CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
+          if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
+            printColor "\n\n  WARNING: this CPU is reported to no longer support newer versions of Windows."
+            printf "\n\n  The command line utility 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
+            printf "\n  meaning that installation is unlikely to be either successful or to be reliable \n\n"
+          fi
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
@@ -122,13 +128,13 @@ else
 
     fi
 
-    SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
+    [[ $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
     [[ $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
     [[ $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
 
     printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
     if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
-    else printf "   main (%s)" "$SnapCountMain"
+    else [[ $MainDrive ]] && printf "   main (%s)" "$SnapCountMain"
     fi
     if [[ $SharedDrive ]]; then
       if [[ $SnapCountShared -gt 15 ]]; then printColor "  shared (%s)" "$SnapCountShared"
@@ -407,7 +413,8 @@ else
     fi
     printf  "\n\n"
 
-    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"; fi
+    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"
+    fi
 
     check_disk_is_okay
     check_if_disk_needs_a_cleanup
