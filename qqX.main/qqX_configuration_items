@@ -538,10 +538,15 @@ function refresh_conf_vars_and_values {
 
     # CLEAR & RE-POPULATE the ConfClearanceLog with current fields, for the next occasion
 
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
+    # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
+
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
     printf "#%s/%s" "$VM_Conf_Dir" "$VM_InstanceName"  > "$ConfClearanceLog"
 
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     mapfile -t ConfClearance_Arr < "$VM_Conf_Dir/$VM_Conf_File"
 
     for Line in "${ConfClearance_Arr[@]}"; do
@@ -557,13 +562,16 @@ function refresh_conf_vars_and_values {
       fi
     done
 
-    # make sure any settings edits have finished writing
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
     # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
     source "$ConfClearanceLog"
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+   [[ $ConfSettingsAdjusted ]] &&  while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     source "$VM_Conf_Dir/$VM_Conf_File"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 2:" &&  main_loop_diagnostics
