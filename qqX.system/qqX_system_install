@@ -182,7 +182,7 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
-    printf "\n\n  A command line '7zip'/'p7zip/p7zip-plugins' installation is needed for some distro downloads..."
+    printf "\n\n  A command line '7zip' installation is needed for some distro downloads ... (aka 'p7zip' and 'p7zip-plugins')"
     InstallationAlert=1
   fi
   if [[ ! $(type -p mkisofs) ]]; then

@@ -111,6 +111,8 @@ function  update_old_settings_file_with_new_options {
   ## A. Make a backup to the installer folder (& check that it is a faithful copy)
   # Dev: move to trash to stop clutter.
 
+  printf "\n\n  Making a settings backup ..."
+
   D_Stamp=".""$(date +%a.%d.%b.%G.%H.%M)"
 
   if [[ -d ".git" ]] && [[ $(type -p gio 2>/dev/null) ]]; then
@@ -121,10 +123,15 @@ function  update_old_settings_file_with_new_options {
 
   else
 
+    ChkSumOld= ; ChkSumBackup= ; SECONDS=0
     cp "$Old_SettingsFileFolder/$Old_SettingsFile" "$(pwd)/qqX_settings.$D_Stamp.old.txt"
-
     ChkSumOld="$(md5sum "$Old_SettingsFileFolder/$Old_SettingsFile" 2>/dev/null | head -c 32)"
     ChkSumBackup="$(md5sum "$(pwd)/qqX_settings.$D_Stamp.old.txt" 2>/dev/null | head -c 32)"
+
+    while [[ ! $ChkSumBackup ]] ; do
+      sleep 0.5
+      [[ $SECONDS -gt 20 ]] && break
+    done
 
     if [[ $ChkSumOld != "$ChkSumBackup" ]]; then
       printColor "\n\n  ERROR:  unable to make a backup of the settings file."
@@ -257,7 +264,9 @@ function  update_old_settings_file_with_new_options {
   done
 
   [[ $DevSetUpdArrOutputScrn ]] && printf "\n\n"
-  printf "  The settings file has now been updated. \n  All recognised original settings have been transferred. \n\n"
+  printf "  The settings file has now been updated. \n\n  All recognised original settings have been transferred."
+  [[ ! -d ".git" ]] && printf "\n\n  Backup file:  %s" "$(pwd)/qqX_settings.$D_Stamp.old.txt"
+  printf "\n\n"
 
 }
 
