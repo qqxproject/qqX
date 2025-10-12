@@ -44,22 +44,35 @@ function  update_old_settings_file_with_new_options {
   # *and* presumes that a valid settings file has been found before this routine is called
 
   ## DEV Array output - Set =1  file or screen or both
-  DevSetUpdArrOutputScrn= ; DevSetUpdArrOutputFile=
+  DevSetUpdArrOutputScrn= ; DevSetUpdArrOutputFile=1
 
   ##
 
   ## 1: OLD FILE
 
-  #  The VM & Extra Folder lists are of unknown length & number so store as separate to add later.
-
+  #  The VM & Extra Folder lists are of unknown length & number so create store to separate and add later.
   Grep_OLD_VM_Arrays_File="/tmp/grep.old.vm.arrays.txt"
   Grep_OLD_XF_Arrays_File="/tmp/grep.old.xf.arrays.txt"
-
   printf "" > "$Grep_OLD_VM_Arrays_File"
   printf "" > "$Grep_OLD_XF_Arrays_File"
 
-  # A. Extract ALL non-commented lines
-  mapfile -t GrepArr_OLD_OneLine_Settings  <<< "$(grep '=' "$Old_SettingsFileFolder/$Old_SettingsFile" | grep -v '#')"
+  # A. Extract all NON-commented settings (in very separate stages, to avoid any logic glitches)
+
+  RAW_OLD_OneLine_Settings=() ; RAW_OLD_OneLine_SettingsString= ; local ChkLine=
+  RAW_OLD_OneLine_SettingsString="$(grep '=' "$Old_SettingsFileFolder/$Old_SettingsFile")"
+  if [[ $DevSetUpdArrOutputScrn ]]; then  echo "RAW Pre-Parse STRING"; echo "$RAW_OLD_OneLine_SettingsString" ; echo ; fi
+  if [[ $DevSetUpdArrOutputFile ]]; then  echo "$RAW_OLD_OneLine_SettingsString" > "/tmp/qDevSet_RAW_OldOneLineArr_PreParse_STRING.txt" ; fi
+  mapfile -t RAW_OLD_OneLine_Settings  <<< "$RAW_OLD_OneLine_SettingsString"
+  GrepArr_OLD_OneLine_Settings=()
+  if [[ $DevSetUpdArrOutputScrn ]]; then  echo "RAW Pre-Parse"; declare -p RAW_OLD_OneLine_Settings ; echo ; fi
+  if [[ $DevSetUpdArrOutputFile ]]; then  declare -p RAW_OLD_OneLine_Settings > "/tmp/qDevSet_RAW_OldOneLineArr_PreParse.txt" ; fi
+  for Line in "${RAW_OLD_OneLine_Settings[@]}"; do
+    # if, when spaces removed, the first char is NOT '#', then add the line to the array list
+    ChkLine="$Line"
+    if [[ "$(tr -cd "[:graph:]" <<< "$ChkLine" | head -c 1)" != '#' ]]; then
+      GrepArr_OLD_OneLine_Settings+=("$Line")
+    fi
+  done
 
   if [[ $DevSetUpdArrOutputScrn ]]; then  echo "Pre-Parse"; declare -p GrepArr_OLD_OneLine_Settings ; echo ; fi
   if [[ $DevSetUpdArrOutputFile ]]; then  declare -p GrepArr_OLD_OneLine_Settings > "/tmp/qDevSet_OldOneLineArr_PreParse.txt" ; fi
@@ -68,28 +81,21 @@ function  update_old_settings_file_with_new_options {
   # B. Remove any existing, personalized folder array lists &  keep them to one side for later. (from the non-commented above)
 
   for i in "${!GrepArr_OLD_OneLine_Settings[@]}"; do
-
-    case "${GrepArr_OLD_OneLine_Settings[i]}" in
-
+   case "${GrepArr_OLD_OneLine_Settings[i]}" in
       *'VM_Array['*)
         printf "%s\n\n" "${GrepArr_OLD_OneLine_Settings[i]}" >> "$Grep_OLD_VM_Arrays_File"
         unset "GrepArr_OLD_OneLine_Settings[i]"
         ;;
-
       *'Extra_VM_Folder+='*)
         printf "%s\n\n" "${GrepArr_OLD_OneLine_Settings[i]}" >> "$Grep_OLD_XF_Arrays_File"
         unset "GrepArr_OLD_OneLine_Settings[i]"
         ;;
-
       *) true ;;
-
     esac
-
   done
 
-  #  Re-index as sections have been removed
+  #  Re-index as sections may have been removed
   GrepArr_OLD_OneLine_Settings=("${GrepArr_OLD_OneLine_Settings[@]}")
-
   if [[ $DevSetUpdArrOutputScrn ]]; then  echo "Post-Parse"; declare -p GrepArr_OLD_OneLine_Settings ; echo ; fi
   if [[ $DevSetUpdArrOutputFile ]]; then  declare -p GrepArr_OLD_OneLine_Settings > "/tmp/qDevSet_OldOneLineArr_PostParse.txt" ; fi
 
@@ -167,9 +173,9 @@ function  update_old_settings_file_with_new_options {
     echo > "/tmp/qDevSet_ProposedMatch.txt"
   fi
 
-  if [[ $DevSetUpdArrOutputScrn || $DevSetUpdArrOutputFile ]]; then
+  if [[ $DevSetUpdArrOutputScrn ]]; then
     printf "\n\n  Pre Main Loop point: \n\n"
-    # read -rp "  >  "
+    read -rp "  >  "
   fi
 
   ## MAIN LOOP:

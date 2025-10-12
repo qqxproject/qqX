@@ -37,7 +37,7 @@ Extra_VM_Folder+=("")
 ##  GENERAL COLOR & THEMING
 #  Yellow 3 (recommended), Blue 4, Cyan 6 (brighter blue), Red 1
 #  On Ubuntu purple, recommend 1 or 6   More:  https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-X_Shade="3"
+  X_Shade="3"
 
 ##  Translation LANGUAGE for [tx] pop-ups
 #  @ 2025, the following have DIRECT PAIR Google data files and are KNOWN WORKABLE:
@@ -46,7 +46,8 @@ X_Shade="3"
 #  qqX messages will normally display in English but will use one of the listed languages in limited amounts, if set or detected
 #  Set here, FROM PAIRS LIST, if a non-autodetected option is preferred.
 #  This setting will also affect browser output, although forcing may be used.
-Default_TxLang=""
+  Default_TxLang=""
+
 #  Set here to FORCE A BROWSER TRANSLATION in a language that is not in the list but is known to translate.
 #  See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
 #  NOT ALL WILL WORK, but those two char that have been assigned are:
@@ -56,13 +57,13 @@ Default_TxLang=""
 #  Iso_639_1_List+="or os pa pi pl ps pt qu rm rn ro ru rw sa sc sd se sg si sk sl sm sn so sq sr ss st su sv sw ta te tg th ti tk tl tn to tr "
 #  Iso_639_1_List+="ts tt tw ty ug uk ur uz ve vi vo wa wo xh yi yo za zh zu"
 #  Note that forced languages will normally show internal pop-ups in English but alternatives may be default set, if direct pair listed above.
-Forced_TxLang=""
+  Forced_TxLang=""
 
 ## DOWNLOADS
-# From qqX 1.13.06, starting with FreeSpirit, the new Curl feature of parallel multiplexed downloads has been enabled.
-# Type 'curl -help all' at the cmd line to see if your version of Curl wil support this feature.
-# Multiplexing may normally be toggled from within the download menus, if needed (?) Set here, to "1", to default disable.
-Curl_NoPara=
+#  From qqX 1.13.06, starting with FreeSpirit, the new Curl feature of parallel multiplexed downloads has been enabled.
+#  Type 'curl -help all' at the cmd line to see if your version of Curl wil support this feature.
+#  Multiplexing may normally be toggled from within the download menus, if needed (?) Set here, to "1", to default disable.
+  Curl_NoPara=
 
 ## Other SETTINGS SECTIONS AVAILABLE:
 
