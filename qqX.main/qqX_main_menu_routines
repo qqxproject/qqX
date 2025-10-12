@@ -194,7 +194,7 @@ check_disk_is_okay () {
   DiskChkExitCode= ;  DiskChkStatus=  ; DiskChkAddSnap=
   local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
-  if [[ -e "$Selected_ChkDrive" ]] && [[ ! $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+  if [[ -e "$Selected_ChkDrive" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
     # Disk won't exist if VM is newly downloaded or live, so only check or return Status, if disk is present.
     # Qemu-img with '-q' should only output if error & only outputs on stderr   The exit status remains separately recorded.
     # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
@@ -212,7 +212,7 @@ check_disk_is_okay () {
      63) DiskChkStatus="Checks are not supported by the image format -- not qcow2 ??" ;;
     esac
   fi
-  if [[ $DiskChkStatus == "Okay" ]] && [[ ! $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+  if [[ $DiskChkStatus == "Okay" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
     # at least one recent snap should be present (if disk is of sufficient size)
     if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
     else

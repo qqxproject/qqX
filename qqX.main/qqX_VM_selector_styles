@@ -69,7 +69,8 @@ function_vm_folder_item_text () {
   elif  [[ ! $(du -b -t 1000000 "${VM_Array[$i,0]}/$QcowTarget" 2>/dev/null) ]]; then
 
     #  Live VM qcow2 disks are as little as only 196k.
-    #  But set test ceiling is set at 1,000,000k (1G) to allow for meta preallocation etc REVIEW
+    #  But set test ceiling is set at 1,000k (1M) to allow for meta preallocation etc
+    #  Some ultra light USB target distros can be very small REVIEW
     #  Live VMs only, in general, running off the iso file.
     ArrayConf_Item_Listing+=" (L)"
     LiveDistrosFound=1
