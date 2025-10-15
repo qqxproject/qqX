@@ -78,7 +78,7 @@ function_vm_folder_item_text () {
   fi
 
   if [[ $FD_Phrase && ${ArrayConf_Item_Listing,,} == *"${FD_Phrase,,}"* ]] || [[ $FD_Start && ${ArrayConf_Item_Listing,,} == "${FD_Start,,}"* ]] ; then
-    FD_Highlight=1
+    FD_Highlight=1 ; FD_Found=1
   else FD_Highlight=
   fi
 
