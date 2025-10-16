@@ -64,10 +64,10 @@ else
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
         fi
       elif [[ "${VM_InstanceName,,}" == *windows* ]] && [[ "$Mounted_ISO" == *virtio* ]]; then
-        printColor "\n\n\n  Everything should now be working and booting correctly,"
+        printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
         # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
-        printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may now be safely removed."
-        printColor "\n\n  Windows could possibly request a boot ISO but it is unlikely. Archive or Delete."
+        printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
+        printColor "\n\n  The Windows ISO is unlikely to be needed so may be archived."
         printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
         [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
         printf "\n"
