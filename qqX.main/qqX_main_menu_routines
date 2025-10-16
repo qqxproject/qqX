@@ -949,7 +949,7 @@ iso_select_mount_and_boot () {
       print_quickget_and_folder_choices  IsoList
     fi
 
-    if [[ $Mounted_ISO ]]; then printColor "\n\n  %s  is mounted additionally to guest" "$Mounted_ISO"
+    if [[ $Mounted_ISO ]]; then printf "\n\n  %s  IS CURRENTLY MOUNTED to guest" "$Mounted_ISO"
     else printf "\n\n  Currently, no ISO is mounted additionally to guest"
     fi
 
@@ -959,7 +959,7 @@ iso_select_mount_and_boot () {
       printColor "  [b] to go back"
     else
       if [[ ${#IsoList[*]} -eq 1 ]]; then  printColor "  [m] to mount/unmount "
-      elif [[ ${#IsoList[*]} -gt 1 ]]; then  printColor "  [number] to select and mount/unmount "
+      elif [[ ${#IsoList[*]} -gt 1 ]]; then  printColor "  [number] to select/reselect and/or mount/unmount "
       fi
       printf "  [b] to go back"
     fi
