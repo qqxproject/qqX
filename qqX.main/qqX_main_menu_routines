@@ -908,7 +908,7 @@ iso_select_mount_and_boot () {
 
     if [[ ${IsoList[0]} && ${ImgList[0]} ]]; then
       mapfile -t -O "${#IsoList[@]}" IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
-    else
+    elif [[ ${ImgList[0]} ]] && [[ ! ${IsoList[0]}  ]]; then
       mapfile -t IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
     fi
     # https://stackoverflow.com/a/53091662/27611101
