@@ -18,8 +18,14 @@
 
 ##  ADD-IN of ORIGINAL quickemu functions & the needed variables
 
-#   Technically, this script absorbs rather than wraps.
+#   Technically, this script ABSORBS rather than wraps.
 #   The original code remains basically as is but some calls get re-routed via new functions ....
+
+#   UNLIKE the QuickGet Mods script, which remains variable isolated from running instances of qqX,
+#   the QuickEmu functions get sourced by qqX and can inherit qqX globals.
+
+#   qqX version 1.14 also adds in a function overwrite script, at a builtin individuated addition,
+#   in a similar manner to that developed for qGet for qqX 1.13
 
 
 function system_code_check_and_warn {
@@ -48,7 +54,7 @@ function system_code_check_and_warn {
     printf "\n  the current folder's FreeSpirit builtins will be auto-selected ...."
     printf "\n\n  [enter] to continue with FreeSpirit and/or set/re-select\n\n"
     read -rp "  >  "
-    CodingHotSwap="FreeBird"
+    CodingHotSwap="FreeSpirit"
 
   elif [[ ! $WarnedOnQE ]] && [[ $CodingHotSwap == "System" || $CodingHotSwap == "Echo" ]]; then
     printColor "\n\n  CAUTION Legacy Source Version '%s' " "$QE_SourceVersion"
@@ -85,6 +91,9 @@ function find_quickemu_source_functions_and_vars {
   # QE starts into setting out the functions almost straight away.
   grep -m 1 -A 3000 'function' "$QE_SourcePath" | grep -B 3000 '### MAIN' | head -n -1  > "/tmp/qmod-functions-temp"
   source "/tmp/qmod-functions-temp"
+
+  # Source any function overwrites
+  [[ -e "$QE_Modpath" ]] && source "$QE_Modpath"
 
   ## Quickemu Variables (set & clear)
   #  have to be cleared before every call to quickemu as the base code is normally set to be run once & exit

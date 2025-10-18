@@ -205,8 +205,10 @@ function sort_qqX_builtin_settings {
 
     QE_SourcePath="$FreePath/quickemu"
     QG_SourcePath="$FreePath/quickget"
-    if [[ -e "$FreePath/qqX_quickget_mods" ]]; then QG_Modpath="$FreePath/qqX_quickget_mods"
+    if [[ -e "$FreePath/qqX_quickGet_mods" ]]; then QG_Modpath="$FreePath/qqX_quickGet_mods"
     else QG_Modpath= ; fi
+    if [[ -e "$FreePath/qqX_quickEmu_mods" ]]; then QE_Modpath="$FreePath/qqX_quickEmu_mods"
+    else QE_Modpath= ; fi
   fi
 
   if [[ $FreePath ]]; then
