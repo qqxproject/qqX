@@ -315,7 +315,7 @@ UserTerm=
 # eg.  CustomTerminalProfile=" --geometry=145x50 --hide-menubar --title=qqX  -e "
 # or   CustomTerminalProfile="" --geometry=${Term_Width}x${Term_Taller} --hide-menubar --title=qqX  -- "
 
-# NB the Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
+# NB the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
 
 # The use of CustomTerminalProfile will also cause UserTerm to be stored.
 # Any size variables copied from below will eventually become stored as numerics.
