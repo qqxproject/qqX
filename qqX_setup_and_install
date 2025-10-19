@@ -164,11 +164,16 @@ elif [ -t 1 ] ; then
   # Probably 97 to 100% chance of finding the matching desktop environment default terminal.
   # If none found, where possible, if stdout is available, give help message.
   # https://stackoverflow.com/a/911213
-  printf "\n\n   TERMINAL NAME not found"
+  printf "\n\n   TERMINAL not found or not suitable"
   # show the help notes at top of script
-  printf "\n\n\n   Pre-Configured and possibly installable terminals include: \n\n"
-  grep -e ^set "$0"| cut -d'-' -f 3- | fmt -w 90
+  printf "\n\n\n   Pre-Configured and possibly installable terminals include:"
   printf "\n\n"
+  grep -e ^set "$0"| cut -d'-' -f 3- | fmt -w 90
+  if [ -n "$(command -v "ptyxis")" ] ; then
+    printf "\n\n  The new GNOME TERMINAL 'Ptyxis' is present on the system but is currently problematic ..."
+    printf "\n\n  Try 'kgx' the new Gnome Console variant or possibly the older 'gnome-terminal' version."
+  fi
+  printf "\n\n\n"
   grep -m 1 -A 4 'FOR ANY NEWER' "$0"
   printf "\n\n  [enter] to exit and configure ...\n\n    "
   read -r reply
