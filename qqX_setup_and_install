@@ -62,13 +62,17 @@ fi
 
 
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
-set "$@" -- "kgx" "alacritty" "kitty" "foot"
+set "$@" -- "ptyxis" "kgx" "alacritty" "kitty" "foot"
 
 while [ -n "$1" ] ; do
   if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX.termlist"
   fi
   shift
 done
+
+# Also see exception handling: 'TERMINAL not found or not suitable' towards end of script
+
+# 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
 
 # Priority listing should have placed the top entry as being the most main stream and being one with sufficient size.
 # At this stage we are looking for something reliable to run the actual terminal selection script.
@@ -169,7 +173,8 @@ elif [ -t 1 ] ; then
   printf "\n\n\n   Pre-Configured and possibly installable terminals include:"
   printf "\n\n"
   grep -e ^set "$0"| cut -d'-' -f 3- | fmt -w 90
-  if [ -n "$(command -v "ptyxis")" ] ; then
+  if [ -n "$(command -v "xxxptyxis")" ] ; then
+    # 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
     printf "\n\n  The new GNOME TERMINAL 'Ptyxis' is present on the system but is currently problematic ..."
     printf "\n\n  Try 'kgx' the new Gnome Console variant or possibly the older 'gnome-terminal' version."
   fi
