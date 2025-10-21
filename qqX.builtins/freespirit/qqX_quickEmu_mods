@@ -106,6 +106,9 @@ function configure_bios() {
 
         # https://bugzilla.redhat.com/show_bug.cgi?id=1929357#c5
         # TODO: Check if macOS should use 'edk2-i386-vars.fd'
+
+        # qqX: arrays re-ordered into better priority and a break added, for when found, instead of continuing to the end ...
+
         if [ -n "${EFI_CODE}" ] || [ ! -e "${EFI_CODE}" ]; then
             case ${secureboot} in
                 on) # shellcheck disable=SC2054,SC2140
@@ -132,6 +135,9 @@ function configure_bios() {
                         "${SHARE_PATH}/edk2-ovmf/x64/OVMF_CODE.fd","${SHARE_PATH}/edk2-ovmf/x64/OVMF_VARS.fd" \
                     );;
             esac
+            # qqX: note these arrays get grepped by 'read_x86_tiano_vars_list' in main menu routines
+            # and the function's -A nn may need adjusting if adding lines
+
             # Attempt each EFI_CODE file one by one, selecting the corresponding code and vars
             # when an existing file is found.
             _IFS=$IFS
@@ -168,6 +174,7 @@ function configure_bios() {
             else
                 EFI_VARS="${VMDIR}/OVMF_VARS.fd"
             fi
+            # if ! -e $2 then cp $1 >
             efi_vars "${EFI_EXTRA_VARS}" "${EFI_VARS}"
         fi
 

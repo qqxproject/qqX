@@ -664,9 +664,10 @@ move_rename_Selected_VM () {
 
 read_x86_tiano_vars_list () {
 
-  # current source list
+  # Current source list (-A nn may need adjusting if adding to qe arrays)
+  # See quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
   local String=
-  String="$(grep -A 20 -m 1 'ovmfs=' "$QE_SourcePath" | grep -s '"')"
+  String="$(grep -A 22 -m 1 'ovmfs=' "$QE_SourcePath" | grep -s '"')"
   if [[ ! $String ]]; then  TianoVarsGrepError=1 ; return
   else TianoVarsGrepError=
   fi
@@ -788,6 +789,8 @@ refresh_tiano_vars () {
         # and selects the last available option, not the first. Whatever the rationale was, it's probably best to
         # leave things as they are. At least for now.  REVIEW
         # Quickemu should re-install the 'correct' vars file if the current one(s) is(are) removed.
+
+        # @ 10/2025 this gets start rationalized with introduction of quickEmu_mods script
 
         if [[ -e "$VM_Conf_Dir/$VM_InstanceName/$x86_Var" ]]; then
           mv "$VM_Conf_Dir/$VM_InstanceName/$x86_Var" "$VM_Conf_Dir/$VM_InstanceName/${x86_Var}.old"
