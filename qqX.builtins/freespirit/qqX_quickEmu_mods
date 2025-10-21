@@ -48,6 +48,7 @@ function is_firmware_qcow2() {
 ## FIX ovmfs array parse
 # TODO: add builtins and rationalize the whole function
 function configure_bios() {
+
     # Always Boot macOS using EFI
     if [ "${guest_os}" == "macos" ]; then
         boot="efi"
@@ -185,8 +186,13 @@ function configure_bios() {
             EFI_CODE=$(realpath "${EFI_CODE}")
             echo "${EFI_CODE}"
         fi
-        BOOT_STATUS="EFI (${guest_os^}), OVMF (${EFI_CODE}), EFI Vars (${EFI_VARS}), SecureBoot (${secureboot})."
+
+        echo " - BOOT:     EFI (${guest_os^}), EFI Vars (${EFI_VARS})"
+        echo "             OVMF (${EFI_CODE}), SecureBoot (${secureboot})"
+        return
+
     else
+
         BOOT_STATUS="Legacy BIOS (${guest_os^})"
         boot="legacy"
         secureboot="off"
