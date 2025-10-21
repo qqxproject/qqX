@@ -182,7 +182,8 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
-    printf "\n\n  A command line '7zip' installation is needed for some distro downloads ... (aka 'p7zip' and 'p7zip-plugins')"
+    printf "\n\n  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
+    printf "\n\n  For some host distros, 'p7zip' may also need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p mkisofs) ]]; then
@@ -190,7 +191,7 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
-    printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk' ..."
+    printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p qemu-system-x86_64) ]]; then
