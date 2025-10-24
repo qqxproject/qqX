@@ -424,17 +424,19 @@ function_config_tune_up ()  {
     if [[ $guest_os == "windows" ]]; then
       printColor "\n\n Windows: "
       printf "\n\n  Software TPM should be set as \"on\" until at least the registration process is complete"
-      printf "\n\n  but can be set to \"off\" at later stages. Lines may commented-out with a \"#\" \n"
-      printf "\n\n  Secure Boot should normally be set to \"off\" but early 2025 Insider betas are now requesting this feature."
-      printf "\n\n  Tests on 2025 Insider are showing seemingly successful outcomes when set to \"on\" \n"
+      printf "\n\n  but can possibly be set to \"off\" at later stages. Lines may commented-out with a \"#\" \n"
+      printf "\n\n  Older releases may be better set to \"off\" but early 2025 Insider betas are now requesting this feature."
+      printf "\n\n  Tests on 25H2 are now showing better outcomes when set to \"on\" \n"
 
       ConfLine="$(grep -s '# for Windows, normally' "$TuneUpTmpCopy")"
       # see https://github.com/qqxproject/qqX/issues/12
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
-        printf "\n\n# For Windows, normally set tpm as on & secureboot as off,\n# although early 2025 insider betas are now needing secureboot as \"on\"\n"  >> "$TuneUpTargetDraft"
+        { printf "\n\n# For Windows, normally set both tpm as on & secureboot as on,"
+          printf "\n# although for pre-25H2 versions, this may be better with secureboot post-install set to \"off\"\n"
+        } >> "$TuneUpTargetDraft"
       fi
       {   printf "\ntpm=\"on\""
-          printf "\nsecureboot=\"off\"\n\n"
+          printf "\nsecureboot=\"on\"\n\n"
       }   >> "$TuneUpTargetDraft"
 
     elif [[ $guest_os == "macos" ]]; then
