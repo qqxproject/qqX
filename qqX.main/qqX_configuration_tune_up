@@ -97,8 +97,9 @@ function_config_tune_up ()  {
   printColor "\n\n  CHECK ME: \n\n"
   cat "$TuneUpTargetFile"
 
-  if [[ $ShowTxTexts ]]; then printColor  "\n  [tx] %s" "$MainTxOptionLine"
-  else printf  "\n  [tx] %s" "$MainTxOptionLine"
+  # Two line feeds as some .conf files may not have any space at the end. But some may have too much ... REVIEW ?
+  if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
+  else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
   fi
   printColor "\n\n  All changes made here, may be reversed:"
   printf "\n\n  A backup of your current configuration has now been date recorded & placed in the Distro Folder"
