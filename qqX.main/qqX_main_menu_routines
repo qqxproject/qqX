@@ -667,7 +667,7 @@ read_x86_tiano_vars_list () {
   # Current source list (-A nn may need adjusting if adding to qe arrays)
   # See quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
   local String=
-  String="$(grep -A 22 -m 1 'ovmfs=' "$QE_SourcePath" | grep -s '"')"
+  String="$(grep -s -A 32 -m 1 'ovmfs=' "$QE_SourcePath" | grep -B 32 'esac' | grep '"')"
   if [[ ! $String ]]; then  TianoVarsGrepError=1 ; return
   else TianoVarsGrepError=
   fi
@@ -676,6 +676,7 @@ read_x86_tiano_vars_list () {
   String="${String//','/' '}"
   # shellcheck disable=SC1003
   String="${String//'\'/' '}"
+  # squeeze out extra spaces and leave a string of single space separated but quoted filepaths
   String="$(tr -s '[= =]' <<< "$String")"
   # shellcheck disable=SC2206
   Tiano_x86_FilesList=($String)
