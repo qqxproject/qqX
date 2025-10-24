@@ -138,12 +138,13 @@ function_config_tune_up ()  {
   done
 
   if [[ $ConfEdit_Qstart == "q" ]]; then
-    printColor "\n  POST-INSTALL Linux distros:"
-    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste and USB redirection."
+    printColor "\n  Post-install LINUX distros:"
+    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
     printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
+    printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
-      printf "\n\n  The qqX 'shared drive' is available to help with sharing between distros"
+      printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
     else
       printColor "\n\n  ALL distros post-install:"
       printf "\n\n  Setting up a qqX 'shared drive' can also help with sharing between distros"
@@ -493,12 +494,13 @@ function_config_tune_up ()  {
 
     fi
 
-    printColor "\n\n  POST-INSTALL Linux distros:"
-    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste and USB redirection."
+    printColor "\n\n  Post-install LINUX distros:"
+    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
     printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
+    printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
-      printf "\n\n  The qqX 'shared drive' is available to help with sharing between distros"
+      printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
     else
       printColor "\n\n  ALL distros post-install:"
       printf "\n\n  Setting up a qqX 'shared drive' can also help with sharing between distros"
