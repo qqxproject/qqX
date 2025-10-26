@@ -164,6 +164,10 @@ while true ; do
     printf "\n\n  'Curl' is a listed dependency of QuickEmu and is also used by qqX ..."
     InstallationAlert=1
   fi
+  if [[ ! $(type -p socat) ]]; then
+    printf "\n\n  'socat' is a needed dependency of QuickEmu and is also used by qqX ..."
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p jq) ]]; then
     printf "\n\n  'jq' is a listed dependency of QuickEmu ..."
     InstallationAlert=1
@@ -206,7 +210,10 @@ while true ; do
     printColor "\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
     printf "\n"
-    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... \n\n  Return here to re-check:"
+    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... "
+    printf "\n\n\n  Ubuntu 25.10 example full set:"
+    printf "\n\n  sudo apt install curl  7zip  socat  genisoimage  spice-vdagent  spice-client-gtk  qemu-system-x86"
+    printf "\n\n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
     [[ $InstallationAlert == "q" ]] &&  exit
