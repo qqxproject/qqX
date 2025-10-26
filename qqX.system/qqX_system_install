@@ -164,6 +164,10 @@ while true ; do
     printf "\n\n  'Curl' is a listed dependency of QuickEmu and is also used by qqX ..."
     InstallationAlert=1
   fi
+  if [[ ! $(type -p socat) ]]; then
+    printf "\n\n  'socat' is a needed dependency of QuickEmu and is also used by qqX ..."
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p jq) ]]; then
     printf "\n\n  'jq' is a listed dependency of QuickEmu ..."
     InstallationAlert=1
@@ -182,7 +186,8 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
-    printf "\n\n  A command line '7zip'/'p7zip/p7zip-plugins' installation is needed for some distro downloads..."
+    printf "\n\n  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
+    printf "\n\n  For some host distros, 'p7zip' may also need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p mkisofs) ]]; then
@@ -190,7 +195,7 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
-    printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk' ..."
+    printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p qemu-system-x86_64) ]]; then
@@ -205,7 +210,10 @@ while true ; do
     printColor "\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
     printf "\n"
-    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... \n\n  Return here to re-check:"
+    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... "
+    printf "\n\n\n  Ubuntu 25.10 example full set:"
+    printf "\n\n  sudo apt install curl  7zip  socat  genisoimage  spice-vdagent  spice-client-gtk  qemu-system-x86"
+    printf "\n\n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
     [[ $InstallationAlert == "q" ]] &&  exit
