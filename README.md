@@ -32,6 +32,18 @@ Plus numerous downstream fixes for _current_ Quickemu issues
 
 -----
 
+NB for Gnome 49, install `kgx` or use the DEV BRANCH and FREESPIRIT to work around the terminal issue.
+
+- Eg. Ubuntu 25.10 and Fedora 43 workstation etc.  For now, set sizes in the terminal preferences.
+
+Also note that new Quickemu dependency checks have now been added to BOTH branches
+
+- If you are intending TO RUN WINDOWS, dowload using the CODE button, not the release page.
+
+- Use Free SPIRIT for the fast release built-ins, not FreeBird.
+
+-----
+
 CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 Ordinary users, who are taking a leap of faith, are being rewarded
