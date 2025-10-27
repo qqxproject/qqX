@@ -290,7 +290,7 @@ check_conf_file_for_typos () {
 }
 
 function_conf_error () {
-  ErrorMenuSelect= ; NewSetupFlag=
+  ErrorMenuSelect= ; NewSetupFlag= ; EnterGT_reverse=
   # clear any accidental initial double pressing of the enter key occuring while experiencing the error
   read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
 
@@ -348,10 +348,15 @@ function_conf_error () {
     printColor "\n\n\n  Settings file not found: %s"  "$qqX_SettingsFile"
     printf "\n\n  [c] ignore and continue   [q] to quit \n\n"
 
+  elif [[ "$1" == *'No VMs'* ]]; then
+    printColor "\n\n  [enter] quickget a new distro "
+    printf "  [s] to edit qqX general settings"
+    printf "  [q] to quit \n\n"
+    EnterGT_reverse=1
+
   else
     # includes "$1" = ".conf file"
     printColor "\n\n  [Enter] to edit qqX general settings"
-    [[ "$1" == *'No VMs'* ]] && printColor "  [gt] quickget a new distro "
     printf "  [c] ignore and continue "
     printf "  [q] to quit \n\n"
 
@@ -359,6 +364,10 @@ function_conf_error () {
 
   read -rp "  >  "   ErrorMenuSelect
 
+  if [[ $EnterGT_reverse ]]; then
+    [[ ! $ErrorMenuSelect ]] && ErrorMenuSelect="gt"
+    [[ $ErrorMenuSelect == "s" ]] && ErrorMenuSelect=
+  fi
 
   if [[ $ErrorMenuSelect == "q" ]]; then  printf "\n\n"; command exit
 
