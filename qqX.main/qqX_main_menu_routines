@@ -174,8 +174,7 @@ show_main_menu_header () {
 
 }
 
-# When a VM_InstanceName exists, check the VM disk is not corrupt  (quickemu default name only)
-# https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
+# CHECK the VM disk is not corrupt and that snapshots are present:
 
 check_disk_is_okay () {
 
@@ -192,17 +191,17 @@ check_disk_is_okay () {
     if [[ $2 ]]; then DiskCheck_Disk="$2" ; else DiskCheck_Disk="disk.qcow2"; fi
   fi
 
-  DiskChkExitCode= ;  DiskChkStatus=
+  DiskChkExitCode= ;  DiskChkStatus=  ; DiskChkAddSnap=
+  local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
-  if [[ -e "$DiskCheckFolderName/$DiskCheck_Disk" ]]; then
-
-    # Disk won't exist if new (or named differently REVIEW )
-    # Qemu-img with '-q' only outputs if error & on outputs on stderr   The exit status remains separately recorded.
-    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk"
-    else "$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk"  2>/dev/null ; fi
-
-    # Note "Okay"  is also used as a flag  > caution if changing   # REVIEW  could also be flagged using:
-    # DiskChkMsg="$("$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk" 2>&1)"
+  if [[ -e "$Selected_ChkDrive" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+    # Disk won't exist if VM is newly downloaded or live, so only check or return Status, if disk is present.
+    # Qemu-img with '-q' should only output if error & only outputs on stderr   The exit status remains separately recorded.
+    # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
+    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive" 2>/dev/null
+    else "$QEMU_IMG" check -q "$Selected_ChkDrive"  2>/dev/null
+    fi
+    # NB "Okay"  is also used as a global flag  > caution if changing
     case "$?" in
       0) DiskChkStatus="Okay" ;;
       1) DiskChkStatus="Check unable to be completed" ;;
@@ -212,6 +211,21 @@ check_disk_is_okay () {
          DiskChkExitCode=3  ;;
      63) DiskChkStatus="Checks are not supported by the image format -- not qcow2 ??" ;;
     esac
+  fi
+  if [[ $DiskChkStatus == "Okay" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+    # at least one recent snap should be present (if disk is of sufficient size)
+    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
+    else
+      DiskChkEpochTime="$(date +%s)"
+      LastSnapDate="$("$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | tail -n 1 | awk '{print $5}')"
+      LastSnapEpochTime="$(date -d "$LastSnapDate" +%s)"
+      # where 1209600 = 14 days
+      [[ $((DiskChkEpochTime-LastSnapEpochTime)) -gt 1209600 ]] && DiskChkAddSnap=1
+    fi
+    if [[ $DiskChkAddSnap ]] ; then
+      SnapTitle="$(date +%b%d.%H.%M)"
+      "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
+    fi
   fi
 }
 
@@ -226,20 +240,22 @@ check_if_disk_needs_a_cleanup  () {
   fi
   local VirtualSize= ; local FileLength= ; local DiskSize= ; local DiskData=
   DiskDisparity=0
-  DiskData="$(qemu-img info "$DiskCheckFolderName/$DiskCheck_Disk" 2>/dev/null)"
-  # make sure units match and disk is of significant size
-  VirtualSize="$(grep -s 'virtual size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  FileLength="$(grep -s 'file length' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  DiskSize="$(grep -s -m1 'disk size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  if [[ $VirtualSize && $FileLength && $DiskSize ]]; then
-    if [[ "$(bc -l <<< "$FileLength > ($DiskSize*2.1)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=4
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
-    elif [[ $VirtualSize -le 32 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
-    elif [[ $VirtualSize -le 64 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
-    elif [[ $VirtualSize -le 96 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
-    else DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+25)" 2>/dev/null)"
+  if [[ -e "$DiskCheckFolderName/$DiskCheck_Disk" ]]; then
+    DiskData="$(qemu-img info "$DiskCheckFolderName/$DiskCheck_Disk" 2>/dev/null)"
+    # make sure units match and disk is of significant size
+    VirtualSize="$(grep -s 'virtual size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    FileLength="$(grep -s 'file length' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    DiskSize="$(grep -s -m1 'disk size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    if [[ $VirtualSize && $FileLength && $DiskSize ]]; then
+      if [[ "$(bc -l <<< "$FileLength > ($DiskSize*2.1)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=4
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
+      elif [[ $VirtualSize -le 32 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
+      elif [[ $VirtualSize -le 64 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
+      elif [[ $VirtualSize -le 96 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
+      else DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+25)" 2>/dev/null)"
+      fi
     fi
   fi
   # bc's math library (-l) should refuse garbage, so if Qemu info layout changes then 'DiskDisparity' should theoretically be null.
@@ -648,9 +664,10 @@ move_rename_Selected_VM () {
 
 read_x86_tiano_vars_list () {
 
-  # current source list
+  # Current source list (-A nn may need adjusting if adding to qe arrays)
+  # See quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
   local String=
-  String="$(grep -A 20 -m 1 'ovmfs=' "$QE_SourcePath" | grep -s '"')"
+  String="$(grep -s -A 32 -m 1 'ovmfs=' "$QE_SourcePath" | grep -B 32 'esac' | grep '"')"
   if [[ ! $String ]]; then  TianoVarsGrepError=1 ; return
   else TianoVarsGrepError=
   fi
@@ -659,6 +676,7 @@ read_x86_tiano_vars_list () {
   String="${String//','/' '}"
   # shellcheck disable=SC1003
   String="${String//'\'/' '}"
+  # squeeze out extra spaces and leave a string of single space separated but quoted filepaths
   String="$(tr -s '[= =]' <<< "$String")"
   # shellcheck disable=SC2206
   Tiano_x86_FilesList=($String)
@@ -773,6 +791,8 @@ refresh_tiano_vars () {
         # leave things as they are. At least for now.  REVIEW
         # Quickemu should re-install the 'correct' vars file if the current one(s) is(are) removed.
 
+        # @ 10/2025 this gets start rationalized with introduction of quickEmu_mods script
+
         if [[ -e "$VM_Conf_Dir/$VM_InstanceName/$x86_Var" ]]; then
           mv "$VM_Conf_Dir/$VM_InstanceName/$x86_Var" "$VM_Conf_Dir/$VM_InstanceName/${x86_Var}.old"
           [[ $RtvText ]] && printColor "\n\n  Reset '%s' >> Quickemu will now auto-update your VM on its next boot"  "$x86_Var"
@@ -886,8 +906,18 @@ iso_select_mount_and_boot () {
 
     IsoList=()
     mapfile -t IsoList <<< "$(ls "$VM_InstanceName"/*.iso 2>/dev/null)"
+
+    ImgList=()
+    mapfile -t ImgList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+
+    if [[ ${IsoList[0]} && ${ImgList[0]} ]]; then
+      mapfile -t -O "${#IsoList[@]}" IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+    elif [[ ${ImgList[0]} ]] && [[ ! ${IsoList[0]}  ]]; then
+      mapfile -t IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+    fi
+    # https://stackoverflow.com/a/53091662/27611101
+
     if [[ $SharedDrive ]]; then
-      #https://stackoverflow.com/a/53091662/27611101
       if [[ ${IsoList[0]} ]]; then
         mapfile -t -O "${#IsoList[@]}" IsoList <<< "$(ls "$(dirname "$SharedDrive")"/*.iso 2>/dev/null)"
       else
@@ -895,7 +925,7 @@ iso_select_mount_and_boot () {
       fi
     fi
 
-    printColor "\n\n  ISO formated disk images may be copied into the individual VM folder"
+    printColor "\n\n  ISO/IMG formated disk images may be copied into the individual VM folder"
     printf "\n\n  A shared 'live boot' ISO can be added to the Shared Drive folder, if Shared Drive has been set up."
     printf "\n\n  One or more may be added.  If more than one, an ISO should be selected from the list."
     printf "\n\n  Current Quickemu code is restricted to one only being mounted at a time."
@@ -923,7 +953,7 @@ iso_select_mount_and_boot () {
       print_quickget_and_folder_choices  IsoList
     fi
 
-    if [[ $Mounted_ISO ]]; then printColor "\n\n  %s  is mounted additionally to guest" "$Mounted_ISO"
+    if [[ $Mounted_ISO ]]; then printf "\n\n  %s  IS CURRENTLY MOUNTED to guest" "$Mounted_ISO"
     else printf "\n\n  Currently, no ISO is mounted additionally to guest"
     fi
 
@@ -933,7 +963,7 @@ iso_select_mount_and_boot () {
       printColor "  [b] to go back"
     else
       if [[ ${#IsoList[*]} -eq 1 ]]; then  printColor "  [m] to mount/unmount "
-      elif [[ ${#IsoList[*]} -gt 1 ]]; then  printColor "  [number] to select and mount/unmount "
+      elif [[ ${#IsoList[*]} -gt 1 ]]; then  printColor "  [number] to select/reselect and/or mount/unmount "
       fi
       printf "  [b] to go back"
     fi

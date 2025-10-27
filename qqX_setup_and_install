@@ -14,11 +14,11 @@
 
 #   OR:  in the script's folder > right click > open in terminal >  type "./qqX_setup_and_install"   (note prefix ./)
 
-#   FOR ANY NEWER OR NON-STANDARD TERMINAL, SETTING UP A CUSTOM TERMINAL PROFILE IS RECOMMENDED
-#   as this will cause the values to be stored for future updates.
+#   FOR ANY NEWER OR NON-STANDARD TERMINAL, setting up a custom terminal profile is recommended
+#   as this will allow the values to be stored for future updates:
 
-#   CUSTOM terminal sizes & profile should be initially set just after the initial system checking lines, at around line 290
-#   in the target script "./qqX_system_install" in the qqX.system folder. See notes in the target script.
+#   See notes in the script "./qqX_system_install" in the folder "qqX.system",
+#   just after the initial checking lines, for 'CustomTerminalProfile=' at around line 300
 
 #   shellcheck disable=SC2009,SC2034
 
@@ -62,13 +62,17 @@ fi
 
 
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
-set "$@" -- "kgx" "alacritty" "kitty" "foot"
+set "$@" -- "ptyxis" "kgx" "alacritty" "kitty" "foot"
 
 while [ -n "$1" ] ; do
   if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX.termlist"
   fi
   shift
 done
+
+# Also see exception handling: 'TERMINAL not found or not suitable' towards end of script
+
+# 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
 
 # Priority listing should have placed the top entry as being the most main stream and being one with sufficient size.
 # At this stage we are looking for something reliable to run the actual terminal selection script.
@@ -164,10 +168,19 @@ elif [ -t 1 ] ; then
   # Probably 97 to 100% chance of finding the matching desktop environment default terminal.
   # If none found, where possible, if stdout is available, give help message.
   # https://stackoverflow.com/a/911213
-  printf "\n\n    TERMINAL NAME not found  \n\n"
+  printf "\n\n   TERMINAL not found or not suitable"
   # show the help notes at top of script
-  grep -m 1 -A 10 'IF:' "$0"
-  printf "\n\n    [enter] to exit \n\n    "
+  printf "\n\n\n   Pre-Configured and possibly installable terminals include:"
+  printf "\n\n"
+  grep -e ^set "$0"| cut -d'-' -f 3- | fmt -w 90
+  if [ -n "$(command -v "xxxptyxis")" ] ; then
+    # 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
+    printf "\n\n  The new GNOME TERMINAL 'Ptyxis' is present on the system but is currently problematic ..."
+    printf "\n\n  Try 'kgx' the new Gnome Console variant or possibly the older 'gnome-terminal' version."
+  fi
+  printf "\n\n\n"
+  grep -m 1 -A 4 'FOR ANY NEWER' "$0"
+  printf "\n\n  [enter] to exit and configure ...\n\n    "
   read -r reply
 fi
 

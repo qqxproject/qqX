@@ -323,7 +323,7 @@ UserTerm=
 # eg.  CustomTerminalProfile=" --geometry=145x50 --hide-menubar --title=qqX  -e "
 # or   CustomTerminalProfile="" --geometry=${Term_Width}x${Term_Taller} --hide-menubar --title=qqX  -- "
 
-# NB the Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
+# NB the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
 
 # The use of CustomTerminalProfile will also cause UserTerm to be stored.
 # Any size variables copied from below will eventually become stored as numerics.
@@ -685,8 +685,8 @@ if [[ ! $SkipMkLauncher ]]; then
       read -rp "  >  "  TermChoose
 
       case "$TermChoose" in
-        '[0-9]'|'[0-9][0-9]')
-          i="$((TermChoose-=1))"
+        [0-9]|[1-9][0-9])
+          i="$((TermChoose-=1))" ; [[ "$i" -lt 0 ]] && i=0
           UserTerm="${TermChooseArr[i]}"
           break ;;
         h)
@@ -723,6 +723,8 @@ if [[ ! $SkipMkLauncher ]]; then
 
   if [[ $UserTerm ]]; then
 
+    printf "\n\n  Selected Terminal: %s" "$UserTerm"
+
     printColor "\n\n  qqX standard window size is %s columns wide & %s lines high"   "$Term_Width"  "$Term_Height"
 
     if [[ -e "$HOME/.qqX/qqX_term.conf" ]]; then
@@ -740,14 +742,14 @@ if [[ ! $SkipMkLauncher ]]; then
     printf   "\n  so changing the font will usually change the physical terminal size."
 
     printf "\n\n  System defaults may usually be changed in the terminal settings, under 'profile'"
+    printf   "\n  and may overide any options if 'remember size and position' has been set."
 
     printf "\n\n  The system's terminal size will apply when starting qqX directly from the command line."
-    printf   "\n  And may overide any options if 'remember size and position' has been set."
-
-    printf "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
 
     printf "\n\n  If your terminal uses PIXELS, for example 'qterminal', try 1500 x 1000 in the settings."
-    printf "\n\n  In other cases, such as with tiling WM envs eg 'i3' the size may be auto-regulated. "
+    printf "\n\n  In other cases, such as with tiling Window Managers, the size may be auto-regulated. "
+
+    printf "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
 
     printf "\n\n\n"
 
@@ -929,6 +931,8 @@ if [[ ! $SkipMkLauncher ]]; then
       # needs quotes  - plus REVIEW  -e  deprecation in other terminals
       if [[ $CustomTerminalProfile ]]; then
         echo "Exec=$UserTerm $CustomTerminalProfile " '"' "$qqX_Std_File_Path %f" '"'
+      elif [[ $UserTerm == "ptyxis" ]]; then
+        echo "Exec=$UserTerm --title qqX -x "'"'"bash -c ""'""$qqX_Std_File_Path""'""  %f"'"'
       elif [[ $UserTerm == "kgx" ]]; then
         echo "Exec=$UserTerm -- $qqX_Std_File_Path "'"'" %f"'"'
       elif [[ $UserTerm == "gnome-terminal" ]]; then

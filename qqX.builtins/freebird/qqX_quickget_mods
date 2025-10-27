@@ -25,11 +25,12 @@
 
 #  However, NOT TO WORRY if you are only familiar the older more POSIX styles, there are still plenty of options
 #  for contributions to the quickemu built-ins, particularly with this file:
-#  Use 4 space tabs with this file, as with QuickGet, so that code can be directly pasted into here and tweaked.
+#  4 space tabs may be used with this file, as with QuickGet, so that code can be directly pasted into here and tweaked.
+#  However, 2 space is the normal qqX tabbing. Try to keep the tabbing consistent within sections, where possible.
 #  QuickGet and qqX house styles may be mixed, WHICHEVER IS EASIEST. See notes at end for qqX coding style.
 
 #  This script is sourced when running a Quickget builtin. It remains variable isolated from running instances of qqX.
-#  Take care to maintain QuickGet variable name continuity where needed.
+#  However, the builtin will pick up the qqX library location. Take care to maintain QuickGet variable name continuity where needed.
 
 #  To test code, run './quickget --check distroname' etc from a terminal opened in the relevant builtin folder.
 
@@ -528,7 +529,8 @@ function get_parrotsec() {
     HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -B 30 'sha384' | grep "${ISO}" | cut -d' ' -f1)"
     echo "${URL}/${ISO} ${HASH}"
 }
-## FIX mate, update url and make dynamic
+
+## FIX hash, update url and make dynamic
 function releases_pclinuxos() {
     echo latest
 }
@@ -577,14 +579,14 @@ function get_slint() {
 
 ## UPDATE
 function releases_sparkylinux() {
-    printf "" > "/tmp/qGet.Mods.REL.data.txt" ; echo "Rolling Stable"
+    echo "Rolling Stable"
 }
 function editions_sparkylinux() {
     # May 2025 > listing task tends to exceed quickget's capabilities but July 2025 now allows Mods installer notes
     # Website subject to change, plus older specialist versions still being listed in addition to the newer ones
-    if [[ ! $RELEASE ]]; then  echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI  MinimalGUI_32bit MinimalCLI_32bit"
+    if [[ ! $RELEASE ]]; then  echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
     elif [[ $RELEASE == "Rolling" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
-    elif [[ $RELEASE == "Stable" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI MinimalGUI_32bit MinimalCLI_32bit"
+    elif [[ $RELEASE == "Stable" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
     fi
 }
 function get_sparkylinux() {
@@ -771,6 +773,336 @@ function get_void() {
 # For special and oversized 'get' functions or "get_${OS} ()" overwrites, eg Windows or Mac
 # Normally place 'get' functions next to releases and editions
 
+function unattended_windows() {
+
+  mkdir -p "${1}/unattended" 2>/dev/null
+
+  RndSeq="$( (tr -cd 'b-zB-Z1-9' | tr -d 'eiouyEIOUY' | head -c 16) < /dev/urandom )"
+  {
+    echo "Admin  $RndSeq"
+    echo; echo "# Password recorded to hand but OS isolated. May be changed ...."
+  } > "${1}/Credentials.txt"
+  # Strengthen: Quickemu uses Quickemu/Quickemu for Admin ....
+
+  cat << 'EOF' > "${1}/unattended/autounattend.xml"
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend"
+  xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!--
+       For documentation on components:
+       https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/
+  -->
+ <settings pass="offlineServicing">
+    <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <EnableLUA>false</EnableLUA>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <ComputerName>*</ComputerName>
+    </component>
+  </settings>
+
+  <settings pass="generalize">
+    <component name="Microsoft-Windows-PnPSysprep" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <PersistAllDeviceInstalls>true</PersistAllDeviceInstalls>
+    </component>
+    <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <SkipRearm>1</SkipRearm>
+    </component>
+  </settings>
+
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <SkipAutoActivation>true</SkipAutoActivation>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <ComputerName>*</ComputerName>
+      <OEMInformation>
+        <Manufacturer>qqX Project</Manufacturer>
+        <Model>qqX</Model>
+        <SupportHours>24/7</SupportHours>
+        <SupportPhone></SupportPhone>
+        <SupportProvider>qqX Project</SupportProvider>
+        <SupportURL>https://qqxproject.org</SupportURL>
+      </OEMInformation>
+      <OEMName>qqX Project</OEMName>
+      <ProductKey>W269N-WFGWX-YVC9B-4J6C9-T83GX</ProductKey>
+    </component>
+    <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <CEIPEnabled>0</CEIPEnabled>
+    </component>
+  </settings>
+
+  <settings pass="windowsPE">
+    <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <Diagnostics>
+        <OptIn>false</OptIn>
+      </Diagnostics>
+      <DiskConfiguration>
+        <Disk wcm:action="add">
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+          <CreatePartitions>
+            <!-- Windows RE Tools partition -->
+            <CreatePartition wcm:action="add">
+              <Order>1</Order>
+              <Type>Primary</Type>
+              <Size>256</Size>
+            </CreatePartition>
+            <!-- System partition (ESP) -->
+            <CreatePartition wcm:action="add">
+              <Order>2</Order>
+              <Type>EFI</Type>
+              <Size>128</Size>
+            </CreatePartition>
+            <!-- Microsoft reserved partition (MSR) -->
+            <CreatePartition wcm:action="add">
+              <Order>3</Order>
+              <Type>MSR</Type>
+              <Size>128</Size>
+            </CreatePartition>
+            <!-- Windows partition -->
+            <CreatePartition wcm:action="add">
+              <Order>4</Order>
+              <Type>Primary</Type>
+              <Extend>true</Extend>
+            </CreatePartition>
+          </CreatePartitions>
+          <ModifyPartitions>
+            <!-- Windows RE Tools partition -->
+            <ModifyPartition wcm:action="add">
+              <Order>1</Order>
+              <PartitionID>1</PartitionID>
+              <Label>WINRE</Label>
+              <Format>NTFS</Format>
+              <TypeID>DE94BBA4-06D1-4D40-A16A-BFD50179D6AC</TypeID>
+            </ModifyPartition>
+            <!-- System partition (ESP) -->
+            <ModifyPartition wcm:action="add">
+              <Order>2</Order>
+              <PartitionID>2</PartitionID>
+              <Label>System</Label>
+              <Format>FAT32</Format>
+            </ModifyPartition>
+            <!-- MSR partition does not need to be modified -->
+            <ModifyPartition wcm:action="add">
+              <Order>3</Order>
+              <PartitionID>3</PartitionID>
+            </ModifyPartition>
+            <!-- Windows partition -->
+              <ModifyPartition wcm:action="add">
+              <Order>4</Order>
+              <PartitionID>4</PartitionID>
+              <Label>Windows</Label>
+              <Letter>C</Letter>
+              <Format>NTFS</Format>
+            </ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+      </DiskConfiguration>
+      <DynamicUpdate>
+        <Enable>true</Enable>
+        <WillShowUI>Never</WillShowUI>
+      </DynamicUpdate>
+      <ImageInstall>
+        <OSImage>
+          <InstallTo>
+            <DiskID>0</DiskID>
+            <PartitionID>4</PartitionID>
+          </InstallTo>
+          <InstallToAvailablePartition>false</InstallToAvailablePartition>
+        </OSImage>
+      </ImageInstall>
+      <RunSynchronous>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassCPUCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>2</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>3</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>4</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+      </RunSynchronous>
+      <UpgradeData>
+        <Upgrade>false</Upgrade>
+        <WillShowUI>Never</WillShowUI>
+      </UpgradeData>
+      <UserData>
+        <AcceptEula>true</AcceptEula>
+        <FullName>Admin</FullName>
+        <Organization>qqX Project</Organization>
+        <!-- https://docs.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys -->
+        <ProductKey>
+          <Key>W269N-WFGWX-YVC9B-4J6C9-T83GX</Key>
+          <WillShowUI>Never</WillShowUI>
+        </ProductKey>
+      </UserData>
+    </component>
+
+    <component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <!--
+           This makes the VirtIO drivers available to Windows, assuming that
+           the VirtIO driver disk is available as drive F: (keep as in qqX 1.12 fix)
+           https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/README.md
+
+           Also see: https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/data/virtio-win-pre-installable-drivers-win-11.xml
+           as it seems that NOT all drivers can be pre-installed ...
+           BUT this link/file is from 'old-drivers' and there is no link to 'current-drivers'
+           AND the given list is out of date, SO use a reduced list, importantly the scsi and stor which featured in the 1.12 fix.
+           Also add split output, as the original only had w10 listed.
+      -->
+EOF
+
+  if [[ $RELEASE == "11" ]]; then
+    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+      <DriverPaths>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+          <Path>F:\vioscsi\w11\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+          <Path>F:\viostor\w11\amd64</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+EOF
+  else
+    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+      <DriverPaths>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+          <Path>F:\vioscsi\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+          <Path>F:\viostor\w10\amd64</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+EOF
+  fi
+
+# shellcheck disable=SC2129
+cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+    </component>
+  </settings>
+
+    <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <AutoLogon>
+        <Password>
+EOF
+
+  printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
+
+  cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+          <PlainText>true</PlainText>
+        </Password>
+        <Enabled>true</Enabled>
+        <Username>Admin</Username>
+      </AutoLogon>
+      <DisableAutoDaylightTimeSet>false</DisableAutoDaylightTimeSet>
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <NetworkLocation>Home</NetworkLocation>
+        <ProtectYourPC>3</ProtectYourPC>
+        <SkipUserOOBE>true</SkipUserOOBE>
+        <SkipMachineOOBE>true</SkipMachineOOBE>
+        <VMModeOptimizations>
+          <SkipWinREInitialization>true</SkipWinREInitialization>
+        </VMModeOptimizations>
+      </OOBE>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Password>
+EOF
+
+  printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
+
+  cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+              <PlainText>true</PlainText>
+            </Password>
+            <Description>Admin</Description>
+            <DisplayName>qqX community</DisplayName>
+            <Group>Administrators</Group>
+            <Name>Admin</Name>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+      <RegisteredOrganization>qqX Project</RegisteredOrganization>
+      <RegisteredOwner>Admin</RegisteredOwner>
+      <FirstLogonCommands>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>msiexec /i F:\virtio-win-gt-x64.msi /passive /qn</CommandLine>
+          <Description>Install virtio drivers</Description>
+          <Order>1</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>msiexec /i E:\spice-vdagent-x64-0.10.0.msi /passive /qn</CommandLine>
+          <Description>Install spice-vdagent SPICE agent</Description>
+          <Order>2</Order>
+        </SynchronousCommand>
+       <SynchronousCommand wcm:action="add">
+          <CommandLine>msiexec /i E:\spice-webdavd-x64-latest.msi /passive /qn</CommandLine>
+          <Description>Install spice-webdavd file sharing agent</Description>
+          <Order>3</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>F:\virtio-win-guest-tools.exe /quiet</CommandLine>
+          <Description>Install virtio tools</Description>
+          <Order>4</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>cmd /c POWERCFG -H OFF</CommandLine>
+          <Description>Disable Hibernation</Description>
+          <Order>5</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+        <CommandLine>cmd /c net accounts /maxpwage:unlimited</CommandLine>
+        <Description>Local account passwords never expire</Description>
+        <Order>6</Order>
+      </SynchronousCommand>
+      </FirstLogonCommands>
+    </component>
+  </settings>
+</unattend>
+EOF
+
+  echo "Downloading Spice drivers..."
+  web_get https://www.spice-space.org/download/windows/spice-webdavd/spice-webdavd-x64-latest.msi "${VM_PATH}/unattended"
+  web_get https://www.spice-space.org/download/windows/vdagent/vdagent-win-0.10.0/spice-vdagent-x64-0.10.0.msi "${VM_PATH}/unattended"
+
+  # Spice downloads are difficult to enable dynamically as they are infrequent and differ in format.
+  # However, a qqX based version notifier is possible:
+
+  LatestSpiceAgent="$(web_pipe "https://www.spice-space.org/download/windows/vdagent" | tr '"' '\n' | grep -s vdagent | fv -Q -M)"
+  if fv -qg "$LatestSpiceAgent 0.10.0" ; then
+    echo; echo "A NEWER Spice agent has been found at https://www.spice-space.org/download/windows/vdagent"
+    echo "but auto adjusting downloads are difficult to enable for the Spice website:"
+    echo; echo "After the installation is finished, please manually update Spice to version $LatestSpiceAgent from inside Windows"
+    echo; echo "Please report this at https://github.com/qqxproject/qqX/issues "
+    echo "if a fix is not already in the development branch, so that a fix can be released."
+  fi
+
+  # REMOVE - UsbDk is for Hosts (aka clients), not for Guests.
+  # See: https://www.ovirt.org/documentation/virtual_machine_management_guide/#sect-Configuring_USB_Devices
+  # web_get https://www.spice-space.org/download/windows/usbdk/UsbDk_1.0.22_x64.msi "${VM_PATH}/unattended"
+
+  # passwords never expire: See https://github.com/quickemu-project/quickemu/issues/1622
+
+  echo "Making unattended.iso"
+  mkisofs -quiet -J -R -input-charset utf-8 -o "${VM_PATH}/unattended.iso" "${VM_PATH}/unattended/"
+
+}
+
 ##########################################
 
 ## OTHER FUNCTIONS
@@ -923,9 +1255,8 @@ function web_get() {
     # --continue-at -  will continue/resume a previous file transfer but we need to make sure we actually have a connection to start with ...
     tput civis ; echo
     local CurlParallel=
-    Curl_NoPara=1 # Freespirit only, for moment.
     if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
-        CurlParallel="--parallel" ; printf "  Multiplexed parallel download: \n\n"
+        CurlParallel="--parallel" ; printf "  qqX multiplexed parallel download: \n\n"
     fi
     if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
     --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
@@ -1109,6 +1440,13 @@ case "${1}" in
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."
         printf "\n\n----------------------------------------------------------------------------------\n\n"
         exit 0 ;;
+
+    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possibile:
+
+    --curl-no-para)
+        Curl_NoPara=1 ; shift
+    ;;
+
 esac
 
 ##########################################

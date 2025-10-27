@@ -351,7 +351,7 @@ function qqX_snapshot_delete {
   printColor "\n\n qqX Snapshot Delete function "
   printf "\n\n %s  (reselection & cancel prompts are given before starting)" "$Selected_DriveName"
 
-  # Create range-selectable array
+  # Create range-selectable array (finds lines with a date entry)
   SnapListString="$("$QEMU_IMG" info "$Selected_Drive" | grep '[0-9][0-9]:')"
 
   # turns the multiline string into raw array with one whole line for each entry making each array element

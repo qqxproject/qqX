@@ -140,25 +140,27 @@ function check_screen_percentage_and_output {
       fi
     fi
 
-    if [[ $SDL_ScreenSize ]]; then
+    # Windows new installs will do silly 250% scaling if large initial values are used
+    if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]]; then
+      [[ $Mon_xRes -le 1920 ]] && SDL_ScreenSize="1280x720"
+      [[ $Mon_xRes -le 2560 ]] && SDL_ScreenSize="1920x1080"
+      [[ $Mon_xRes -le 3840 ]] && SDL_ScreenSize="2560x1440"
+    fi
 
+    if [[ $SDL_ScreenSize ]]; then
       xRes="$(cut -d 'x' -f 1 <<< "$SDL_ScreenSize")"
       yRes="$(cut -d 'x' -f 2 <<< "$SDL_ScreenSize")"
       xRes="$(tr -cd "[:digit:]" <<< "$xRes")"
       yRes="$(tr -cd "[:digit:]" <<< "$yRes")"
-
       if [[ ! $xRes || ! $yRes ]]; then
         printColor "\n\n  ERROR: check specified sizes in settings \n\n "
         SDL_ScreenSize_Error="> display size error"
       fi
-
     elif [[ $SDL_ScreenPercent ]]; then
-
       xRes="$(bc <<< "scale=0; $Mon_xRes*$SDL_ScreenPercent/100")"
       yRes="$(bc <<< "scale=0; $Mon_yRes*$SDL_ScreenPercent/100")"
       SDL_ScreenSize_Cmd=" --width $xRes --height $yRes"
       SDL_ScreenSize="${xRes}x${yRes}"
-
     else
       xRes=1152 && yRes=648
     fi
@@ -536,14 +538,19 @@ function refresh_conf_vars_and_values {
 
     # CLEAR & RE-POPULATE the ConfClearanceLog with current fields, for the next occasion
 
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
+    # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
+
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
     printf "#%s/%s" "$VM_Conf_Dir" "$VM_InstanceName"  > "$ConfClearanceLog"
 
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     mapfile -t ConfClearance_Arr < "$VM_Conf_Dir/$VM_Conf_File"
 
     for Line in "${ConfClearance_Arr[@]}"; do
-      if [[ $Line ]] && [[ "$Line" == *'='* ]]; then
+      if [[ $Line ]] && [[ "$Line" == *'='* ]] && [[ "$(tr -cd "[:graph:]" <<< "$Line" | head -c 1)" != '#' ]]; then
         if [[ "$Line" == *'QemuError_VM_Filter'* ]]; then Line='QemuError_VM_Filter=()'
         else
           Line="$(cut -d'=' -f1 <<< "$Line")"
@@ -551,18 +558,20 @@ function refresh_conf_vars_and_values {
           [[ "$Line" == *'#'* ]] && Line="${Line/'#'/}"
         fi
         printf "\n\n%s" "$Line" >> "$ConfClearanceLog"
-        # Note that commented out lines need including, in case the comment marker gets removed during a settings edit
-        # BUT NB any added comments with '=' will get filtered
+        # ver 1.14 - enhance allowing through commented lines containing '=' and other characters
       fi
     done
 
-    # make sure any settings edits have finished writing
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
     # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
     source "$ConfClearanceLog"
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+   [[ $ConfSettingsAdjusted ]] &&  while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     source "$VM_Conf_Dir/$VM_Conf_File"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 2:" &&  main_loop_diagnostics

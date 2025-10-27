@@ -97,8 +97,9 @@ function_config_tune_up ()  {
   printColor "\n\n  CHECK ME: \n\n"
   cat "$TuneUpTargetFile"
 
-  if [[ $ShowTxTexts ]]; then printColor  "\n  [tx] %s" "$MainTxOptionLine"
-  else printf  "\n  [tx] %s" "$MainTxOptionLine"
+  # Two line feeds as some .conf files may not have any space at the end. But some may have too much ... REVIEW ?
+  if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
+  else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
   fi
   printColor "\n\n  All changes made here, may be reversed:"
   printf "\n\n  A backup of your current configuration has now been date recorded & placed in the Distro Folder"
@@ -138,12 +139,13 @@ function_config_tune_up ()  {
   done
 
   if [[ $ConfEdit_Qstart == "q" ]]; then
-    printColor "\n  POST-INSTALL Linux distros:"
-    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste and USB redirection."
+    printColor "\n  Post-install LINUX distros:"
+    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
     printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
+    printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
-      printf "\n\n  The qqX 'shared drive' is available to help with sharing between distros"
+      printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
     else
       printColor "\n\n  ALL distros post-install:"
       printf "\n\n  Setting up a qqX 'shared drive' can also help with sharing between distros"
@@ -301,27 +303,20 @@ function_config_tune_up ()  {
   [[ $CoresSetNumber == "q" ]] && return
 
   if [[ $CoresSetNumber && $(tr -cd "[:digit:]" <<< "$CoresSetNumber") ]]; then
-
     printf "cpu_cores=\"%s\"\n"  "$CoresSetNumber"  >> "$TuneUpTargetDraft"
-
   elif [[ $CoresSetNumber == "c" ]]; then  printf "%s\n" "$ConfLine" >> "$TuneUpTargetDraft"
-
   elif [[ $CoresSetNumber == "d" ]]; then  true
-
   else
-
     if [[ $ThreadsSuggestLower ]]; then
       printf "cpu_cores=\"%s\"\n"  "$ThreadsSuggestLower"  >> "$TuneUpTargetDraft"
       printf "\n\n  Max cores set to %s " "$ThreadsSuggestLower"
     fi
-
   fi
 
   SharedRAM_NotFound=
   RAM_Available=
 
   printColor "\n\n\n\n  Memory showing: \n\n"
-
   free --si -h
 
   RAM_Available="$(free --giga | tr ' ' '\n' | grep -m 1 [0-9] 2>/dev/null)"
@@ -330,26 +325,19 @@ function_config_tune_up ()  {
   # & has been traced to 'free' being aliased.  Manjaro Devs may wish to comment this out in ~/bashrc
 
   # Of note, Qemu defaults to 128 MiB (mebibytes) but the ram values are taken as MB or GB
-
   # Also see https://github.com/quickemu-project/quickemu/issues/899
 
   if [[ ! $RAM_Available ]]; then
-
     RAM_Available="$(grep MemTotal /proc/meminfo | cut -d':' -f2 | tr -cd '[:digit:]' 2>/dev/null)"
     RAM_Available="$(bc <<< "scale=1; $RAM_Available/999999" 2>/dev/null)"
     SharedRAM_NotFound=1
-
   else
-
     Shared_RAM_Allocated="$(free --mega -h | tr ' ' '\n' | grep -m 4 [0-9] | tail -n 1  2>/dev/null)"
-
     if [[ "$Shared_RAM_Allocated" == *M* ]]; then
       Shared_RAM_Allocated="$(cut -d'M' -f1 <<< "$Shared_RAM_Allocated")"
       if [[ $(bc <<< "$Shared_RAM_Allocated < 500") == 1 ]]; then Shared_RAM_Allocated= ; else Shared_RAM_Allocated="1" ; fi
     fi
-
     [[ "$Shared_RAM_Allocated" == *G* ]] && Shared_RAM_Allocated="${Shared_RAM_Allocated/G/}"
-
   fi
 
   [[ ! $Shared_RAM_Allocated ]] && SharedRAM_NotFound=1
@@ -389,16 +377,12 @@ function_config_tune_up ()  {
   ConfLine="$(grep -s 'ram=' "$TuneUpTmpCopy")"
 
   if [[ $ConfLine ]]; then
-
     printf "\n\n  CURRENT setting:  %s" "$ConfLine"
     Current_RAM="$(tr -cd "[:digit:]" <<< "$ConfLine")"
     [[ $Current_RAM != "$RAM_Suggested_Higher"  ]] && printColor "   [c] to use current  "
-
   fi
 
-
   RAM_SetNumber=
-
   printColor "\n\n  [enter] use %s   [integer] choose   " "$RAM_Suggested_Higher"
   printColor "[d] to use quickemu defaults  [q] quit tune-up \n\n"
   read -rp  "  >  "  RAM_SetNumber
@@ -407,64 +391,54 @@ function_config_tune_up ()  {
   [[ $RAM_SetNumber == "q" ]] && return
 
   if [[ $RAM_SetNumber ]] && [[ $(tr -cd "[:digit:]" <<< "$RAM_SetNumber") ]]; then printf "ram=\"%sG\"\n"  "$RAM_SetNumber"  >> "$TuneUpTargetDraft"
-
   elif [[ $RAM_SetNumber == "d" ]]; then true
-
   elif [[ $RAM_SetNumber == "c" ]]; then printf "%s\n" "$ConfLine" >> "$TuneUpTargetDraft"
-
   else [[ $RAM_Suggested_Higher ]] &&  printf "ram=\"%sG\"\n"  "$RAM_Suggested_Higher"  >> "$TuneUpTargetDraft"
-
   fi
 
-
   # add in other conf lines
-
   printf "\n" >> "$TuneUpTargetDraft"
-
   mapfile -t TuneUpArr < "$TuneUpTmpCopy"
-
   for Line in "${TuneUpArr[@]}"; do
     if [[ $(tr -cd "[:graph:]" <<< "$Line") ]] && [[ "$Line" != *'#!'* ]] && [[ "$Line" != 'disk_size='* ]] \
     && [[ "$Line" != 'cpu_cores='* ]] && [[ "$Line" != 'ram='* ]] && [[ "$Line" != '#tpm='* ]]  && [[ "$Line" != 'tpm='* ]] \
     && [[ "$Line" != *'cureboot='* ]]; then
       [[ "$Line" == '# Secure Boot'* ]] && continue
       [[ "$Line" == '# For Windows'* ]] && continue
+      [[ "$Line" == '# for Windows'* ]] && Line=
       [[ "$Line" == '# although early'* ]] && continue
+      # ver 1.14 - enhance allowing through commented lines containing '=' and other characters
+      # also see 'refresh_conf_vars_and_values' and 'ConfClearanceLog'
+      [[ "$(tr -cd "[:graph:]" <<< "$Line" | head -c 1)" == '#' ]] && printf "\n" >> "$TuneUpTargetDraft"
       printf "%s\n" "$Line" >> "$TuneUpTargetDraft"
     fi
   done
 
   # Check for OS specifics
-
   guest_os=
-
   ConfLine="$(grep -s 'guest_os=' "$TuneUpTmpCopy")"
-
   if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
-
     printColor "\n\n  WARNING  a line 'guest_os=\"xxx\"' should be present"
     printf "\n\n  This should be added manually, where  =\"linux\"  \"windows\"  or \"macos\" are valid options"
     printf "\n\n  Re-run this checker after the guest_os line has been added"
-
   else
-
     eval "$ConfLine"
-
     if [[ $guest_os == "windows" ]]; then
-
       printColor "\n\n Windows: "
       printf "\n\n  Software TPM should be set as \"on\" until at least the registration process is complete"
-      printf "\n\n  but can be set to \"off\" at later stages. Lines may commented-out with a \"#\" \n"
-      printf "\n\n  Secure Boot should normally be set to \"off\" but early 2025 Insider betas are now requesting this feature."
-      printf "\n\n  Tests on 2025 Insider are showing seemingly successful outcomes when set to \"on\" \n"
+      printf "\n\n  but can possibly be set to \"off\" at later stages. Lines may commented-out with a \"#\" \n"
+      printf "\n\n  Older releases may be better set to \"off\" but early 2025 Insider betas are now requesting this feature."
+      printf "\n\n  Tests on 25H2 are now showing better outcomes when set to \"on\" \n"
 
-      # NB any added comments with '=' will get filtered
       ConfLine="$(grep -s '# for Windows, normally' "$TuneUpTmpCopy")"
+      # see https://github.com/qqxproject/qqX/issues/12
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
-        printf "\n\n# For Windows, normally set tpm as on & secureboot as off,\n# although early 2025 insider betas are now needing secureboot as \"on\"\n"  >> "$TuneUpTargetDraft"
+        { printf "\n\n# For Windows, normally set both tpm as on & secureboot as on,"
+          printf "\n# although for pre-25H2 versions, this may be better with secureboot post-install set to \"off\"\n"
+        } >> "$TuneUpTargetDraft"
       fi
       {   printf "\ntpm=\"on\""
-          printf "\nsecureboot=\"off\"\n\n"
+          printf "\nsecureboot=\"on\"\n\n"
       }   >> "$TuneUpTargetDraft"
 
     elif [[ $guest_os == "macos" ]]; then
@@ -521,12 +495,13 @@ function_config_tune_up ()  {
 
     fi
 
-    printColor "\n\n  POST-INSTALL Linux distros:"
-    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste and USB redirection."
+    printColor "\n\n  Post-install LINUX distros:"
+    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
     printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
+    printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
-      printf "\n\n  The qqX 'shared drive' is available to help with sharing between distros"
+      printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
     else
       printColor "\n\n  ALL distros post-install:"
       printf "\n\n  Setting up a qqX 'shared drive' can also help with sharing between distros"

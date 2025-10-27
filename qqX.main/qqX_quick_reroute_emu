@@ -88,47 +88,76 @@ function quickemu {
 
       Mounted_ISO_Return=
 
-      if [[ $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
-        printColor "  Press 'esc' when 'Start boot Option' appears ..."
-        printf " to access the BIOS or boot an ISO, "
-        printf "\n\n  Mounted ISO: Select 'Boot manager' and select 'QEMU DVD-ROM' from the list. "
-        printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
-        printColor "\n\n  Current ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
-        printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
-        printColor "\n\n  [enter] to continue  [b] to go back \n\n"
-        read -rp "  >  "  Mounted_ISO_Return
-
-      elif [[ ! $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
-        printColor "  Press 'esc' when 'Start boot Option' appears ..."
-        printf " to access the BIOS "
-        if [[ $img ]]; then
-          printf "\n\n  A 'live boot' ISO may be usable for disk management"
-          printf "\n\n  BUT this appears to be an 'IMG' based distro which may need special booting."
-        else
+      [[ $Loop_Diagnostics ]] && printf "\n\n pre drives_and_snapshots :" &&  main_loop_diagnostics
+      drives_and_snapshots  "info_current"
+      printf "\n"
+      if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
+        printColor "  DISK.QCOW2 ERROR  %s  \n\n  Return and run [disk] repair utils \n\n"  "$DiskChkStatus"
+        read -rp "  >  "
+        BreakAtVerboseArgs=1
+        VM_ExecBoot=
+        return
+      else
+        if [[ $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
+          printColor "  Press 'esc' when 'Start boot Option' appears ..."
+          printf " to access the BIOS or boot an ISO, "
+          printf "\n\n  Mounted ISO: Select 'Boot manager' and select 'QEMU DVD-ROM' from the list. "
           printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
+          printColor "\n\n  Current ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
+          printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
+          printColor "\n\n  [enter] to continue  [b] to go back \n\n"
+          read -rp "  >  "  Mounted_ISO_Return
+
+        elif [[ ! $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
+          printColor "  Press 'esc' when 'Start boot Option' appears ..."
+          printf " to access the BIOS "
+          if [[ $img ]]; then
+            printf "\n\n  A 'live boot' ISO may be usable for disk management"
+            printf "\n\n  BUT this appears to be an 'IMG' based distro which may need special booting."
+          else
+            printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
+          fi
+          printf "\n\n  NO ISO/DVD has been specifically mounted ... "
+          [[ $LiveBoot ]] && printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
+          printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
+          printColor "\n\n  [enter] to continue  [b] to go back \n\n"
+          read -rp "  >  "  Mounted_ISO_Return
+
+        elif [[ $BootStyle == "fast" ]]; then
+          printColor "  qqX Boot Manager may be session enabled in utils, if required ..."
+          if [[ $LiveBoot ]]; then
+            printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
+            [[ $img || $iso ]] && printf "\n\n  Booting from: %s  %s" "$(basename "$img")" "$(basename "$iso")"
+            printf "\n\n\n"
+          elif [[ $Mounted_ISO ]]; then
+            printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
+            printf "\n\n  Currently mounted ISO is '%s' \n\n\n" "$Mounted_ISO_DisplayName"
+          else
+            printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file \n\n\n"
+          fi
+        elif [[ $BootStyle == "slow" ]]; then
+          printColor "  Press 'esc' to access BIOS Boot Manager, when 'Start boot Option' appears"
+          if [[ $LiveBoot ]]; then
+            printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
+            [[ $img || $iso ]] && printf "\n\n  Booting from: %s  %s" "$(basename "$img")" "$(basename "$iso")"
+          elif [[ $Mounted_ISO ]]; then printf "\n\n  Currently mounted ISO is '%s' \n\n" "$Mounted_ISO_DisplayName"
+          else printf "\n\n  NO ISO/DVD has been specifically mounted ... "
+          fi
+          printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file \n\n\n"
         fi
-        printf "\n\n  NO ISO/DVD has been specifically mounted ... "
-        [[ $LiveBoot ]] && printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
-        printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
-        printColor "\n\n  [enter] to continue  [b] to go back \n\n"
-        read -rp "  >  "  Mounted_ISO_Return
-
-      elif [[ $BootStyle == "fast" ]]; then
-        printColor "  qqX Boot Manager may be session enabled in utils, if required ..."
-        printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file \n\n"
-
-      elif [[ $BootStyle == "slow" ]]; then
-        printColor "  Press 'esc' to access BIOS Boot Manager, when 'Start boot Option' appears"
-        [[ ! $Mounted_ISO ]] && printf "\n\n  NO ISO/DVD has been specifically mounted ... "
-        [[ $LiveBoot ]] && printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
-        printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file \n\n"
-
       fi
 
-      if [[ $BootStyle == "fast" ]] && [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]]; then
+      # qqX 1.14 removes need for detailed disk scrutiny, so xx this for windows but leave in case needed later
+      if [[ $BootStyle == "fast" ]] && [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *xx-windows* ]]; then
         printf "  [enter] to continue  [b] to go back \n\n"
         read -rp "  >  " LiveDoubleCheck
         [[ $LiveDoubleCheck ]] && return
+      fi
+
+      # But add qqX 1.14 onwards credentials display
+      if [[ "${VM_InstanceName,,}" == *windows* ]] && [[ $(cat "$VM_Conf_Dir/$VM_InstanceName/Credentials.txt" 2>/dev/null) ]] ; then
+        printColor "  Password Reminder:"
+        printf "  %s (system isolated) \n\n\n" "$(head -n 1 "$VM_Conf_Dir/$VM_InstanceName/Credentials.txt")"
       fi
 
       if [[ $Mounted_ISO_Return ]]; then  return
@@ -137,23 +166,11 @@ function quickemu {
         # whether the run is made as [v] verbose & terminated
         printf "" > "/tmp/qqX_echo_output.log"
         printf "" > "$QemuErrorLog"
-        [[ $Loop_Diagnostics ]] && printf "\n\n pre drives_and_snapshots :" &&  main_loop_diagnostics
-        drives_and_snapshots  "info_current"
-        printf "\n"
-        if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
-          printColor "  DISK.QCOW2 ERROR  %s  \n\n  Return and run [disk] repair utils \n\n"  "$DiskChkStatus"
-          read -rp "  >  "
-          BreakAtVerboseArgs=1
-          VM_ExecBoot=
-          return
-        fi
         [[ $Loop_Diagnostics ]] && printf "\n\n pre-sourcing qmod-boot :" &&  main_loop_diagnostics && printf "\n\n"
+        # Run boot sequence (which includes verbose routine and break sequence)
+        sleep 1
         source "/tmp/qmod-boot-temp"
         VM_ExecBoot=
-        if [[ $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
-          printColor "\n\n  Press 'esc' when 'Start boot Option' appears"
-          printf "\n\n  Select 'Boot manager' and select 'QEMU DVD-ROM' from the list. \n\n"
-        fi
         if [[ $BreakAtVerboseArgs ]]; then
           SpicyPID="$(pgrep spicy)"
           [[ $SpicyPID ]] && kill "$SpicyPID" 2>/dev/null &

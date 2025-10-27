@@ -47,15 +47,30 @@ else
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
-          printf "\n\n"
+          check_screen_percentage_and_output
+          printf "\n\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
-          printColor "  IMPORTANT >>> read the TL;DR for setting up the INITIAL DRIVERS at https://qqxproject.org/docs/Guides/Windows-OS"
-          printf "\n\n  MAKE SURE to follow the pictures in the installer section"
-          printf "\n\n  MAKE SURE to follow up with virtio-win-gt-x64.msi  <<< IMPORTANT \n"
+          printColor "  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
+          printf "\n\n  However, take a moment to overview things at https://qqxproject.org/docs/Guides/Windows-OS"
+          printf "\n\n  MAKE SURE to have followed the 'swtpm' and 'mkisofs' setup   <<< IMPORTANT \n"
+          CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
+          if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
+            printColor "\n\n  WARNING: this CPU is reported to no longer support newer versions of Windows."
+            printf "\n\n  The command line utility 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
+            printf "\n  meaning that installation is unlikely to be either successful or to be reliable \n\n"
+          fi
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
         fi
+      elif [[ "${VM_InstanceName,,}" == *windows* ]] && [[ "$Mounted_ISO" == *virtio* ]]; then
+        printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
+        # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
+        printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
+        printColor "\n\n  The Windows ISO is unlikely to be needed so may be archived."
+        printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
+        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+        printf "\n"
       else
         printf "   [bm] > "
         if [[ $BootStyle == "fast" ]]; then
@@ -112,7 +127,25 @@ else
       printColor "\n\n  ---------------------------------------------------------------------------- "
 
     fi
-    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS "
+
+    [[ $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
+    [[ $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
+    [[ $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
+
+    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
+    if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
+    else [[ $MainDrive ]] && printf "   main (%s)" "$SnapCountMain"
+    fi
+    if [[ $SharedDrive ]]; then
+      if [[ $SnapCountShared -gt 15 ]]; then printColor "  shared (%s)" "$SnapCountShared"
+      else printf "  shared (%s)" "$SnapCountShared"
+      fi
+    fi
+    if [[ $SecondDrive ]]; then
+      if [[ $SnapCountSecond -gt 15 ]]; then printColor "  second (%s)" "$SnapCountSecond"
+      else printf "  second (%s)" "$SnapCountSecond"
+      fi
+    fi
     printf "\n"
 
     if [[ ! $ShowUtilsMenu ]]; then
@@ -169,7 +202,7 @@ else
 
         printColor  "\n\n  [d]   start with SDL display"
 
-        if [[ $guest_os == "windows" ]]; then  printColor "   (size as set in Windows)"
+        if [[ $guest_os == "windows" ]]; then  printColor "   (size as set by qqX and/or by Windows)"
         elif [[ $guest_os == "macos" ]] && [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then  printColor " (size determined by MacOS with this QE version)"
         elif [[ "$SDL_ScreenSize_Cmd" == *screenpct* ]]; then printColor " (%s%%)    [df]  97%% "  "$SDL_ScreenPercent"
         elif [[ "$SDL_ScreenSize_Cmd" == *width* ]] && [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
@@ -380,7 +413,8 @@ else
     fi
     printf  "\n\n"
 
-    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"; fi
+    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"
+    fi
 
     check_disk_is_okay
     check_if_disk_needs_a_cleanup

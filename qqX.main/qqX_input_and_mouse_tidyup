@@ -168,15 +168,11 @@ fi
 if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised || $XDG_FileType_Recognised ]]; then
   refresh_sources_and_load_VM_arrays
   while true; do
-    New_ISO_Start=
-    Cancel_ISO=
-    ISO_NewVM_Name=
-    ISO_OvWr=
-    ISO_NewFolder=
-    MoveIso=
-    printColor "\n\n  Set up this ISO as a qqX/quickemu VM? "
+    New_ISO_Start= ; Cancel_ISO= ; ISO_NewVM_Name=
+    ISO_OvWr= ; ISO_NewFolder= ; MoveIso=
+    printColor "\n\n  Set up this ISO as a qqX/quickemu VM: "
     printf "\n\n  %s\n" "$XDG_ISO_Name"
-    printColor "\n\n  Standard LINUX ISO's only"
+    printColor "\n\n  Standard ISO's only. Some distros may need special treatments:"
     printf "\n\n  For: batocera | freedos | haiku | kolibrios | reactos | truenas "
     printf "\n\n  solaris | dragonflybsd | freebsd | netbsd | openbsd "
     printf "\n\n  Follow up edit the guest_os= .conf line  eg guest_os=\"batocera\""

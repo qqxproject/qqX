@@ -7,7 +7,7 @@
 # For qqX use with C.UTF-8 locale, not:  export LC_ALL=C
 
 # This section enables testing via './quickget --check distroname' from a terminal opened in the built-ins folder:
-if [[ -e "$(pwd)/qqX_quickget_mods" ]]; then
+if [[ -e "$(pwd)/qqX_quickGet_mods" ]]; then
     if [[ $(pgrep -aAi qqX 2>/dev/null) ]] ; then
         printf "\n\n  qqX running elsewhere ... \n\n" ; exit 1
     else
@@ -3739,7 +3739,7 @@ fi
 
 mapfile -t -d':' PathArr <<< "$PATH"
 for QG_Modpath in "${PathArr[@]}"; do
-    [[ -e "$QG_Modpath/qqX_quickget_mods" ]] && source "$QG_Modpath/qqX_quickget_mods" && break
+    [[ -e "$QG_Modpath/qqX_quickGet_mods" ]] && source "$QG_Modpath/qqX_quickGet_mods" && break
 done
 
 case "${1}" in

@@ -2,7 +2,7 @@
 
 # For qqX use with C.UTF-8 locale, not:  export LC_ALL=C
 # This section enables testing via './quickget --check distroname' from a terminal opened in the built-ins folder:
-if [[ -e "$(pwd)/qqX_quickget_mods" ]]; then
+if [[ -e "$(pwd)/qqX_quickGet_mods" ]]; then
     if [[ $(pgrep -aAi qqX 2>/dev/null) ]] ; then
         printf "\n  qqX running elsewhere ... \n\n" ; exit 1
     else
@@ -443,153 +443,151 @@ function configure_cpu() {
             MACHINE_TYPE="pc";;
 
         macos)
-        # A CPU with SSE4.1 support is required for >= macOS Sierra
-        # A CPU with SSE4.2 support is required for >= macOS Catalina
-        # A CPU with AVX2 support is required for >= macOS Ventura
+            # A CPU with SSE4.1 support is required for >= macOS Sierra
+            # A CPU with SSE4.2 support is required for >= macOS Catalina
+            # A CPU with AVX2 support is required for >= macOS Ventura
 
-        # qqX mod based on
-        # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2115516935
-        # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
-        # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
+            # qqX mod based on
+            # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2115516935
+            # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
+            # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
 
-        # Skylake-Server-v3 should be default
-        # See https://en.wikipedia.org/wiki/IMac_Pro#Technical_specifications
-        # Also retains IBRS spectre mitigation
-        # Tests suggest edit of .conf file to cpu_cores="8"  ie 4 core x 2 threads for MacOS to recognise Xeon
-        # Will work both with cpu_cores="16" and ="32" but 'About' will show Cpu as unrecognised, only sysctl will show the CPU name ...
-        # Other Xeon oddballs like 14 or 28 don't boot, even when forced.
-        # CascadeLake is Mac Pro 2019 but is practically identical to Skylake
-        # Whilst switching from Sky to Cascade still leaves 'About' displaying iMacPro 2017 ...
+            # Skylake-Server-v3 should be default
+            # See https://en.wikipedia.org/wiki/IMac_Pro#Technical_specifications
+            # Also retains IBRS spectre mitigation
+            # Tests suggest edit of .conf file to cpu_cores="8"  ie 4 core x 2 threads for MacOS to recognise Xeon
+            # Will work both with cpu_cores="16" and ="32" but 'About' will show Cpu as unrecognised, only sysctl will show the CPU name ...
+            # Other Xeon oddballs like 14 or 28 don't boot, even when forced.
+            # CascadeLake is Mac Pro 2019 but is practically identical to Skylake
+            # Whilst switching from Sky to Cascade still leaves 'About' displaying iMacPro 2017 ...
 
-        #CPU_MODEL="Haswell-v2"
-        CPU_MODEL="Skylake-Server-v3"
-        #CPU_MODEL="Cascadelake-Server-v3"
+            #CPU_MODEL="Haswell-v2"
+            CPU_MODEL="Skylake-Server-v3"
+            #CPU_MODEL="Cascadelake-Server-v3"
 
-        # A CPU with fma is required for Mac Graphics 'Metal' support (@flexiondotorg) # REVIEW add darwin hardware test ?
+            # A CPU with fma is required for Mac Graphics 'Metal' support (@flexiondotorg) # REVIEW add darwin hardware test ?
 
-        # Default Use Subtractive method: Set =1 or blank  Allow Qemu to add all, unless not present in host.
-        # Use "sysctl -a | grep machdep.cpu" at terminal in MacOS to see flags
-        # On initial tests, outperforms +ve method.
-         UseSubtractiveCPU=1
+            # Default Use Subtractive method: Set =1 or blank  Allow Qemu to add all, unless not present in host.
+            # Use "sysctl -a | grep machdep.cpu" at terminal in MacOS to see flags
+            # On initial tests, outperforms +ve method.
+            UseSubtractiveCPU=1
 
-        # Dev overwrite, for testing only
-         UseHostOverWrite=
+            # Dev overwrite, for testing only
+            UseHostOverWrite=
 
-        if [[ $UseSubtractiveCPU ]]; then
+            if [[ $UseSubtractiveCPU ]]; then
 
-            CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
+                CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
 
-            case ${macos_release} in
-                ventura|sonoma|sequoia)
-                    # A CPU with AVX2 support is required for >= macOS Ventura
-                    if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
-                        echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
-                        echo "       Try macOS Monterey or Big Sur."
-                        exit 1
-                    fi ;;
-                catalina|big-sur|monterey)
-                    # A CPU with SSE4.2 support is required for >= macOS Catalina
-                    if ! check_cpu_flag sse4_2; then
-                        echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
-                        exit 1
-                    fi ;;
-                *)
-                    # A CPU with SSE4.1 support is required for >= macOS Sierra
-                    if ! check_cpu_flag sse4_1; then
-                        echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.1 support."
-                        exit 1
-                    fi ;;
-            esac
+                case ${macos_release} in
+                    ventura|sonoma|sequoia)
+                        # A CPU with AVX2 support is required for >= macOS Ventura
+                        if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
+                            echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
+                            echo "       Try macOS Monterey or Big Sur."
+                            exit 1
+                        fi ;;
+                    catalina|big-sur|monterey)
+                        # A CPU with SSE4.2 support is required for >= macOS Catalina
+                        if ! check_cpu_flag sse4_2; then
+                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
+                            exit 1
+                        fi ;;
+                    *)
+                        # A CPU with SSE4.1 support is required for >= macOS Sierra
+                        if ! check_cpu_flag sse4_1; then
+                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.1 support."
+                            exit 1
+                        fi ;;
+                esac
 
-            # rdtscp and invtsc, tsc, tsc_adjust, as neutral, neither on nor off
-            # ditto pcid for AMD and fp87 for Intel
+                # rdtscp and invtsc, tsc, tsc_adjust, as neutral, neither on nor off
+                # ditto pcid for AMD and fp87 for Intel
 
-            for FLAG in abm aes apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
-                        erms f16c fma fsgsbase fxsr invpcid lahf_lm lm \
-                        mca mce mmx movbe mpx msr mtrr nx pae pat pge pse popcnt pse36 \
-                        rdrand sep smep syscall vaes vpclmulqdq \
-                        x2apic xgetbv1 xsave xsaveopt; do
-                    if  ! check_cpu_flag "$FLAG"; then
+                for FLAG in abm aes apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
+                            erms f16c fma fsgsbase fxsr invpcid lahf_lm lm \
+                            mca mce mmx movbe mpx msr mtrr nx pae pat pge pse popcnt pse36 \
+                            rdrand sep smep syscall vaes vpclmulqdq \
+                            x2apic xgetbv1 xsave xsaveopt; do
+                        if  ! check_cpu_flag "$FLAG"; then
+                            QEMU_CPU_FLAG="${FLAG//_/-}"
+                            CPU+=",${QEMU_CPU_FLAG}=off"
+                        fi
+                done
+
+            else
+
+                CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,-pdpe1gb,+avx,+sse,+sse2,+ssse3,vmware-cpuid-freq=on"
+
+                case ${macos_release} in
+                    ventura|sonoma|sequoia)
+                        # A CPU with AVX2 support is required for >= macOS Ventura
+                        if check_cpu_flag sse4_2 && check_cpu_flag avx2; then
+                            CPU+=",+avx2,+sse4.1,+sse4.2"
+                        else
+                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 and AVX2 support."
+                            echo "       Try macOS Monterey or Big Sur."
+                            exit 1
+                        fi ;;
+                    catalina|big-sur|monterey)
+                        # A CPU with SSE4.2 support is required for >= macOS Catalina
+                        if check_cpu_flag sse4_2; then
+                            CPU+=",+sse4.1,+sse4.2"
+                        else
+                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
+                            exit 1
+                        fi ;;
+                    *)
+                        # A CPU with SSE4.1 support is required for >= macOS Sierra
+                        if check_cpu_flag sse4_1; then
+                            CPU+=",+sse4.1"
+                        else
+                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.1 support."
+                            exit 1
+                        fi ;;
+                esac
+
+                for FLAG in abm aes apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
+                            erms f16c fma fsgsbase fxsr invpcid invtsc lahf_lm lm \
+                            mca mce mmx movbe mpx msr mtrr nx pae pat pge pse popcnt pse36 \
+                            rdrand rdtscp sep smep syscall tsc tsc_adjust vaes vpclmulqdq \
+                            x2apic xgetbv1 xsave xsaveopt; do
+                        if check_cpu_flag "$FLAG"; then
+                            QEMU_CPU_FLAG="${FLAG//_/-}"
+                            CPU+=",+${QEMU_CPU_FLAG}"
+                        fi
+                done
+
+            fi
+
+            # Not many host CPU's will have AVX 512
+            if [[ "$CPU_MODEL" == 'Skylake-Server'* ]] || [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
+                for FLAG in clwb adx smap avx512f avx512dq avx512bw avx512cd avx512vl ; do
+                    if ! check_cpu_flag "$FLAG"; then
                         QEMU_CPU_FLAG="${FLAG//_/-}"
                         CPU+=",${QEMU_CPU_FLAG}=off"
                     fi
-            done
+                done
+            fi
 
-        else
+            # Only diff to Skylake is = PKU  AVX512VNNI  SPEC_CTRL  SPEC_CTRL_SSBD
+            # plus the VMX which is to be ignored, unless Host = Intel ?? REVIEW
+            # But Qemu doesn't allow spec ctrl for V3, at least
+            # And avx512_vnni has underscore in lscpu but not hyphenated in qemu, so:
+            if [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
+                if ! check_cpu_flag "pku"; then CPU+=",pku=off" ; fi
+                if ! check_cpu_flag "avx512_vnni"; then CPU+=",avx512vnni=off" ; fi
+            fi
 
-            CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,-pdpe1gb,+avx,+sse,+sse2,+ssse3,vmware-cpuid-freq=on"
+            [[ $UseHostOverWrite ]] && CPU="-cpu host,kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
 
-            case ${macos_release} in
-                ventura|sonoma|sequoia)
-                    # A CPU with AVX2 support is required for >= macOS Ventura
-                    if check_cpu_flag sse4_2 && check_cpu_flag avx2; then
-                        CPU+=",+avx2,+sse4.1,+sse4.2"
-                    else
-                        echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 and AVX2 support."
-                        echo "       Try macOS Monterey or Big Sur."
-                        exit 1
-                    fi ;;
-                catalina|big-sur|monterey)
-                    # A CPU with SSE4.2 support is required for >= macOS Catalina
-                    if check_cpu_flag sse4_2; then
-                        CPU+=",+sse4.1,+sse4.2"
-                    else
-                        echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
-                        exit 1
-                    fi ;;
-                *)
-                    # A CPU with SSE4.1 support is required for >= macOS Sierra
-                    if check_cpu_flag sse4_1; then
-                        CPU+=",+sse4.1"
-                    else
-                        echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.1 support."
-                        exit 1
-                    fi ;;
-            esac
+            # Disable S3 support in the VM to prevent macOS suspending during install
+            GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1 -device isa-applesmc,osk=$(echo "bheuneqjbexolgurfrjbeqfthneqrqcyrnfrqbagfgrny(p)NccyrPbzchgreVap" | tr 'A-Za-z' 'N-ZA-Mn-za-m')"
 
-            for FLAG in abm aes apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
-                        erms f16c fma fsgsbase fxsr invpcid invtsc lahf_lm lm \
-                        mca mce mmx movbe mpx msr mtrr nx pae pat pge pse popcnt pse36 \
-                        rdrand rdtscp sep smep syscall tsc tsc_adjust vaes vpclmulqdq \
-                        x2apic xgetbv1 xsave xsaveopt; do
-                    if check_cpu_flag "$FLAG"; then
-                        QEMU_CPU_FLAG="${FLAG//_/-}"
-                        CPU+=",+${QEMU_CPU_FLAG}"
-                    fi
-            done
-
-        fi
-
-        # Not many host CPU's will have AVX 512
-        if [[ "$CPU_MODEL" == 'Skylake-Server'* ]] || [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
-            for FLAG in clwb adx smap avx512f avx512dq avx512bw avx512cd avx512vl ; do
-                if ! check_cpu_flag "$FLAG"; then
-                    QEMU_CPU_FLAG="${FLAG//_/-}"
-                    CPU+=",${QEMU_CPU_FLAG}=off"
-                fi
-            done
-        fi
-
-        # Only diff to Skylake is = PKU  AVX512VNNI  SPEC_CTRL  SPEC_CTRL_SSBD
-        # plus the VMX which is to be ignored, unless Host = Intel ?? REVIEW
-        # But Qemu doesn't allow spec ctrl for V3, at least
-        # And avx512_vnni has underscore in lscpu but not hyphenated in qemu, so:
-        if [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
-            if ! check_cpu_flag "pku"; then CPU+=",pku=off" ; fi
-            if ! check_cpu_flag "avx512_vnni"; then CPU+=",avx512vnni=off" ; fi
-        fi
-
-        [[ $UseHostOverWrite ]] && CPU="-cpu host,kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
-
-        # Disable S3 support in the VM to prevent macOS suspending during install
-        GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1 -device isa-applesmc,osk=$(echo "bheuneqjbexolgurfrjbeqfthneqrqcyrnfrqbagfgrny(p)NccyrPbzchgreVap" | tr 'A-Za-z' 'N-ZA-Mn-za-m')"
-
-        # Disable High Precision Timer
-        if [ "${QEMU_VER_SHORT}" -ge 70 ]; then
-            MACHINE_TYPE+=",hpet=off"
-        else
-            GUEST_TWEAKS+=" -no-hpet"
-        fi
+            # Disable High Precision Timer
+            if [ "${QEMU_VER_SHORT}" -ge 70 ]; then [[ "$MACHINE_TYPE" != *hpet* ]] && MACHINE_TYPE+=",hpet=off"
+            else [[ "$GUEST_TWEAKS" != *hpet* ]] && GUEST_TWEAKS+=" -no-hpet"
+            fi
         ;;
 
         windows|windows-server)
@@ -604,10 +602,8 @@ function configure_cpu() {
             GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1"
 
             # Disable High Precision Timer
-            if [ "${QEMU_VER_SHORT}" -ge 70 ]; then
-              MACHINE_TYPE+=",hpet=off"
-            else
-              GUEST_TWEAKS+=" -no-hpet"
+            if [ "${QEMU_VER_SHORT}" -ge 70 ]; then [[ "$MACHINE_TYPE" != *hpet* ]] && MACHINE_TYPE+=",hpet=off"
+            else [[ "$GUEST_TWEAKS" != *hpet* ]] && GUEST_TWEAKS+=" -no-hpet"
             fi
             ;;
     esac
@@ -1984,7 +1980,7 @@ function monitor_send_cmd {
 
     case "${monitor}" in
         socket)
-            echo -e " - Sending:  via socket ${MSG}"
+            echo -e " - Sending:  via socket ${MSG} $LOOP"
             echo -e "${MSG}" | socat -,shut-down unix-connect:"${SOCKET_MONITOR}" > /dev/null 2>&1;;
         telnet)
             echo -e " - Sending:  via telnet ${MSG}"
@@ -2063,7 +2059,7 @@ VMPATH=""
 # shellcheck disable=SC2155
 readonly LAUNCHER=$(basename "${0}")
 readonly DISK_MIN_SIZE=$((197632 * 8))
-readonly VERSION="FB 4.9.8.07"
+readonly VERSION="FB 4.9.8.08"
 
 # TODO: Make this run the native architecture binary
 ARCH_VM="x86_64"
@@ -2334,9 +2330,8 @@ fileshare_param_check
 if [ -z "${VM_PID}" ]; then
     vm_boot
     start_viewer
-    # If the VM being started is an uninstalled Windows VM then auto-skip the press-any key prompt.
-    if [ -n "${iso}" ] && [[ "${guest_os}" == "windows"* ]]; then
-        # shellcheck disable=SC2034
+    if [ -n "${iso}" ] && [[ "$guest_os" == windows* ]]; then
+        echo " - Sending:  keys for the 'CD ROM'"
         for LOOP in {1..5}; do
           sleep 1
           monitor_send_cmd "sendkey ret"
