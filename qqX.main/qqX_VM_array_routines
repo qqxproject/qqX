@@ -156,6 +156,7 @@ scan_folders_list_and_add_VMs () {
 
   if [[ ! ${VM_Array[0,0]} || "${VM_Array[0,1]}" == "empty" ]] ; then
     if [[ $CodingHotSwapShow ]]; then SelectArrayError=
+    elif [[ $No_NoVMs ]]; then SelectArrayError= ; No_NoVMs=
     else
       function_conf_error  "No VMs"
       SelectArrayError=1

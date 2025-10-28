@@ -202,7 +202,7 @@ VM_loader_selector_and_menu () {
 
       # Note, for this script, 'refresh_sources_and_load_VM_arrays' gets run at start of loop on return
 
-      elif [[ $VM_Selection == "r" ]]; then  VM_selector_menu_refresh ; return
+      elif [[ $VM_Selection == "r" ]]; then No_NoVMs=1 ;  VM_selector_menu_refresh ; return
 
       elif [[ ${VM_Selection^^} == "FS" ]] ; then
         CodingHotSwap="FreeSpirit" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
