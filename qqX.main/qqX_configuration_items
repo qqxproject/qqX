@@ -523,7 +523,9 @@ function refresh_conf_vars_and_values {
     VM_Conf_File="$(basename "$VM_Conf_File")"
     if [[ ! -e "$VM_Conf_Dir/$VM_Conf_File" ]]; then function_conf_error  "Conf Refresh:  WRONG FOLDER/FILE ," ; fi
 
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
     while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+
     source "$ConfClearanceLog"
     SecondDrive=
     SharedDrive=
@@ -539,7 +541,11 @@ function refresh_conf_vars_and_values {
     ACCESS=
     QemuArgsCustomFile=
     QemuErrorLog=
-    #reload_boot_style_defaults  # REVIEW
+
+    # make sure boot is default efi
+    boot="efi"
+
+    # reload_boot_style_defaults  # REVIEW
     # left off as if active then utils menu bm function reverts to defaults after booting once ...
     # at ver 1.12.01 has been placed into qqX main loop so switching vm is clean
 

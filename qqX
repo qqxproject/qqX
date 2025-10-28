@@ -76,7 +76,7 @@ function main_loop_diagnostics {
     echo; echo "VM_Conf_Dir=$VM_Conf_Dir   VM_Conf_File=$VM_Conf_File   VM_InstanceName=$VM_InstanceName"
     echo "pwd: $(pwd)   Current_VM_Folder=$Current_VM_Folder"
     echo "BootStyle=$BootStyle   BootStyleMsg=$BootStyleMsg    BootStyle_Default=$BootStyle_Default   BootStyleMsg_Default=$BootStyleMsg_Default"
-    echo "ram=$ram   cpu_cores=$cpu_cores  mouse=$mouse  keyboard=$keyboard"
+    echo "ram=$ram   cpu_cores=$cpu_cores  mouse=$mouse  keyboard=$keyboard  boot=$boot"
     echo "SelectArrayError=$SelectArrayError  DefaultFolderError=$DefaultFolderError  ExtraFolderError=$ExtraFolderError"
     echo "VM_Selection=$VM_Selection  VM_Selection_Overide=$VM_Selection_Overide"
     echo "ByPass_VM_Array_Loader=$ByPass_VM_Array_Loader  ByPass_VM_Array_Selector=$ByPass_VM_Array_Selector"

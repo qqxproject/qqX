@@ -1169,7 +1169,7 @@ function_quick_get_wrap ()  {
         printf "  DOWNLOADING:  "
         printColor "%s"  "$QWG_NewVM_Name"
         printf "   TO:  "
-        printf "%s"   "$QWG_Conf_Dir"
+        printColor "%s"   "$QWG_Conf_Dir"
         [[ ! $DL_PotentialOkay ]] &&  printf "\n\n   MAY NOT BE WORKING CORRECTLY ...."
         printf "\n"
       fi
