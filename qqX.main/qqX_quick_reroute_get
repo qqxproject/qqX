@@ -410,17 +410,6 @@ function show_hot_swap_line {
   printf "\n\n"
 }
 
-function refresh_QWG_selector {
-  if [[ $1 != "no-set" ]] ; then
-    SettingsFileAdjusted=1
-    refresh_sources_and_load_VM_arrays
-  fi
-  clear_main_gt_start_vars
-  show_QWG_header ; show_hot_swap_line
-  print_quickget_and_folder_choices  "QGW_OS_Array"
-  QGW_List_NumSelected=
-}
-
 function clear_main_gt_start_vars {
 
   # Main vars, other clearances will need less,
@@ -443,6 +432,17 @@ function clear_main_gt_start_vars {
     cd "$QWG_Conf_Dir" || { printColor "  ERROR changing to the General VM Location"; sleep 3; }
     Current_VM_Folder="$QWG_Conf_Dir"
   fi
+}
+
+function refresh_QWG_selector {
+  if [[ $1 != "no-set" ]] ; then
+    SettingsFileAdjusted=1
+    refresh_sources_and_load_VM_arrays
+  fi
+  clear_main_gt_start_vars
+  show_QWG_header ; show_hot_swap_line
+  print_quickget_and_folder_choices  "QGW_OS_Array"
+  QGW_List_NumSelected=
 }
 
 test_internet_is_up () {

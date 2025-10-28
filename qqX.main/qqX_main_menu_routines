@@ -363,7 +363,7 @@ function_delete_Selected_VM () {
   read -rp "  >  "   Delete_VM_Option
 
   if [[ $Delete_VM_Option == "y" ]]; then
-    printf "\n\n  Folder & .conf file being deleted ... "
+    printf "\n\n  Deleting Folder & .conf file ... "
     rm -f -r "$1"
     rm -f "$2"
   else
@@ -380,6 +380,7 @@ function_delete_Selected_VM () {
   read -rp "  > "
 
   if [[ $Delete_VM_Option != "n" ]]; then
+    printf "\n  Refreshing the VM arrays ... \n\n"
     ByPass_VM_Array_Selector=
     ByPass_VM_Array_Loader=
     VM_InstanceName=
@@ -395,7 +396,7 @@ function_delete_Selected_VM () {
   fi
   Delete_VM_Option=
   # clear any accidental initial double pressing of the enter key
-  read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
+  read -r -t 0.2 ; read -r -t 0.2
 }
 
 function_rename_conf_dirnames () {
