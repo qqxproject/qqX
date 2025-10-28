@@ -832,7 +832,7 @@ function_quick_get_wrap ()  {
         printColor "\n\n\n  Give LIST number of Release"
       fi
 
-      [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  [b] main menu > hot-swap to FreeSpirit for LATEST FIXES and ADDITIONS?"
+      [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  [f] main menu > hot-swap to FreeSpirit"
 
       [[ $QGW_VerifiedList_NumSelected ]] && QGW_List_NumSelected="$QGW_VerifiedList_NumSelected"
 
@@ -858,6 +858,8 @@ function_quick_get_wrap ()  {
       printf "  [b] back to main menu \n\n"
       read -rp "  >  "  QGW_List_NumSelected
       printf "\n"
+
+      [[ $QGW_List_NumSelected == "f" ]] &&  QGW_List_NumSelected="b"
 
       if [[ $QGW_List_NumSelected == "s" || $QGW_List_NumSelected == "p" || $QGW_List_NumSelected == "r" || $QGW_List_NumSelected == "b" ]]; then
 

@@ -143,9 +143,9 @@ function sort_qqX_builtin_settings {
   QE_SourcePath= ; QG_SourcePath= ; FreePath=
 
   if [[ $CodingHotSwap ]]; then QE_SourceVersion="$CodingHotSwap" ; fi
-  [[ ! $QE_SourceVersion ]] && QE_SourceVersion="freebird"
 
-  # simplfy checks and standardization, make all lower case, for now
+  # simplify checks and standardization, make all - lower case - for now  <<<
+  [[ ! $QE_SourceVersion ]] && QE_SourceVersion="freebird"
   QE_SourceVersion="${QE_SourceVersion,,}"
 
   if [[ $QE_SourceVersion == "custom" ]] && [[ ! -d "$Default_VM_Folder/qqX.custom/QE.Custom" ]]; then

@@ -3756,8 +3756,8 @@ if [ ! -x "${QEMU_IMG}" ]; then
 fi
 
 mapfile -t -d':' PathArr <<< "$PATH"
-for QG_Modpath in "${PathArr[@]}"; do
-    [[ -e "$QG_Modpath/qqX_quickGet_mods" ]] && source "$QG_Modpath/qqX_quickGet_mods" && break
+for QGP in "${PathArr[@]}"; do
+    [[ -e "$QGP/qqX_quickGet_mods" ]] && source "$QGP/qqX_quickGet_mods" && break
 done
 
 case "${1}" in
