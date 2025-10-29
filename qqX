@@ -79,7 +79,7 @@ function main_loop_diagnostics {
     echo "ram=$ram   cpu_cores=$cpu_cores  mouse=$mouse  keyboard=$keyboard  boot=$boot"
     echo "SelectArrayError=$SelectArrayError  DefaultFolderError=$DefaultFolderError  ExtraFolderError=$ExtraFolderError"
     echo "VM_Selection=$VM_Selection  VM_Selection_Overide=$VM_Selection_Overide"
-    echo "ByPass_VM_Array_Loader=$ByPass_VM_Array_Loader  ByPass_VM_Array_Selector=$ByPass_VM_Array_Selector"
+    echo "ByPass_VM_Array_Loader=$ByPass_VM_Array_Loader  ByPass_VM_Array_Selector=$ByPass_VM_Array_Selector  MSR_DistrosFound=$MSR_DistrosFound"
     echo "NewFileTuneUp_JustDone=$NewFileTuneUp_JustDone  QemuErrorLog=$QemuErrorLog"
     echo "MainDrive=$MainDrive disk_img=$disk_img IsoImg=$IsoImg"
     echo "SharedDrive=$SharedDrive SharedDrive_Conf=$SharedDrive_Conf SharedDrive_Mount=$SharedDrive_Mount"

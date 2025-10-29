@@ -44,6 +44,8 @@ else
       fi
       printf  "  [u] show UTILS & technical"
       [[ $KVM_MSR_Error || $KVM_MSR_Warn ]] && printf  "   [m]  msrs help "
+      # once only:
+      [[ $Verbose_MSR_dialog ]] && Verbose_MSR_dialog=
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
@@ -52,7 +54,8 @@ else
           [[ $WebBrowser ]] && printColor "  [qW]"
           printColor "  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
           printf "\n\n  However, take a moment to overview things at https://qqxproject.org/docs/Guides/Windows-OS"
-          printf "\n\n  MAKE SURE to have followed the 'swtpm' and 'mkisofs' setup   <<< IMPORTANT \n"
+          [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT \n"
+          [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT \n"
           CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
           if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
             printColor "\n\n  WARNING: this CPU is reported to no longer support newer versions of Windows."

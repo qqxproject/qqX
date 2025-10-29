@@ -228,7 +228,12 @@ function  main_menu_actions {
       read -rp "  >  "
     fi
 
-  elif [[ $MainMenuChoice == "m" ]] ; then KVM_MSR_selector_LoadHelp=1 ; select_msr_config
+  elif [[ $MainMenuChoice == "m" ]] ; then
+
+    printf "\033c"
+    qqX_logo_printf_title "Machine Specific Register controls"
+    printf "\n\n"
+    KVM_MSR_selector_LoadHelp=1 ; select_msr_config
 
   elif [[ $MainMenuChoice == "gl" ]] ; then
 
