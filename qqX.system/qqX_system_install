@@ -794,7 +794,7 @@ if [[ ! $SkipMkLauncher ]]; then
 
     print_terminal_notes
     printColor "\n  https://qqxproject.org/ "
-    printf "\n\n  https://qqxproject.org/docs/Translation \n\n"
+    printf "\n\n  https://qqxproject.org/Translation \n\n"
 
   fi
 

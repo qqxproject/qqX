@@ -79,7 +79,7 @@ show_CLI_usage () {
   printf   "\n\n  or alternatively \'qqX --qqf\' to open the Qcow2 mounter."
   printf   "\n"
   printf   "\n\n  More Help:"
-  printf   "\n\n  https://qqxproject.org/docs/Command-line-and-Mouse \n\n"
+  printf   "\n\n  https://qqxproject.org/Command-line-and-Mouse \n\n"
 
 }
 

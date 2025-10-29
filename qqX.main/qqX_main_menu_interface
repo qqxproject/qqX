@@ -53,7 +53,7 @@ else
           printf "\n\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
           printColor "  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
-          printf "\n\n  However, take a moment to overview things at https://qqxproject.org/docs/Guides/Windows-OS"
+          printf "\n\n  However, take a moment to overview things at https://qqxproject.org/Guides/Windows-OS"
           [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT \n"
           [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT \n"
           CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"

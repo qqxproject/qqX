@@ -832,7 +832,7 @@ custom_boot_file () {
 
     printColor "\n\n  Utility to copy QEMU args list from the last qemu boot formula"
     printf "\n\n  Boot in 'Verbose mode' is sufficient. Actual boot is not required."
-    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"
+    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
     if [[ ! -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then
       printf "\n\n  NO ARGS FILE yet present "
@@ -846,7 +846,7 @@ custom_boot_file () {
 
     elif [[ $CreateCustom == "w" ]]; then
       printf "\n  Opening Browser ... \n\n"
-      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
+      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
       sleep 1
 
     elif [[ -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then
@@ -860,7 +860,7 @@ custom_boot_file () {
   elif [[ $1 == "delete" ]]; then
 
     printColor "\n\n  Utility to delete existing custom qemu boot formula"
-    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"
+    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
     if [[ ! -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then
       printf "\n\n  NO CUSTOM BOOT FILE present "
@@ -874,7 +874,7 @@ custom_boot_file () {
 
     elif [[ $DeleteCustom == "w" ]]; then
       printf "\n  Opening Browser ... \n\n"
-      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
+      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
       sleep 1
 
     elif [[ -e "$VM_InstanceName/Qemu_ShortArgs_Custom.txt" ]]; then

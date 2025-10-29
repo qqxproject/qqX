@@ -257,7 +257,7 @@ function manage_and_repair_disks {
     if [[ $DiskManage == "rz" ]]; then
       printf "\n\n  This will resize the external envelope. Internal partitions may require additional treatment."
       printf "\n\n  For main drive partitions, follow up with the [iso] utility > 'gparted' is recommended."
-      printf "\n\n  See https://qqxproject.org/docs/Advanced/Disks-and-Resizing "
+      printf "\n\n  See https://qqxproject.org/Advanced/Disks-and-Resizing "
       printColor "\n\n\n  Give extra GigaBytes TO ADD, as integer, eg 16 "
       printf "  [b] to go back"
       printf "\n\n"
