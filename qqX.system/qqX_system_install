@@ -146,81 +146,111 @@ fi
 
 while true ; do
 
+  printf "\033c"
+  cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
   InstallationAlert=
 
   if [[ ! "$(type -p bash)" ]]; then
-    printf "\n\n  Problem locating Bash. Please read the notes at the start of this installer script."
+    printColor "\n\n  Problem locating Bash. Please read the notes at the start of this installer script."
     printf "\n\n  The start line to the qqX main script may need to be adjusted."
     InstallationAlert=1
   fi
 
   if ! tput -V | grep -q ncurses 2> /dev/null; then
-    printf "\n\n  Check your OS >  \n\n  An 'ncurses' installation should normally be present. Test using 'tput -V' "
+    printColor "\n\n  Check your OS >  \n\n  An 'ncurses' installation should normally be present. Test using 'tput -V' "
     InstallationAlert=1
   fi
 
   ##  Check for items sometimes missing
   if [[ ! $(type -p curl) ]]; then
-    printf "\n\n  'Curl' is a listed dependency of QuickEmu and is also used by qqX ..."
+    printColor "\n\n  'Curl' is a listed dependency of QuickEmu and is also used by qqX ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p socat) ]]; then
-    printf "\n\n  'socat' is a needed dependency of QuickEmu and is also used by qqX ..."
+    printColor "\n\n  'socat' is a needed dependency of QuickEmu and is also used by qqX ..."
+    InstallationAlert=1
+  fi
+  if [[ ! $(type -p glxinfo) ]]; then
+    printColor "\n\n  'glxinfo' is a needed dependency of QuickEmu and may be part of 'mesa-utils' ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p jq) ]]; then
-    printf "\n\n  'jq' is a listed dependency of QuickEmu ..."
+    printColor "\n\n  'jq' is a listed dependency of QuickEmu ..."
     InstallationAlert=1
   fi
-  CoreList=("bc" "xrandr" "paste")
+  if [[ ! $(type -p python3) ]]; then
+    printColor "\n\n  'python3' is a listed dependency of QuickEmu ..."
+    InstallationAlert=1
+  fi
+  CoreList=("bc" "xrandr" "paste" "uuidgen" "ps" "pgrep" "realpath" "lscpu" "lsusb")
   for CP in "${CoreList[@]}"; do
     if [[ ! $(type -p "$CP") ]]; then
-      printf "\n\n  '%s' should normally be present and is required by qqX"  "$CP"
+      printColor "\n\n  '%s' should normally be present and is required by qqX"  "$CP"
       printf "\n\n  Sometimes a utils package can be missing or standard utils can be packaged differently ...."
       [[ $CP == "xrandr" ]] && printf "\n  xrandr can be listed as xorg-xrandr or as part of x11-xserver-utils"
       InstallationAlert=1
     fi
   done
+  GnuList=("awk" "sed" "gzip" "tar")
+  for GP in "${GnuList[@]}"; do
+    GnuPath="$(type -p "$GP")"
+    [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
+    if [[ ! $GnuPath ]]; then
+      printColor "\n\n  '%s' should usually be present and is required by qqX"  "$GP"
+      printf "\n\n  Note, the Gnu versions are to be preferred eg 'gawk' not 'awk' as behaviour can slightly vary ...."
+      InstallationAlert=1
+    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' <<< "$("$GP" --version)"; then
+      printColor "\n\n  Caution: GNU '%s' is the usually supplied version eg realpath 'awk' should be 'gawk' ... "  "$GP"
+      printf "\n\n  Some distro variance can be possible.  Behaviour can vary slightly but most versions are Gnu compatible: \n\n"
+      "$GP" --version
+      InstallationAlert=1
+    fi
+  done
   if [[ ! $(type -p wget) ]]; then
-    printf "\n\n  A 'wget' installation should normally be present and may be needed in certain places ..."
+    printColor "\n\n  A 'wget' installation should normally be present and may be needed in certain places ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
-    printf "\n\n  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
+    printColor "\n\n  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
     printf "\n\n  For some host distros, 'p7zip' may also need 'p7zip-plugins' "
     InstallationAlert=1
   fi
+  if [[ ! $(type -p unzip) ]]; then
+    printColor "\n\n  A command line 'zip/unzip' installation is needed for some distro downloads ... "
+    InstallationAlert=1
+  fi
+  if [[ ! $(type -p bzip2) ]]; then
+    printColor "\n\n  A command line 'bzip2' installation is needed for some distro downloads ... "
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p mkisofs) ]]; then
-    printf "\n\n  For Windows downloads, installation of 'mkisofs' (via: genisoimage, cdrtools, cdrkit or xorriso) is required ..."
+    printColor "\n\n  For some downloads, installation of 'mkisofs' (via: genisoimage, cdrtools, cdrkit or xorriso) is required ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
-    printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' ..."
+    printColor "\n\n  Check for 'spice' installations 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' ..."
     InstallationAlert=1
   fi
   if [[ ! $(type -p qemu-system-x86_64) ]]; then
     # REVIEW Arm compatibility
-    printf "\n\n  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system etc ..."
+    printColor "\n\n  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system etc ..."
     InstallationAlert=1
   fi
 
-  if [[ ! $InstallationAlert ]]; then  break
-  else
-    cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
-    printColor "\n\n  [tx]  Translate from English"
+  if [[ $InstallationAlert ]]; then
+    printColor "\n\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
-    printf "\n"
-    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... "
     printf "\n\n\n  Ubuntu 25.10 example full set:"
     printf "\n\n  sudo apt install curl  7zip  socat  genisoimage  spice-vdagent  spice-client-gtk  qemu-system-x86"
-    printf "\n\n\n  Return here to re-check:"
+    printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
+    printf "\n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
+  else break
+  fi
     [[ $InstallationAlert == "q" ]] &&  exit
     if [[ $InstallationAlert == "c" || $InstallationAlert == "i" ]]; then InstallationAlert= ; break ; fi
-    if [[ $InstallationAlert == "tx" ]]; then sleep 0.6 ; open_installer_tx_screens_in_browser ; printf "\033c" ; fi
-  fi
-
+    if [[ $InstallationAlert == "tx" ]]; then sleep 0.6 ; open_installer_tx_screens_in_browser ; fi
 done
 
 
