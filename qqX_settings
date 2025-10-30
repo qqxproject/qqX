@@ -279,8 +279,8 @@ VM_SelectorStyle="A"
   AllowMoreLocale=
 
 # MSR
-# Set =1 for more prompting.  Standard prompting will be less active in warning situations.
-# Setting MSR_Warnings to =1 will unhide minor warnings on the standard (non technical) interface
+# Setting MSR_Warnings to =1 will fully unhide MSR status and warnings on the standard interface
+# Verbose_MSR_dialog will report status, but once only, on first load
   MSR_Warnings=
   Verbose_MSR_dialog=
 

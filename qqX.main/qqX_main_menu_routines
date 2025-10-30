@@ -160,8 +160,6 @@ show_main_menu_header () {
     printf " ISO: %s \n" "$Mounted_ISO_DisplayName"
   fi
 
-  [[ $KVM_MSR_Error ||  $Show_MSR_Warnings  || $MSR_Warnings || $Verbose_MSR_dialog ]] && print_kvm_status_warnings
-
   # Note .conf won't exist at first load, at VM selector menu
 
   if [[ ! $NewFileTuneUp ]] && [[ ! $NewFileTuneUp_JustDone ]] && [[ -e $VM_Conf_File ]] && [[ ! -e "$MainDrive" ]] && [[ ! -e "$IsoImg" ]] ; then

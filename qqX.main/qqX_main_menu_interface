@@ -43,9 +43,6 @@ else
       if [[ ! $VM_InstanceName ]]; then printColor  "  [vm]  reselect " ; else   printf  "  [vm]  SELECT "
       fi
       printf  "  [u] show UTILS & technical"
-      [[ $KVM_MSR_Error || $KVM_MSR_Warn ]] && printf  "   [m]  msrs help "
-      # once only:
-      [[ $Verbose_MSR_dialog ]] && Verbose_MSR_dialog=
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
@@ -112,7 +109,7 @@ else
 
       printColor "\n\n  ----------------------------------------------------------------------------"
       printf "\n\n  [FS] Switch to FreeSpirit  [FB] FreeBird  [HB]  [Ech]  [Sys]  [Cust]  [Dev] "
-      printf "\n\n  [hdw] add current config to this VM's Virtual Hardware Record    [m] msrs help"
+      printf "\n\n  [hdw] add current config to this VM's Virtual Hardware Record "
 
       [[ -e "$HOME/.qqX/qqX_term.conf" ]] && printf "\n\n   [tmc] terminal config"
 
@@ -149,7 +146,11 @@ else
       else printf "  second (%s)" "$SnapCountSecond"
       fi
     fi
+
     printf "\n"
+    [[ $SettingsFileAdjusted ]] && Verbose_MSR_dialog=1
+    print_kvm_status_warnings
+    [[ $Verbose_MSR_dialog ]] && Verbose_MSR_dialog=
 
     if [[ ! $ShowUtilsMenu ]]; then
 
@@ -179,8 +180,6 @@ else
         fi
 
       fi
-
-      print_kvm_status_warnings
 
       if [[ $ShowCustomBootStyle ]] ; then
 

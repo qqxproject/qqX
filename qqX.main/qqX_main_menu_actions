@@ -230,10 +230,7 @@ function  main_menu_actions {
 
   elif [[ $MainMenuChoice == "m" ]] ; then
 
-    printf "\033c"
-    qqX_logo_printf_title "Machine Specific Register controls"
-    printf "\n\n"
-    KVM_MSR_selector_LoadHelp=1 ; select_msr_config
+    select_msr_config
 
   elif [[ $MainMenuChoice == "gl" ]] ; then
 

@@ -34,26 +34,25 @@ find_kvm_msr_default_and_status () {
     if [[ "$VM_InstanceName" == *windows*  ]] ||	[[ "$VM_InstanceName" == *macos*  ]] ; then
       if [[ $KVM_MSR_status == "N" ]]; then KVM_MSR_Error=1 ; else KVM_MSR_Error= ; fi
     elif [[ "$VM_InstanceName" != *windows*  ]] &&	[[ "$VM_InstanceName" != *macos*  ]] ; then
-      if [[ $KVM_MSR_status == "Y" ]]; then KVM_MSR_Warn=1 ; else KVM_MSR_Warn= ; fi
+      KVM_MSR_Warn=
     fi
   fi
 }
 
 print_kvm_status_warnings () {
-  find_kvm_msr_default_and_status
   if [[ $VM_InstanceName ]]; then
-    if [[ $KVM_MSR_Warn ]] && [[ $Verbose_MSR_dialog || $MSR_Warnings ]] || [[ ! $MSR_Warnings && $ShowUtilsMenu ]] ; then
-      Show_MSR_Warnings=1 ; else Show_MSR_Warnings=
+    if [[ $KVM_MSR_Warn || $Verbose_MSR_dialog || $MSR_Warnings || $ShowUtilsMenu ]] ; then
+      Show_MSR_Status=1 ; else Show_MSR_Status=
     fi
     if [[ $KVM_MSR_status == "Y" ]] ; then
-      [[ $KVM_MSR_Error || $Show_MSR_Warnings ]] && printf "\n  Host Session = Y"
-      if  [[ $KVM_MSR_Error ]]; then  printColor "  ERROR > [m] msrs help\n"
-      elif [[ $Show_MSR_Warnings ]]; then printf "   [m] msrs help\n"
+      [[ $KVM_MSR_Error || $Show_MSR_Status ]] && printf "\n  MSR Host Session = Y"
+      if  [[ $KVM_MSR_Error ]]; then  printColor "  ERROR > [m] msrs controls\n"
+      elif [[ $Show_MSR_Status ]]; then printf "   [m] msrs controls\n"
       fi
     else
-      [[ $KVM_MSR_Error || $Show_MSR_Warnings ]] && printf "\n  Host Session = N"
-      if [[ $KVM_MSR_Error ]]; then printColor "  ERROR > [m] msrs help\n"
-      elif [[ $Show_MSR_Warnings ]] ; then printf "   [m] msrs help\n"
+      [[ $KVM_MSR_Error || $Show_MSR_Status ]] && printf "\n  MSR Host Session = N"
+      if [[ $KVM_MSR_Error ]]; then printColor "  ERROR > [m] msrs controls\n"
+      elif [[ $Show_MSR_Status ]] ; then printf "   [m] msrs controls\n"
       fi
     fi
   fi
@@ -81,7 +80,7 @@ toggle_msr_defaults () {
 
     [[ ! $KVM_MSR_ModProbeFile ]] && KVM_MSR_ModProbeFile="/etc/modprobe.d/kvm-quickemu.conf"
 
-    [[ ! -e "$KVM_MSR_ModProbeFile" ]] && printf "\n\n  \'%s\'  needs to be created "  "$KVM_MSR_ModProbeFile"
+    [[ ! -e "$KVM_MSR_ModProbeFile" ]] && printf "\n\n  \'%s\'  will be created "  "$KVM_MSR_ModProbeFile"
     printf "\n\n  "
     [[ $KVM_MSR_default == "N" ]] && printColor "[y] to set Y  "
     [[ $KVM_MSR_default == "Y" ]] && printColor "[n] to set N  "
@@ -115,10 +114,13 @@ toggle_msr_defaults () {
 
 show_kvm_msr_general_note () {
 
-  printColor "\n  For frequent use of Windows or MacOS, you should modify the SYSTEM BOOT settings "
+  printColor "\n  For frequent use of Windows or MacOS, use Y for the host SYSTEM Boot Defaults"
   printf   "\n\n  Adjusting the current session will avoid the need for rebooting"
-  [[ $MSR_DistrosFound ]] &&  printf "\n\n  Windows or MacOS distros appear present  "
-
+  if [[ $MSR_DistrosFound ]]; then
+    printf "\n\n"
+    [[ $KVM_MSR_status == "Y" ]] && printf "  SESSION settings are OKAY for the "
+    printf "Windows or MacOS distros present"
+  fi
   printColor "\n\n\n  Status:  "
   printf "Host Session = %s   Boot Default = %s"   "$KVM_MSR_status"  "$KVM_MSR_default"
   printf "\n\n  Windows or MacOS should be set to 'Y' whilst Linux distros can generally use either"
@@ -140,7 +142,6 @@ show_kvm_sudo_security_note () {
   printf "\n\n  open a side terminal & use shift-crtl-v to paste and run it.  In this way, elevated permissions"
   printf "\n\n  will only exist in the side terminal and will cease as soon as it is closed."
   printf "\n\n  Return to qqX and select 'leave as ...'  The msrs settings will auto-update. "
-  printf "\n\n"
 
 }
 
@@ -151,13 +152,21 @@ select_msr_config () {
   # or if selector is being used to change current status.
 
   find_kvm_msr_default_and_status
-  KVM_MSR_selector= ;  Verbose_MSR_dialog=1
+  Verbose_MSR_dialog=1
 
   while true ; do
 
-    [[ $KVM_MSR_selector_LoadHelp ]] && show_kvm_msr_general_note
+    KVM_MSR_selector= ; Set_MSR_defaults=
+    printf "\033c"
+    qqX_logo_printf_title "Machine Specific Register controls"
+    printf "\n\n"
 
-    if [[ $FurtherNoteFlag ]]; then FurtherNoteFlag= ; else  printf "\n\n\n  [f] See the further notes for details"
+    if [[ $FurtherNoteFlag ]]; then
+      show_kvm_sudo_security_note
+      printf "\n"
+    else
+      show_kvm_msr_general_note
+      printf "\n\n\n  [f] See the further notes for details"
     fi
 
     if [[ $MSR_DistrosFound && $KVM_MSR_status == "N" ]]; then
@@ -177,18 +186,15 @@ select_msr_config () {
       printf "  [enter]  leave as Y"
     fi
 
-    if [[ $KVM_MSR_selector == "h" ]] || [[ $KVM_MSR_selector_LoadHelp ]] ; then
-      printf "   [d] set host system defaults \n\n"
-    else  printf "   [h] see help  \n\n"
-    fi
-
+    printf "   [d] set host system defaults"
+    [[ $FurtherNoteFlag ]] && printf "   [b] to go back" && FurtherNoteFlag=
+    printf "\n\n"
     read -rp "  >  "  KVM_MSR_selector
     printf "\n"
 
     [[ ! $KVM_MSR_selector ]]  &&  break
 
     if [[ $KVM_MSR_selector == "y" ]] || [[ $KVM_MSR_selector == "n" ]]; then
-
       # As per the solution in original quickemu, needs 'tee' to get this to work,
       # but route tee's stdout to null to tidy the screen
       [[ $KVM_MSR_selector == "y" ]] &&  echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs  1> /dev/null
@@ -200,38 +206,17 @@ select_msr_config () {
       printf "\n\n  Status:  Host Session= %s   Boot Default = %s"   "$KVM_MSR_status"  "$KVM_MSR_default"
       printColor "\n\n  [enter]  to return \n\n"
       read -rp  "  > "
-
       break
-
     fi
 
-    if [[ $KVM_MSR_selector == "d" ]]; then
-
-      toggle_msr_defaults
-
-      if [[ $Set_MSR_defaults == "b" ]]; then
-        Set_MSR_defaults=
-        printf "\033c"
-        qqX_logo_printf_title "Machine Specific Register controls"
-        printf "\n\n"
-      else
-        find_kvm_msr_default_and_status
-        break
-      fi
-
-    elif [[ $KVM_MSR_selector == "f" ]]; then
-
-      printf "\033c"
-      qqX_logo_printf_title "Machine Specific Register controls"
-      printf "\n\n"
-      show_kvm_sudo_security_note
-      FurtherNoteFlag=1
-
+    if [[ $KVM_MSR_selector == "d" ]]; then toggle_msr_defaults
+    elif [[ $KVM_MSR_selector == "f" ]]; then FurtherNoteFlag=1
+    elif [[ $KVM_MSR_selector != "b" && $Set_MSR_defaults != "b" ]]; then
+      find_kvm_msr_default_and_status
+      break
     fi
 
   done
-
-  KVM_MSR_selector= ; KVM_MSR_selector_LoadHelp=
 
 }
 
