@@ -49,10 +49,11 @@ else
           check_screen_percentage_and_output
           printf "\n\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
-          printColor "  From qqX 1.14 onwards, ALL the drivers should be autodetected and should autoinstall"
+          printColor "  From qqX 1.14 onwards, ALL the Windows drivers should be autodetected and should autoinstall"
           printf "\n\n  However, take a moment to overview things at https://qqxproject.org/Guides/Windows-OS"
-          [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT \n"
-          [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT \n"
+          [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT"
+          [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT"
+          printf "\n"
           CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
           if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
             printColor "\n\n  WARNING: this CPU is reported to no longer support newer versions of Windows."
