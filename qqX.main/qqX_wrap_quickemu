@@ -83,7 +83,7 @@ function find_quickemu_source_functions_and_vars {
   fi
 
   QE_496_Script= ; QE_495_Script=
-  if grep -q 'LOOP in {1..5}' "$QE_SourcePath" ; then QE_496_Script="true"
+  if grep -q 'LOOP in {1..' "$QE_SourcePath" ; then QE_496_Script="true"
   elif grep -q 'configure_storage' "$QE_SourcePath" ; then QE_495_Script="true"
   fi
 
@@ -382,7 +382,7 @@ function load_quickemu_cases_and_actions {
   if [[ $QE_495_Script ]]; then
     grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 '# Check if vm is already run' | head -n -1 > "/tmp/qmod-actions-conf-source-temp"
   elif [[ $QE_496_Script ]]; then
-    grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'LOOP in {1..5}' | head -n -7  > "/tmp/qmod-actions-conf-source-temp"
+    grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'LOOP in {1..' | head -n -7  > "/tmp/qmod-actions-conf-source-temp"
   else
     grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'vm_boot' | head -n -2 > "/tmp/qmod-actions-conf-source-temp"
   fi
