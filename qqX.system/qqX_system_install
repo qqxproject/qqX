@@ -174,6 +174,11 @@ while true ; do
     printColor "\n\n  >>  'glxinfo' is a needed dependency of QuickEmu and may be part of 'mesa-utils' "
     InstallationAlert=1
   fi
+  if [[ ! $(type -p xrandr) ]]; then
+    printColor "\n\n  >>  'xrandr' is a needed dependency of qqX "
+    printf "\n\n       xrandr can be sometimes be packaged as xorg-xrandr or as part of x11-xserver-utils"
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p jq) ]]; then
     printColor "\n\n  >>  'jq' is a listed dependency of QuickEmu "
     InstallationAlert=1
@@ -182,12 +187,12 @@ while true ; do
     printColor "\n\n  >>  'python3' is a listed dependency of QuickEmu "
     InstallationAlert=1
   fi
-  CoreList=("bc" "xrandr" "paste" "uuidgen" "ps" "pgrep" "realpath" "lscpu" "lsusb")
+  CoreList=("bc" "uuidgen" "ps" "pgrep" "lscpu" "lsusb")
   for CP in "${CoreList[@]}"; do
     if [[ ! $(type -p "$CP") ]]; then
-      printColor "\n\n  >>  '%s' should normally be present and is required by qqX"  "$CP"
-      printf "\n\n  Sometimes a utils package can be missing or standard utils can be packaged differently"
-      [[ $CP == "xrandr" ]] && printf "\n  xrandr can be listed as xorg-xrandr or as part of x11-xserver-utils"
+      printColor "\n\n  >>  '%s' should normally be present and is required by qqX or by Quickemu"  "$CP"
+      printf "\n\n  Sometimes standard supplementary utils can be missing or can be packaged differently"
+      printf "\n  These can include 'util-linux' 'procps' and the 'Unix_SUS2008_utilities' "
       InstallationAlert=1
     fi
   done
@@ -199,7 +204,7 @@ while true ; do
       printColor "\n\n  >>  '%s' should usually be present and is required by qqX"  "$GP"
       printf "\n\n  Gnu is expected but most versions should have basic Gnu compatibilities"
       InstallationAlert=1
-    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' <<< "$("$GP" --version)"; then
+    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
       printColor "\n\n  >>  CAUTION: Gnu '%s' is the usually supplied version eg realpath 'awk' should be 'gawk' ... "  "$GP"
       printf "\n\n      Behaviour can vary but most versions should have basic Gnu compatibilities"
       printf "\n      Most distro packaging systems should allow Gnu replacement upgrades"
@@ -232,9 +237,9 @@ while true ; do
     printColor "\n\n  >>  Check for 'spice' installations 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' "
     InstallationAlert=1
   fi
-  if [[ ! $(type -p qemu-system-x86_64) ]]; then
+  if [[ ! $(type -p qemu-system-x86_64) ]] || [[ ! $(type -p qemu-img) ]] || [[ ! $(type -p qemu-nbd) ]]; then
     # REVIEW Arm compatibility
-    printColor "\n\n  >>  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system etc "
+    printColor "\n\n  >>  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system, and for qemu-utils etc "
     InstallationAlert=1
   fi
 
