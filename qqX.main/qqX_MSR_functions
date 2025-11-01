@@ -119,7 +119,7 @@ show_kvm_msr_general_note () {
   if [[ $MSR_DistrosFound ]]; then
     printf "\n\n"
     [[ $KVM_MSR_status == "Y" ]] && printf "  SESSION settings are OKAY for the "
-    printf "Windows or MacOS distros present"
+    printf "  Windows or MacOS distros present"
   fi
   printColor "\n\n\n  Status:  "
   printf "Host Session = %s   Boot Default = %s"   "$KVM_MSR_status"  "$KVM_MSR_default"
