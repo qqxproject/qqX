@@ -301,14 +301,19 @@ XDG_GUI_desktop_PathName="$XDG_GUI_desktop_Folder/$XDG_GUI_desktop_Name"
 
 function print_manual_uninstall_notes {
   cat << Notes
+  MANUAL UNINSTALL, standard procedure, requires sudo permissions:
 
-  Manual uninstall, standard procedure  >>  remove the hidden .qqX folder from $HOME
-  and any desktop items in folder:  $qqX_Std_Share_Path
-  followed by: sudo update-desktop-database  "$XDG_GUI_desktop_Folder"
+  Remove any qqX TASKBAR icons, FIRST
 
-  Sudo remove the scripts  > sudo rm /usr/bin/qqX  &  sudo rm /usr/bin/qqx
-  From qqX 1.6 onwards also remove  sudo rm -r /usr/share/qqX
+  Remove the hidden .qqX folder from "$HOME"
 
+  Remove the folder "$qqX_Std_Share_Path" and its contents eg. sudo rm -r /usr/share/qqX
+
+  Remove the /bin scripts  eg. sudo rm /usr/bin/qqX  and  sudo rm /usr/bin/qqx
+
+  Remove any qqX .desktop items in "$XDG_GUI_desktop_Folder"
+
+  Follow up with  sudo update-desktop-database "$XDG_GUI_desktop_Folder"
 Notes
 }
 
@@ -489,8 +494,8 @@ else
     qqX_RemovalTarget="$(type -p qqx)"
     qqX_RemovalTarget_X="$(type -p qqX)"
     qqX_Remove=
-    printColor "\n\n  [y] sudo auto removal of qqX scripts and settings and builtins."
-    printf " \n\n  All VM folders will be left as they are ... [enter] to quit \n\n"
+    printColor "\n\n  [y] SUDO AUTO REMOVAL of qqX scripts and settings and builtins."
+    printf " \n\n  All VM folders will be left as they are ... \n\n  [enter] to quit \n\n"
     read -rp "  >  "  qqX_Remove
     printf "\n\n"
 
