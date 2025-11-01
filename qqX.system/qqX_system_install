@@ -495,7 +495,9 @@ else
     qqX_RemovalTarget_X="$(type -p qqX)"
     qqX_Remove=
     printColor "\n\n  [y] SUDO AUTO REMOVAL of qqX scripts and settings and builtins."
-    printf " \n\n  All VM folders will be left as they are ... \n\n  [enter] to quit \n\n"
+    printf "\n\n  All VM folders will be left as they are:"
+    printf "\n\n  The .conf files may need line 1 changing from qqX to quickemu ... "
+    printf "\n\n  [enter] to quit \n\n"
     read -rp "  >  "  qqX_Remove
     printf "\n\n"
 
@@ -548,15 +550,15 @@ else
       printf "\n\n  NOTE command line installation only. "
       printf "\n\n  Auto-install is needed for desktop launchers and shortcuts"
       printf "\n"
-      print_manual_uninstall_notes
-      printColor "\n  [enter] changed mind, use auto-install   [y] to confirm action completed \n\n"
+      printColor "\n  [enter] changed mind, use auto-install   [y] to confirm action completed   [q] to quit \n\n"
       read -rp  "  >  "  SeparateSudo
       printf "\n"
 
     fi
 
-    if [[  $SeparateSudo != "y" ]]; then
+    [[  $SeparateSudo == "q" ]] && sleep 1 && exit
 
+    if [[  $SeparateSudo != "y" ]]; then
       printColor "\n  Auto-Installing .... \n\n  "
       sudo cp "qqX" "$qqX_Std_File_Path"
       # make symbolic link lowercase 'qqx' , as in: ln -s  textfile.txt  my_link.
@@ -574,7 +576,6 @@ else
       sudo chmod a+rx -R  "$qqX_Std_Share_Path/"
       sudo chmod a+rx "$qqX_Std_File_Path"
       sudo chmod a+rx "$qqX_Std_lc_Link_Path"
-
     fi
 
     # Check that the right version is there:
