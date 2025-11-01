@@ -207,11 +207,13 @@ else
 
         if [[ $guest_os == "windows" ]]; then  printColor "   (size as set by qqX and/or by Windows)"
         elif [[ $guest_os == "macos" ]] && [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then  printColor " (size determined by MacOS with this QE version)"
-        elif [[ "$SDL_ScreenSize_Cmd" == *screenpct* ]]; then printColor " (%s%%)    [df]  97%% "  "$SDL_ScreenPercent"
-        elif [[ "$SDL_ScreenSize_Cmd" == *width* ]] && [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
-        elif [[ "$SDL_ScreenSize_Cmd" == *width* ]]; then printColor " (%s)     [df]  97%% "  "$SDL_ScreenSize"
         elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > see settings)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
+        elif [[ $SDL_ScreenPercent ]]; then printColor " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
+        elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
+        else printColor " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
         fi
+
+        [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
 
         if [[ $HeadlessDisplay ]]; then printColor 	"\n\n  [s]   start with Spice display (HEADLESS) "
         else  printColor 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi

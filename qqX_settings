@@ -253,7 +253,7 @@ VM_SelectorStyle="A"
 # VM SCREEN SIZE may be added here. Standard values are suggested. Oddball sizes may cause unsharp display.
 # Or INDIVIDUALLY in the .conf file as 'Custom_SDL_ScreenSize'
 # From quickemu 4.9.5 onwards For Linux VM's, SDL only.
-# qqX still allows percent as a value in later code. Size, if present, takes priority over percent.
+# qqX still allows percent as a value in later code. Size, if present, TAKES PRIORITY over percent.
 # Windows determines its own sizes, as does earlier code for Macs.
 # For later code MacOS should now use Size as per release in the conf files. See qqX wiki notes for Mac.
 # Set Linux sizes as ="XxY" Eg 3200x1800 2560x1440 2560x1080 1600x900 1920x1080 1920x720 etc
