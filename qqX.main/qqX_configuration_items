@@ -40,6 +40,9 @@ custom_conf_notes () {
     keyboard_layout=    'en-us' (default)
     mouse=              'tablet' (default), 'ps2', 'usb', 'virtio'
     network=            'bridge' >> -nic bridge,br=bridge,model=virtio-net-pci
+    usb_controller=     'ehci' (default), 'xhci', 'none'
+    sound_card=         'intel-hda' (default), 'ich9-intel-hda' 'ac97', 'es1370', 'sb16', 'usb-audio', 'none'
+    sound_duplex=        for intel: 'hda-micro' (default: speaker/mic), 'hda-duplex' (line-in/line-out), 'hda-output' (output-only)
 
     boot=\"legacy\"     (use bios, not UEFI) default: =\"efi\"
 

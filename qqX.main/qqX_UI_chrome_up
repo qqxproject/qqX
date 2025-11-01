@@ -123,10 +123,10 @@ function exit {
 
   elif [[ $1 ]] && [[ ! $NoExit ]]; then
     printf "\n\n"
-    printColor "  ERROR :  [i] ignore & continue  [q] quit  \n\n"
+    printColor "  ERROR :  [c] ignore and continue  [q] quit  \n\n"
     read -rp  "  >  "
     ExitTrap=
-    printf "\n\n  Confirm:  [Enter] to quit  [r] to return and retry something else \n\n"
+    printf "\n\n  Confirm:  [Enter] to quit qqX   [c] ignore and continue  \n\n"
     read -rp "  >  "  ExitTrap
     if [[ ! $ExitTrap ]]; then
       tput cnorm
