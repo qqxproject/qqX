@@ -56,9 +56,9 @@ else
           printf "\n"
           CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
           if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
-            printColor "\n\n  WARNING: this CPU is reported to no longer support newer versions of Windows."
-            printf "\n\n  The command line utility 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
-            printf "\n  meaning that installation is unlikely to be either successful or to be reliable \n\n"
+            printColor "\n\n  WARNING: this CPU is unable to support current versions of Windows."
+            printf "\n\n  As 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
+            printf "\n  the installation is unlikely to be successful, or to be reliable. \n\n"
           fi
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
