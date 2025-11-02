@@ -93,30 +93,27 @@ function check_screen_percentage_and_output {
     fi
   fi
 
-  xRes=
-  yRes=
-  Mon_xRes=
-  Mon_yRes=
-  SDL_ScreenSize=
-  MacScreenRes=
-  SDL_ScreenSize_Cmd97=
+  xRes= ; yRes= ; Mon_xRes= ; Mon_yRes= ; MonGrep=
+  SDL_ScreenSize= ; MacScreenRes= ; SDL_ScreenSize_Cmd97=
 
   if [[ $QE_495_Script || $QE_496_Script ]] && [[ $XDG_SESSION_TYPE == "x11" || $XDG_SESSION_TYPE == "wayland" ]]; then
 
     if [[ $PhysicalMonitor ]]; then
       Mon_xRes="$(cut -d 'x' -f 1 <<< "$PhysicalMonitor")"
       Mon_yRes="$(cut -d 'x' -f 2 <<< "$PhysicalMonitor")"
+    elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+      MonGrep="$(wayland-info | grep -s logical_width)"
+      Mon_xRes="$(cut -d':' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      Mon_yRes="$(cut -d':' -f3 <<< "$MonGrep" | tr -cd "[:digit:]")"
     else
-      Mon_xRes=$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4 | cut -d'/' -f1 | head -n1)
-      Mon_yRes=$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4 | cut -d'/' -f2 | cut -d'x' -f2 | head -n1)
+      MonGrep="$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4)"
+      Mon_xRes="$(cut -d'/' -f1 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      Mon_yRes="$(cut -d'/' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
     fi
 
-    Mon_xRes="$(tr -cd "[:digit:]" <<< "$Mon_xRes")"
-    Mon_yRes="$(tr -cd "[:digit:]" <<< "$Mon_yRes")"
-
     if [[ ! $Mon_xRes || ! $Mon_yRes ]]; then
-      if [[ $PhysicalMonitor ]]; then printColor "\n\n  ERROR: check monitor size in general settings \n\n "
-      else printColor "\n\n  ERROR: xrandr detection > set manually in general settings \n\n "
+      if [[ $PhysicalMonitor ]]; then printColor "\n\n  ERROR: check monitor size given in general settings \n\n "
+      else printColor "\n\n  ERROR: Monitor Size Detection > Add sizes to 'PhysicalMonitor' in general settings \n\n "
       fi
       SDL_ScreenSize_Error="> monitor size error"
     fi

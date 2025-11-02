@@ -174,10 +174,17 @@ while true ; do
     printColor "\n\n  >>  'glxinfo' is a needed dependency of QuickEmu and may be part of 'mesa-utils' "
     InstallationAlert=1
   fi
-  if [[ ! $(type -p xrandr) ]]; then
-    printColor "\n\n  >>  'xrandr' is a needed dependency of qqX "
-    printf "\n\n       xrandr can be sometimes be packaged as xorg-xrandr or as part of x11-xserver-utils"
-    InstallationAlert=1
+  if [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+    if [[ ! $(type -p wayland-info) ]]; then
+      printColor "\n\n  >>  'wayland-utils' are a needed dependency of qqX "
+      InstallationAlert=1
+    fi
+  else
+    if [[ ! $(type -p xrandr) ]]; then
+      printColor "\n\n  >>  'xrandr' is a needed dependency of qqX "
+      printf "\n\n       xrandr can be sometimes be packaged as xorg-xrandr or as part of x11-xserver-utils"
+      InstallationAlert=1
+    fi
   fi
   if [[ ! $(type -p jq) ]]; then
     printColor "\n\n  >>  'jq' is a listed dependency of QuickEmu "
@@ -249,6 +256,7 @@ while true ; do
     printf "\n\n\n  Ubuntu 25.10 example full set:"
     printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
     printf "\n\n  sudo apt install  spice-vdagent  spice-client-gtk  qemu-system-x86"
+    [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-info"
     printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
     printf "\n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
