@@ -713,7 +713,9 @@ qcow2_filemanagement_launcher () {
     GrepExecLine="${GrepExecLine/'Exec='/}"
     if grep -qs 'gnome-terminal' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then
       Terminal_Start="$(cut -d '/' -f 1 <<< "$GrepExecLine")"
-    else Terminal_Start="$(cut -d '"' -f 1 <<< "$GrepExecLine")"
+    else
+      Terminal_Start="$(cut -d '"' -f 1 <<< "$GrepExecLine")"
+      [[ "$Terminal_Start" == *'kgx'* ]] && Terminal_Start="kgx --"
     fi
   fi
 
