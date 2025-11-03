@@ -102,9 +102,15 @@ function check_screen_percentage_and_output {
       Mon_xRes="$(cut -d 'x' -f 1 <<< "$PhysicalMonitor")"
       Mon_yRes="$(cut -d 'x' -f 2 <<< "$PhysicalMonitor")"
     elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
-      MonGrep="$(wayland-info | grep -s logical_width)"
-      Mon_xRes="$(cut -d':' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
-      Mon_yRes="$(cut -d':' -f3 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      if [[ $(type -p wlr-randr) ]]; then
+        MonGrep="$(wlr-randr | grep -s current)"
+        Mon_xRes="$(cut -d'x' -f1 <<< "$MonGrep" | tr -cd "[:digit:]")"
+        Mon_yRes="$(cut -d'x' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      else
+        MonGrep="$(wayland-info | grep -s logical_width)"
+        Mon_xRes="$(cut -d':' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
+        Mon_yRes="$(cut -d':' -f3 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      fi
     else
       MonGrep="$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4)"
       Mon_xRes="$(cut -d'/' -f1 <<< "$MonGrep" | tr -cd "[:digit:]")"

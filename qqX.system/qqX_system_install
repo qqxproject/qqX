@@ -175,7 +175,8 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ $XDG_SESSION_TYPE == "wayland" ]]; then
-    if [[ ! $(type -p wayland-info) ]]; then
+    if [[ ! $(type -p wayland-info) ]] && [[ ! $(type -p wlr-randr) ]]; then
+      # wlr is used for wayland tiling WMs for size setting so use that, if present
       printColor "\n\n  >>  'wayland-utils' are a needed dependency of qqX "
       InstallationAlert=1
     fi
