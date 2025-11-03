@@ -335,7 +335,7 @@ function print_terminal_notes {
 
   TO MANUALLY SPECIFY the terminal name, the installer script's 'UserTerm' variable may be used.
 
-  From qqX version 1.10.02 onwards, a 'CustomTerminalProfile' will now be stored in the qqX settings folder.
+  From qqX version 1.10 onwards, a 'CustomTerminalProfile' is stored in the qqX settings folder.
   This file will be checked and auto-read when carrying out updates.
 
   For first installs or profile re-imposition the 'system' installer script may be directly edited.
@@ -352,7 +352,7 @@ function print_terminal_notes {
   so the terminal window size will usually alter when the font size is changed.
 
   Some terminals do not have a -geometry parameter and must be pre-set in the actual terminal.
-  For example, 'qterminal' which also uses PIXELS.  Try 1500 x 1000.
+  For 'qterminal' which uses PIXELS,  try 1500 x 1000.
 
 Notes
 }
@@ -732,7 +732,8 @@ if [[ ! $SkipMkLauncher ]]; then
         ((n+=1))
       done
       printf "\n\n  [enter] for %s  or  [number] of terminal to use   "  "$UserTerm"
-      printColor "[h] for help \n\n"
+      printColor "[h] for help"
+      printf "   [q] quit \n\n"
       read -rp "  >  "  TermChoose
 
       case "$TermChoose" in
@@ -743,11 +744,22 @@ if [[ ! $SkipMkLauncher ]]; then
         h)
           printf "\n\n\n  85%% of users are probably covered by \"gnome-terminal\" \"konsole\" \"mate-terminal\" "
           printf "\n\n  \"xfce4-terminal\" and over 95%% probably when \"qterminal\" and \"alacritty\" are added."
-          printf "\n\n  For qqX purposes, alacritty works better in tiling window managers."
-          printf "\n\n\n  Try \"xterm/uxterm\" or \"foot\" if you are having problems."
-          printf "\n\n  Otherwise, read the guidance notes at the start of the system_install file in qqX.main"
+
+          printf "\n\n\n  Flatpak installed terminals and the new Gnome Terminal 'ptyxis' are currently problematic ..."
+          printf "\n\n  For qqX purposes, alacritty works better in tiling window managers"
+          printf "\n\n  A recommended general installation is 'mate-terminal' "
+          printf "\n\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
           printf "\n"
           TermChoose=
+          ;;
+        q)
+          printf "\n\n\n  Re-run the installer to remove residual files, if needed"
+          printf "\n\n  Or if you want to resume installation after installing other software"
+          printColor "\n\n  [enter] to return"
+          printf "  [q] to confirm closing the installer \n\n"
+          QuitInstaller=
+          read -rp "  >  " QuitInstaller
+          [[ $QuitInstaller ]] && exit
           ;;
         *) break ;;
       esac
@@ -768,96 +780,107 @@ if [[ ! $SkipMkLauncher ]]; then
 
   ## HOW THE INTERFACE WILL LOOK
 
-  printf "\033c"
-  echo
-  qqX_logo_title  "Setting up the desktop:"
+  while true ; do
+    printf "\033c"
+    echo
+    qqX_logo_title  "Setting up the desktop:"
 
-  if [[ $UserTerm ]]; then
+    if [[ $UserTerm ]]; then
 
-    printf "\n\n  Selected Terminal: %s" "$UserTerm"
+      printf "\n\n  Selected Terminal: %s" "$UserTerm"
+      printColor "\n\n  qqX standard window size is %s columns wide & %s lines high"   "$Term_Width"  "$Term_Height"
 
-    printColor "\n\n  qqX standard window size is %s columns wide & %s lines high"   "$Term_Width"  "$Term_Height"
+      if [[ -e "$HOME/.qqX/qqX_term.conf" ]]; then
+        printf "\n\n  A stored terminal profile is being used: \n\n"
+        cat "$HOME/.qqX/qqX_term.conf"
+      fi
 
-    if [[ -e "$HOME/.qqX/qqX_term.conf" ]]; then
-      printf "\n\n  A stored terminal profile is being used: \n\n"
-      cat "$HOME/.qqX/qqX_term.conf"
+      if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
+        printf "\n\n  Use extra height (%s) if you have high numbers of Vm's"  "$Term_Taller"
+        printf   "\n  You may also edit/create a 'CustomTerminalProfile' to store different values."
+        printf   "\n  See the notes near the start of the 'system' folder's installer script."
+      fi
+
+      printf "\n\n  Remember that column width units are normally based on the size of your terminal font,"
+      printf   "\n  so changing the font will usually change the physical terminal size."
+
+      printf "\n\n  System defaults may usually be changed in the terminal settings, under 'profile'"
+      printf   "\n  and may overide any options if 'remember size and position' has been set."
+
+      printf "\n\n  The system's terminal size will apply when starting qqX directly from the command line."
+
+      printf "\n\n  If your terminal uses PIXELS, for example 'qterminal', try 1500 x 1000 in the settings."
+
+      printf "\n\n  For TILING Window Managers, the size may be auto-regulated. "
+
+      printColor "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
+
+      if [[ $(type -p "ptyxis") ]] ; then
+        # 10/2025 ptyxis  partly resolved, from ver 49.1 (tested on Fedora 43 beta) but fails to open QF second windows
+        printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on the system this is currently problematic ..."
+      fi
+
+      printf "\n\n  A recommended general installation is 'mate-terminal' "
+      printf "\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
+
+      printf "\n\n\n"
+
+      # REVIEW add W H number entry?
+
+      printColor "  [enter] continue "
+      if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
+        printColor "at standard height "
+        printf "   [t] extra height  [a] as host (auto)  or "
+      fi
+
+    else
+
+      print_terminal_notes
+      printColor "\n  https://qqxproject.org/ "
+      printf "\n\n  https://qqxproject.org/Translation \n\n"
+
     fi
 
-    if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
-      printf "\n\n  Use extra height (%s) if you have high numbers of Vm's"  "$Term_Taller"
-      printf   "\n  You may also edit/create a 'CustomTerminalProfile' to store different values."
-      printf   "\n  See the notes near the start of the 'system' folder's installer script."
+    printf "  [q] to exit \n\n"
+    read -rp "  > "   TerminalHeightChoice
+
+    if [[ ! $UserTerm || $TerminalHeightChoice == "q" ]]; then
+      printf "\n\n\n  Re-run the installer to remove residual files, if needed"
+      printf "\n\n  Or if you want to resume installation after installing other software"
+      printColor "\n\n  [enter] to return"
+      printf "  [q] to confirm closing the installer \n\n"
+      QuitInstaller=
+      read -rp "  >  " QuitInstaller
+      [[ $QuitInstaller ]] && exit
+    elif [[ $TerminalHeightChoice == "t" ]]; then
+      printf "\n  Height selected = %s " "$Term_Taller"
+      MateTerminalProfile="$MateTerminalProfile_Taller"
+      GnomeTerminalProfile="$GnomeTerminalProfile_Taller"
+      XfceTerminalProfile="$XfceTerminalProfile_Taller"
+      XtermTerminalProfile="$XtermTerminalProfile_Taller"
+      LxTerminalProfile="$LxTerminalProfile_Taller"
+      KonsoleTerminalProfile="$KonsoleTerminalProfile_Taller"
+      break
+    elif [[ $TerminalHeightChoice == "a" ]]; then
+      printf "\n  Height selected =  Auto/Host "
+      MateTerminalProfile="$MateTerminalProfile_HostSize"
+      GnomeTerminalProfile="$GnomeTerminalProfile_HostSize"
+      XfceTerminalProfile="$XfceTerminalProfile_HostSize"
+      XtermTerminalProfile="$XtermTerminalProfile_HostSize"
+      LxTerminalProfile="$LxTerminalProfile_HostSize"
+      KonsoleTerminalProfile="$KonsoleTerminalProfile_HostSize"
+      break
+    elif  [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
+      printf "\n  Height selected = %s " "$Term_Height"
+      MateTerminalProfile="$MateTerminalProfile_Standard"
+      GnomeTerminalProfile="$GnomeTerminalProfile_Standard"
+      XfceTerminalProfile="$XfceTerminalProfile_Standard"
+      XtermTerminalProfile="$XtermTerminalProfile_Standard"
+      LxTerminalProfile="$LxTerminalProfile_Standard"
+      KonsoleTerminalProfile="$KonsoleTerminalProfile_Standard"
+      break
     fi
-
-    printf "\n\n  Remember that column width units are normally based on the size of your terminal font,"
-    printf   "\n  so changing the font will usually change the physical terminal size."
-
-    printf "\n\n  System defaults may usually be changed in the terminal settings, under 'profile'"
-    printf   "\n  and may overide any options if 'remember size and position' has been set."
-
-    printf "\n\n  The system's terminal size will apply when starting qqX directly from the command line."
-
-    printf "\n\n  If your terminal uses PIXELS, for example 'qterminal', try 1500 x 1000 in the settings."
-    printf "\n\n  In other cases, such as with tiling Window Managers, the size may be auto-regulated. "
-
-    printf "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
-
-    printf "\n\n\n"
-
-    # REVIEW add W H number entry?
-
-    printColor "  [enter] continue "
-    if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
-      printColor "at standard height "
-      printf "   [t] extra height  [a] as host (auto)  or "
-    fi
-
-  else
-
-    print_terminal_notes
-    printColor "\n  https://qqxproject.org/ "
-    printf "\n\n  https://qqxproject.org/Translation \n\n"
-
-  fi
-
-  printf "  [q] to exit \n\n"
-  read -rp "  > "   TerminalHeightChoice
-
-  if [[ ! $UserTerm || $TerminalHeightChoice == "q" ]]; then
-
-    sleep 0.6 ; exit
-
-  elif [[ $TerminalHeightChoice == "t" ]]; then
-
-    printf "\n  Height selected = %s " "$Term_Taller"
-    MateTerminalProfile="$MateTerminalProfile_Taller"
-    GnomeTerminalProfile="$GnomeTerminalProfile_Taller"
-    XfceTerminalProfile="$XfceTerminalProfile_Taller"
-    XtermTerminalProfile="$XtermTerminalProfile_Taller"
-    LxTerminalProfile="$LxTerminalProfile_Taller"
-    KonsoleTerminalProfile="$KonsoleTerminalProfile_Taller"
-
-  elif [[ $TerminalHeightChoice == "a" ]]; then
-
-    printf "\n  Height selected =  Auto/Host "
-    MateTerminalProfile="$MateTerminalProfile_HostSize"
-    GnomeTerminalProfile="$GnomeTerminalProfile_HostSize"
-    XfceTerminalProfile="$XfceTerminalProfile_HostSize"
-    XtermTerminalProfile="$XtermTerminalProfile_HostSize"
-    LxTerminalProfile="$LxTerminalProfile_HostSize"
-    KonsoleTerminalProfile="$KonsoleTerminalProfile_HostSize"
-
-  elif  [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
-
-    printf "\n  Height selected = %s " "$Term_Height"
-    MateTerminalProfile="$MateTerminalProfile_Standard"
-    GnomeTerminalProfile="$GnomeTerminalProfile_Standard"
-    XfceTerminalProfile="$XfceTerminalProfile_Standard"
-    XtermTerminalProfile="$XtermTerminalProfile_Standard"
-    LxTerminalProfile="$LxTerminalProfile_Standard"
-    KonsoleTerminalProfile="$KonsoleTerminalProfile_Standard"
-
-  fi
+  done
 
   # Some listed terminals will be entered into the 'else' section at the end, eg qterminal & urxvt
 

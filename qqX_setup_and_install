@@ -173,10 +173,9 @@ elif [ -t 1 ] ; then
   printf "\n\n\n   Pre-Configured and possibly installable terminals include:"
   printf "\n\n"
   grep -e ^set "$0"| cut -d'-' -f 3- | fmt -w 90
-  if [ -n "$(command -v "xxxptyxis")" ] ; then
-    # 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
-    printf "\n\n  The new GNOME TERMINAL 'Ptyxis' is present on the system but is currently problematic ..."
-    printf "\n\n  Try 'kgx' the new Gnome Console variant or possibly the older 'gnome-terminal' version."
+  if [ -n "$(command -v "flatpak")" ] ; then
+    printf "\n\n  Unfortunately, Flatpak installed terminals are currently problematic"
+    printf "\n\n  including a possible qqX flatpak ...."
   fi
   printf "\n\n\n"
   grep -m 1 -A 4 'FOR ANY NEWER' "$0"
@@ -186,7 +185,7 @@ fi
 
 if [ -t 1 ] ; then
   printf "\n"
-  printf "\n\n    qqX installer:  %s"  "$UserTerm"
+  printf "\n\n    qqX startup installer initially running in:  %s"  "$UserTerm"
   printf "\n"
   printf "\n\n    Help and info always available at https://qqxproject.org/"
   printf "\n"
