@@ -102,14 +102,19 @@ function check_screen_percentage_and_output {
       Mon_xRes="$(cut -d 'x' -f 1 <<< "$PhysicalMonitor")"
       Mon_yRes="$(cut -d 'x' -f 2 <<< "$PhysicalMonitor")"
     elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
-      if [[ $(type -p wlr-randr) ]]; then
+      if [[ $(type -p wayland-info) ]]; then
+        MonGrep="$(wayland-info | grep -s logical_width)"
+        Mon_xRes="$(cut -d':' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
+        Mon_yRes="$(cut -d':' -f3 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      elif [[ $(type -p wlr-randr) ]]; then
+        # wlr is used for wayland tiling WMs for size setting but wlroots is still classed unstable
+        # and grepping scaled logical display sizes is proving difficult to carry out
+        # Setup is holding back use of wlr greps as of (11/2025) but leave this fall-back in place for now
         MonGrep="$(wlr-randr | grep -s current)"
         Mon_xRes="$(cut -d'x' -f1 <<< "$MonGrep" | tr -cd "[:digit:]")"
         Mon_yRes="$(cut -d'x' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
       else
-        MonGrep="$(wayland-info | grep -s logical_width)"
-        Mon_xRes="$(cut -d':' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
-        Mon_yRes="$(cut -d':' -f3 <<< "$MonGrep" | tr -cd "[:digit:]")"
+        printColor "\n\n  ERROR: Install 'wayland-info' or add sizes to 'PhysicalMonitor' in general settings"
       fi
     else
       MonGrep="$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4)"
