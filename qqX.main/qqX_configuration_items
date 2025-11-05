@@ -536,6 +536,8 @@ function refresh_conf_vars_and_values {
     while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
 
     source "$ConfClearanceLog"
+
+    # clear any qqX specifics
     SecondDrive=
     SharedDrive=
     DriveLocationError=
@@ -547,12 +549,37 @@ function refresh_conf_vars_and_values {
     QemuError_VM_Filter=()
     Custom_SDL_ScreenSize=
     Custom_SDL_ScreenPercent=
-    ACCESS=
     QemuArgsCustomFile=
     QemuErrorLog=
 
-    # make sure boot is default efi
-    boot="efi"
+    ## make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
+
+    # first fully unset any that don't auto-reset
+    # eg sound_duplex="${sound_duplex:-hda-micro}" won't work if a empty var name is present
+    unset -n "disk_format"
+    unset -n "disk_img"
+    unset -n "disk_size"
+    unset -n "display"
+    unset -n "extra_args"
+    unset -n "viewer"
+    unset -n "width"
+    unset -n "height"
+    unset -n "ssh_port"
+    unset -n "spice_port"
+    unset -n "monitor"
+    unset -n "monitor_telnet_port"
+    unset -n "monitor_telnet_host"
+    unset -n "serial"
+    unset -n "serial_telnet_port"
+    unset -n "serial_telnet_host"
+    unset -n "usb_controller"
+    unset -n "keyboard"
+    unset -n "keyboard_layout"
+    unset -n "sound_card"
+    unset -n "sound_duplex"
+
+    # then reset
+    source  "/tmp/qmod-qe-rw-vars-temp"
 
     # reload_boot_style_defaults  # REVIEW
     # left off as if active then utils menu bm function reverts to defaults after booting once ...
