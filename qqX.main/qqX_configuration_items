@@ -302,9 +302,13 @@ function_conf_error () {
   if [[ $NewFileTuneUp_JustDone ]]; then NewFileTuneUp_JustDone= ; return ; fi
 
   printColor "\n\n  qqX Settings, VM folder & conf file(s)"
-  if [[ $1 == "No VMs" ]] ; then
-    printColor "\n\n  No VMs - Probably time to welcome you to qqX and invite you to get some distros."
-    printf "\n\n  The settings file and locations can usually be left till later ..."
+  if [[ $1 == "No VMs" ]]; then
+    if grep -qs -e 'qqX_system_install' -e 'qqX_setup' <<< "$(pgrep -a sh)" ; then
+      printColor "\n\n  No VMs - Probably time to welcome you to qqX and invite you to get some distros."
+      printf "\n\n  The settings file and locations can usually be left till later ..."
+    else
+      printColor "\n\n  No VMs - Settings Error or Possibly time to get some distros ..."
+    fi
   elif [[ $1 ]] ; then
     printf "\n\n  Check %s settings, possibly LOCATION and/or CONTENT ... "  "$1"
   else
