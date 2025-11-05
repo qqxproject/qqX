@@ -65,7 +65,8 @@ function quickemu {
   else
 
     # keep running quickemu 'case' checks for matches:
-    while [[ $1 ]]; do source "/tmp/qmod-case-temp" ; done
+    while [[ $1 ]]; do source "/tmp/qmod-case-temp"
+    done
     shift  $#
 
     # if no more matches, remove any leftover params not cleared due to trapped exit re-route
@@ -80,6 +81,14 @@ function quickemu {
     fixed_iso="$Mounted_ISO"
     [[ $guest_os == "macos" ]] && [[ ! $cpu_cores ]] && cpu_cores=8
     source "/tmp/qmod-actions-temp"
+
+    # return if quickemu found conf errors (via exit trap)
+    if [[ $RouteToMenus ]]; then
+      RouteToMenus= ; VM_ExecBoot=
+      printf "\n\n  Returning to menus ... \n\n"
+      sleep 0.5
+      return
+    fi
 
     if [[ $VM_ExecBoot ]]; then
 

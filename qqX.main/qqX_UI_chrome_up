@@ -123,19 +123,20 @@ function exit {
 
   elif [[ $1 ]] && [[ ! $NoExit ]]; then
     printf "\n\n"
-    printColor "  ERROR :  [c] ignore and continue  [q] quit  \n\n"
+    printColor "  ERROR :  [c] ignore and continue  [m] return to menus  [q] quit  \n\n"
     read -rp  "  >  "
     ExitTrap=
-    printf "\n\n  Confirm:  [Enter] to quit qqX   [c] ignore and continue  \n\n"
+    printf "\n\n  Confirm: [c] ignore and continue  [m] return to menus  [q] quit  \n\n"
     read -rp "  >  "  ExitTrap
-    if [[ ! $ExitTrap ]]; then
+    if [[ $ExitTrap == "q" ]]; then
       tput cnorm
       command exit "$@"
-    else
-      return 0
+    elif [[ $ExitTrap == "c" ]]; then true
+    else RouteToMenus=1
     fi
+    return
 
-   elif [[ ! $disk_img ]]; then
+  elif [[ ! $disk_img ]]; then
     # don't exit on quickemu error no disk defined, this is handled by qqX  REVIEW
     return
 
