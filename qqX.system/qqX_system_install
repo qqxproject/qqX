@@ -315,7 +315,7 @@ function print_manual_uninstall_notes {
   cat << Notes
   MANUAL UNINSTALL, standard procedure, requires sudo permissions:
 
-  Remove any qqX TASKBAR icons, FIRST
+  Remove any pinned qqX TASKBAR icons, FIRST
 
   Remove the hidden .qqX folder from "$HOME"
 
@@ -502,7 +502,7 @@ else
 
     printf "\n\n"
     print_manual_uninstall_notes
-    printColor "\n\n  Remove any qqX taskbar icons BEFORE proceeding. Some distros may need this."
+    printColor "\n\n  Remove any pinned qqX taskbar icons BEFORE proceeding. Some distros may need this."
     qqX_RemovalTarget="$(type -p qqx)"
     qqX_RemovalTarget_X="$(type -p qqX)"
     qqX_Remove=
