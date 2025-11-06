@@ -726,6 +726,12 @@ function configure_ram() {
     fi
 }
 
+function is_firmware_qcow2() {
+    # Check for the magic bytes that indicate the firmware is in qcow2 format,
+    # otherwise default to assuming firmware files are in raw format
+    [ "$(head -c 4 "$1")" = "QFI"$'\xfb' ] && echo "true" || echo "false"
+}
+
 function configure_bios() {
     # Always Boot macOS using EFI
     if [ "${guest_os}" == "macos" ]; then
@@ -792,7 +798,8 @@ function configure_bios() {
                         "${SHARE_PATH}/qemu/ovmf-x86_64-smm-ms-code.bin","${SHARE_PATH}/qemu/ovmf-x86_64-smm-ms-vars.bin" \
                         "${SHARE_PATH}/qemu/edk2-x86_64-secure-code.fd","${SHARE_PATH}/qemu/edk2-x86_64-code.fd" \
                         "${SHARE_PATH}/edk2-ovmf/x64/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2-ovmf/x64/OVMF_VARS.fd" \
-                        "${SHARE_PATH}/edk2/x64/OVMF_CODE.secboot.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd"
+                        "${SHARE_PATH}/edk2/x64/OVMF_CODE.secboot.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd" \
+                        "${SHARE_PATH}/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2","${SHARE_PATH}/edk2/ovmf/OVMF_VARS_4M.secboot.qcow2"
                     );;
                 *)  # shellcheck disable=SC2054,SC2140
                     ovmfs=("${SHARE_PATH}/OVMF/OVMF_CODE_4M.fd","${SHARE_PATH}/OVMF/OVMF_VARS_4M.fd" \
@@ -803,7 +810,8 @@ function configure_bios() {
                         "${SHARE_PATH}/qemu/ovmf-x86_64-4m-code.bin","${SHARE_PATH}/qemu/ovmf-x86_64-4m-vars.bin" \
                         "${SHARE_PATH}/qemu/edk2-x86_64-code.fd","${SHARE_PATH}/qemu/edk2-x86_64-code.fd" \
                         "${SHARE_PATH}/edk2-ovmf/x64/OVMF_CODE.fd","${SHARE_PATH}/edk2-ovmf/x64/OVMF_VARS.fd" \
-                        "${SHARE_PATH}/edk2/x64/OVMF_CODE.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd"
+                        "${SHARE_PATH}/edk2/x64/OVMF_CODE.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd" \
+                        "${SHARE_PATH}/edk2/ovmf/OVMF_CODE_4M.qcow2","${SHARE_PATH}/edk2/ovmf/OVMF_VARS_4M.qcow2"
                     );;
             esac
             # Attempt each EFI_CODE file one by one, selecting the corresponding code and vars
@@ -834,6 +842,14 @@ function configure_bios() {
                 echo " - EFI:      ERROR! EFI_EXTRA_VARS file ${EFI_EXTRA_VARS} does not exist."
                 exit 1
             fi
+            # Write destination vars file with correct extension
+            # based on source format of the EFI_EXTRA_VARS file
+            QCOW2VARS=$(is_firmware_qcow2 "${EFI_EXTRA_VARS}")
+            if [ "${QCOW2VARS}" = "true" ]; then
+                EFI_VARS="${VMDIR}/OVMF_VARS.qcow2"
+            else
+                EFI_VARS="${VMDIR}/OVMF_VARS.fd"
+            fi
             efi_vars "${EFI_EXTRA_VARS}" "${EFI_VARS}"
         fi
 
@@ -852,7 +868,7 @@ function configure_bios() {
             EFI_CODE=$(realpath "${EFI_CODE}")
             echo "${EFI_CODE}"
         fi
-        BOOT_STATUS="EFI (${guest_os^}), OVMF (${EFI_CODE}), SecureBoot (${secureboot})."
+        BOOT_STATUS="EFI (${guest_os^}), OVMF (${EFI_CODE}), EFI Vars (${EFI_VARS}), SecureBoot (${secureboot})."
     else
         BOOT_STATUS="Legacy BIOS (${guest_os^})"
         boot="legacy"
@@ -939,13 +955,15 @@ function configure_storage() {
         if ! ${QEMU_IMG} create -q -f "${disk_format}" -o "${create_options=}" "${disk_img}" "${disk_size}"; then
             echo "ERROR! Failed to create ${disk_img} using ${disk_format} format."
             exit 1
+        else
+            DU_Size="$(du -h "${disk_img}" | cut -f 1  2>/dev/null)"
+            echo "             Created Current Size: $DU_Size   Max Size: ${disk_size}"
         fi
 
         if [ -z "${iso}" ] && [ -z "${img}" ]; then
             echo "ERROR! You haven't specified a .iso or .img image to boot from."
             exit 1
         fi
-        echo "             Just created, booting from ${iso}${img}"
         DISK_USED="no"
     elif [ -e "${disk_img}" ]; then
         # If the VM is not running, check for disk related issues.
@@ -1491,10 +1509,14 @@ function vm_boot() {
     # Add the disks
     # - https://turlucode.com/qemu-disk-io-performance-comparison-native-or-threads-windows-10-version/
     if [[ "${boot}" == *"efi"* ]]; then
+        QCOW2CODE=$(is_firmware_qcow2 "${EFI_CODE}")
+        QCOW2VARS=$(is_firmware_qcow2 "${EFI_VARS}")
+        if [ "${QCOW2CODE}" = "true" ]; then EFI_CODE_FORMAT="qcow2"; else EFI_CODE_FORMAT="raw"; fi
+        if [ "${QCOW2VARS}" = "true" ]; then EFI_VARS_FORMAT="qcow2"; else EFI_VARS_FORMAT="raw"; fi
         # shellcheck disable=SC2054
         args+=(-global driver=cfi.pflash01,property=secure,value=on
-            -drive if=pflash,format=raw,unit=0,file="${EFI_CODE}",readonly=on
-            -drive if=pflash,format=raw,unit=1,file="${EFI_VARS}")
+            -drive if=pflash,format="${EFI_CODE_FORMAT}",unit=0,file="${EFI_CODE}",readonly=on
+            -drive if=pflash,format="${EFI_VARS_FORMAT}",unit=1,file="${EFI_VARS}")
     fi
 
     if [ -n "${iso}" ] && [ "${guest_os}" == "freedos" ]; then
@@ -1932,6 +1954,7 @@ function fileshare_param_check() {
 
         if [ ! -d "${PUBLIC}" ]; then
             echo " - WARNING! Public directory: '${PUBLIC}' doesn't exist!"
+            PUBLIC=""
         else
             PUBLIC_TAG="Public-${USER,,}"
             if [ "${OS_KERNEL}" == "Darwin" ]; then PUBLIC_PERMS=$(${STAT} -c "%A" "${PUBLIC}"); fi
@@ -2059,7 +2082,7 @@ VMPATH=""
 # shellcheck disable=SC2155
 readonly LAUNCHER=$(basename "${0}")
 readonly DISK_MIN_SIZE=$((197632 * 8))
-readonly VERSION="FB 4.9.8.08"
+readonly VERSION="FB 4.9.8.09"
 
 # TODO: Make this run the native architecture binary
 ARCH_VM="x86_64"
@@ -2329,13 +2352,15 @@ fileshare_param_check
 
 if [ -z "${VM_PID}" ]; then
     vm_boot
-    start_viewer
-    if [ -n "${iso}" ] && [[ "$guest_os" == windows* ]]; then
-        echo " - Sending:  keys for the 'CD ROM'"
-        for LOOP in {1..5}; do
-          sleep 1
-          monitor_send_cmd "sendkey ret"
-        done
+    if [[ ! $BreakAtVerboseArgs ]]; then
+        start_viewer
+        if [ -n "${iso}" ] && [[ "$guest_os" == windows* ]]; then
+            echo " - Sending:  keys for the 'CD ROM'"
+            for LOOP in {1..7}; do
+            sleep 1
+            monitor_send_cmd "sendkey ret"
+            done
+        fi
     fi
 else
     echo "${VMNAME}"

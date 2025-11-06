@@ -137,7 +137,7 @@ function distro_release_notes {
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
         elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
-        fedora)           RelNotes="09/2025 Tested as ALL working but there are possibly new unlisted editions. See website, for more.";;
+        fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
         nitrux)           RelNotes="08/2025 ISO releases have been suspended for changes from KDE to Hyprland and the Cachy kernel. See https://nxos.org/news/news-farewell-nx-desktop-and-plasma/";;
