@@ -98,10 +98,24 @@ function quickemu {
       Mounted_ISO_Return=
 
       [[ $Loop_Diagnostics ]] && printf "\n\n pre drives_and_snapshots :" &&  main_loop_diagnostics
+      if [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
+        printColor "  LIVE BOOT ERROR  %s  \n\n  [enter] to return files in the VM folder \n\n"
+        read -rp "  >  "
+        BreakAtVerboseArgs=1
+        VM_ExecBoot=
+        return
+      fi
+      if [[ ! $LiveBoot ]] && [[ ! -e $MainDrive ]]; then
+        printColor "  Main Drive NOT FOUND  %s  \n\n  [enter] to return and check files in the VM folder \n\n"
+        read -rp "  >  "
+        BreakAtVerboseArgs=1
+        VM_ExecBoot=
+        return
+      fi
       drives_and_snapshots  "info_current"
       printf "\n"
       if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
-        printColor "  DISK.QCOW2 ERROR  %s  \n\n  Return and run [disk] repair utils \n\n"  "$DiskChkStatus"
+        printColor "  DISK.QCOW2 ERROR  %s  \n\n  [enter] to return and run disk repair utils \n\n"  "$DiskChkStatus"
         read -rp "  >  "
         BreakAtVerboseArgs=1
         VM_ExecBoot=
@@ -176,7 +190,7 @@ function quickemu {
         printf "" > "/tmp/qqX_echo_output.log"
         printf "" > "$QemuErrorLog"
         [[ $Loop_Diagnostics ]] && printf "\n\n pre-sourcing qmod-boot :" &&  main_loop_diagnostics && printf "\n\n"
-        # Run boot sequence via modded function vm_boot from pre-sourced file 'qmod-function-vm_boot-new-temp'
+        # Run BOOT SEQUENCE via modded function vm_boot from pre-sourced file 'qmod-function-vm_boot-new-temp'
         # which also includes verbose load routines and break sequence
         sleep 1
         source "/tmp/qmod-boot-temp"

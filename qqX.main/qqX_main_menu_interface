@@ -64,6 +64,10 @@ else
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
         fi
+      elif [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
+        printColor "\n\n\n  Live BOOT ISO NOT FOUND"
+        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+        printf "\n"
       elif [[ "${VM_InstanceName,,}" == *windows* ]] && [[ "$Mounted_ISO" == *virtio* ]]; then
         printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
         # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
