@@ -226,9 +226,11 @@ function show_qqX_general_help {
     if [[ $1 ]]; then  HelpSelect="$1" ; shift
     fi
 
+    printf "\033c"
+    printColor "\n\n  GENERAL HELP:"
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"
     printf "\n  Translations:  https://qqxproject.org/Translation   Release Notes:  https://qqxproject.org/Release-Notes"
-    printf "\n\n  For SETTINGS and user modes, see notes in the general settings file"
+    printf "\n\n  For SETTINGS, user modes, screen sizes etc  >>  [s] see notes in the general settings file"
     printf  "\n\n  [f] FreeBird notes  [c] command line & mouse notes"
     if [[ $WebBrowser ]]; then
       printColor "\n\n  [w] Online: HELP PAGES and FAQs"
@@ -267,6 +269,11 @@ function show_qqX_general_help {
       printf "\n  Opening Browser ... \n"
       (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/FAQs-and-Help"  & ) || web_browser_not_found_message
       sleep 1
+
+    elif [[ $HelpSelect == "s" ]]; then
+      HelpSelect=
+      qqX_edit_settings
+
     else
       HelpSelect=
       break
