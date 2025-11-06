@@ -2352,13 +2352,15 @@ fileshare_param_check
 
 if [ -z "${VM_PID}" ]; then
     vm_boot
-    start_viewer
-    if [ -n "${iso}" ] && [[ "$guest_os" == windows* ]]; then
-        echo " - Sending:  keys for the 'CD ROM'"
-        for LOOP in {1..5}; do
-          sleep 1
-          monitor_send_cmd "sendkey ret"
-        done
+    if [[ ! $BreakAtVerboseArgs ]]; then
+        start_viewer
+        if [ -n "${iso}" ] && [[ "$guest_os" == windows* ]]; then
+            echo " - Sending:  keys for the 'CD ROM'"
+            for LOOP in {1..7}; do
+            sleep 1
+            monitor_send_cmd "sendkey ret"
+            done
+        fi
     fi
 else
     echo "${VMNAME}"

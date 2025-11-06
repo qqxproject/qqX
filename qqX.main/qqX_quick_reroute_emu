@@ -176,7 +176,8 @@ function quickemu {
         printf "" > "/tmp/qqX_echo_output.log"
         printf "" > "$QemuErrorLog"
         [[ $Loop_Diagnostics ]] && printf "\n\n pre-sourcing qmod-boot :" &&  main_loop_diagnostics && printf "\n\n"
-        # Run boot sequence (which includes verbose routine and break sequence)
+        # Run boot sequence via modded function vm_boot from pre-sourced file 'qmod-function-vm_boot-new-temp'
+        # which also includes verbose load routines and break sequence
         sleep 1
         source "/tmp/qmod-boot-temp"
         VM_ExecBoot=
