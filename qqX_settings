@@ -15,6 +15,30 @@
 
 #  -------------------------------------------------------------------------------------------------------------------
 
+##    SETTINGS SECTIONS AVAILABLE:
+
+  #   DEFAULT VM FOLDER
+  #   GENERAL COLOR & THEMING
+  #   LANGUAGE
+  #   VM SELECTOR INTERFACE
+
+  #   FREEBIRD and BUILT-INS
+  #   QUICKGET and DISTRO DOWNLOADS
+  #   qqX UPDATES
+  #   EDITOR & BROWSER PROGRAMS
+  #   BOOT DEFAULTS, MSR, LOCALE, SCREENS and SIZES
+
+  #   SHARED or SECOND DRIVES
+  #   SNAPSHOTS
+  #   ERROR HANDLING
+  #   QEMU VERSIONING
+
+  #   qqX CUSTOM BOOTING & EXTRA ARGS
+  #   TIANO BIOS
+  #   CUSTOM SETTINGS & DEVELOPMENT
+
+#  -------------------------------------------------------------------------------------------------------------------
+
 ## SET THE DEFAULT GENERAL VM FOLDER, where the Virtual Machines are normally stored.
 #  Installation pre-set is "$HOME/VMQs"  -  Reconfigure as appropriate.
 #  Contains the .conf files and the 'InstanceName' containers.
@@ -58,27 +82,6 @@ Extra_VM_Folder+=("")
 #  Iso_639_1_List+="ts tt tw ty ug uk ur uz ve vi vo wa wo xh yi yo za zh zu"
 #  Note that forced languages will normally show internal pop-ups in English but alternatives may be default set, if direct pair listed above.
   Forced_TxLang=""
-
-## DOWNLOADS
-#  From qqX 1.13.06, starting with FreeSpirit, the new Curl feature of parallel multiplexed downloads has been enabled.
-#  Type 'curl -help all' at the cmd line to see if your version of Curl wil support this feature.
-#  Multiplexing may normally be toggled from within the download menus, if needed (?) Set here, to "1", to default disable.
-  Curl_NoPara=
-
-## Other SETTINGS SECTIONS AVAILABLE:
-
-  #   VM SELECTOR INTERFACE
-  #  'QUICKEMU' & 'QUICKGET'  SOURCE
-  #   qqX UPDATES
-  #   EDITOR & BROWSER PROGRAMS
-  #   BOOT DEFAULTS, MSR, LOCALE, SCREENS and SIZES
-  #   SHARED or SECOND DRIVES
-  #   SNAPSHOTS
-  #   ERROR HANDLING
-  #   QEMU VERSIONING
-  #   qqX CUSTOM BOOTING & EXTRA ARGS
-  #   TIANO BIOS
-  #   CUSTOM SETTINGS & DEVELOPMENT
 
 #  -------------------------------------------------------------------------------------------------------------------
 
@@ -150,7 +153,7 @@ VM_SelectorStyle="A"
 
 #  -------------------------------------------------------------------------------------------------------------------
 
-## 'QUICKEMU' & 'QUICKGET'  SOURCE:
+## FREEBIRD and BUILT-INS:
 
 # IMPORTANT @ 2024/04  quickemu underwent major changes.
 
@@ -201,6 +204,15 @@ VM_SelectorStyle="A"
 
 #  -------------------------------------------------------------------------------------------------------------------
 
+## QUICKGET and DISTRO DOWNLOADS
+
+#  From qqX 1.13.06, starting with FreeSpirit, the new Curl feature of parallel multiplexed downloads has been enabled.
+#  Type 'curl -help all' at the cmd line to see if your version of Curl wil support this feature.
+#  Multiplexing may normally be toggled from within the download menus, if needed (?) Set here, to "1", to default disable.
+  Curl_NoPara=
+
+#  -------------------------------------------------------------------------------------------------------------------
+
 ## qqX UPDATES:
 
 # Checks quietly for new GitHub releases (set =1 if not required)
@@ -245,18 +257,20 @@ VM_SelectorStyle="A"
 
 # For BIOS settings, see TIANO BIOS further down.
 
-# SCREEN %PERCENTAGE may be added here or INDIVIDUALLY in the .conf file as 'Custom_SDL_ScreenPercent'
-# Use just the value, eg. ="68"   Suggested values from 50 to 70 as a percentage of the physical monitor
-# From quickemu 4.8 onwards, where value is integer from 25 to 99  & for Linux VM's, SDL only.
+## SCREEN SIZES
+
+# Windows determines its own sizes, as does earlier code for Macs.
+# MacOS should now use Size as per release in the conf files. See qqX webpage notes for Mac.
+
+# SIZE, if present, TAKES PRIORITY over percent. Oddball sizes may cause unsharp display.
+
+# SDL SCREEN %PERCENTAGE may be added here or INDIVIDUALLY in the .conf file as 'Custom_SDL_ScreenPercent'
+# Value is integer from 25 to 99  eg. ="68"   Suggested values from 50 to 70 as a percentage of the physical monitor
   Default_SDL_ScreenPercent="60"
 
-# VM SCREEN SIZE may be added here. Standard values are suggested. Oddball sizes may cause unsharp display.
-# Or INDIVIDUALLY in the .conf file as 'Custom_SDL_ScreenSize'
-# From quickemu 4.9.5 onwards For Linux VM's, SDL only.
-# qqX still allows percent as a value in later code. Size, if present, TAKES PRIORITY over percent.
-# Windows determines its own sizes, as does earlier code for Macs.
-# For later code MacOS should now use Size as per release in the conf files. See qqX wiki notes for Mac.
-# Set Linux sizes as ="XxY" Eg 3200x1800 2560x1440 2560x1080 1600x900 1920x1080 1920x720 etc
+# SDL VM SCREEN SIZE may be added here or INDIVIDUALLY in the .conf file as 'Custom_SDL_ScreenSize'
+# Standard values are suggested:
+# Set sizes as ="XxY" Eg 3200x1800 2560x1440 2560x1080 1600x900 1920x1080 1920x720 etc
   Default_SDL_ScreenSize=""
 
 # PHYSICAL MONITOR SIZE - quickemu 4.9.5 onwards
