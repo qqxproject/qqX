@@ -80,7 +80,7 @@ else
         printf "   [bm] > "
         if [[ $BootStyle == "fast" ]]; then
           printf " fastboot"
-          if [[ $Mounted_ISO ]]; then printf "  (toggle to enable ISO boot)"
+          if [[ $Mounted_ISO ]]; then printf "  (toggle to enable boot menu)"
           else printf "  (toggle)"
           fi
         else
