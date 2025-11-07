@@ -170,6 +170,10 @@ show_main_menu_header () {
     printf "\n  Symbolically linked to real path %s \n" "$(realpath "$VM_Conf_Dir/$VM_InstanceName")"
   fi
 
+  if [[ $qvWarn ]] ; then
+    printf "\n  QEMU version 8.1.0 or newer is normally required for all functions to work ... \n"
+  fi
+
 }
 
 # CHECK the VM disk is not corrupt and that snapshots are present:
