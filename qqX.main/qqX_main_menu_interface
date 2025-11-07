@@ -475,7 +475,9 @@ else
     fi
 
     printf  "  [enter] refresh   "
-    [[ $DistroHomePage ]] &&  printf "[w] distro homepage  "
+    if [[ $DistroHomePage ]]; then printf "[w] distro homepage  "
+    else printf "(no distro webpage listed)  "
+    fi
     printf " [h] show help & info  [q] quit "
 
     if [[ $LiveBoot && $DistroLogin ]]; then
