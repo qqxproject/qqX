@@ -156,6 +156,7 @@ show_main_menu_header () {
 
   if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
     printf "\n  Designated Live Boot: %s \n" "$(basename "$IsoImg")"
+    [[ $BootStyle == "slow" ]] && printColor "\n  [iso] select an ISO to be mounted and made additionally accessible\n"
   elif [[ $BootStyle == "slow" ]]; then
     printf "\n  Designated Boot: Main Drive \n"
     if [[ ! $Mounted_ISO ]]; then
@@ -966,7 +967,7 @@ iso_select_mount_and_boot () {
   printf "\n"
 
   if [[ $LiveBoot ]]; then
-    printf "\n\n  CAUTION: You are already standard booting from an ISO. "
+    printColor "\n\n  CAUTION: You are already standard booting from an ISO. "
     printf "\n\n  The distro has not yet been installed to the disk."
   fi
 

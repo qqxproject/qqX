@@ -124,21 +124,26 @@ function quickemu {
         if [[ $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
           printColor "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS or boot an ISO"
           printf "\n\n  Mounted ISO: Select 'Boot manager' and select 'QEMU DVD-ROM' from the list. "
-          printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
-          printColor "\n\n  Current ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
+          [[ ! $LiveBoot ]] && printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
+          if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printColor "\n\n  Designated Live Boot: %s" "$(basename "$IsoImg")"
+          elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Designated Boot: Main Drive"
+          fi
+          if [[ $LiveBoot ]]; then printf "\n\n  Additionally mounted ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
+          else printColor "\n\n  Additionally mounted ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
+          fi
           printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
           read -rp "  >  "  Mounted_ISO_Return
 
         elif [[ ! $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
-          printColor "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS"
+          printf "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS"
           if [[ $img ]]; then
             printf "\n\n  A 'live boot' ISO may be usable for disk management"
             printf "\n\n  BUT this appears to be an 'IMG' based distro which may need special booting."
           else
-            printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
+            [[ ! $LiveBoot ]] && printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
           fi
-          printf "\n\n  NO ISO/DVD has been specifically mounted ... "
+          printColor "\n\n  NO ISO/DVD has been specifically mounted ... "
           [[ $LiveBoot ]] && printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
           printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
@@ -152,7 +157,10 @@ function quickemu {
             printf "\n\n\n"
           elif [[ $Mounted_ISO ]]; then
             printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
-            printf "\n\n  Currently mounted ISO is '%s' \n\n\n" "$Mounted_ISO_DisplayName"
+            if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printf "\n\n  Designated Live Boot: %s" "$(basename "$IsoImg")"
+            elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Designated Boot: Main Drive"
+            fi
+            printf "\n\n  Additionally mounted ISO is '%s' \n\n\n" "$Mounted_ISO_DisplayName"
           else
             printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file \n\n\n"
           fi
