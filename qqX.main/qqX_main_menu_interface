@@ -43,6 +43,16 @@ else
       if [[ ! $VM_InstanceName ]]; then printColor  "  [vm]  reselect " ; else   printf  "  [vm]  SELECT "
       fi
       printf  "  [u] show UTILS & technical"
+      printf "   [bm] > "
+      if [[ $BootStyle == "fast" ]]; then
+        printf " fastboot"
+        if [[ $Mounted_ISO ]]; then printf "  (toggle to enable boot management menu)"
+        else printf "  (toggle)"
+        fi
+      else
+        printColor " boot menu enabled"
+        printf "  (toggle)"
+      fi
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
@@ -76,17 +86,6 @@ else
         printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
         [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
         printf "\n"
-      else
-        printf "   [bm] > "
-        if [[ $BootStyle == "fast" ]]; then
-          printf " fastboot"
-          if [[ $Mounted_ISO ]]; then printf "  (toggle to enable boot menu)"
-          else printf "  (toggle)"
-          fi
-        else
-          printColor " boot menu enabled"
-          printf "  (toggle)"
-        fi
       fi
 
     else
@@ -105,9 +104,9 @@ else
       if [[ $Mounted_ISO ]]; then
         printf "\n\n  [iso] unmount iso from guest, boot from main drive"
       else
-        printf "\n\n  [iso] mount iso to guest, allow boot or read from iso"
+        [[ ${#IsoList[*]} -gt 1 ]] && printf "\n\n  [iso] mount iso to guest, allow boot or read from iso"
       fi
-      if [[ $BootStyle == "fast" ]]; then printf "   [bm] boot menu > allow guest efi/bios"
+      if [[ $BootStyle == "fast" ]]; then printf "   [bm] enable boot management menu"
       else printf "   [fb] use fast boot menu "
       fi
       printf  "\n\n  [tune] config tune-up wizard   [disk]  resize or repair existing drives   [rtv] reset Tiano VMF Vars"
@@ -325,6 +324,7 @@ else
     [[ $(ls "$VM_InstanceName"/*.OLD.qcow2 2>/dev/null) ]] && printColor "(backup disk present)"
 
     printf  "\n\n"
+
     filter_and_flag_qemu_errors
 
     if [[ $QemuErrorAlert ]]; then
@@ -333,6 +333,7 @@ else
       if [[ $(type -p "$FileManager") ]]; then
         printf "  [qf] | [qqf]  open a qcow2 drive"
         printf " in file manager"
+        [[ ${#IsoList[*]} -gt 1 ]] && printf "  [iso] un/mount iso to guest"
         if [[ $LiveBootMissing ]]; then  printColor "   [f]  open VM folder"
         else printf "   [f]  open VM folder"
         fi
