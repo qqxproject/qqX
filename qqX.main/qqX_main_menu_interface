@@ -227,7 +227,9 @@ else
         if [[ $qqX_GL_Mode == "off" ]] ; then printColor "[gl]  OFF > toggle EGL/GLX > on"
         else printColor "[gl]  ON > toggle EGL/GLX > off" ; fi
 
-        [[ -e "$QemuArgsCustomFile" ]] && printColor "     [C] toggle normal/custom menu "
+        if [[ -e "$QemuArgsCustomFile" ]]; then printColor "     [C] toggle normal/custom menu "
+        elif [[ $VerboseArgs ]]; then  printf  "      (all starts > Verbose)"
+        fi
 
       fi
 

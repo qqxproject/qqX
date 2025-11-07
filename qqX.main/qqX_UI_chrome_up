@@ -188,8 +188,6 @@ show_qqX_title_bar() {
   fi
   printf "quickemu %s  &  quickget %s  '%s'"  "$QE_VerNumber" "$QG_VerNumber" "$QE_SourceVersion"
 
-  [[ $VerboseArgs ]] && printColor  "  (Verbose Args)"
-
   if [[ $CodingHotSwap && $CodingHotSwapShow ]] || [[ $DevStart ]]; then
     printf "\n\n  Using Code: %s " "$QE_SourcePath"
     [[ $CodingHotSwap ]] && CodingHotSwapShow=
