@@ -188,6 +188,21 @@ function distro_release_notes {
 
 # For testing code, run './quickget --check distroname' from a terminal opened in the relevant builtin folder.
 
+## FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
+function releases_alpine() {
+    CurrAlp="$(web_pipe "https://alpinelinux.org/downloads/" | grep -s 'Current Alpine' | fv -M -Q | cut -d '.' -f 1,2)"
+    ListAlp="$(web_pipe "https://dl-cdn.alpinelinux.org/alpine/" | fv -M 6 -Q --col)"
+    mapfile -t ArrAlp <<< "$ListAlp"
+    RelAlpCount=0 ; ArrAlpCount=0 ; RelList=
+    while [[ ${ArrAlp[ArrAlpCount]} ]] && [[ "$RelAlpCount" -lt 4 ]]; do
+        if ! fv --gt "${ArrAlp[ArrAlpCount]} $CurrAlp "; then
+            RelList+="${ArrAlp[ArrAlpCount]} " ; ((RelAlpCount+=1))
+        fi
+        ((ArrAlpCount+=1))
+    done
+    echo "$RelList"
+}
+
 ## ADD
 function releases_anduinos {
     echo "LTS Standard"
