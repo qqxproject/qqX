@@ -743,6 +743,18 @@ function get_void() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## ADD 18 as in https://github.com/quickemu-project/quickemu/pull/1761
+# but FIX missing lite64 with ver 18. REVIEW making dynamic?
+function releases_zorin() {
+    echo 18 17 16
+}
+function editions_zorin() {
+    if [[ ! $RELEASE ]]; then echo "core64 lite64 education64"
+    elif [[ $RELEASE == "18" ]]; then echo "core64 education64"
+    else echo "core64 lite64  education64"
+    fi
+}
+
 ##########################################
 
 ## 4: GUEST TYPE
