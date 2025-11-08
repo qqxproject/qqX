@@ -532,10 +532,14 @@ function_quick_get_wrap ()  {
 
       elif [[ ${QGW_List_NumSelected,,} == "fl" ]] && [[ $QG_Modpath ]]; then
         while true ; do
-          qqLselect=
+          qqLselect= ; local fNum=0
+          while [[ ${VM_ListingArray[fNum]} ]]; do
+            [[ ${VM_ListingArray[fNum]} == "${VM_ListingFilter,,}" ]] && break
+            ((fNum+=1))
+          done
           printf "\n  FilterDefault is editable in the general settings file ... "
           printf "\n\n  Some listed distros may have releases that offer other options. Some lists may overlap with others.\n\n"
-          print_quickget_and_folder_choices  "VM_ListingArray"
+          print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
           printf "\n\n  CURRENT FILTER  =  %s  =  %s" "${VM_ListingFilter^^}" "${VM_Listing_Info[$VM_ListingFilter,info]}"
           printColor "\n\n  [number] to reselect"
           printColor "   [enter] to return"

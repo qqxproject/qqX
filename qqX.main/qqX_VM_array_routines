@@ -410,10 +410,6 @@ refresh_sources_and_load_VM_arrays() {
     tput sgr0
   }
 
-  #if [[ $VM_ListingFilterDefault ]]; then VM_ListingFilter="$VM_ListingFilterDefault"
-  #else VM_ListingFilter="qqlist-desktop"
-  #fi   REVIEW  > follow refresh doesn't change builtin model, so leave filter unchanged too
-
   [[ $CodingHotSwap ]] && QE_SourceVersion="$CodingHotSwap"
   refresh_and_load_quickemu_sources
   store_boot_style_defaults
