@@ -143,9 +143,9 @@ function sort_qqX_builtin_settings {
   QE_SourcePath= ; QG_SourcePath= ; FreePath=
 
   if [[ $CodingHotSwap ]]; then QE_SourceVersion="$CodingHotSwap" ; fi
-  [[ ! $QE_SourceVersion ]] && QE_SourceVersion="freebird"
 
-  # simplfy checks and standardization, make all lower case, for now
+  # simplify checks and standardization, make all - lower case - for now  <<<
+  [[ ! $QE_SourceVersion ]] && QE_SourceVersion="freebird"
   QE_SourceVersion="${QE_SourceVersion,,}"
 
   if [[ $QE_SourceVersion == "custom" ]] && [[ ! -d "$Default_VM_Folder/qqX.custom/QE.Custom" ]]; then
@@ -205,8 +205,10 @@ function sort_qqX_builtin_settings {
 
     QE_SourcePath="$FreePath/quickemu"
     QG_SourcePath="$FreePath/quickget"
-    if [[ -e "$FreePath/qqX_quickget_mods" ]]; then QG_Modpath="$FreePath/qqX_quickget_mods"
+    if [[ -e "$FreePath/qqX_quickGet_mods" ]]; then QG_Modpath="$FreePath/qqX_quickGet_mods"
     else QG_Modpath= ; fi
+    if [[ -e "$FreePath/qqX_quickEmu_mods" ]]; then QE_Modpath="$FreePath/qqX_quickEmu_mods"
+    else QE_Modpath= ; fi
   fi
 
   if [[ $FreePath ]]; then
@@ -314,15 +316,18 @@ function qemu_version_check {
   # No past versions of Qemu have ever exceeded a minor value of 2 so future cases of minor versions > 9 are only hypothetical
   # eg where 10.14.1 becomes 1014
 
+  qvFail= ; qvWarn=
+
   if [[ ! $QEMU_VER_LONG ]] || [[ "$QEMU_VER_LONG" == *[[:alpha:]]* ]]; then qvFail=1
   elif [[ ! $QEMU_VER_SHORT ]] || [[ "$QEMU_VER_SHORT" == *[[:alpha:]]* ]]; then qvFail=1
   elif [[ $QEMU_VER_SHORT -lt 61 ]]; then qvFail=1
+  elif [[ $QEMU_VER_SHORT -lt 82 ]]; then qvWarn=1
   fi
 
   if [[ $QemuShortVerOveride ]]; then  QEMU_VER_SHORT="123456"
   elif [[ $qvFail ]]; then
     printf "\n\n  %s" "$("$QEMU" -version | head -n 1)"
-    printf "\n\n  QEMU version 8.1.0 or newer is normally required for all functions to work."
+    printf "\n\n  QEMU version 8.2.0 or newer is normally required for all functions to work."
     printf "\n\n  while QEMU version 6.1.0 is baseline for GL functions."
     printf "\n\n  Use 'QemuShortVerOveride' in MAIN SETTINGS to adjust errors and change warnings"
     printf "\n\n  [enter] to continue and edit settings if current version is okay. \n\n"

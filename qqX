@@ -41,7 +41,7 @@
 # Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
 # Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
 # but minor numbers remain padded to 2dp
-  qqX_Version="1.13.06"
+  qqX_Version="1.14.01"
 
 # Allow Posix sub-shell checks (without -t 1) eg. qqX_Version="$(./qqX --version 2>/dev/null)"
 if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit ; fi
@@ -69,17 +69,17 @@ if [[ -d "./qqX.system" ]]; then DevStart=1 ; else DevStart= ; fi
 
 # DEV FAULT TRACING: set vars as =0, or set =int/float for pauses; eg =1 to pause 1 sec, "0.2" etc for less,
 # where timed pauses are given. Some diagnostics require enter key to continue ...
-NoClear=  ;  Loop_Diagnostics= ;  Trace_InputVars=   ; ShowProcesses=   ; PathDiagnostics=  ; ShowQGetLists=        ### DEV ###
+NoClear=  ;  Loop_Diagnostics=  ;  Trace_InputVars=  ; ShowProcesses=  ; PathDiagnostics=  ; ShowQGetLists=        ### DEV ###
 
 function main_loop_diagnostics {
   if [[ $Loop_Diagnostics ]]; then
     echo; echo "VM_Conf_Dir=$VM_Conf_Dir   VM_Conf_File=$VM_Conf_File   VM_InstanceName=$VM_InstanceName"
     echo "pwd: $(pwd)   Current_VM_Folder=$Current_VM_Folder"
     echo "BootStyle=$BootStyle   BootStyleMsg=$BootStyleMsg    BootStyle_Default=$BootStyle_Default   BootStyleMsg_Default=$BootStyleMsg_Default"
-    echo "ram=$ram   cpu_cores=$cpu_cores  mouse=$mouse  keyboard=$keyboard"
+    echo "ram=$ram   cpu_cores=$cpu_cores  mouse=$mouse  keyboard=$keyboard  boot=$boot"
     echo "SelectArrayError=$SelectArrayError  DefaultFolderError=$DefaultFolderError  ExtraFolderError=$ExtraFolderError"
     echo "VM_Selection=$VM_Selection  VM_Selection_Overide=$VM_Selection_Overide"
-    echo "ByPass_VM_Array_Loader=$ByPass_VM_Array_Loader  ByPass_VM_Array_Selector=$ByPass_VM_Array_Selector"
+    echo "ByPass_VM_Array_Loader=$ByPass_VM_Array_Loader  ByPass_VM_Array_Selector=$ByPass_VM_Array_Selector  MSR_DistrosFound=$MSR_DistrosFound"
     echo "NewFileTuneUp_JustDone=$NewFileTuneUp_JustDone  QemuErrorLog=$QemuErrorLog"
     echo "MainDrive=$MainDrive disk_img=$disk_img IsoImg=$IsoImg"
     echo "SharedDrive=$SharedDrive SharedDrive_Conf=$SharedDrive_Conf SharedDrive_Mount=$SharedDrive_Mount"

@@ -43,30 +43,49 @@ else
       if [[ ! $VM_InstanceName ]]; then printColor  "  [vm]  reselect " ; else   printf  "  [vm]  SELECT "
       fi
       printf  "  [u] show UTILS & technical"
-      [[ $KVM_MSR_Error || $KVM_MSR_Warn ]] && printf  "   [m]  msrs help "
+      printf "   [bm] > "
+      if [[ $BootStyle == "fast" ]]; then
+        printf " fastboot"
+        if [[ $Mounted_ISO ]]; then printf "  (toggle to enable boot management menu)"
+        else printf "  (toggle)"
+        fi
+      else
+        printColor " boot menu enabled"
+        printf "  (toggle)"
+      fi
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
-          printf "\n\n"
+          check_screen_percentage_and_output
+          printf "\n\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
-          printColor "  IMPORTANT >>> read the TL;DR for setting up the INITIAL DRIVERS at https://qqxproject.org/docs/Guides/Windows-OS"
-          printf "\n\n  MAKE SURE to follow the pictures in the installer section"
-          printf "\n\n  MAKE SURE to follow up with virtio-win-gt-x64.msi  <<< IMPORTANT \n"
+          printColor "  From qqX 1.14 onwards, ALL the Windows drivers should be autodetected and should autoinstall"
+          printf "\n\n  However, take a moment to overview things at https://qqxproject.org/Guides/Windows-OS"
+          [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT"
+          [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT"
+          printf "\n"
+          CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
+          if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
+            printColor "\n\n  WARNING: this CPU is unable to support current versions of Windows."
+            printf "\n\n  As 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
+            printf "\n  the installation is unlikely to be successful, or to be reliable. \n\n"
+          fi
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
         fi
-      else
-        printf "   [bm] > "
-        if [[ $BootStyle == "fast" ]]; then
-          printf " fastboot"
-          if [[ $Mounted_ISO ]]; then printf "  (toggle to enable ISO boot)"
-          else printf "  (toggle)"
-          fi
-        else
-          printColor " boot menu enabled"
-          printf "  (toggle)"
-        fi
+      elif [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
+        printColor "\n\n\n  Live BOOT ISO NOT FOUND"
+        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+        printf "\n"
+      elif [[ "${VM_InstanceName,,}" == *windows* ]] && [[ "$Mounted_ISO" == *virtio* ]]; then
+        printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
+        # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
+        printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
+        printColor "\n\n  The Windows ISO is unlikely to be needed so may be archived."
+        printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
+        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+        printf "\n"
       fi
 
     else
@@ -85,16 +104,16 @@ else
       if [[ $Mounted_ISO ]]; then
         printf "\n\n  [iso] unmount iso from guest, boot from main drive"
       else
-        printf "\n\n  [iso] mount iso to guest, allow boot or read from iso"
+        [[ ${#IsoList[*]} -gt 1 ]] && printf "\n\n  [iso] mount iso to guest, allow boot or read from iso"
       fi
-      if [[ $BootStyle == "fast" ]]; then printf "   [bm] boot menu > allow guest efi/bios"
+      if [[ $BootStyle == "fast" ]]; then printf "   [bm] enable boot management menu"
       else printf "   [fb] use fast boot menu "
       fi
       printf  "\n\n  [tune] config tune-up wizard   [disk]  resize or repair existing drives   [rtv] reset Tiano VMF Vars"
 
       printColor "\n\n  ----------------------------------------------------------------------------"
       printf "\n\n  [FS] Switch to FreeSpirit  [FB] FreeBird  [HB]  [Ech]  [Sys]  [Cust]  [Dev] "
-      printf "\n\n  [hdw] add current config to this VM's Virtual Hardware Record    [m] msrs help"
+      printf "\n\n  [hdw] add current config to this VM's Virtual Hardware Record "
 
       [[ -e "$HOME/.qqX/qqX_term.conf" ]] && printf "\n\n   [tmc] terminal config"
 
@@ -112,8 +131,30 @@ else
       printColor "\n\n  ---------------------------------------------------------------------------- "
 
     fi
-    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS "
+
+    [[ $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
+    [[ $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
+    [[ $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
+
+    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
+    if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
+    else [[ $MainDrive ]] && printf "   main (%s)" "$SnapCountMain"
+    fi
+    if [[ $SharedDrive ]]; then
+      if [[ $SnapCountShared -gt 15 ]]; then printColor "  shared (%s)" "$SnapCountShared"
+      else printf "  shared (%s)" "$SnapCountShared"
+      fi
+    fi
+    if [[ $SecondDrive ]]; then
+      if [[ $SnapCountSecond -gt 15 ]]; then printColor "  second (%s)" "$SnapCountSecond"
+      else printf "  second (%s)" "$SnapCountSecond"
+      fi
+    fi
+
     printf "\n"
+    [[ $SettingsFileAdjusted ]] && Verbose_MSR_dialog=1
+    print_kvm_status_warnings
+    [[ $Verbose_MSR_dialog ]] && Verbose_MSR_dialog=
 
     if [[ ! $ShowUtilsMenu ]]; then
 
@@ -144,8 +185,6 @@ else
 
       fi
 
-      print_kvm_status_warnings
-
       if [[ $ShowCustomBootStyle ]] ; then
 
         # NB  "$QemuArgsCustomFile" may exist BUT [c] $UseCustomBootArgs remains menu selectable
@@ -169,13 +208,15 @@ else
 
         printColor  "\n\n  [d]   start with SDL display"
 
-        if [[ $guest_os == "windows" ]]; then  printColor "   (size as set in Windows)"
+        if [[ $guest_os == "windows" ]]; then  printColor "   (size as set by qqX and/or by Windows)"
         elif [[ $guest_os == "macos" ]] && [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then  printColor " (size determined by MacOS with this QE version)"
-        elif [[ "$SDL_ScreenSize_Cmd" == *screenpct* ]]; then printColor " (%s%%)    [df]  97%% "  "$SDL_ScreenPercent"
-        elif [[ "$SDL_ScreenSize_Cmd" == *width* ]] && [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
-        elif [[ "$SDL_ScreenSize_Cmd" == *width* ]]; then printColor " (%s)     [df]  97%% "  "$SDL_ScreenSize"
         elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > see settings)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
+        elif [[ $SDL_ScreenPercent ]]; then printColor " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
+        elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
+        else printColor " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
         fi
+
+        [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
 
         if [[ $HeadlessDisplay ]]; then printColor 	"\n\n  [s]   start with Spice display (HEADLESS) "
         else  printColor 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
@@ -185,7 +226,9 @@ else
         if [[ $qqX_GL_Mode == "off" ]] ; then printColor "[gl]  OFF > toggle EGL/GLX > on"
         else printColor "[gl]  ON > toggle EGL/GLX > off" ; fi
 
-        [[ -e "$QemuArgsCustomFile" ]] && printColor "     [C] toggle normal/custom menu "
+        if [[ -e "$QemuArgsCustomFile" ]]; then printColor "     [C] toggle normal/custom menu "
+        elif [[ $VerboseArgs ]]; then  printf  "      (all starts > Verbose)"
+        fi
 
       fi
 
@@ -281,6 +324,7 @@ else
     [[ $(ls "$VM_InstanceName"/*.OLD.qcow2 2>/dev/null) ]] && printColor "(backup disk present)"
 
     printf  "\n\n"
+
     filter_and_flag_qemu_errors
 
     if [[ $QemuErrorAlert ]]; then
@@ -289,6 +333,7 @@ else
       if [[ $(type -p "$FileManager") ]]; then
         printf "  [qf] | [qqf]  open a qcow2 drive"
         printf " in file manager"
+        [[ ${#IsoList[*]} -gt 1 ]] && printf "  [iso] un/mount iso to guest"
         if [[ $LiveBootMissing ]]; then  printColor "   [f]  open VM folder"
         else printf "   [f]  open VM folder"
         fi
@@ -380,7 +425,8 @@ else
     fi
     printf  "\n\n"
 
-    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"; fi
+    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"
+    fi
 
     check_disk_is_okay
     check_if_disk_needs_a_cleanup
@@ -429,7 +475,9 @@ else
     fi
 
     printf  "  [enter] refresh   "
-    [[ $DistroHomePage ]] &&  printf "[w] distro homepage  "
+    if [[ $DistroHomePage ]]; then printf "[w] distro homepage  "
+    else printf "(no distro webpage listed)  "
+    fi
     printf " [h] show help & info  [q] quit "
 
     if [[ $LiveBoot && $DistroLogin ]]; then

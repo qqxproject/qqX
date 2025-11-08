@@ -63,10 +63,15 @@ print_quickget_and_folder_choices () {
   # listing function, originally for use inside 'function_quick_get_wrap'
   # adapted with $2 EITHER as number per line OR for alpha zooming filter
   # and for use for listing target folder selections for installing or moving VM's
+  # OR with highlighter, giving $2 as 'HL' and $3 as known valid integer
 
   declare -n  QGW_List_ArrName="$1"
   [[ $ShowQGetLists ]] && { printf "\n print choices transfer arr: "; printf "\n %s" "${QGW_List_ArrName[@]}"; printf "\n\n"; }
   QGW_List_Arr_ItemLength=14
+  local HighLightNumber=
+
+  if [[ $2 == "HL" ]]; then shift; HighLightNumber="$2"; shift
+  fi
 
   if [[ "$2" == [1-9] ]]; then QGW_List_NewLinePoint="$2"; else QGW_List_NewLinePoint="7"; fi
   # default QGW_List_NewLinePoint = 7  but some functions may reduce this to as low as 2 or 3
@@ -113,7 +118,11 @@ print_quickget_and_folder_choices () {
       QGW_TxArr+=("$TxVar")
 
     elif [[ ! $QGW_List_UbuntuOthers ]] && [[ ! $QGW_List_AlphaFilter || ${QGW_List_Arr_Item:0:1} == "$QGW_List_AlphaFilter" ]] ; then
-      printf "  %3d)  %-${QGW_List_Arr_ItemLength}s  "  "$QGW_List_DisplayNum"  "$QGW_List_Arr_Item"; ((QGW_List_NewLineCounter+=1))
+      if [[ $HighLightNumber ]] && [[ $QGW_List_ArrNum -eq "$HighLightNumber" ]]; then
+        printColor "  %3d)  %-${QGW_List_Arr_ItemLength}s  "  "$QGW_List_DisplayNum"  "$QGW_List_Arr_Item"; ((QGW_List_NewLineCounter+=1))
+      else
+        printf "  %3d)  %-${QGW_List_Arr_ItemLength}s  "  "$QGW_List_DisplayNum"  "$QGW_List_Arr_Item"; ((QGW_List_NewLineCounter+=1))
+      fi
     fi
 
     ((QGW_List_ArrNum+=1));  ((QGW_List_DisplayNum+=1))
@@ -401,17 +410,6 @@ function show_hot_swap_line {
   printf "\n\n"
 }
 
-function refresh_QWG_selector {
-  if [[ $1 != "no-set" ]] ; then
-    SettingsFileAdjusted=1
-    refresh_sources_and_load_VM_arrays
-  fi
-  clear_main_gt_start_vars
-  show_QWG_header ; show_hot_swap_line
-  print_quickget_and_folder_choices  "QGW_OS_Array"
-  QGW_List_NumSelected=
-}
-
 function clear_main_gt_start_vars {
 
   # Main vars, other clearances will need less,
@@ -434,6 +432,17 @@ function clear_main_gt_start_vars {
     cd "$QWG_Conf_Dir" || { printColor "  ERROR changing to the General VM Location"; sleep 3; }
     Current_VM_Folder="$QWG_Conf_Dir"
   fi
+}
+
+function refresh_QWG_selector {
+  if [[ $1 != "no-set" ]] ; then
+    SettingsFileAdjusted=1
+    refresh_sources_and_load_VM_arrays
+  fi
+  clear_main_gt_start_vars
+  show_QWG_header ; show_hot_swap_line
+  print_quickget_and_folder_choices  "QGW_OS_Array"
+  QGW_List_NumSelected=
 }
 
 test_internet_is_up () {
@@ -523,10 +532,14 @@ function_quick_get_wrap ()  {
 
       elif [[ ${QGW_List_NumSelected,,} == "fl" ]] && [[ $QG_Modpath ]]; then
         while true ; do
-          qqLselect=
+          qqLselect= ; local fNum=0
+          while [[ ${VM_ListingArray[fNum]} ]]; do
+            [[ ${VM_ListingArray[fNum]} == "${VM_ListingFilter,,}" ]] && break
+            ((fNum+=1))
+          done
           printf "\n  FilterDefault is editable in the general settings file ... "
           printf "\n\n  Some listed distros may have releases that offer other options. Some lists may overlap with others.\n\n"
-          print_quickget_and_folder_choices  "VM_ListingArray"
+          print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
           printf "\n\n  CURRENT FILTER  =  %s  =  %s" "${VM_ListingFilter^^}" "${VM_Listing_Info[$VM_ListingFilter,info]}"
           printColor "\n\n  [number] to reselect"
           printColor "   [enter] to return"
@@ -812,22 +825,18 @@ function_quick_get_wrap ()  {
     while true ; do
 
       if [[ ! ${QGW_Releases_Array[*]} ]] ; then
-
         printColor "\n\n  QuickGet or internet ERROR, no releases found "
         printf "\n\n  Linux ISO's: Try downloading directly from the distro's Web Pages .... \n"
-
       elif [[ ${#QGW_Releases_Array[@]} -eq 1 ]] ; then
-
         printf "\n  One Release only >  %s " "${QGW_Releases_Array[0]}"
         printf " >  but Editions choice may be be possible:"
         printColor "\n\n  [enter] to continue"
-
       else
-
         print_quickget_and_folder_choices  "QGW_Releases_Array"
         printColor "\n\n\n  Give LIST number of Release"
-
       fi
+
+      [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  [f] main menu > hot-swap to FreeSpirit"
 
       [[ $QGW_VerifiedList_NumSelected ]] && QGW_List_NumSelected="$QGW_VerifiedList_NumSelected"
 
@@ -853,6 +862,8 @@ function_quick_get_wrap ()  {
       printf "  [b] back to main menu \n\n"
       read -rp "  >  "  QGW_List_NumSelected
       printf "\n"
+
+      [[ $QGW_List_NumSelected == "f" ]] &&  QGW_List_NumSelected="b"
 
       if [[ $QGW_List_NumSelected == "s" || $QGW_List_NumSelected == "p" || $QGW_List_NumSelected == "r" || $QGW_List_NumSelected == "b" ]]; then
 
@@ -918,12 +929,13 @@ function_quick_get_wrap ()  {
       fi
       #  See https://github.com/quickemu-project/quickemu/issues/1113
       printf "\n\n"
+      local HighLightNumber="10"
       if [[ $QGW_Release_Arr_NameSelected == "8"  ||  $QGW_Release_Arr_NameSelected == "10-ltsc" ]]; then
         printf "\n\n  WARNING:  Outdated code. This release can no longer be downloaded"
         printColor "\n\n  [b] back to main menu \n\n"
       else
-        print_quickget_and_folder_choices  "QGW_WinLangs_Array"
-        printColor "\n\n  Give LIST number of Language   [b] back to main menu \n\n"
+        print_quickget_and_folder_choices  "QGW_WinLangs_Array" HL "$HighLightNumber"
+        printColor "\n\n  [enter] for ${QGW_WinLangs_Array[$HighLightNumber]}  OR  [number] to select    [b] back to main menu \n\n"
       fi
       read -rp "  >  "  QGW_List_NumSelected
       printf "\n"
@@ -932,6 +944,7 @@ function_quick_get_wrap ()  {
         QGW_Release_Arr_NumSelected= ; QGW_Release_Arr_NameSelected= ; QGW_Edition_Arr_NameSelected= ; QGW_Edition_Arr_NumSelected=
         function_quick_get_wrap ; return
       else
+        [[ ! $QGW_List_NumSelected ]] && QGW_List_NumSelected=$((HighLightNumber+1))
         [[ $QGW_List_NumSelected -gt "${#QGW_WinLangs_Array[@]}" ]] && QGW_List_NumSelected="${#QGW_WinLangs_Array[@]}"
         # Uses Lang as edition
         QGW_Edition_Arr_NumSelected=$((QGW_List_NumSelected-1))
@@ -1160,7 +1173,7 @@ function_quick_get_wrap ()  {
         printf "  DOWNLOADING:  "
         printColor "%s"  "$QWG_NewVM_Name"
         printf "   TO:  "
-        printf "%s"   "$QWG_Conf_Dir"
+        printColor "%s"   "$QWG_Conf_Dir"
         [[ ! $DL_PotentialOkay ]] &&  printf "\n\n   MAY NOT BE WORKING CORRECTLY ...."
         printf "\n"
       fi
@@ -1180,14 +1193,19 @@ function_quick_get_wrap ()  {
             else printf "\n\n  qqX has enabled download multiplexing"
             fi
             printf "  [sp] for serial/parallel toggle"
-          else printf "\n\n  Download multiplexing is available on your host machine: \n\n  Use [b] to switch to qqX FreeSpirit and test it out ..."
           fi
         fi
       fi
 
-      if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]] && [[ ! $(type -p mkisofs) ]]; then
-        printColor "\n\n\n  Caution: Installation of 'mkisofs' (genisoimage/cdrtools/cdrkit/xorriso) is NEEDED for a smooth Windows Desktop setup:"
-        printf "\n\n  Use [b] to see qqX help and the Windows installation guide ...\n"
+      if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
+        [[ ! $(type -p mkisofs) ]] && printColor "\n\n\n  Caution: Installation of 'mkisofs' (genisoimage/cdrtools/cdrkit/xorriso) is NEEDED for a smooth Windows Desktop setup:"
+        CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
+        if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
+          printColor "\n\n  WARNING: this CPU is unable to support current versions of Windows."
+            printf "\n\n  As 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
+            printf "\n  the installation is unlikely to be successful, or to be reliable. \n\n"
+        fi
+        printf "\n\n  Use [b] to see qqX help options and the Windows installation guide ...\n"
       fi
 
       if [[ "${#QGW_Releases_Array[@]}" -gt 1 ]] || [[ "${#QGW_Editions_Array[@]}" -gt 1 ]]; then
@@ -1435,7 +1453,8 @@ function_quick_get_wrap ()  {
 		read -r -t 0.2
 		read -r -t 0.2
 
-    printf "\n\n\n  May take a moment to start, and pauses may occur, if servers are slow"
+    printf "\n\n\n  May take a moment to start and pauses may occur if servers are slow"
+    printf "\n\n  Not all servers will allow parallel downloads \n"
     [[ ! $MainMenuZsync ]] && printf "\n\n  The downloader has been set to AUTO-RESUME and to pick up where it left off \n"
     printColor "\n\n  Use [c] to STOP ALL current downloads, [d] to delete "
     printColor "\n\n  Or  [c] then [r] to force a restart on a new server or to force a download re-check ..."

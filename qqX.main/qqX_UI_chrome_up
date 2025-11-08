@@ -123,19 +123,20 @@ function exit {
 
   elif [[ $1 ]] && [[ ! $NoExit ]]; then
     printf "\n\n"
-    printColor "  ERROR :  [i] ignore & continue  [q] quit  \n\n"
+    printColor "  ERROR :  [c] ignore and continue  [m] return to menus  [q] quit  \n\n"
     read -rp  "  >  "
     ExitTrap=
-    printf "\n\n  Confirm:  [Enter] to quit  [r] to return and retry something else \n\n"
+    printf "\n\n  Confirm: [c] ignore and continue  [m] return to menus  [q] quit  \n\n"
     read -rp "  >  "  ExitTrap
-    if [[ ! $ExitTrap ]]; then
+    if [[ $ExitTrap == "q" ]]; then
       tput cnorm
       command exit "$@"
-    else
-      return 0
+    elif [[ $ExitTrap == "c" ]]; then true
+    else RouteToMenus=1
     fi
+    return
 
-   elif [[ ! $disk_img ]]; then
+  elif [[ ! $disk_img ]]; then
     # don't exit on quickemu error no disk defined, this is handled by qqX  REVIEW
     return
 
@@ -187,8 +188,6 @@ show_qqX_title_bar() {
   fi
   printf "quickemu %s  &  quickget %s  '%s'"  "$QE_VerNumber" "$QG_VerNumber" "$QE_SourceVersion"
 
-  [[ $VerboseArgs ]] && printColor  "  (Verbose Args)"
-
   if [[ $CodingHotSwap && $CodingHotSwapShow ]] || [[ $DevStart ]]; then
     printf "\n\n  Using Code: %s " "$QE_SourcePath"
     [[ $CodingHotSwap ]] && CodingHotSwapShow=
@@ -225,9 +224,11 @@ function show_qqX_general_help {
     if [[ $1 ]]; then  HelpSelect="$1" ; shift
     fi
 
+    printf "\033c"
+    printColor "\n\n  GENERAL HELP:"
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"
-    printf "\n  Translations:  https://qqxproject.org/docs/Translation   Release Notes:  https://qqxproject.org/docs/Release-Notes"
-    printf "\n\n  For SETTINGS and user modes, see notes in the general settings file"
+    printf "\n  Translations:  https://qqxproject.org/Translation   Release Notes:  https://qqxproject.org/Release-Notes"
+    printf "\n\n  For SETTINGS, user modes, screen sizes etc  >>  [s] see notes in the general settings file"
     printf  "\n\n  [f] FreeBird notes  [c] command line & mouse notes"
     if [[ $WebBrowser ]]; then
       printColor "\n\n  [w] Online: HELP PAGES and FAQs"
@@ -235,7 +236,7 @@ function show_qqX_general_help {
       else printf  "  [tx] %s" "$MainTxOptionLine"
       fi
     else
-      printColor "\n\n  Check settings: Web Browser not found ??  https://qqxproject.org/docs/FAQs-and-Help"
+      printColor "\n\n  Check settings: Web Browser not found ??  https://qqxproject.org/FAQs-and-Help"
     fi
     printf  "\n\n  [enter] to return"
     printf "\n\n"
@@ -264,8 +265,13 @@ function show_qqX_general_help {
     elif [[ $HelpSelect == "w" ]]; then
       HelpSelect=
       printf "\n  Opening Browser ... \n"
-      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/docs/FAQs-and-Help"  & ) || web_browser_not_found_message
+      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/FAQs-and-Help"  & ) || web_browser_not_found_message
       sleep 1
+
+    elif [[ $HelpSelect == "s" ]]; then
+      HelpSelect=
+      qqX_edit_settings
+
     else
       HelpSelect=
       break

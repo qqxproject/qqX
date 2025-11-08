@@ -257,7 +257,7 @@ function manage_and_repair_disks {
     if [[ $DiskManage == "rz" ]]; then
       printf "\n\n  This will resize the external envelope. Internal partitions may require additional treatment."
       printf "\n\n  For main drive partitions, follow up with the [iso] utility > 'gparted' is recommended."
-      printf "\n\n  See https://qqxproject.org/docs/Advanced/Disks-and-Resizing "
+      printf "\n\n  See https://qqxproject.org/Advanced/Disks-and-Resizing "
       printColor "\n\n\n  Give extra GigaBytes TO ADD, as integer, eg 16 "
       printf "  [b] to go back"
       printf "\n\n"
@@ -351,7 +351,7 @@ function qqX_snapshot_delete {
   printColor "\n\n qqX Snapshot Delete function "
   printf "\n\n %s  (reselection & cancel prompts are given before starting)" "$Selected_DriveName"
 
-  # Create range-selectable array
+  # Create range-selectable array (finds lines with a date entry)
   SnapListString="$("$QEMU_IMG" info "$Selected_Drive" | grep '[0-9][0-9]:')"
 
   # turns the multiline string into raw array with one whole line for each entry making each array element
@@ -713,7 +713,9 @@ qcow2_filemanagement_launcher () {
     GrepExecLine="${GrepExecLine/'Exec='/}"
     if grep -qs 'gnome-terminal' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then
       Terminal_Start="$(cut -d '/' -f 1 <<< "$GrepExecLine")"
-    else Terminal_Start="$(cut -d '"' -f 1 <<< "$GrepExecLine")"
+    else
+      Terminal_Start="$(cut -d '"' -f 1 <<< "$GrepExecLine")"
+      [[ "$Terminal_Start" == *'kgx'* ]] && Terminal_Start="kgx --"
     fi
   fi
 

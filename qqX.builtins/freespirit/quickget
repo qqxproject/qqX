@@ -7,7 +7,7 @@
 # For qqX use with C.UTF-8 locale, not:  export LC_ALL=C
 
 # This section enables testing via './quickget --check distroname' from a terminal opened in the built-ins folder:
-if [[ -e "$(pwd)/qqX_quickget_mods" ]]; then
+if [[ -e "$(pwd)/qqX_quickGet_mods" ]]; then
     if [[ $(pgrep -aAi qqX 2>/dev/null) ]] ; then
         printf "\n  qqX running elsewhere ... \n\n" ; exit 1
     else
@@ -1205,7 +1205,7 @@ function languages_windows-server() {
 }
 
 function releases_zorin() {
-    echo 17 16
+    echo 18 17 16
 }
 
 function editions_zorin() {
@@ -3756,8 +3756,8 @@ if [ ! -x "${QEMU_IMG}" ]; then
 fi
 
 mapfile -t -d':' PathArr <<< "$PATH"
-for QG_Modpath in "${PathArr[@]}"; do
-    [[ -e "$QG_Modpath/qqX_quickget_mods" ]] && source "$QG_Modpath/qqX_quickget_mods" && break
+for QGP in "${PathArr[@]}"; do
+    [[ -e "$QGP/qqX_quickGet_mods" ]] && source "$QGP/qqX_quickGet_mods" && break
 done
 
 case "${1}" in
@@ -3785,7 +3785,7 @@ case "${1}" in
         fi
         exit 0;;
     --version|-version)
-        ## NB The matching 'qqX_quickget_mods' file is required
+        ## NB The matching 'qqX_quickGet_mods' file is required
         # when moving FreeBird/Freespirit builtins ##
         echo "FS 4.9.8.07"
         exit 0;;

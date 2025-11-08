@@ -2,7 +2,7 @@
 
 SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.builtins/freespirit/quickemu) / [QUICKGET](https://github.com/qqxproject/qqX/blob/main/qqX.builtins/freespirit/quickget)
 
-[Adds fixes, tools and improvements to the popular Quickemu system](https://qqxproject.org/docs/FreeBird)
+[Adds fixes, tools and improvements to the popular Quickemu system](https://qqxproject.org/FreeBird)
 
 - Rapid development, simplified interface system, for extra features from Qemu and the Linux desktop
 
@@ -14,7 +14,7 @@ SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.b
 
 - Comprehensive disk management utilities
 
-- [Fully compatible](https://qqxproject.org/docs/FAQs-and-Help#qqx-and-quickemu-compatibilty) with existing Quickemu builds
+- [Fully compatible](https://qqxproject.org/FAQs-and-Help#qqx-and-quickemu-compatibilty) with existing Quickemu builds
 
 -----
 

@@ -40,6 +40,9 @@ custom_conf_notes () {
     keyboard_layout=    'en-us' (default)
     mouse=              'tablet' (default), 'ps2', 'usb', 'virtio'
     network=            'bridge' >> -nic bridge,br=bridge,model=virtio-net-pci
+    usb_controller=     'ehci' (default), 'xhci', 'none'
+    sound_card=         'intel-hda' (default), 'ich9-intel-hda' 'ac97', 'es1370', 'sb16', 'usb-audio', 'none'
+    sound_duplex=        for intel: 'hda-micro' (default: speaker/mic), 'hda-duplex' (line-in/line-out), 'hda-output' (output-only)
 
     boot=\"legacy\"     (use bios, not UEFI) default: =\"efi\"
 
@@ -74,58 +77,61 @@ function check_screen_percentage_and_output {
   fi
 
   SDL_ScreenPercent=
-
+  [[ $Default_SDL_ScreenPercent ]] && [[ ! $Default_SDL_ScreenSize ]] && SDL_ScreenPercent="$Default_SDL_ScreenPercent"
   [[ $Custom_SDL_ScreenPercent ]] && SDL_ScreenPercent="$Custom_SDL_ScreenPercent"
-  [[ $Default_SDL_ScreenPercent ]] && [[ ! $SDL_ScreenPercent ]] && SDL_ScreenPercent="$Default_SDL_ScreenPercent"
+  [[ $Custom_SDL_ScreenSize ]] && [[ $SDL_ScreenPercent ]] && SDL_ScreenPercent=
 
   if [[ $SDL_ScreenPercent ]]; then
-
     SDL_ScreenPercent="$(tr -cd "[:digit:]" <<< "$SDL_ScreenPercent")"
     [[ SDL_ScreenPercent -lt 25 ]] && SDL_ScreenPercent="25"
     [[ SDL_ScreenPercent -gt 97 ]] && SDL_ScreenPercent="97"
-
-    if  grep -q -s -e 'screenpct' "/tmp/qmod-case-temp" ; then
-      SDL_ScreenSize_Cmd=" --screenpct  $SDL_ScreenPercent"
-    else
+    if  ! grep -q -s -e 'screenpct' "/tmp/qmod-case-temp" ; then
       if [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then
         printColor "\n\n  WARNING:  SDL_ScreenPercent needs quickemu 4.8+ \n\n "
         SDL_ScreenSize_Error="> not possible with this qe-version"
       fi
     fi
-
   fi
 
-  xRes=
-  yRes=
-  Mon_xRes=
-  Mon_yRes=
-  SDL_ScreenSize=
-  MacScreenRes=
-  SDL_ScreenSize_Cmd97=
+  xRes= ; yRes= ; Mon_xRes= ; Mon_yRes= ; MonGrep=
+  SDL_ScreenSize= ; MacScreenRes= ; SDL_ScreenSize_Cmd97=
 
   if [[ $QE_495_Script || $QE_496_Script ]] && [[ $XDG_SESSION_TYPE == "x11" || $XDG_SESSION_TYPE == "wayland" ]]; then
 
     if [[ $PhysicalMonitor ]]; then
       Mon_xRes="$(cut -d 'x' -f 1 <<< "$PhysicalMonitor")"
       Mon_yRes="$(cut -d 'x' -f 2 <<< "$PhysicalMonitor")"
+    elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+      if [[ $(type -p wayland-info) ]]; then
+        MonGrep="$(wayland-info | grep -s logical_width)"
+        Mon_xRes="$(cut -d':' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
+        Mon_yRes="$(cut -d':' -f3 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      elif [[ $(type -p wlr-randr) ]]; then
+        # wlr is used for wayland tiling WMs for size setting but wlroots is still classed unstable
+        # and grepping scaled logical display sizes is proving difficult to carry out
+        # Setup is holding back use of wlr greps as of (11/2025) but leave this fall-back in place for now
+        MonGrep="$(wlr-randr | grep -s current)"
+        Mon_xRes="$(cut -d'x' -f1 <<< "$MonGrep" | tr -cd "[:digit:]")"
+        Mon_yRes="$(cut -d'x' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      else
+        printColor "\n\n  ERROR: Install 'wayland-info' or add sizes to 'PhysicalMonitor' in general settings"
+      fi
     else
-      Mon_xRes=$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4 | cut -d'/' -f1 | head -n1)
-      Mon_yRes=$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4 | cut -d'/' -f2 | cut -d'x' -f2 | head -n1)
+      MonGrep="$(xrandr --listmonitors | grep -v Monitors | cut -d' ' -f4)"
+      Mon_xRes="$(cut -d'/' -f1 <<< "$MonGrep" | tr -cd "[:digit:]")"
+      Mon_yRes="$(cut -d'/' -f2 <<< "$MonGrep" | tr -cd "[:digit:]")"
     fi
 
-    Mon_xRes="$(tr -cd "[:digit:]" <<< "$Mon_xRes")"
-    Mon_yRes="$(tr -cd "[:digit:]" <<< "$Mon_yRes")"
-
     if [[ ! $Mon_xRes || ! $Mon_yRes ]]; then
-      if [[ $PhysicalMonitor ]]; then printColor "\n\n  ERROR: check monitor size in general settings \n\n "
-      else printColor "\n\n  ERROR: xrandr detection > set manually in general settings \n\n "
+      if [[ $PhysicalMonitor ]]; then printColor "\n\n  ERROR: check monitor size given in general settings \n\n "
+      else printColor "\n\n  ERROR: Monitor Size Detection > Add sizes to 'PhysicalMonitor' in general settings \n\n "
       fi
       SDL_ScreenSize_Error="> monitor size error"
     fi
 
-    [[ $Custom_SDL_ScreenSize ]] && SDL_ScreenSize="$Custom_SDL_ScreenSize"
+    [[ $Default_SDL_ScreenSize ]] && [[ ! $Custom_SDL_ScreenPercent ]] && [[ ! $SDL_ScreenSize ]] && SDL_ScreenSize="$Default_SDL_ScreenSize"
+    [[ $Custom_SDL_ScreenSize ]] && SDL_ScreenSize="$Custom_SDL_ScreenSize" && SDL_ScreenPercent=
     [[ $MacScreenRes ]] && SDL_ScreenSize="$MacScreenRes"
-    [[ $Default_SDL_ScreenSize ]] && [[ ! $SDL_ScreenSize ]] && SDL_ScreenSize="$Default_SDL_ScreenSize"
 
     # MacOS REVIEW  # ? 1360 x 768  ? 1920 x 1080 (max ovmf)  ? 1280 x 720  (max default qxl)
     # The newer variable SDL_ScreenSize is functionally identical to MacScreenRes
@@ -140,25 +146,26 @@ function check_screen_percentage_and_output {
       fi
     fi
 
-    if [[ $SDL_ScreenSize ]]; then
+    # Windows new installs will do silly 250% scaling if large initial values are used
+    if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]]; then
+      [[ $Mon_xRes -le 1920 ]] && SDL_ScreenSize="1280x720"
+      [[ $Mon_xRes -le 2560 ]] && SDL_ScreenSize="1920x1080"
+      [[ $Mon_xRes -le 3840 ]] && SDL_ScreenSize="2560x1440"
+    fi
 
+    if [[ $SDL_ScreenSize ]]; then
       xRes="$(cut -d 'x' -f 1 <<< "$SDL_ScreenSize")"
       yRes="$(cut -d 'x' -f 2 <<< "$SDL_ScreenSize")"
       xRes="$(tr -cd "[:digit:]" <<< "$xRes")"
       yRes="$(tr -cd "[:digit:]" <<< "$yRes")"
-
       if [[ ! $xRes || ! $yRes ]]; then
         printColor "\n\n  ERROR: check specified sizes in settings \n\n "
         SDL_ScreenSize_Error="> display size error"
       fi
-
     elif [[ $SDL_ScreenPercent ]]; then
-
       xRes="$(bc <<< "scale=0; $Mon_xRes*$SDL_ScreenPercent/100")"
       yRes="$(bc <<< "scale=0; $Mon_yRes*$SDL_ScreenPercent/100")"
-      SDL_ScreenSize_Cmd=" --width $xRes --height $yRes"
       SDL_ScreenSize="${xRes}x${yRes}"
-
     else
       xRes=1152 && yRes=648
     fi
@@ -288,16 +295,20 @@ check_conf_file_for_typos () {
 }
 
 function_conf_error () {
-  ErrorMenuSelect= ; NewSetupFlag=
+  ErrorMenuSelect= ; NewSetupFlag= ; EnterGT_reverse=
   # clear any accidental initial double pressing of the enter key occuring while experiencing the error
   read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
 
   if [[ $NewFileTuneUp_JustDone ]]; then NewFileTuneUp_JustDone= ; return ; fi
 
   printColor "\n\n  qqX Settings, VM folder & conf file(s)"
-  if [[ $1 == "No VMs" ]] ; then
-    printColor "\n\n  No VMs - Probably time to welcome you to qqX and invite you to get some distros."
-    printf "\n\n  The settings file and locations can usually be left till later ..."
+  if [[ $1 == "No VMs" ]]; then
+    if grep -qs -e 'qqX_system_install' -e 'qqX_setup' <<< "$(pgrep -a sh)" ; then
+      printColor "\n\n  No VMs - Probably time to welcome you to qqX and invite you to get some distros."
+      printf "\n\n  The settings file and locations can usually be left till later ..."
+    else
+      printColor "\n\n  No VMs - Settings Error or Possibly time to get some distros ..."
+    fi
   elif [[ $1 ]] ; then
     printf "\n\n  Check %s settings, possibly LOCATION and/or CONTENT ... "  "$1"
   else
@@ -346,10 +357,15 @@ function_conf_error () {
     printColor "\n\n\n  Settings file not found: %s"  "$qqX_SettingsFile"
     printf "\n\n  [c] ignore and continue   [q] to quit \n\n"
 
+  elif [[ "$1" == *'No VMs'* ]]; then
+    printColor "\n\n  [enter] quickget a new distro "
+    printf "  [s] to edit qqX general settings"
+    printf "  [q] to quit \n\n"
+    EnterGT_reverse=1
+
   else
     # includes "$1" = ".conf file"
     printColor "\n\n  [Enter] to edit qqX general settings"
-    [[ "$1" == *'No VMs'* ]] && printColor "  [gt] quickget a new distro "
     printf "  [c] ignore and continue "
     printf "  [q] to quit \n\n"
 
@@ -357,6 +373,10 @@ function_conf_error () {
 
   read -rp "  >  "   ErrorMenuSelect
 
+  if [[ $EnterGT_reverse ]]; then
+    [[ ! $ErrorMenuSelect ]] && ErrorMenuSelect="gt"
+    [[ $ErrorMenuSelect == "s" ]] && ErrorMenuSelect=
+  fi
 
   if [[ $ErrorMenuSelect == "q" ]]; then  printf "\n\n"; command exit
 
@@ -512,8 +532,12 @@ function refresh_conf_vars_and_values {
     VM_Conf_File="$(basename "$VM_Conf_File")"
     if [[ ! -e "$VM_Conf_Dir/$VM_Conf_File" ]]; then function_conf_error  "Conf Refresh:  WRONG FOLDER/FILE ," ; fi
 
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
     while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+
     source "$ConfClearanceLog"
+
+    # clear any qqX specifics
     SecondDrive=
     SharedDrive=
     DriveLocationError=
@@ -525,10 +549,39 @@ function refresh_conf_vars_and_values {
     QemuError_VM_Filter=()
     Custom_SDL_ScreenSize=
     Custom_SDL_ScreenPercent=
-    ACCESS=
     QemuArgsCustomFile=
     QemuErrorLog=
-    #reload_boot_style_defaults  # REVIEW
+
+    ## make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
+
+    # first fully unset any that don't auto-reset
+    # eg sound_duplex="${sound_duplex:-hda-micro}" won't work if a empty var name is present
+    unset -n "disk_format"
+    unset -n "disk_img"
+    unset -n "disk_size"
+    unset -n "display"
+    unset -n "extra_args"
+    unset -n "viewer"
+    unset -n "width"
+    unset -n "height"
+    unset -n "ssh_port"
+    unset -n "spice_port"
+    unset -n "monitor"
+    unset -n "monitor_telnet_port"
+    unset -n "monitor_telnet_host"
+    unset -n "serial"
+    unset -n "serial_telnet_port"
+    unset -n "serial_telnet_host"
+    unset -n "usb_controller"
+    unset -n "keyboard"
+    unset -n "keyboard_layout"
+    unset -n "sound_card"
+    unset -n "sound_duplex"
+
+    # then reset
+    source  "/tmp/qmod-qe-rw-vars-temp"
+
+    # reload_boot_style_defaults  # REVIEW
     # left off as if active then utils menu bm function reverts to defaults after booting once ...
     # at ver 1.12.01 has been placed into qqX main loop so switching vm is clean
 
@@ -536,14 +589,19 @@ function refresh_conf_vars_and_values {
 
     # CLEAR & RE-POPULATE the ConfClearanceLog with current fields, for the next occasion
 
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
+    # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
+
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
     printf "#%s/%s" "$VM_Conf_Dir" "$VM_InstanceName"  > "$ConfClearanceLog"
 
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     mapfile -t ConfClearance_Arr < "$VM_Conf_Dir/$VM_Conf_File"
 
     for Line in "${ConfClearance_Arr[@]}"; do
-      if [[ $Line ]] && [[ "$Line" == *'='* ]]; then
+      if [[ $Line ]] && [[ "$Line" == *'='* ]] && [[ "$(tr -cd "[:graph:]" <<< "$Line" | head -c 1)" != '#' ]]; then
         if [[ "$Line" == *'QemuError_VM_Filter'* ]]; then Line='QemuError_VM_Filter=()'
         else
           Line="$(cut -d'=' -f1 <<< "$Line")"
@@ -551,18 +609,20 @@ function refresh_conf_vars_and_values {
           [[ "$Line" == *'#'* ]] && Line="${Line/'#'/}"
         fi
         printf "\n\n%s" "$Line" >> "$ConfClearanceLog"
-        # Note that commented out lines need including, in case the comment marker gets removed during a settings edit
-        # BUT NB any added comments with '=' will get filtered
+        # ver 1.14 - enhance allowing through commented lines containing '=' and other characters
       fi
     done
 
-    # make sure any settings edits have finished writing
+    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
     # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
     source "$ConfClearanceLog"
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+   [[ $ConfSettingsAdjusted ]] &&  while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
-    while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 1 ; done
+    SECONDS=0
+    [[ $ConfSettingsAdjusted ]] && while grep -qs "$VM_Conf_Dir/$VM_Conf_File" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break ; done
     source "$VM_Conf_Dir/$VM_Conf_File"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 2:" &&  main_loop_diagnostics

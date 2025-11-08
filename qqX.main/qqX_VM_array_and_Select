@@ -149,10 +149,11 @@ VM_loader_selector_and_menu () {
 
         fi
 
+        [[ $FD_Phrase || $FD_Start ]] && [[ ! $FD_Found ]] && printColor "\n\n  NOT FOUND  %s/ %s" "Contains: $FD_Phrase " "Starts: $FD_Start"
+
         path_diagnostics
         IgnoreConfigErrors=
-        FD_Phrase=
-        FD_Start=
+        FD_Phrase= ; FD_Start= ; FD_Found=
 
         if [[ $DiskStorageChanges ]]; then
           DiskStorageChanges=
@@ -181,8 +182,9 @@ VM_loader_selector_and_menu () {
       elif [[ "$VM_Selection" == fd* ]]; then
 
         [[ "$VM_Selection" != *' '* ]] && FD_help_notes
-        if [[  "${VM_Selection,,}" == 'fd c '*  ]]; then  FD_Phrase="${VM_Selection/'fd c '/}"
-        elif [[  "${VM_Selection,,}" == 'fd s '*  ]]; then  FD_Start="${VM_Selection/'fd s '/}"
+        if [[  "${VM_Selection,,}" == 'fd c '*  ]]; then  FD_Phrase="${VM_Selection/'fd c'/}"; FD_Phrase="$(tr -cd "[:graph:]" <<< "$FD_Phrase")"
+        elif [[  "${VM_Selection,,}" == 'fd s '*  ]]; then  FD_Start="${VM_Selection/'fd s'/}"; FD_Start="$(tr -cd "[:graph:]" <<< "$FD_Start")"
+        elif [[  "${VM_Selection,,}" == 'fd'*  ]]; then  FD_Start="${VM_Selection/'fd'/}"; FD_Start="$(tr -cd "[:graph:]" <<< "$FD_Start")"
         fi
 
       elif [[ "$VM_Selection" == [A-Z] ]]; then
@@ -200,7 +202,7 @@ VM_loader_selector_and_menu () {
 
       # Note, for this script, 'refresh_sources_and_load_VM_arrays' gets run at start of loop on return
 
-      elif [[ $VM_Selection == "r" ]]; then  VM_selector_menu_refresh ; return
+      elif [[ $VM_Selection == "r" ]]; then NoVMsOkay=1 ;  VM_selector_menu_refresh ; return
 
       elif [[ ${VM_Selection^^} == "FS" ]] ; then
         CodingHotSwap="FreeSpirit" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
@@ -298,10 +300,10 @@ VM_loader_selector_and_menu () {
 }
 
 FD_help_notes () {
-  printColor "\n\n  Find Distro Help - Use multi-part command, either at this prompt, or at the standard prompt"
+  printColor "\n\n  Find Distro Help - Use MULTI-PART command, EITHER at this prompt, OR at the standard prompt"
   printf "\n\n  Search letters or phrases are case insensitive"
-  printf "\n\n  Contains:      fd c letters or phrase"
-  printf "\n\n  Starts with:   fd s letters or phrase"
+  printf "\n\n  Contains:      fd c 'letter or single phrase'   eg. fd c g / fd c gno"
+  printf "\n\n  Starts with:   fd 'letter or single phrase'   eg. fd f / fd fed"
   printColor "\n\n  [multi-part cmd] to search  [enter] to return\n\n"
   read -rp "  >  "  VM_Selection
 }

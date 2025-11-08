@@ -1,0 +1,277 @@
+#!/usr/bin/env bash
+
+##  qqX - quickemu quickget X terminal project
+
+#  ADDS IN NEW FUNCTIONS and ALLOWS emu FUNCTION OVERWRITES
+#  qqX component to be located in builtins folder
+
+##  Copyright (c)  Alex Genovese   https://github.com/qqxproject
+#   SMALL CODE SNIPPETS eg the function printColor MAY BE USED
+#   PERMISSIVELY in projects as MIT or similar, providing CLEAR ATTRIBUTIONS are shown.
+# 	Otherwise:
+#   Licence  GPL3   https://www.gnu.org/licenses
+
+##  May contain MIT licensed snippets or functions from the Quickemu project that have been modified.
+
+## ShellCheck global disables:
+# https://www.shellcheck.net/wiki/SC2242 as it clashes with use of exit traps used to keep mouse click scripts open
+# And SC1090,SC1091,SC2024, SC2154 for necessity of dynamic file sourcing
+
+#  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154
+
+## CODING STYLE
+
+#  A more MODERN BASH style of coding is used for qqX than that used for QuickEmu.
+
+#  However, NOT TO WORRY if you are only familiar the older more POSIX styles, there are still plenty of options
+#  for contributions to the quickemu built-ins, particularly with this file:
+#  4 space tabs may be used with this file, as with QuickGet, so that code can be directly pasted into here and tweaked.
+#  However, 2 space is the normal qqX tabbing. Try to keep the tabbing consistent within sections, where possible.
+#  QuickGet and qqX house styles may be mixed, WHICHEVER IS EASIEST. See notes at end for qqX coding style.
+
+#  This script is sourced when running a QuickEmu builtin and is suitable for smaller functions.
+
+#  UNLIKE the QuickGet Mods script, which remains variable isolated from running instances of qqX,
+#  the QuickEmu functions get sourced by qqX and can inherit qqX globals.
+#  See the script qqX_wrap_quickemu > 'find_quickemu_source_functions_and_vars'
+#  Take care to maintain QuickEmu variable name continuity where needed.
+
+##########################################
+
+## FIX null bytes error BUT keep awkward true flag method, for now, to maintain 'vm_boot' upstream compatibility
+function is_firmware_qcow2() {
+    # Check for the magic bytes that indicate the firmware is in qcow2 format,
+    # otherwise default to assuming firmware files are in raw format
+    if grep -qs "QFI" <<< "$(head -c 4 "$1" | tr -cd '[:graph:]')" ; then echo "true" ; fi
+}
+
+## FIX ovmfs array parse
+# TODO: add builtins and rationalize the whole function
+function configure_bios() {
+
+    # Always Boot macOS using EFI
+    if [ "${guest_os}" == "macos" ]; then
+        boot="efi"
+        if [ -e "${VMDIR}/OVMF_CODE.fd" ] && [ -e "${VMDIR}/OVMF_VARS-1024x768.fd" ]; then
+            EFI_CODE="${VMDIR}/OVMF_CODE.fd"
+            EFI_VARS="${VMDIR}/OVMF_VARS-1024x768.fd"
+        elif [ -e "${VMDIR}/OVMF_CODE.fd" ] && [ -e "${VMDIR}/OVMF_VARS-1920x1080.fd" ]; then
+            EFI_CODE="${VMDIR}/OVMF_CODE.fd"
+            EFI_VARS="${VMDIR}/OVMF_VARS-1920x1080.fd"
+        else
+            MAC_MISSING="Firmware"
+        fi
+
+        if [ -e "${VMDIR}/OpenCore.qcow2" ]; then
+            MAC_BOOTLOADER="${VMDIR}/OpenCore.qcow2"
+        elif [ -e "${VMDIR}/ESP.qcow2" ]; then
+            # Backwards compatibility for Clover
+            MAC_BOOTLOADER="${VMDIR}/ESP.qcow2"
+        else
+            MAC_MISSING="Bootloader"
+        fi
+
+        if [ -n "${MAC_MISSING}" ]; then
+            echo "ERROR! macOS ${MAC_MISSING} was not found."
+            echo "       Use 'quickget' to download the required files."
+            exit 1
+        fi
+        BOOT_STATUS="EFI (macOS), OVMF ($(basename "${EFI_CODE}")), SecureBoot (${secureboot})."
+
+    elif [[ "${boot}" == *"efi"* ]]; then
+
+        EFI_VARS="${VMDIR}/OVMF_VARS.fd"
+
+        # Preserve backward compatibility
+        if [ -e "${VMDIR}/${VMNAME}-vars.fd" ]; then
+            mv "${VMDIR}/${VMNAME}-vars.fd" "${EFI_VARS}"
+        elif [ -e "${VMDIR}/OVMF_VARS_4M.fd" ]; then
+            mv "${VMDIR}/OVMF_VARS_4M.fd" "${EFI_VARS}"
+        fi
+
+        # OVMF_CODE_4M.fd is for booting guests in non-Secure Boot mode.
+        # While this image technically supports Secure Boot, it does so
+        # without requiring SMM support from QEMU
+
+        # OVMF_CODE.secboot.fd is like OVMF_CODE_4M.fd, but will abort if QEMU
+        # does not support SMM.
+
+        local SHARE_PATH="/usr/share"
+        if [ "${OS_KERNEL}" == "Darwin" ]; then
+            # Do not assume brew; quickemu could have been installed via Nix
+            if command -v brew &>/dev/null; then
+                SHARE_PATH="$(brew --prefix qemu)/share"
+            fi
+        fi
+
+        # https://bugzilla.redhat.com/show_bug.cgi?id=1929357#c5
+        # TODO: Check if macOS should use 'edk2-i386-vars.fd'
+
+        # qqX: arrays re-ordered into better priority and a break added, for when found, instead of continuing to the end ...
+
+        if [ -n "${EFI_CODE}" ] || [ ! -e "${EFI_CODE}" ]; then
+            case ${secureboot} in
+                on) # shellcheck disable=SC2054,SC2140
+                    ovmfs=("${SHARE_PATH}/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2","${SHARE_PATH}/edk2/ovmf/OVMF_VARS_4M.secboot.qcow2" \
+                        "${SHARE_PATH}/edk2/x64/OVMF_CODE.secboot.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd" \
+                        "${SHARE_PATH}/OVMF/OVMF_CODE_4M.secboot.fd","${SHARE_PATH}/OVMF/OVMF_VARS_4M.ms.fd" \
+                        "${SHARE_PATH}/edk2/ovmf/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2/ovmf/OVMF_VARS.secboot.fd" \
+                        "${SHARE_PATH}/OVMF/x64/OVMF_CODE.secboot.fd","${SHARE_PATH}/OVMF/x64/OVMF_VARS.fd" \
+                        "${SHARE_PATH}/edk2-ovmf/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2-ovmf/OVMF_VARS.fd" \
+                        "${SHARE_PATH}/qemu/ovmf-x86_64-smm-ms-code.bin","${SHARE_PATH}/qemu/ovmf-x86_64-smm-ms-vars.bin" \
+                        "${SHARE_PATH}/qemu/edk2-x86_64-secure-code.fd","${SHARE_PATH}/qemu/edk2-x86_64-code.fd" \
+                        "${SHARE_PATH}/edk2-ovmf/x64/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2-ovmf/x64/OVMF_VARS.fd" \
+                    );;
+                *)  # shellcheck disable=SC2054,SC2140
+                    ovmfs=("${SHARE_PATH}/edk2/ovmf/OVMF_CODE_4M.qcow2","${SHARE_PATH}/edk2/ovmf/OVMF_VARS_4M.qcow2" \
+                        "${SHARE_PATH}/edk2/x64/OVMF_CODE.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd" \
+                        "${SHARE_PATH}/OVMF/OVMF_CODE_4M.fd","${SHARE_PATH}/OVMF/OVMF_VARS_4M.fd" \
+                        "${SHARE_PATH}/edk2/ovmf/OVMF_CODE.fd","${SHARE_PATH}/edk2/ovmf/OVMF_VARS.fd" \
+                        "${SHARE_PATH}/OVMF/OVMF_CODE.fd","${SHARE_PATH}/OVMF/OVMF_VARS.fd" \
+                        "${SHARE_PATH}/OVMF/x64/OVMF_CODE.fd","${SHARE_PATH}/OVMF/x64/OVMF_VARS.fd" \
+                        "${SHARE_PATH}/edk2-ovmf/OVMF_CODE.fd","${SHARE_PATH}/edk2-ovmf/OVMF_VARS.fd" \
+                        "${SHARE_PATH}/qemu/ovmf-x86_64-4m-code.bin","${SHARE_PATH}/qemu/ovmf-x86_64-4m-vars.bin" \
+                        "${SHARE_PATH}/qemu/edk2-x86_64-code.fd","${SHARE_PATH}/qemu/edk2-x86_64-code.fd" \
+                        "${SHARE_PATH}/edk2-ovmf/x64/OVMF_CODE.fd","${SHARE_PATH}/edk2-ovmf/x64/OVMF_VARS.fd" \
+                    );;
+            esac
+            # qqX: note these arrays get grepped by 'read_x86_tiano_vars_list' in main menu routines
+            # and the function's -A nn may need adjusting if adding lines
+
+            # Attempt each EFI_CODE file one by one, selecting the corresponding code and vars
+            # when an existing file is found.
+            _IFS=$IFS
+            IFS=","
+            for f in "${ovmfs[@]}"; do
+                # shellcheck disable=SC2086
+                set -- ${f};
+                if [ -e "${1}" ]; then
+                    EFI_CODE="${1}" ; EFI_EXTRA_VARS="${2}" ; break
+                fi
+            done
+            IFS=$_IFS
+        fi
+        if [ -z "${EFI_CODE}" ] || [ ! -e "${EFI_CODE}" ]; then
+            if [ "${secureboot}" == "on" ]; then
+                echo "ERROR! SecureBoot was requested but no SecureBoot capable firmware was found."
+            else
+                echo "ERROR! EFI boot requested but no EFI firmware found."
+            fi
+            echo "       Please install OVMF firmware."
+            exit 1
+        fi
+        if [ -n "${EFI_EXTRA_VARS}" ]; then
+            if [ ! -e "${EFI_EXTRA_VARS}" ]; then
+                echo " - EFI:      ERROR! EFI_EXTRA_VARS file ${EFI_EXTRA_VARS} does not exist."
+                exit 1
+            fi
+            # Write destination vars file with correct extension
+            # based on source format of the EFI_EXTRA_VARS file
+            # Use modified true flag method to maintain 'vm_boot' upstream compatibility
+            # if is_firmware_qcow2 "${EFI_EXTRA_VARS}" ; then
+            if [[ $(is_firmware_qcow2 "${EFI_EXTRA_VARS}") == "true" ]]; then
+                EFI_VARS="${VMDIR}/OVMF_VARS.qcow2"
+            else
+                EFI_VARS="${VMDIR}/OVMF_VARS.fd"
+            fi
+            # if ! -e $2 then cp $1 >
+            efi_vars "${EFI_EXTRA_VARS}" "${EFI_VARS}"
+        fi
+
+        # Make sure EFI_VARS references an actual, writeable, file
+        if [ ! -f "${EFI_VARS}" ] || [ ! -w "${EFI_VARS}" ]; then
+            echo " - EFI:      ERROR! ${EFI_VARS} is not a regular file or not writeable."
+            echo "             Deleting ${EFI_VARS}. Please re-run quickemu."
+            rm -f "${EFI_VARS}"
+            exit 1
+        fi
+
+        # If EFI_CODE references a symlink, resolve it to the real file.
+        if [ -L "${EFI_CODE}" ]; then
+            echo " - EFI:      WARNING! ${EFI_CODE} is a symlink."
+            echo -n "             Resolving to... "
+            EFI_CODE=$(realpath "${EFI_CODE}")
+            echo "${EFI_CODE}"
+        fi
+
+        echo " - BOOT:     EFI (${guest_os^}), EFI Vars (${EFI_VARS})"
+        echo "             OVMF (${EFI_CODE}), SecureBoot (${secureboot})"
+        return
+
+    else
+
+        BOOT_STATUS="Legacy BIOS (${guest_os^})"
+        boot="legacy"
+        secureboot="off"
+    fi
+
+    echo " - BOOT:     ${BOOT_STATUS}"
+}
+
+##########################################
+
+## CODING STYLE  (as listed at the end of the main 'qqX' script)
+
+#  A more MODERN BASH style of coding is used for qqX than that used for QuickEmu.
+
+#  NOT TO WORRY if you are only familiar the older more POSIX styles, there are still plenty of options
+#  for contributions to the quickemu built-ins, particularly with QuickGet which needs frequent updating.
+
+#  VARIABLES should normally tend towards 'CamelCase' & FUNCTIONS should tend towards 'snake_case'.
+#  Aim for clarity and contextual identity. Emphasis or separation underscoring & caps should be added where needed.
+
+#  Modern editors, such as VS Code or Sublime have auto-suggesting which enables LongerMoreHelpfulVariableNames.
+
+#  Also SHELLCHECK will NOT continuity follow all-caps variables either, even if SC2154 is enabled ...
+#  https://en.wikipedia.org/wiki/Camel_case   https://en.wikipedia.org/wiki/Snake_case
+
+#  Variables {don't} need to be braced unless using string manipulations or needing to stop vars from merging with other text.
+#  Some of QuickEmu's variables can be very ambiguous eg. '$VERSION' but in some places have to be used.
+#  Except for the .conf file, where they are lowercase, they are generally CAPS and very brief ...
+
+#  BRACKETS:  if [[ $Foo ]] && [[ ! $Bar ]] ...   Posix Style is not needed:  if [ -n ${FOO} ] && [ -z ${bar} ] ....
+
+#  The [[ double bracket ]] system is NOW the STANDARD METHOD in the Bash Manual.
+#  See  https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-_005b_005b
+#  Plus https://ss64.com/bash/test.html  And (older article) http://mywiki.wooledge.org/BashFAQ/031
+
+#  Double bracket one-liners may be new to some people.
+#  These statements are all the same:
+
+FooVar=
+
+if [ -n "${FooVar}" ]; then
+    echo
+    echo "  Hello "
+    echo
+fi
+
+if [[ $FooVar ]]; then
+    printf "\n\n  Hello \n\n"
+fi
+
+[[ $FooVar ]] && printf "\n\n  Hello \n\n"
+
+#  COMMENTS: Add clarification or explanation to code, especially if the origin or meaning could be difficult to follow.
+
+#  Add links to any how-to's that you used.  If you needed to check, then others may do also.
+#  Let others follow what you are/were thinking at the time & give Bash beginners a chance too.
+#  It makes it easier for everyone, especially later on.
+
+#  SPACE:  Give your code some room to breathe. But also keep your code tight enough to view on smaller screens.
+#  Place it into clear logic blocks. Make it easy to follow & easy to see what is happening.
+
+#  SED, AWK and REGEX:  Commands can very easily finish up as lines of indecipherable hieroglyphics.
+#  If you must use them, keep things very simple & explain the sections.
+#  Where possible use Bash's string manipulations instead.   See: http://mywiki.wooledge.org/BashFAQ/100
+
+#  ECHO: Beyond basic one-liners, the use of printf should generally be preferred.  See https://ss64.com/bash/printf.html
+#  However & specifically, echo within the vm boot control section of the qqX script *must* be avoided
+#  as an echo trap is used to tee quickemu screen output to the qqX boot log.
+
+#  All code should be SHELLCHECK linted & disables avoided where possible.
+#  The VS Code shellcheck extension works well if set to 'check-on-save'.
+
+
+# https://code.visualstudio.com/  (recommended)
+# vim:tabstop=4:shiftwidth=4:expandtab

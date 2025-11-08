@@ -146,81 +146,130 @@ fi
 
 while true ; do
 
+  printf "\033c"
+  cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
   InstallationAlert=
 
   if [[ ! "$(type -p bash)" ]]; then
-    printf "\n\n  Problem locating Bash. Please read the notes at the start of this installer script."
+    printColor "\n\n  >>  Problem locating Bash. Please read the notes at the start of this installer script."
     printf "\n\n  The start line to the qqX main script may need to be adjusted."
     InstallationAlert=1
   fi
 
   if ! tput -V | grep -q ncurses 2> /dev/null; then
-    printf "\n\n  Check your OS >  \n\n  An 'ncurses' installation should normally be present. Test using 'tput -V' "
+    printColor "\n\n  >>  Check your OS >  \n\n  An 'ncurses' installation should normally be present. Test using 'tput -V' "
     InstallationAlert=1
   fi
 
   ##  Check for items sometimes missing
   if [[ ! $(type -p curl) ]]; then
-    printf "\n\n  'Curl' is a listed dependency of QuickEmu and is also used by qqX ..."
+    printColor "\n\n  >>  'Curl' is a listed dependency of QuickEmu and is also used by qqX "
     InstallationAlert=1
   fi
   if [[ ! $(type -p socat) ]]; then
-    printf "\n\n  'socat' is a needed dependency of QuickEmu and is also used by qqX ..."
+    printColor "\n\n  >>  'socat' is a needed dependency of QuickEmu and is also used by qqX "
     InstallationAlert=1
+  fi
+  if [[ ! $(type -p glxinfo) ]]; then
+    printColor "\n\n  >>  'glxinfo' is a needed dependency of QuickEmu and may be part of 'mesa-utils' "
+    InstallationAlert=1
+  fi
+  if [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+    # if [[ ! $(type -p wayland-info) ]] && [[ ! $(type -p wlr-randr) ]]; then
+      # wlr is used for wayland tiling WMs for size setting but wlroots is still classed unstable
+      # and grepping scaled logical display sizes is proving difficult to carry out,
+      # so hold back using wlr greps for now (11/2025)
+    if [[ ! $(type -p wayland-info) ]]; then
+      printColor "\n\n  >>  'wayland-utils' are a needed dependency of qqX "
+      InstallationAlert=1
+    fi
+  else
+    if [[ ! $(type -p xrandr) ]]; then
+      printColor "\n\n  >>  'xrandr' is a needed dependency of qqX "
+      printf "\n\n       xrandr can be sometimes be packaged as xorg-xrandr or as part of x11-xserver-utils"
+      InstallationAlert=1
+    fi
   fi
   if [[ ! $(type -p jq) ]]; then
-    printf "\n\n  'jq' is a listed dependency of QuickEmu ..."
+    printColor "\n\n  >>  'jq' is a listed dependency of QuickEmu "
     InstallationAlert=1
   fi
-  CoreList=("bc" "xrandr" "paste")
+  if [[ ! $(type -p python3) ]]; then
+    printColor "\n\n  >>  'python3' is a listed dependency of QuickEmu "
+    InstallationAlert=1
+  fi
+  CoreList=("bc" "uuidgen" "ps" "pgrep" "lscpu" "lsusb")
   for CP in "${CoreList[@]}"; do
     if [[ ! $(type -p "$CP") ]]; then
-      printf "\n\n  '%s' should normally be present and is required by qqX"  "$CP"
-      printf "\n\n  Sometimes a utils package can be missing or standard utils can be packaged differently ...."
-      [[ $CP == "xrandr" ]] && printf "\n  xrandr can be listed as xorg-xrandr or as part of x11-xserver-utils"
+      printColor "\n\n  >>  '%s' should normally be present and is required by qqX or by Quickemu"  "$CP"
+      printf "\n\n  Sometimes standard supplementary utils can be missing or can be packaged differently"
+      printf "\n  These can include 'util-linux' 'procps' and the 'Unix_SUS2008_utilities' "
+      InstallationAlert=1
+    fi
+  done
+  GnuList=("awk" "sed" "gzip" "tar")
+  for GP in "${GnuList[@]}"; do
+    GnuPath="$(type -p "$GP")"
+    [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
+    if [[ ! $GnuPath ]]; then
+      printColor "\n\n  >>  '%s' should usually be present and is required by qqX"  "$GP"
+      printf "\n\n  Gnu is expected but most versions should have basic Gnu compatibilities"
+      InstallationAlert=1
+    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
+      printColor "\n\n  >>  CAUTION: Gnu '%s' is the usually supplied version eg realpath 'awk' should be 'gawk' ... "  "$GP"
+      printf "\n\n      Behaviour can vary but most versions should have basic Gnu compatibilities"
+      printf "\n      Most distro packaging systems should allow Gnu replacement upgrades"
+      printf "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
       InstallationAlert=1
     fi
   done
   if [[ ! $(type -p wget) ]]; then
-    printf "\n\n  A 'wget' installation should normally be present and may be needed in certain places ..."
+    printColor "\n\n  >>  A 'wget' installation should normally be present and may be needed in certain places "
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
-    printf "\n\n  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
+    printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
     printf "\n\n  For some host distros, 'p7zip' may also need 'p7zip-plugins' "
     InstallationAlert=1
   fi
+  if [[ ! $(type -p unzip) ]]; then
+    printColor "\n\n  >>  A command line 'zip/unzip' installation is needed for some distro downloads ... "
+    InstallationAlert=1
+  fi
+  if [[ ! $(type -p bzip2) ]]; then
+    printColor "\n\n  >>  A command line 'bzip2' installation is needed for some distro downloads ... "
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p mkisofs) ]]; then
-    printf "\n\n  For Windows downloads, installation of 'mkisofs' (via: genisoimage, cdrtools, cdrkit or xorriso) is required ..."
+    printColor "\n\n  >>  For some downloads, installation of 'mkisofs' (via: genisoimage, cdrtools, cdrkit or xorriso) is required "
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
-    printf "\n\n  Check for 'spice' installations 'spicy', 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' ..."
+    printColor "\n\n  >>  Check for 'spice' installations 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' "
     InstallationAlert=1
   fi
-  if [[ ! $(type -p qemu-system-x86_64) ]]; then
+  if [[ ! $(type -p qemu-system-x86_64) ]] || [[ ! $(type -p qemu-img) ]] || [[ ! $(type -p qemu-nbd) ]]; then
     # REVIEW Arm compatibility
-    printf "\n\n  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system etc ..."
+    printColor "\n\n  >>  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system, and for qemu-utils etc "
     InstallationAlert=1
   fi
 
-  if [[ ! $InstallationAlert ]]; then  break
-  else
-    cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
-    printColor "\n\n  [tx]  Translate from English"
+  if [[ $InstallationAlert ]]; then
+    printColor "\n\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
-    printf "\n"
-    printf "\n\n  SOFTWARE: A second terminal can be opened for installations ... "
     printf "\n\n\n  Ubuntu 25.10 example full set:"
-    printf "\n\n  sudo apt install curl  7zip  socat  genisoimage  spice-vdagent  spice-client-gtk  qemu-system-x86"
-    printf "\n\n\n  Return here to re-check:"
+    printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
+    printf "\n\n  sudo apt install  spice-vdagent  spice-client-gtk  qemu-system-x86"
+    [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-info"
+    printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
+    printf "\n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
+  else break
+  fi
     [[ $InstallationAlert == "q" ]] &&  exit
     if [[ $InstallationAlert == "c" || $InstallationAlert == "i" ]]; then InstallationAlert= ; break ; fi
-    if [[ $InstallationAlert == "tx" ]]; then sleep 0.6 ; open_installer_tx_screens_in_browser ; printf "\033c" ; fi
-  fi
-
+    if [[ $InstallationAlert == "tx" ]]; then sleep 0.6 ; open_installer_tx_screens_in_browser ; fi
 done
 
 
@@ -264,14 +313,19 @@ XDG_GUI_desktop_PathName="$XDG_GUI_desktop_Folder/$XDG_GUI_desktop_Name"
 
 function print_manual_uninstall_notes {
   cat << Notes
+  MANUAL UNINSTALL, standard procedure, requires sudo permissions:
 
-  Manual uninstall, standard procedure  >>  remove the hidden .qqX folder from $HOME
-  and any desktop items in folder:  $qqX_Std_Share_Path
-  followed by: sudo update-desktop-database  "$XDG_GUI_desktop_Folder"
+  Remove any pinned qqX TASKBAR icons, FIRST
 
-  Sudo remove the scripts  > sudo rm /usr/bin/qqX  &  sudo rm /usr/bin/qqx
-  From qqX 1.6 onwards also remove  sudo rm -r /usr/share/qqX
+  Remove the hidden .qqX folder from "$HOME"
 
+  Remove the folder "$qqX_Std_Share_Path" and its contents eg. sudo rm -r /usr/share/qqX
+
+  Remove the /bin scripts  eg. sudo rm /usr/bin/qqX  and  sudo rm /usr/bin/qqx
+
+  Remove any qqX .desktop items in "$XDG_GUI_desktop_Folder"
+
+  Follow up with  sudo update-desktop-database "$XDG_GUI_desktop_Folder"
 Notes
 }
 
@@ -284,7 +338,7 @@ function print_terminal_notes {
 
   TO MANUALLY SPECIFY the terminal name, the installer script's 'UserTerm' variable may be used.
 
-  From qqX version 1.10.02 onwards, a 'CustomTerminalProfile' will now be stored in the qqX settings folder.
+  From qqX version 1.10 onwards, a 'CustomTerminalProfile' is stored in the qqX settings folder.
   This file will be checked and auto-read when carrying out updates.
 
   For first installs or profile re-imposition the 'system' installer script may be directly edited.
@@ -301,7 +355,7 @@ function print_terminal_notes {
   so the terminal window size will usually alter when the font size is changed.
 
   Some terminals do not have a -geometry parameter and must be pre-set in the actual terminal.
-  For example, 'qterminal' which also uses PIXELS.  Try 1500 x 1000.
+  For 'qterminal' which uses PIXELS,  try 1500 x 1000.
 
 Notes
 }
@@ -323,7 +377,7 @@ UserTerm=
 # eg.  CustomTerminalProfile=" --geometry=145x50 --hide-menubar --title=qqX  -e "
 # or   CustomTerminalProfile="" --geometry=${Term_Width}x${Term_Taller} --hide-menubar --title=qqX  -- "
 
-# NB the Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
+# NB the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
 
 # The use of CustomTerminalProfile will also cause UserTerm to be stored.
 # Any size variables copied from below will eventually become stored as numerics.
@@ -413,7 +467,6 @@ else
   fi
 
   if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then  printf  "\n   Upgrade the current release %s ..."   "$Current_qqX_Version"
-  else  printColor  "\n   Install a settings file to %s & add program scripts?"   "$HOME"
   fi
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
@@ -449,12 +502,14 @@ else
 
     printf "\n\n"
     print_manual_uninstall_notes
-    printColor "\n\n  Remove any qqX taskbar icons BEFORE proceeding. Some distros may need this."
+    printColor "\n\n  Remove any pinned qqX taskbar icons BEFORE proceeding. Some distros may need this."
     qqX_RemovalTarget="$(type -p qqx)"
     qqX_RemovalTarget_X="$(type -p qqX)"
     qqX_Remove=
-    printColor "\n\n  [y] sudo auto removal of qqX scripts and settings and builtins."
-    printf " \n\n  All VM folders will be left as they are ... [enter] to quit \n\n"
+    printColor "\n\n  [y] SUDO AUTO REMOVAL of qqX scripts and settings and builtins."
+    printf "\n\n  All VM folders will be left as they are:"
+    printf "\n\n  The .conf files may need line 1 changing from qqX to quickemu ... "
+    printf "\n\n  [enter] to quit \n\n"
     read -rp "  >  "  qqX_Remove
     printf "\n\n"
 
@@ -507,15 +562,15 @@ else
       printf "\n\n  NOTE command line installation only. "
       printf "\n\n  Auto-install is needed for desktop launchers and shortcuts"
       printf "\n"
-      print_manual_uninstall_notes
-      printColor "\n  [enter] changed mind, use auto-install   [y] to confirm action completed \n\n"
+      printColor "\n  [enter] changed mind, use auto-install   [y] to confirm action completed   [q] to quit \n\n"
       read -rp  "  >  "  SeparateSudo
       printf "\n"
 
     fi
 
-    if [[  $SeparateSudo != "y" ]]; then
+    [[  $SeparateSudo == "q" ]] && sleep 1 && exit
 
+    if [[  $SeparateSudo != "y" ]]; then
       printColor "\n  Auto-Installing .... \n\n  "
       sudo cp "qqX" "$qqX_Std_File_Path"
       # make symbolic link lowercase 'qqx' , as in: ln -s  textfile.txt  my_link.
@@ -533,7 +588,6 @@ else
       sudo chmod a+rx -R  "$qqX_Std_Share_Path/"
       sudo chmod a+rx "$qqX_Std_File_Path"
       sudo chmod a+rx "$qqX_Std_lc_Link_Path"
-
     fi
 
     # Check that the right version is there:
@@ -648,7 +702,7 @@ if [[ ! $SkipMkLauncher ]]; then
       printf "\n\n  The current qqX launcher is using '%s'" "$CurrentTerm"
       if [[ $CurrentTerm == "gnome-terminal" ]] && ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry ; then
         printf "\n\n  however some distros are aliasing 'gnome-terminal' as a call to kgx / gnome console"
-        printf "\n\n  CAUTION:  either select 'kgx' or install the non-aliased version ...."
+        printf "\n\n  CAUTION:  either select 'kgx' or install the non-aliased version"
       fi
     fi
   fi
@@ -681,22 +735,34 @@ if [[ ! $SkipMkLauncher ]]; then
         ((n+=1))
       done
       printf "\n\n  [enter] for %s  or  [number] of terminal to use   "  "$UserTerm"
-      printColor "[h] for help \n\n"
+      printColor "[h] for help"
+      printf "   [q] quit \n\n"
       read -rp "  >  "  TermChoose
 
       case "$TermChoose" in
-        '[0-9]'|'[0-9][0-9]')
-          i="$((TermChoose-=1))"
+        [0-9]|[1-9][0-9])
+          i="$((TermChoose-=1))" ; [[ "$i" -lt 0 ]] && i=0
           UserTerm="${TermChooseArr[i]}"
           break ;;
         h)
           printf "\n\n\n  85%% of users are probably covered by \"gnome-terminal\" \"konsole\" \"mate-terminal\" "
           printf "\n\n  \"xfce4-terminal\" and over 95%% probably when \"qterminal\" and \"alacritty\" are added."
-          printf "\n\n  For qqX purposes, alacritty works better in tiling window managers."
-          printf "\n\n\n  Try \"xterm/uxterm\" or \"foot\" if you are having problems."
-          printf "\n\n  Otherwise, read the guidance notes at the start of the system_install file in qqX.main"
+
+          printf "\n\n\n  Flatpak installed terminals and the new Gnome Terminal 'ptyxis' are currently problematic ..."
+          printf "\n\n  For qqX purposes, alacritty works better in tiling window managers"
+          printf "\n\n  A recommended general installation is 'mate-terminal' "
+          printf "\n\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
           printf "\n"
           TermChoose=
+          ;;
+        q)
+          printf "\n\n\n  Re-run the installer to remove residual files, if needed"
+          printf "\n\n  Or if you want to resume installation after installing other software"
+          printColor "\n\n  [enter] to return"
+          printf "  [q] to confirm closing the installer \n\n"
+          QuitInstaller=
+          read -rp "  >  " QuitInstaller
+          [[ $QuitInstaller ]] && exit
           ;;
         *) break ;;
       esac
@@ -717,94 +783,107 @@ if [[ ! $SkipMkLauncher ]]; then
 
   ## HOW THE INTERFACE WILL LOOK
 
-  printf "\033c"
-  echo
-  qqX_logo_title  "Setting up the desktop:"
+  while true ; do
+    printf "\033c"
+    echo
+    qqX_logo_title  "Setting up the desktop:"
 
-  if [[ $UserTerm ]]; then
+    if [[ $UserTerm ]]; then
 
-    printColor "\n\n  qqX standard window size is %s columns wide & %s lines high"   "$Term_Width"  "$Term_Height"
+      printf "\n\n  Selected Terminal: %s" "$UserTerm"
+      printColor "\n\n  qqX standard window size is %s columns wide & %s lines high"   "$Term_Width"  "$Term_Height"
 
-    if [[ -e "$HOME/.qqX/qqX_term.conf" ]]; then
-      printf "\n\n  A stored terminal profile is being used: \n\n"
-      cat "$HOME/.qqX/qqX_term.conf"
+      if [[ -e "$HOME/.qqX/qqX_term.conf" ]]; then
+        printf "\n\n  A stored terminal profile is being used: \n\n"
+        cat "$HOME/.qqX/qqX_term.conf"
+      fi
+
+      if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
+        printf "\n\n  Use extra height (%s) if you have high numbers of Vm's"  "$Term_Taller"
+        printf   "\n  You may also edit/create a 'CustomTerminalProfile' to store different values."
+        printf   "\n  See the notes near the start of the 'system' folder's installer script."
+      fi
+
+      printf "\n\n  Remember that column width units are normally based on the size of your terminal font,"
+      printf   "\n  so changing the font will usually change the physical terminal size."
+
+      printf "\n\n  System defaults may usually be changed in the terminal settings, under 'profile'"
+      printf   "\n  and may overide any options if 'remember size and position' has been set."
+
+      printf "\n\n  The system's terminal size will apply when starting qqX directly from the command line."
+
+      printf "\n\n  If your terminal uses PIXELS, for example 'qterminal', try 1500 x 1000 in the settings."
+
+      printf "\n\n  For TILING Window Managers, the size may be auto-regulated. "
+
+      printColor "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
+
+      if [[ $(type -p "ptyxis") ]] ; then
+        # 10/2025 ptyxis  partly resolved, from ver 49.1 (tested on Fedora 43 beta) but fails to open QF second windows
+        printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on the system this is currently problematic ..."
+      fi
+
+      printf "\n\n  A recommended general installation is 'mate-terminal' "
+      printf "\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
+
+      printf "\n\n\n"
+
+      # REVIEW add W H number entry?
+
+      printColor "  [enter] continue "
+      if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
+        printColor "at standard height "
+        printf "   [t] extra height  [a] as host (auto)  or "
+      fi
+
+    else
+
+      print_terminal_notes
+      printColor "\n  https://qqxproject.org/ "
+      printf "\n\n  https://qqxproject.org/Translation \n\n"
+
     fi
 
-    if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
-      printf "\n\n  Use extra height (%s) if you have high numbers of Vm's"  "$Term_Taller"
-      printf   "\n  You may also edit/create a 'CustomTerminalProfile' to store different values."
-      printf   "\n  See the notes near the start of the 'system' folder's installer script."
+    printf "  [q] to exit \n\n"
+    read -rp "  > "   TerminalHeightChoice
+
+    if [[ ! $UserTerm || $TerminalHeightChoice == "q" ]]; then
+      printf "\n\n\n  Re-run the installer to remove residual files, if needed"
+      printf "\n\n  Or if you want to resume installation after installing other software"
+      printColor "\n\n  [enter] to return"
+      printf "  [q] to confirm closing the installer \n\n"
+      QuitInstaller=
+      read -rp "  >  " QuitInstaller
+      [[ $QuitInstaller ]] && exit
+    elif [[ $TerminalHeightChoice == "t" ]]; then
+      printf "\n  Height selected = %s " "$Term_Taller"
+      MateTerminalProfile="$MateTerminalProfile_Taller"
+      GnomeTerminalProfile="$GnomeTerminalProfile_Taller"
+      XfceTerminalProfile="$XfceTerminalProfile_Taller"
+      XtermTerminalProfile="$XtermTerminalProfile_Taller"
+      LxTerminalProfile="$LxTerminalProfile_Taller"
+      KonsoleTerminalProfile="$KonsoleTerminalProfile_Taller"
+      break
+    elif [[ $TerminalHeightChoice == "a" ]]; then
+      printf "\n  Height selected =  Auto/Host "
+      MateTerminalProfile="$MateTerminalProfile_HostSize"
+      GnomeTerminalProfile="$GnomeTerminalProfile_HostSize"
+      XfceTerminalProfile="$XfceTerminalProfile_HostSize"
+      XtermTerminalProfile="$XtermTerminalProfile_HostSize"
+      LxTerminalProfile="$LxTerminalProfile_HostSize"
+      KonsoleTerminalProfile="$KonsoleTerminalProfile_HostSize"
+      break
+    elif  [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
+      printf "\n  Height selected = %s " "$Term_Height"
+      MateTerminalProfile="$MateTerminalProfile_Standard"
+      GnomeTerminalProfile="$GnomeTerminalProfile_Standard"
+      XfceTerminalProfile="$XfceTerminalProfile_Standard"
+      XtermTerminalProfile="$XtermTerminalProfile_Standard"
+      LxTerminalProfile="$LxTerminalProfile_Standard"
+      KonsoleTerminalProfile="$KonsoleTerminalProfile_Standard"
+      break
     fi
-
-    printf "\n\n  Remember that column width units are normally based on the size of your terminal font,"
-    printf   "\n  so changing the font will usually change the physical terminal size."
-
-    printf "\n\n  System defaults may usually be changed in the terminal settings, under 'profile'"
-
-    printf "\n\n  The system's terminal size will apply when starting qqX directly from the command line."
-    printf   "\n  And may overide any options if 'remember size and position' has been set."
-
-    printf "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
-
-    printf "\n\n  If your terminal uses PIXELS, for example 'qterminal', try 1500 x 1000 in the settings."
-    printf "\n\n  In other cases, such as with tiling WM envs eg 'i3' the size may be auto-regulated. "
-
-    printf "\n\n\n"
-
-    # REVIEW add W H number entry?
-
-    printColor "  [enter] continue "
-    if [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
-      printColor "at standard height "
-      printf "   [t] extra height  [a] as host (auto)  or "
-    fi
-
-  else
-
-    print_terminal_notes
-    printColor "\n  https://qqxproject.org/ "
-    printf "\n\n  https://qqxproject.org/docs/Translation \n\n"
-
-  fi
-
-  printf "  [q] to exit \n\n"
-  read -rp "  > "   TerminalHeightChoice
-
-  if [[ ! $UserTerm || $TerminalHeightChoice == "q" ]]; then
-
-    sleep 0.6 ; exit
-
-  elif [[ $TerminalHeightChoice == "t" ]]; then
-
-    printf "\n  Height selected = %s " "$Term_Taller"
-    MateTerminalProfile="$MateTerminalProfile_Taller"
-    GnomeTerminalProfile="$GnomeTerminalProfile_Taller"
-    XfceTerminalProfile="$XfceTerminalProfile_Taller"
-    XtermTerminalProfile="$XtermTerminalProfile_Taller"
-    LxTerminalProfile="$LxTerminalProfile_Taller"
-    KonsoleTerminalProfile="$KonsoleTerminalProfile_Taller"
-
-  elif [[ $TerminalHeightChoice == "a" ]]; then
-
-    printf "\n  Height selected =  Auto/Host "
-    MateTerminalProfile="$MateTerminalProfile_HostSize"
-    GnomeTerminalProfile="$GnomeTerminalProfile_HostSize"
-    XfceTerminalProfile="$XfceTerminalProfile_HostSize"
-    XtermTerminalProfile="$XtermTerminalProfile_HostSize"
-    LxTerminalProfile="$LxTerminalProfile_HostSize"
-    KonsoleTerminalProfile="$KonsoleTerminalProfile_HostSize"
-
-  elif  [[ ! -e "$HOME/.qqX/qqX_term.conf" ]]; then
-
-    printf "\n  Height selected = %s " "$Term_Height"
-    MateTerminalProfile="$MateTerminalProfile_Standard"
-    GnomeTerminalProfile="$GnomeTerminalProfile_Standard"
-    XfceTerminalProfile="$XfceTerminalProfile_Standard"
-    XtermTerminalProfile="$XtermTerminalProfile_Standard"
-    LxTerminalProfile="$LxTerminalProfile_Standard"
-    KonsoleTerminalProfile="$KonsoleTerminalProfile_Standard"
-
-  fi
+  done
 
   # Some listed terminals will be entered into the 'else' section at the end, eg qterminal & urxvt
 
@@ -929,6 +1008,8 @@ if [[ ! $SkipMkLauncher ]]; then
       # needs quotes  - plus REVIEW  -e  deprecation in other terminals
       if [[ $CustomTerminalProfile ]]; then
         echo "Exec=$UserTerm $CustomTerminalProfile " '"' "$qqX_Std_File_Path %f" '"'
+      elif [[ $UserTerm == "ptyxis" ]]; then
+        echo "Exec=$UserTerm --title qqX -x "'"'"bash -c ""'""$qqX_Std_File_Path""'""  %f"'"'
       elif [[ $UserTerm == "kgx" ]]; then
         echo "Exec=$UserTerm -- $qqX_Std_File_Path "'"'" %f"'"'
       elif [[ $UserTerm == "gnome-terminal" ]]; then

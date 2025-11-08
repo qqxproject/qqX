@@ -152,15 +152,27 @@ show_main_menu_header () {
   fi
   printf "\n"
 
+  iso_find_available_lists
+
+  if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
+    printf "\n  Designated Live Boot: %s \n" "$(basename "$IsoImg")"
+    [[ $BootStyle == "slow" ]] && printColor "\n  [iso] select an ISO to be mounted and made additionally accessible\n"
+  elif [[ $BootStyle == "slow" ]]; then
+    printf "\n  Designated Boot: Main Drive \n"
+    if [[ ! $Mounted_ISO ]]; then
+      if [[ ${#IsoList[*]} -ge 1 ]]; then printColor "\n  [iso] select an ISO to be mounted and made accessible\n"
+      else printColor "\n  No additional ISO's found to boot select from ...\n"
+      fi
+    fi
+  fi
+
   if [[ $Mounted_ISO ]]; then
     printf "\n  Additional "
-    if [[ $BootStyle == "slow" ]]; then printf "(mounted & boot selectable)"
+    if [[ $BootStyle == "slow" ]]; then printColor "(mounted & boot selectable)"
     else printf "(mounted, not bootable)"
     fi
     printf " ISO: %s \n" "$Mounted_ISO_DisplayName"
   fi
-
-  [[ $KVM_MSR_Error ||  $Show_MSR_Warnings  || $MSR_Warnings || $Verbose_MSR_dialog ]] && print_kvm_status_warnings
 
   # Note .conf won't exist at first load, at VM selector menu
 
@@ -172,10 +184,13 @@ show_main_menu_header () {
     printf "\n  Symbolically linked to real path %s \n" "$(realpath "$VM_Conf_Dir/$VM_InstanceName")"
   fi
 
+  if [[ $qvWarn ]] ; then
+    printf "\n  QEMU version 8.1.0 or newer is normally required for all functions to work ... \n"
+  fi
+
 }
 
-# When a VM_InstanceName exists, check the VM disk is not corrupt  (quickemu default name only)
-# https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
+# CHECK the VM disk is not corrupt and that snapshots are present:
 
 check_disk_is_okay () {
 
@@ -192,17 +207,17 @@ check_disk_is_okay () {
     if [[ $2 ]]; then DiskCheck_Disk="$2" ; else DiskCheck_Disk="disk.qcow2"; fi
   fi
 
-  DiskChkExitCode= ;  DiskChkStatus=
+  DiskChkExitCode= ;  DiskChkStatus=  ; DiskChkAddSnap=
+  local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
-  if [[ -e "$DiskCheckFolderName/$DiskCheck_Disk" ]]; then
-
-    # Disk won't exist if new (or named differently REVIEW )
-    # Qemu-img with '-q' only outputs if error & on outputs on stderr   The exit status remains separately recorded.
-    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk"
-    else "$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk"  2>/dev/null ; fi
-
-    # Note "Okay"  is also used as a flag  > caution if changing   # REVIEW  could also be flagged using:
-    # DiskChkMsg="$("$QEMU_IMG" check -q "$DiskCheckFolderName/$DiskCheck_Disk" 2>&1)"
+  if [[ -e "$Selected_ChkDrive" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+    # Disk won't exist if VM is newly downloaded or live, so only check or return Status, if disk is present.
+    # Qemu-img with '-q' should only output if error & only outputs on stderr   The exit status remains separately recorded.
+    # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
+    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive" 2>/dev/null
+    else "$QEMU_IMG" check -q "$Selected_ChkDrive"  2>/dev/null
+    fi
+    # NB "Okay"  is also used as a global flag  > caution if changing
     case "$?" in
       0) DiskChkStatus="Okay" ;;
       1) DiskChkStatus="Check unable to be completed" ;;
@@ -212,6 +227,21 @@ check_disk_is_okay () {
          DiskChkExitCode=3  ;;
      63) DiskChkStatus="Checks are not supported by the image format -- not qcow2 ??" ;;
     esac
+  fi
+  if [[ $DiskChkStatus == "Okay" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+    # at least one recent snap should be present (if disk is of sufficient size)
+    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
+    else
+      DiskChkEpochTime="$(date +%s)"
+      LastSnapDate="$("$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | tail -n 1 | awk '{print $5}')"
+      LastSnapEpochTime="$(date -d "$LastSnapDate" +%s)"
+      # where 1209600 = 14 days
+      [[ $((DiskChkEpochTime-LastSnapEpochTime)) -gt 1209600 ]] && DiskChkAddSnap=1
+    fi
+    if [[ $DiskChkAddSnap ]] ; then
+      SnapTitle="$(date +%b%d.%H.%M)"
+      "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
+    fi
   fi
 }
 
@@ -226,20 +256,22 @@ check_if_disk_needs_a_cleanup  () {
   fi
   local VirtualSize= ; local FileLength= ; local DiskSize= ; local DiskData=
   DiskDisparity=0
-  DiskData="$(qemu-img info "$DiskCheckFolderName/$DiskCheck_Disk" 2>/dev/null)"
-  # make sure units match and disk is of significant size
-  VirtualSize="$(grep -s 'virtual size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  FileLength="$(grep -s 'file length' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  DiskSize="$(grep -s -m1 'disk size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
-  if [[ $VirtualSize && $FileLength && $DiskSize ]]; then
-    if [[ "$(bc -l <<< "$FileLength > ($DiskSize*2.1)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=4
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
-    elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
-    elif [[ $VirtualSize -le 32 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
-    elif [[ $VirtualSize -le 64 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
-    elif [[ $VirtualSize -le 96 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
-    else DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+25)" 2>/dev/null)"
+  if [[ -e "$DiskCheckFolderName/$DiskCheck_Disk" ]]; then
+    DiskData="$(qemu-img info "$DiskCheckFolderName/$DiskCheck_Disk" 2>/dev/null)"
+    # make sure units match and disk is of significant size
+    VirtualSize="$(grep -s 'virtual size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    FileLength="$(grep -s 'file length' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    DiskSize="$(grep -s -m1 'disk size' <<< "$DiskData" | grep -s 'GiB' | awk '{print $3}')"
+    if [[ $VirtualSize && $FileLength && $DiskSize ]]; then
+      if [[ "$(bc -l <<< "$FileLength > ($DiskSize*2.1)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=4
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
+      elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
+      elif [[ $VirtualSize -le 32 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
+      elif [[ $VirtualSize -le 64 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
+      elif [[ $VirtualSize -le 96 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
+      else DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+25)" 2>/dev/null)"
+      fi
     fi
   fi
   # bc's math library (-l) should refuse garbage, so if Qemu info layout changes then 'DiskDisparity' should theoretically be null.
@@ -347,7 +379,7 @@ function_delete_Selected_VM () {
   read -rp "  >  "   Delete_VM_Option
 
   if [[ $Delete_VM_Option == "y" ]]; then
-    printf "\n\n  Folder & .conf file being deleted ... "
+    printf "\n\n  Deleting Folder & .conf file ... "
     rm -f -r "$1"
     rm -f "$2"
   else
@@ -364,6 +396,7 @@ function_delete_Selected_VM () {
   read -rp "  > "
 
   if [[ $Delete_VM_Option != "n" ]]; then
+    printf "\n  Refreshing the VM arrays ... \n\n"
     ByPass_VM_Array_Selector=
     ByPass_VM_Array_Loader=
     VM_InstanceName=
@@ -379,7 +412,7 @@ function_delete_Selected_VM () {
   fi
   Delete_VM_Option=
   # clear any accidental initial double pressing of the enter key
-  read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
+  read -r -t 0.2 ; read -r -t 0.2
 }
 
 function_rename_conf_dirnames () {
@@ -648,9 +681,10 @@ move_rename_Selected_VM () {
 
 read_x86_tiano_vars_list () {
 
-  # current source list
+  # Current source list (-A nn may need adjusting if adding to qe arrays)
+  # See quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
   local String=
-  String="$(grep -A 20 -m 1 'ovmfs=' "$QE_SourcePath" | grep -s '"')"
+  String="$(grep -s -A 32 -m 1 'ovmfs=' "$QE_SourcePath" | grep -B 32 'esac' | grep '"')"
   if [[ ! $String ]]; then  TianoVarsGrepError=1 ; return
   else TianoVarsGrepError=
   fi
@@ -659,6 +693,7 @@ read_x86_tiano_vars_list () {
   String="${String//','/' '}"
   # shellcheck disable=SC1003
   String="${String//'\'/' '}"
+  # squeeze out extra spaces and leave a string of single space separated but quoted filepaths
   String="$(tr -s '[= =]' <<< "$String")"
   # shellcheck disable=SC2206
   Tiano_x86_FilesList=($String)
@@ -773,6 +808,8 @@ refresh_tiano_vars () {
         # leave things as they are. At least for now.  REVIEW
         # Quickemu should re-install the 'correct' vars file if the current one(s) is(are) removed.
 
+        # @ 10/2025 this gets start rationalized with introduction of quickEmu_mods script
+
         if [[ -e "$VM_Conf_Dir/$VM_InstanceName/$x86_Var" ]]; then
           mv "$VM_Conf_Dir/$VM_InstanceName/$x86_Var" "$VM_Conf_Dir/$VM_InstanceName/${x86_Var}.old"
           [[ $RtvText ]] && printColor "\n\n  Reset '%s' >> Quickemu will now auto-update your VM on its next boot"  "$x86_Var"
@@ -811,7 +848,7 @@ custom_boot_file () {
 
     printColor "\n\n  Utility to copy QEMU args list from the last qemu boot formula"
     printf "\n\n  Boot in 'Verbose mode' is sufficient. Actual boot is not required."
-    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"
+    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
     if [[ ! -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then
       printf "\n\n  NO ARGS FILE yet present "
@@ -825,7 +862,7 @@ custom_boot_file () {
 
     elif [[ $CreateCustom == "w" ]]; then
       printf "\n  Opening Browser ... \n\n"
-      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
+      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
       sleep 1
 
     elif [[ -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then
@@ -839,7 +876,7 @@ custom_boot_file () {
   elif [[ $1 == "delete" ]]; then
 
     printColor "\n\n  Utility to delete existing custom qemu boot formula"
-    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"
+    printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
     if [[ ! -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then
       printf "\n\n  NO CUSTOM BOOT FILE present "
@@ -853,7 +890,7 @@ custom_boot_file () {
 
     elif [[ $DeleteCustom == "w" ]]; then
       printf "\n  Opening Browser ... \n\n"
-      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/docs/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
+      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"  & ) || web_browser_not_found_message
       sleep 1
 
     elif [[ -e "$VM_InstanceName/Qemu_ShortArgs_Custom.txt" ]]; then
@@ -873,8 +910,7 @@ custom_boot_file () {
 
 }
 
-
-iso_select_mount_and_boot () {
+iso_find_available_lists () {
 
   # to be run from main menu, on presumption of a VM having been selected,
   # the standard VM vars to be in place and set up
@@ -886,8 +922,18 @@ iso_select_mount_and_boot () {
 
     IsoList=()
     mapfile -t IsoList <<< "$(ls "$VM_InstanceName"/*.iso 2>/dev/null)"
+
+    ImgList=()
+    mapfile -t ImgList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+
+    if [[ ${IsoList[0]} && ${ImgList[0]} ]]; then
+      mapfile -t -O "${#IsoList[@]}" IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+    elif [[ ${ImgList[0]} ]] && [[ ! ${IsoList[0]}  ]]; then
+      mapfile -t IsoList <<< "$(ls "$VM_InstanceName"/*.img 2>/dev/null)"
+    fi
+    # https://stackoverflow.com/a/53091662/27611101
+
     if [[ $SharedDrive ]]; then
-      #https://stackoverflow.com/a/53091662/27611101
       if [[ ${IsoList[0]} ]]; then
         mapfile -t -O "${#IsoList[@]}" IsoList <<< "$(ls "$(dirname "$SharedDrive")"/*.iso 2>/dev/null)"
       else
@@ -895,60 +941,72 @@ iso_select_mount_and_boot () {
       fi
     fi
 
-    printColor "\n\n  ISO formated disk images may be copied into the individual VM folder"
-    printf "\n\n  A shared 'live boot' ISO can be added to the Shared Drive folder, if Shared Drive has been set up."
-    printf "\n\n  One or more may be added.  If more than one, an ISO should be selected from the list."
-    printf "\n\n  Current Quickemu code is restricted to one only being mounted at a time."
-    printf "\n\n  To auto-mount an ISO when the VM is selected, set 'fixed_iso=\"VM_InstanceName/name.iso\"' in the .conf file"
-    printf "\n\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for partition management."
-    printf "\n\n  Some iso's may not work as secondary boots, notably Kolibri."
-    printColor "\n\n  Use [bm] main menu utility to toggle boot manager and ISO boot selection."
-    printf " Current status:"
-    if [[ $BootStyle == "fast" ]]; then printf "  (fastboot)"
-    else  printf "  (boot menu options active)"
-    fi
-    printf "\n"
+    #  mapping to -O zero can cause emtpy entries, if none found, so if empty, do a refresh
+    [[ ! ${IsoList[0]} ]] && IsoList=()
 
-    if [[ $LiveBoot ]]; then
-      printf "\n\n  CAUTION: You are already standard booting from an ISO. "
-      printf "\n\n  The distro has not yet been installed to the disk."
-    fi
-
-    if [[ ! ${IsoList[*]} ]]; then
-      printColor "\n\n  NONE FOUND:  An ISO formated disk image should be copied into the individual VM folder"
-    elif [[ ! ${IsoList[1]} ]]; then
-      printColor "\n\n  Single ISO FOUND:  %s" "${IsoList[0]}"
-    else
-      printf "\n\n"
-      print_quickget_and_folder_choices  IsoList
-    fi
-
-    if [[ $Mounted_ISO ]]; then printColor "\n\n  %s  is mounted additionally to guest" "$Mounted_ISO"
-    else printf "\n\n  Currently, no ISO is mounted additionally to guest"
-    fi
-
-    IsoSelect=
-    printf "\n\n"
-    if [[ $LiveBoot ]] && [[ ${#IsoList[*]} -eq 1 ]]; then
-      printColor "  [b] to go back"
-    else
-      if [[ ${#IsoList[*]} -eq 1 ]]; then  printColor "  [m] to mount/unmount "
-      elif [[ ${#IsoList[*]} -gt 1 ]]; then  printColor "  [number] to select and mount/unmount "
-      fi
-      printf "  [b] to go back"
-    fi
-
-    printf "\n\n"
-    read -rp "  >  "  IsoSelect
-
-      if [[ $IsoSelect == "m" ]]; then
-        if [[ ! $Mounted_ISO ]]; then [[ "${IsoList[0]}" ]] && Mounted_ISO="${IsoList[0]}" ; else Mounted_ISO= ; fi
-      elif [[ "$IsoSelect" == [1-9] || "$IsoSelect" == [1-9][0-9] ]]; then
-        ((IsoSelect-=1))
-        if [[ ! $Mounted_ISO ]]; then [[ "${IsoList[IsoSelect]}" ]] && Mounted_ISO="${IsoList[IsoSelect]}"
-        elif [[ $Mounted_ISO == "${IsoList[IsoSelect]}" ]]; then Mounted_ISO=
-        elif [[ $Mounted_ISO != "${IsoList[IsoSelect]}" ]]; then [[ "${IsoList[IsoSelect]}" ]] && Mounted_ISO="${IsoList[IsoSelect]}"
-        fi
-      fi
   fi
+}
+
+iso_select_mount_and_boot () {
+
+  # presumes 'iso_find_available_list' has been run
+
+  printColor "\n\n  ISO/IMG formated disk images may be in both the Shared Drive folder and an individual VM folder"
+  printf "\n\n  More than one may be present but only one ADDITIONAL may be mounted and made accessible at a time"
+  printf "\n\n  To auto-mount an ISO when the VM is selected, set 'fixed_iso=\"VM_InstanceName/name.iso\"' in the .conf file"
+
+  printf "\n\n\n  BOOT is normally from the MAIN DRIVE or the Live Boot distro ISO"
+  printf "\n\n  BUT if a drive has been mounted, the BOOT MANAGER can be used to control what happens."
+  printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for partition management."
+
+  printf "\n\n\n  The boot manager is enabled separately, via the main menu"
+  printf "\n\n  Current status:"
+  if [[ $BootStyle == "fast" ]]; then printf "  (fastboot > boot manager NOT enabled)"
+  else  printf "  (boot manager enabled)"
+  fi
+  printf "\n"
+
+  if [[ $LiveBoot ]]; then
+    printColor "\n\n  CAUTION: You are already standard booting from an ISO. "
+    printf "\n\n  The distro has not yet been installed to the disk."
+  fi
+
+  if [[ ! ${IsoList[*]} ]]; then
+    printColor "\n\n  NONE FOUND:  An ISO formated disk image should be copied into the Shared or individual VM folder"
+  elif [[ ! ${IsoList[1]} ]]; then
+    printColor "\n\n  Single ISO FOUND:  %s" "${IsoList[0]}"
+  else
+    printf "\n\n"
+    [[ ${#IsoList[*]} -ge 1 ]] && printColor "  Available List: \n\n"
+    print_quickget_and_folder_choices  IsoList
+  fi
+
+  if [[ $Mounted_ISO ]]; then printf "\n\n  %s  IS CURRENTLY MOUNTED to guest" "$Mounted_ISO"
+  else printf "\n\n  Currently, no ISO is mounted additionally to guest"
+  fi
+
+  IsoSelect=
+  printf "\n\n"
+  if [[ $LiveBoot ]] && [[ ${#IsoList[*]} -eq 1 ]]; then
+    printColor "  [b] to go back"
+  else
+    if [[ ${#IsoList[*]} -eq 1 ]]; then  printColor "  [m] to mount/unmount "
+    elif [[ ${#IsoList[*]} -gt 1 ]]; then  printColor "  [number] to select/reselect and/or mount/unmount "
+    fi
+    printf "  [b] to go back"
+  fi
+
+  printf "\n\n"
+  read -rp "  >  "  IsoSelect
+
+  if [[ $IsoSelect == "m" ]]; then
+    if [[ ! $Mounted_ISO ]]; then [[ "${IsoList[0]}" ]] && Mounted_ISO="${IsoList[0]}" ; else Mounted_ISO= ; fi
+  elif [[ "$IsoSelect" == [1-9] || "$IsoSelect" == [1-9][0-9] ]]; then
+    ((IsoSelect-=1))
+    if [[ ! $Mounted_ISO ]]; then [[ "${IsoList[IsoSelect]}" ]] && Mounted_ISO="${IsoList[IsoSelect]}"
+    elif [[ $Mounted_ISO == "${IsoList[IsoSelect]}" ]]; then Mounted_ISO=
+    elif [[ $Mounted_ISO != "${IsoList[IsoSelect]}" ]]; then [[ "${IsoList[IsoSelect]}" ]] && Mounted_ISO="${IsoList[IsoSelect]}"
+    fi
+  fi
+
 }

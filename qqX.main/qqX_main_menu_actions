@@ -172,7 +172,7 @@ function  main_menu_actions {
     sleep 1
   elif [[ $MainMenuChoice == "qW" ]] ; then
     printf "\n  Opening Browser ... \n\n"
-    (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/docs/Guides/Windows-OS"  & ) || web_browser_not_found_message
+    (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Guides/Windows-OS"  & ) || web_browser_not_found_message
     sleep 1
 
   elif [[ $MainMenuChoice == "tune" ]] ; then function_config_tune_up "$VM_Conf_Dir/$VM_Conf_File"
@@ -228,7 +228,9 @@ function  main_menu_actions {
       read -rp "  >  "
     fi
 
-  elif [[ $MainMenuChoice == "m" ]] ; then KVM_MSR_selector_LoadHelp=1 ; select_msr_config
+  elif [[ $MainMenuChoice == "m" ]] ; then
+
+    select_msr_config
 
   elif [[ $MainMenuChoice == "gl" ]] ; then
 

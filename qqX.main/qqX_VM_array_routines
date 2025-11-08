@@ -156,9 +156,9 @@ scan_folders_list_and_add_VMs () {
 
   if [[ ! ${VM_Array[0,0]} || "${VM_Array[0,1]}" == "empty" ]] ; then
     if [[ $CodingHotSwapShow ]]; then SelectArrayError=
+    elif [[ $NoVMsOkay ]]; then SelectArrayError= ; NoVMsOkay=
     else
       function_conf_error  "No VMs"
-      SelectArrayError=1
     fi
   fi
 
@@ -322,13 +322,14 @@ VM_check_and_load () {
     if [[ ! $SelectArrayError ]]; then
       # Check KVM parameter settings of new selection & advise accordingly
       KVM_MSR_selector=
-      find_kvm_msr_default_and_status
-      if [[ $Verbose_MSR_dialog ]] || [[ ! $Verbose_MSR_dialog ]] && [[ "$VM_InstanceName" == *windows* || "$VM_InstanceName" == *macos* ]]; then
-        msrs_conflict_check_resolver
+      if [[ "$VM_InstanceName" == *windows* || "$VM_InstanceName" == *macos* ]]; then msrs_conflict_check_resolver
+      else find_kvm_msr_default_and_status
       fi
     fi
 
   fi
+
+  [[ $ByPass_VM_Array_Selector ]] && msrs_conflict_check_resolver
 
   if [[ $SelectArrayError || $SettingsFileAdjusted ]] && [[ ! $NewFileTuneUp_JustDone ]]; then
 
@@ -408,10 +409,6 @@ refresh_sources_and_load_VM_arrays() {
     printf "$@"
     tput sgr0
   }
-
-  #if [[ $VM_ListingFilterDefault ]]; then VM_ListingFilter="$VM_ListingFilterDefault"
-  #else VM_ListingFilter="qqlist-desktop"
-  #fi   REVIEW  > follow refresh doesn't change builtin model, so leave filter unchanged too
 
   [[ $CodingHotSwap ]] && QE_SourceVersion="$CodingHotSwap"
   refresh_and_load_quickemu_sources

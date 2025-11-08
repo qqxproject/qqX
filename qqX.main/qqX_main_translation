@@ -82,22 +82,22 @@ if [[ ! $SideRoutine ]] ; then tx_main_option_line ; fi
 open_main_tx_screens_in_browser() {
 	printf "\n  %s ... \n\n" "$OpenTx4"
 	if [[ $1 == "settings" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Settings?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/Translation/Settings?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "main" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Main-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/Translation/Main-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "gt" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Download-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/Translation/Download-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "tune" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Tune-Up-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/Translation/Tune-Up-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	elif [[ $1 == "disks" ]]; then
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation/Disk-Management-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/Translation/Disk-Management-menus?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	else
-		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/docs/Translation?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
+		(nohup &> /dev/null  "$WebBrowser" "https://qqxproject-org.translate.goog/Translation?_x_tr_sl=auto&_x_tr_tl=${TxLang}&_x_tr_hl=en&_x_tr_pto=wapp" & ) \
 		|| printf "\n\n  %s \n\n" "$OpenTx5"
 	fi
 	sleep 1
@@ -135,7 +135,7 @@ main_translation_menu() {
 	else printColor "\n\n  %s" "$OpenTx2"
 	fi
 	TxSetCode=
-	printf "\n\n  [b] %s \"https://qqxproject.org/docs/Translation\" \n\n" "$OpenTx3"
+	printf "\n\n  [b] %s \"https://qqxproject.org/Translation\" \n\n" "$OpenTx3"
 	read -rp "  >  "  TxSetCode
 
 	case "$TxSetCode" in
