@@ -24,6 +24,10 @@ Recent Highlights Include:
 
 - A new fully automated Windows installer
 
+- New Quickemu dependency checks
+
+- Fixes for Wayland and Gnome 49
+
 - Multiplexed parallel downloads with enhanced stop/start
 
 - 51 language auto-translation system
