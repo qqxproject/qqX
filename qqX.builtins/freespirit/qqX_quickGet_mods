@@ -308,6 +308,27 @@ function editions_bodhi() {
     fi
 }
 
+## FIXES for Devuan - make dynamic     #echo daedalus chimaera beowulf
+function releases_devuan() {
+    local ReadMeTxt= ; ReadMeTxt=$(web_pipe "https://files.devuan.org/README.txt")
+    mapfile -t  Dlist <<< "$(grep -s Devuan <<< "$ReadMeTxt" | grep -v archived | fv -c -M 3 -Q)"
+    local DlistStr=
+    for D in "${Dlist[@]}"; do
+        grep -s Devuan <<< "$ReadMeTxt" | grep "$D" | cut -d' ' -f6- | tr ' ' '_'
+    done
+}
+function get_devuan() {
+    local HASH="" ; local ISO="" ; local VER="" ; local URL=
+    RELEASE="$(tr -cd '[:alpha:]' <<< "$RELEASE" | tr -cd '[:graph:]')"
+    RELEASE="devuan_${RELEASE,,}"
+    URL="https://files.devuan.org/${RELEASE}/desktop-live"
+    VER="$(web_pipe "$URL" | grep -s -m 1 "amd64_desktop" | cut -d '>' -f 1 | fv -Q | tr -cd '[:graph:]')"
+    ISO="${RELEASE}_${VER}_amd64_desktop-live.iso"
+    HASH=$(web_pipe "${URL}/${ISO}.sha256" | grep -s amd64 | cut -d' ' -f1)
+    [[ ! $HASH ]] && HASH=$(web_pipe "${URL}/SHA256SUMS.txt" | grep -s amd64 | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## REDUCE release count - over 20 is too many!
 function releases_dragonflybsd() {
     # If you remove "".bz2" from the end of the searched URL, you will get only the current release
