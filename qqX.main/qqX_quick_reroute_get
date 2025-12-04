@@ -57,8 +57,12 @@ refresh_load_listing_filters () {
   VM_Listing_Info[ultra-light,info]="Super Small from ~100 to 500 Mb or so, ideal for USB sticks and similar."
   VM_Listing_Info[security,info]="Distros for network specialists, security engineers, pen-testers and those wanting privacy lock-downs."
   VM_Listing_Info[no-sysd,info]="Full or medium size Linux distros without, or optionally w/o, Systemd initialization and runtimes ..."
-  if [[ $VM_ListingFilterDefault ]]; then VM_ListingFilter="$VM_ListingFilterDefault"
-  else VM_ListingFilter="desktop"
+  if [[ $VM_ListingFilterDefault ]]; then
+    VM_ListingFilter="$VM_ListingFilterDefault"
+    VM_ListingFilterDefault_Display="$VM_ListingFilterDefault"
+  else
+    VM_ListingFilter="desktop"
+    VM_ListingFilterDefault_Display="desktop"
   fi
 }
 
@@ -411,7 +415,9 @@ function show_QWG_header {
     if [[ $QG_Modpath ]]; then
       printf "   ("
       printColor "%s" "$VM_ListingFilter"
-      printf ") [fl] adjust filter "
+      printf ") ["
+      printColor "fl"
+      printf "] adjust filter "
     fi
     printf "\n\n"
   else
@@ -562,12 +568,12 @@ function_quick_get_wrap ()  {
             [[ ${VM_ListingArray[fNum]} == "${VM_ListingFilter,,}" ]] && break
             ((fNum+=1))
           done
-          printf "\n  FilterDefault is editable in the general settings file ... "
+          printf "\n  FilterDefault (%s) is editable in the general settings file ... " "$VM_ListingFilterDefault_Display"
           printf "\n\n  Some listed distros may have releases that offer other options. Some lists may overlap with others.\n\n"
           print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
-          printf "\n\n  CURRENT FILTER  =  %s  =  %s" "${VM_ListingFilter^^}" "${VM_Listing_Info[$VM_ListingFilter,info]}"
-          printColor "\n\n  [number] to reselect"
-          printColor "   [enter] to return or continue"
+          printColor "\n\n  CURRENT FILTER  =  %s  =  %s" "${VM_ListingFilter^^}" "${VM_Listing_Info[$VM_ListingFilter,info]}"
+          printf "\n\n  [number] to reselect"
+          printf "   [enter] to return or continue"
           printf "\n\n"
           read -rp "  >  " qqLselect
           VM_ListingArrayCount="${#VM_ListingArray[@]}"
