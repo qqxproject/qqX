@@ -38,15 +38,15 @@ Plus numerous downstream fixes for _current_ Quickemu issues
 
 CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
-Ordinary users, who are taking a leap of faith, are being rewarded
-
 > After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
 
-More stars and endorsements hopefully to come
+More stars and endorsements hopefully to come ....
 
-Any qqX built machines will still run using Quickemu and you can always switch or go back to QuickGUI
+-----
 
-Developers who understand modern scripting should find the code easy to follow and are welcome to contribute
+![qqX-part-of-quickemu-edited3b](https://github.com/user-attachments/assets/3322789f-ed89-4b6c-90b3-630958860b2f)
+
+Any qqX built machines will still run using [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) or Quickgui
 
 -----
 
