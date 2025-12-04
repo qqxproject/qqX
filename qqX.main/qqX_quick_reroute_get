@@ -28,21 +28,43 @@ function quickget {
   return
 }
 
-## DISTRO LISTINGS  (non-function sections are run only during initialization)
+## DISTRO LISTINGS
 
-# An eventual qqlist- prefix is needed to make sure any calls to Quickget don't confuse list names with distro names
-VM_ListingArray=("all" "desktop" "server-cl" "gaming" "ultra-light" "security")
-declare -gA VM_Listing_Info=()
-VM_Listing_Info[all,info]="All listed Distros, of all types."
-VM_Listing_Info[desktop,info]="All distros, minus the server list. The mainly Desktop focused distros."
-VM_Listing_Info[server-cl,info]="The mainly Server focused distros."
-VM_Listing_Info[gaming,info]="Distros with gaming tuned kernels or with releases that offer gaming focused options."
-VM_Listing_Info[ultra-light,info]="Super Small from ~100 to 500 Mb or so, ideal for USB sticks and similar."
-VM_Listing_Info[security,info]="Distros for network specialists, security engineers, pen-testers and those wanting privacy lock-downs."
-if [[ $VM_ListingFilterDefault ]]; then VM_ListingFilter="$VM_ListingFilterDefault"
-else VM_ListingFilter="desktop"
-fi
-QGW_OS_Array=()
+refresh_load_listing_filters () {
+
+  # An eventual qqlist- prefix is needed to make sure any calls to Quickget don't confuse list names with distro names
+  declare -ga VM_ListingArray=()
+  VM_ListingArray=( "all" "desktop" "server-cl" "gaming" "ultra-light" "security" "no-sysd" )
+  # make sure the builtin mod file has these items as older mod files may not have them.
+  [[ $ShowQGetLists ]] && { echo; declare -p VM_ListingArray; echo; echo "VM_ListingFilter: $VM_ListingFilter"; echo; }
+
+  i=0
+  while [[ "${VM_ListingArray[i]}" ]]; do
+    if ! grep -qs "qqlist-${VM_ListingArray[i]}" "$QG_Modpath" ; then
+      unset "VM_ListingArray[i]"
+    else [[ $ShowQGetLists ]] && echo "${VM_ListingArray[i]}"
+    fi
+    ((i++))
+  done
+  #  Re-index as sections may have been removed
+  VM_ListingArray=("${VM_ListingArray[@]}")
+
+  declare -gA VM_Listing_Info=()
+  VM_Listing_Info[all,info]="All listed Distros, of all types."
+  VM_Listing_Info[desktop,info]="All distros, minus the server list. The mainly Desktop focused distros."
+  VM_Listing_Info[server-cl,info]="The mainly Server focused distros."
+  VM_Listing_Info[gaming,info]="Distros with gaming tuned kernels or with releases that offer gaming focused options."
+  VM_Listing_Info[ultra-light,info]="Super Small from ~100 to 500 Mb or so, ideal for USB sticks and similar."
+  VM_Listing_Info[security,info]="Distros for network specialists, security engineers, pen-testers and those wanting privacy lock-downs."
+  VM_Listing_Info[no-sysd,info]="Full or medium size Linux distros without, or optionally w/o, Systemd initialization and runtimes ..."
+  if [[ $VM_ListingFilterDefault ]]; then VM_ListingFilter="$VM_ListingFilterDefault"
+  else VM_ListingFilter="desktop"
+  fi
+}
+
+[[ $QG_Modpath ]] && refresh_load_listing_filters
+
+declare -ga QGW_OS_Array=()
 
 load_QGW_OS_Array () {
   [[ $VM_ListingFilter ]] && VM_ListingCall="qqlist-""$VM_ListingFilter"
@@ -531,6 +553,7 @@ function_quick_get_wrap ()  {
       elif [[ ${QGW_List_NumSelected^^} == "HF" ]]; then  QGW_List_NumSelected= ; show_qqX_general_help "f" ; GT_Help=1
 
       elif [[ ${QGW_List_NumSelected,,} == "fl" ]] && [[ $QG_Modpath ]]; then
+        refresh_load_listing_filters
         while true ; do
           qqLselect= ; local fNum=0
           while [[ ${VM_ListingArray[fNum]} ]]; do
@@ -542,7 +565,7 @@ function_quick_get_wrap ()  {
           print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
           printf "\n\n  CURRENT FILTER  =  %s  =  %s" "${VM_ListingFilter^^}" "${VM_Listing_Info[$VM_ListingFilter,info]}"
           printColor "\n\n  [number] to reselect"
-          printColor "   [enter] to return"
+          printColor "   [enter] to return or continue"
           printf "\n\n"
           read -rp "  >  " qqLselect
           VM_ListingArrayCount="${#VM_ListingArray[@]}"

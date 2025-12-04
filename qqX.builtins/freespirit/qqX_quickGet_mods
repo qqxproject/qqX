@@ -81,13 +81,21 @@ osSecList+=" parrotsec tails "
 osSecList="${osSecList//'  '/' '}"
 osSecList="${osSecList//'  '/' '}"
 
+osNoSysDList=" artixlinux devuan "
+osNoSysDList+=" mxlinux void "
+osNoSysDList="${osNoSysDList//'  '/' '}"
+osNoSysDList="${osNoSysDList//'  '/' '}"
+
 # A qqlist- prefix is used to make sure any calls to Quickget don't confuse list names with distro names
 # See function 'load_QGW_OS_Array' in the 'reroute_get' script
+# Older version mod files will get check for qqlists that don't exist in their particular built-in
+# qqlist-all is default (add here for grepping)
 if [[ $1 == "qqlist-desktop"  ]] ; then mapfile -t -O "${#osRemoveArr[@]}" -d ' ' osRemoveArr <<< "$osServersList"
 elif [[ $1 == "qqlist-server-cl" ]] ; then osSupported="$osServersList"
 elif [[ $1 == "qqlist-gaming" ]] ; then osSupported="$osGamingList"
 elif [[ $1 == "qqlist-ultra-light" ]] ; then osSupported="$osUsbList"
 elif [[ $1 == "qqlist-security" ]] ; then osSupported="$osSecList"
+elif [[ $1 == "qqlist-no-sysd" ]] ; then osSupported="$osNoSysDList"
 else osSupported="$osSupported_All"
 fi
 
