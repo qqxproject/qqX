@@ -457,14 +457,16 @@ function clear_main_gt_start_vars {
 }
 
 function refresh_QWG_selector {
-  if [[ $1 != "no-set" ]] ; then
+  if [[ $1 == "no-set" ]] ; then
+    clear_main_gt_start_vars
+    show_QWG_header ; show_hot_swap_line
+    print_quickget_and_folder_choices  "QGW_OS_Array"
+    QGW_List_NumSelected=
+    SettingsFileAdjusted=
+  else
     SettingsFileAdjusted=1
     refresh_sources_and_load_VM_arrays
   fi
-  clear_main_gt_start_vars
-  show_QWG_header ; show_hot_swap_line
-  print_quickget_and_folder_choices  "QGW_OS_Array"
-  QGW_List_NumSelected=
 }
 
 test_internet_is_up () {
