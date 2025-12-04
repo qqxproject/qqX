@@ -466,7 +466,10 @@ else
   else Current_qqX_Version=
   fi
 
-  if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then  printf  "\n   Upgrade the current release %s ..."   "$Current_qqX_Version"
+  if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then
+    printf  "\n   Upgrade the current release %s ..."   "$Current_qqX_Version"
+    # The terminal check list also needs to be available for the standard upgrader script:
+    ./qqX_setup_and_install MakeTermList || { printColor "\n\n  ERROR  'qqX setup and install' file not found \n\n" ; sleep 5; exit 1; }
   fi
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
@@ -675,9 +678,8 @@ if [[ -e  "$XDG_GUI_desktop_PathName" ]] ; then
     printf "\n\n  BUT... to enable new qqX features, we need to take a few seconds to reconfigure the launcher"
     printColor "\n\n  [enter] to continue   "
   else
-    printf "\n\n  Unless changing the terminal size, the icon or similar, may be skipped ..."
     printColor "\n\n  [enter] to skip   "
-    printf "[r] to reconfigure \n\n"
+    printf "[r] to RECONFIGURE terminal, terminal size, the icon or similar ...\n\n"
   fi
   read -rp "  >  "  SkipMkLauncher
 
@@ -745,13 +747,14 @@ if [[ ! $SkipMkLauncher ]]; then
           UserTerm="${TermChooseArr[i]}"
           break ;;
         h)
-          printf "\n\n\n  85%% of users are probably covered by \"gnome-terminal\" \"konsole\" \"mate-terminal\" "
-          printf "\n\n  \"xfce4-terminal\" and over 95%% probably when \"qterminal\" and \"alacritty\" are added."
+          printf "\n\n\n  85%% of users are probably covered by \"gnome-terminal\" \"konsole\" \"mate-terminal\" \"xfce4-terminal\""
+          printf "\n\n  and over 95%% probably when \"qterminal\" and \"alacritty\" are added."
 
-          printf "\n\n\n  Flatpak installed terminals and the new Gnome Terminal 'ptyxis' are currently problematic ..."
-          printf "\n\n  For qqX purposes, alacritty works better in tiling window managers"
-          printf "\n\n  A recommended general installation is 'mate-terminal' "
-          printf "\n\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
+          printf "\n\n\n  Flatpak installs and the new Gnome Terminal 'ptyxis' are currently problematic"
+          printf "\n\n  whilst, for qqX purposes, alacritty works better in tiling window managers:"
+          printf "\n\n\n  A recommended general installation is 'mate-terminal' or 'qterminal'"
+          printf "\n\n  which are both lightweight and Wayland/X11 compatible."
+          printf "\n\n\n  Systems are fine with more than one terminal installed and present ..."
           printf "\n"
           TermChoose=
           ;;
@@ -820,11 +823,12 @@ if [[ ! $SkipMkLauncher ]]; then
 
       if [[ $(type -p "ptyxis") ]] ; then
         # 10/2025 ptyxis  partly resolved, from ver 49.1 (tested on Fedora 43 beta) but fails to open QF second windows
-        printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on the system this is currently problematic ..."
+        printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on this system, it is currently problematic:"
       fi
 
-      printf "\n\n  A recommended general installation is 'mate-terminal' "
-      printf "\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
+      printf "\n\n  A recommended general installation is 'mate-terminal' or 'qterminal'"
+      printf "\n  which are both lightweight and Wayland/X11 compatible."
+      printf "\n\n  Systems are fine with more than one terminal installed and present ..."
 
       printf "\n\n\n"
 

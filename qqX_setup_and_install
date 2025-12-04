@@ -60,6 +60,8 @@ fi
 # Users with Window Managers, not Desktop Envs will be familiar with terminals and settings at the cmd line
 # However add some well known interfaces where possible, eg. urxvt that comes with 'i3' as this helps with running of QF
 
+# This terminal check list also needs to be available for the standard upgrader script:
+if [ "$1" = "MakeTermList" ]; then MakeTermList=1 ; shift ; else MakeTermList= ; fi
 
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
 set "$@" -- "ptyxis" "kgx" "alacritty" "kitty" "foot"
@@ -69,6 +71,8 @@ while [ -n "$1" ] ; do
   fi
   shift
 done
+
+if [ -n "$MakeTermList" ]; then exit ; fi
 
 # Also see exception handling: 'TERMINAL not found or not suitable' towards end of script
 
