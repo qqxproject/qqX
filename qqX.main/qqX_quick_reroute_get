@@ -729,7 +729,7 @@ function_quick_get_wrap ()  {
 
           QGW_OS_HomePage_Working=
           if [[ $QGW_OS_HomePage ]]; then
-            printf "\n  Checking Distro Home Page ....\n"
+            printf "\n\n  Checking Distro Home Page:  "
             printf "" > "/tmp/qmod-dl-homepage-report.txt"
             {
               printf "\n\n  HomePage = %s"  "$QGW_OS_HomePage"
@@ -774,7 +774,7 @@ function_quick_get_wrap ()  {
       return
     fi
 
-    printf "\n\n  Checking releases. May need to check on-line and may take time ... \n\n"
+    printf "\n\n\n  Checking releases > may need to check on-line and may take time:\n\n"
 
     declare -ga QGW_Releases_Array=() ; declare -ga QGW_Editions_Array=() ; declare -ga QGW_StockEditions_Array=()
     QGW_ReleasesEditions_ListRaw= ; QGW_Releases_ListRaw= ; QGW_Releases_List=
@@ -856,11 +856,11 @@ function_quick_get_wrap ()  {
     while true ; do
 
       if [[ ! ${QGW_Releases_Array[*]} ]] ; then
-        printColor "\n\n  QuickGet or internet ERROR, no releases found "
+        printColor "\n  QuickGet or internet ERROR, no releases found "
         printf "\n\n  Linux ISO's: Try downloading directly from the distro's Web Pages .... \n"
       elif [[ ${#QGW_Releases_Array[@]} -eq 1 ]] ; then
-        printf "\n  One Release only >  %s " "${QGW_Releases_Array[0]}"
-        printf " >  but Editions choice may be be possible:"
+        printColor "  One Release only >  %s " "${QGW_Releases_Array[0]}"
+        printColor " >  but Editions choice may be be possible:"
         printColor "\n\n  [enter] to continue"
       else
         print_quickget_and_folder_choices  "QGW_Releases_Array"
@@ -988,7 +988,7 @@ function_quick_get_wrap ()  {
 
         [[ ! $QGW_OS_Arr_NameSelected || ! $QGW_Release_Arr_NameSelected ]] && break
         printColor  "  OS / Release   =   %s  %s "  "$QGW_OS_Arr_NameSelected" "$QGW_Release_Arr_NameSelected"
-        printf "\n\n  Checking editions. May need to check on-line and may take time .... \n\n"
+        printf "\n\n\n  Checking editions > may need to check on-line and may take time: \n\n"
 
         QGW_List_NumSelected=
         QGW_Edition_Arr_NumSelected= ; QGW_Edition_Arr_NameSelected=
@@ -1032,6 +1032,13 @@ function_quick_get_wrap ()  {
 
         if [[ $QGW_Editions_List ]]; then
             mapfile -t QGW_Editions_Array <<< "$QGW_Editions_List"
+
+            if [[ $QG_Modpath ]]; then
+              QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
+              if [[ $QGW_OS_RelNotes ]]; then fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes" ; printf "\n"
+              fi
+            fi
+
         fi
 
         if [[ ! ${QGW_Editions_Array[*]} ]]; then
@@ -1205,7 +1212,10 @@ function_quick_get_wrap ()  {
         printColor "%s"  "$QWG_NewVM_Name"
         printf "   TO:  "
         printColor "%s"   "$QWG_Conf_Dir"
-        [[ ! $DL_PotentialOkay ]] &&  printf "\n\n   MAY NOT BE WORKING CORRECTLY ...."
+        if [[ ! $DL_PotentialOkay ]]; then
+          printf "\n\n  MAY NOT BE WORKING CORRECTLY ...."
+          printColor "\n\n  Try downloading directly from the distro's Web Pages ?"
+        fi
         printf "\n"
       fi
 
@@ -1219,13 +1229,14 @@ function_quick_get_wrap ()  {
         check_new_vm_folder_name  "$QWG_NewVM_Name"
         # and display download method / options where available
         if [[ ! $MainMenuZsync ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
+          printf "\n\n  [sp] for serial/parallel toggle"
           if grep -qs 'curl-no-para' "$QG_Modpath"; then
-            if [[ $Curl_NoPara ]]; then printf "\n\n  Downloads are set to serial mode"
-            else printf "\n\n  qqX has enabled download multiplexing"
+            if [[ $Curl_NoPara ]]; then printf "  > Downloads are set to serial mode"
+            else printf "  > qqX has enabled download multiplexing"
             fi
-            printf "  [sp] for serial/parallel toggle"
           fi
         fi
+
       fi
 
       if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
@@ -1241,8 +1252,13 @@ function_quick_get_wrap ()  {
 
       if [[ "${#QGW_Releases_Array[@]}" -gt 1 ]] || [[ "${#QGW_Editions_Array[@]}" -gt 1 ]]; then
         printf "\n\n"
-        [[ "${#QGW_Releases_Array[@]}" -gt 1 ]] && printf "  [r] reselect release, view distro web pages   or "
-        [[ "${#QGW_Editions_Array[@]}" -gt 1 ]] && printf "  [e] reselect edition, release or view distro web pages,   or "
+        if [[ $DL_PotentialOkay ]]; then
+          [[ "${#QGW_Releases_Array[@]}" -gt 1 ]] && printf "  [r] reselect release, view distro web pages   or "
+          [[ "${#QGW_Editions_Array[@]}" -gt 1 ]] && printf "  [e] reselect edition, release or view distro web pages,   or "
+        else
+          [[ "${#QGW_Releases_Array[@]}" -gt 1 ]] && { printColor "  [r] reselect release, view distro web pages"; printf "   or "; }
+          [[ "${#QGW_Editions_Array[@]}" -gt 1 ]] && { printColor "  [e] reselect edition, release or view distro web pages,"; printf "   or "; }
+        fi
       fi
 
       if [[ $QGW_Download_BadLink ]]; then
@@ -1280,7 +1296,7 @@ function_quick_get_wrap ()  {
           else printf "\n  Percent downloaded not known"
           fi
           # clear any accidental initial double pressing of the enter key
-          read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
+          read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
           printf  "\n\n  [enter] Start the download  "
           if [[ $DL_PercentageDone == "100.00" ]]; then printColor " ?? BACKUP ??  "
           else
@@ -1293,11 +1309,14 @@ function_quick_get_wrap ()  {
             printColor "\n\n  WARNING Source Version '%s' :  Stopping and Restarting of partly completed downloads requires the Freebird/FreeSpirit builtins." "$QE_SourceVersion"
           fi
           # clear any accidental initial double pressing of the enter key
-          read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
-          if [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then  printColor  "\n\n  [enter] Start the download to THIS folder \n\n  "
-          else printColor  "\n\n  [enter] Start the download  "
+          read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
+          if [[ $DL_PotentialOkay ]]; then
+            if [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then  printColor  "\n\n  [enter] Start the download to THIS folder \n\n  "
+            else printColor  "\n\n  [enter] Start the download  " ; fi
+          else
+            if [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then  printf  "\n\n  [enter] Start the download to THIS folder \n\n  "
+            else printf  "\n\n  [enter] Start the download  " ; fi
           fi
-
         fi
 
         if [[ $ZsyncDownload ]]; then
