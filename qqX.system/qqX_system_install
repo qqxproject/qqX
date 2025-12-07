@@ -295,7 +295,7 @@ fi
 qqX_Std_File_Path="$qqX_Std_Bin_Dir/qqX"
 qqX_Std_lc_Link_Path="$qqX_Std_Bin_Dir/qqx"
 
-#  NB For non FHS OS packaging, also edit at start of main file 'qqX' ...
+#  NB: For non FHS OS packaging, also edit at start of main file 'qqX' ...
 #  WiP: attention may need to be given to the qqX updater too ...
 
 #  From qqX 1.6 onwards, a folder /usr/share/qqX should be created for the subfolder and files of qqX.main
@@ -333,7 +333,7 @@ Notes
 
 function print_terminal_notes {
   # See https://stackoverflow.com/questions/22697688/how-to-cat-eof-a-file-containing-code
-  # ( NB use of escape EOF, or quotes, not used )
+  # ( NB: use of escape EOF, or quotes, not used )
   cat << Notes
 
   TO MANUALLY SPECIFY the terminal name, the installer script's 'UserTerm' variable may be used.
@@ -377,7 +377,7 @@ UserTerm=
 # eg.  CustomTerminalProfile=" --geometry=145x50 --hide-menubar --title=qqX  -e "
 # or   CustomTerminalProfile="" --geometry=${Term_Width}x${Term_Taller} --hide-menubar --title=qqX  -- "
 
-# NB the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
+# NB: the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
 
 # The use of CustomTerminalProfile will also cause UserTerm to be stored.
 # Any size variables copied from below will eventually become stored as numerics.

@@ -111,7 +111,7 @@ check_for_qqX_updates() {
         # flag up about beta notifications if transitioning from beta to release:
         [[ $qqX_Latest_ReleaseType == "release" ]] && BetaTxReleasePoint=1
       fi
-      # Using TRANSFER FILE for all needed variables,  as check runs in background ...  NB
+      # Using TRANSFER FILE for all needed variables,  as check runs in background ...  NB:
       { printf "\n\n qqX_UpdateAvail=\"1\""
         printf "\n\n qqX_Latest_ReleaseNumber=\"%s\""  "$qqX_Latest_ReleaseNumber"
         printf "\n\n qqX_Latest_SecureTarBall_Addr=\"%s\""  "$qqX_Latest_SecureTarBall_Addr"

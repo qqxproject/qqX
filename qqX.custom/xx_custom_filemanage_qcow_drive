@@ -2,7 +2,7 @@
 
 ##  qqX component to be located in folder 'qqX.main'
 
-# NB Avoid use of "#!/usr/bin/env bash" in this script
+# NB: Avoid use of "#!/usr/bin/env bash" in this script
 # as it will mask process names & inhibit process controls.
 
 ##  Copyright (c)  Alex Genovese   https://github.com/qqxproject

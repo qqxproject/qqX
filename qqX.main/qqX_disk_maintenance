@@ -346,7 +346,7 @@ function manage_and_repair_disks {
 
 function qqX_snapshot_delete {
 
-  # NB qqX prefix to avoid cross-linking with the quickemu one
+  # NB: qqX prefix to avoid cross-linking with the quickemu one
 
   printColor "\n\n qqX Snapshot Delete function "
   printf "\n\n %s  (reselection & cancel prompts are given before starting)" "$Selected_DriveName"

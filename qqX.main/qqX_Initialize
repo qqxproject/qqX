@@ -188,7 +188,7 @@ if [[ -e "$InputFilePath" ]]; then
     fi
 
   elif [[ "$XDG_MimeType" == *'text/plain' ]] || [[ $XDG_RealPathName == *'.conf' ]] ; then
-      # NB .conf files may also be mime sym-links
+      # NB: .conf files may also be mime sym-links
     if [[ $XDG_RealPathName == *'.conf' ]] && grep -qs 'guest_os' "$XDG_RealPathName" ; then
       # then is a conf file open-with and appears to conform to standard quickemu .conf layout
       # (also see api mouse script for qcow checks)

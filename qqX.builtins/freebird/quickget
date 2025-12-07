@@ -3785,7 +3785,7 @@ case "${1}" in
         fi
         exit 0;;
     --version|-version)
-        ## NB The matching 'qqX_quickGet_mods' file is required
+        ## NB: The matching 'qqX_quickGet_mods' file is required
         # when moving FreeBird/Freespirit builtins ##
         echo "FB 4.9.8.07"
         exit 0;;

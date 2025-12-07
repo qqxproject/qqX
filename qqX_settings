@@ -399,7 +399,7 @@ VM_SelectorStyle="A"
 
 # Extra * QUICKEMU * parameters to be used GLOBALLY at VM run time
 # Format = "group quoted" with single-space separated elements eg:  Extra_QE_Params="--screen 0"
-# See quickemu --help for full list   NB  not all options can be applicable  CAUTION
+# See quickemu --help for full list   NB:  not all options can be applicable  CAUTION
 # Of note:  "--full-screen" only works with spice display ...  &&  will overide --screenpct
 # DUAL DISPLAY  users should set "--screen 0" or "--screen 1" to select the monitor
 # See quickemu project main page for more details: https://github.com/quickemu-project/quickemu
@@ -407,16 +407,16 @@ VM_SelectorStyle="A"
 
 # HEADLESS commands may be set using Extra_QE_Params using "--display none"  BUT
 # to avoid this affecting all machines it is recommended to add 'HeadlessDisplay' as ="true" to the .conf file
-# NB headless ONLY RUNS IN SPICE and an SSH connection may need to be set as an extra QE parameter
+# NB: headless ONLY RUNS IN SPICE and an SSH connection may need to be set as an extra QE parameter
 # Originally: https://github.com/quickemu-project/quickemu#headless   --ssh-port <port> : Set ssh-port manually
 # BUT Improved from Quickemu 4.9.1  https://github.com/quickemu-project/quickemu/pull/835
 # --access : Enable remote spice access support. 'local' | 'remote' | 'clientipaddress'
-# May be set INDIVIDUALLY by placing eg ACCESS="1.1.1.1" in the .conf file  (NB 'ACCESS' in CAPS, but value in lower case)
+# May be set INDIVIDUALLY by placing eg ACCESS="1.1.1.1" in the .conf file  (NB: 'ACCESS' in CAPS, but value in lower case)
 # Note that if unset then quickemu will default this to = local
 
 # VERBOSE BOOT
 # Set =1  to normally display the qemu args, with okay dialogue, in human readable & before booting.
-# Set blank for log file only. NB A main menu toggle is also available and a log file is always outputted to the VM's folder
+# Set blank for log file only. NB: A main menu toggle is also available and a log file is always outputted to the VM's folder
   VerboseArgs=
 
 #  -------------------------------------------------------------------------------------------------------------------
@@ -485,7 +485,7 @@ VM_SelectorStyle="A"
 # Inside the folder, all script names should be as standard. Plus, add all ancilliary scripts, such as macrecovery/chunkcheck etc.
 # qqX will select this folder and will also add it to '$PATH' to make sure the correct ancilliaries are found.
 
-# NB no spaces in path, as quoted paths can only be added to the end of $PATH and we need the source path as first.
+# NB: no spaces in path, as quoted paths can only be added to the end of $PATH and we need the source path as first.
 
 # Branches    - Source code and diff comparisons are at  https://github.com/qqxproject/quickemu/branches
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NB Avoid use of "#!/usr/bin/env bash" in this script
+# NB: Avoid use of "#!/usr/bin/env bash" in this script
 # as it will mask process names & inhibit process controls.
 
 # qqX - quickemu quickget X terminal project  https://github.com/qqxproject/qqX
@@ -124,7 +124,7 @@ System_qqX_Path="$(type -p qqX)"
 # BUT 'QE_SystemFilePath' should be probed at the start of qqX, and before any builtins or re-routes happen,
 # otherwise finding the filepath gets a bit complex ...
 
-# Respect standard FHS locations but allow local overide for qqX dev work. NB no spaces in qqX dev path, see notes at end of settings file.
+# Respect standard FHS locations but allow local overide for qqX dev work. NB: no spaces in qqX dev path, see notes at end of settings file.
 if [[ -d "./qqX.main" ]]; then qqX_MainFolder="$(realpath "./qqX.main")" ; else qqX_MainFolder="/usr/share/qqX/qqX.main"; fi
 if [[ ! -d "$qqX_MainFolder" ]]; then echo; echo "  ERROR: qqX main files not found.  Please re-check your installation."; echo; sleep 10; exit 1 ; fi
 

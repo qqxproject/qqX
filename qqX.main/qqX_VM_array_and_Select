@@ -189,7 +189,7 @@ VM_loader_selector_and_menu () {
 
       elif [[ "$VM_Selection" == [A-Z] ]]; then
 
-        # NB different to VM_selector_menu_refresh
+        # NB: different to VM_selector_menu_refresh
         VM_SelectorStyle="$VM_Selection"
         ByPass_VM_Array_Loader=1
         MenuStylePreviewed=1

@@ -120,7 +120,7 @@ find_texteditor () {
   fi
 }
 
-# NB Also needs calling if re-loading the settings file  See refresh_sources_and_load_VM_arrays
+# NB: Also needs calling if re-loading the settings file  See refresh_sources_and_load_VM_arrays
 find_file_manager_browser
 find_texteditor
 

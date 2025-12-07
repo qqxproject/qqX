@@ -29,7 +29,7 @@ if [ ! "$(command -v bash)" ] || ! bash --version | grep bash | grep -qEo '[ ]+[
 fi
 
 # Use C.UTF-8  where possible as has more locale  See https://wiki.archlinux.org/title/Locale 
-# NB if EMBEDDING, make sure that this or LC_ALL=C.UTF-8 or LC_ALL=C is present in the main script
+# NB: if EMBEDDING, make sure that this or LC_ALL=C.UTF-8 or LC_ALL=C is present in the main script
 if  grep -sqi 'C.utf8' <<< "$(locale -a)"; then export "LC_NUMERIC=C.UTF-8" ; export "LC_COLLATE=C.UTF-8"
 else export "LC_NUMERIC=C" ; export "LC_COLLATE=C"
 fi
@@ -458,7 +458,7 @@ fi
 
 # COMPACT VERSION, suitable for embedding into other scripts, if preferred  (help and annotation removed)
 #  For quiet, use -Q.  Use of  -qc | -qs | -qg  reduces error output on full machine tests only (no help notes)
-# # NB make sure that locale is set in the main script. See notes at start.
+# # NB: make sure that locale is set in the main script. See notes at start.
 
 floatversion ()  {
   # floatversion --options  "quoted-input-string-or-text-file" 

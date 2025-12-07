@@ -31,7 +31,7 @@ if [ -n "$UserTerm" ]; then  printf "%s\n" "$UserTerm" > "/tmp/qqX.termlist"
 fi
 
 # https://stackoverflow.com/questions/35385962/arrays-in-a-posix-compliant-shell#59353917
-# NB 'Type' is a Bash builtin, type -p is not supported in 'dash' so command -v needed.
+# NB: 'Type' is a Bash builtin, type -p is not supported in 'dash' so command -v needed.
 
 ## Selection of terminal:
 

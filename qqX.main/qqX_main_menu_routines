@@ -217,7 +217,7 @@ check_disk_is_okay () {
     if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive" 2>/dev/null
     else "$QEMU_IMG" check -q "$Selected_ChkDrive"  2>/dev/null
     fi
-    # NB "Okay"  is also used as a global flag  > caution if changing
+    # NB: "Okay"  is also used as a global flag  > caution if changing
     case "$?" in
       0) DiskChkStatus="Okay" ;;
       1) DiskChkStatus="Check unable to be completed" ;;
