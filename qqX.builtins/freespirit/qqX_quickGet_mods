@@ -127,6 +127,7 @@ function os_info {
         endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
+        nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
@@ -148,7 +149,7 @@ function distro_release_notes {
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
-        nitrux)           RelNotes="08/2025 ISO releases have been suspended for changes from KDE to Hyprland and the Cachy kernel. See https://nxos.org/news/news-farewell-nx-desktop-and-plasma/";;
+        nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)           RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
