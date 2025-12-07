@@ -1504,7 +1504,7 @@ function_quick_get_wrap ()  {
 		read -r -t 0.2
 
     printf "\n\n\n  May take a moment to start and pauses may occur if servers are slow"
-    printf "\n\n  Not all servers will allow parallel downloads \n"
+    printf "\n\n  Parallel downloads are only possible where upstream server multiplexing is supplied\n"
     [[ ! $MainMenuZsync ]] && printf "\n\n  The downloader has been set to AUTO-RESUME and to pick up where it left off \n"
     printColor "\n\n  Use [c] to STOP ALL current downloads, [d] to delete "
     printColor "\n\n  Or  [c] then [r] to force a restart on a new server or to force a download re-check ..."
