@@ -608,20 +608,34 @@ function_quick_get_wrap ()  {
 
       elif [[ $QGW_List_NumSelected == "T"  ]] && [[ $QG_Modpath ]] ; then
         while true; do
-          printColor "\n\n\n  Tests downloadabilty of ALL available Quickget and quickGet_Mod distros"
+          printf "\n\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
           printf "\n\n  Using %s:  " "$QE_SourceVersion"
           [[ $QE_SourceVersion != "FreeSpirit" ]] && printf " >> FreeSpirit usually has the latest fixes and additions ...."
           printf "\n\n  Tests every edition of every distro release, except Windows tests which are not possible"
           printf "\n\n  Takes around 1/2 hour ..."
-          printf "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back \n\n"
+          printColor "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back \n\n"
           read -rp "  >  " TestDistros
           if [[ $TestDistros == "b" ]]; then break
           elif [[ $TestDistros == "v" ]]; then
-            printf "\n\n"
+            printf "\n\n  Starting: "
+            printf "\n\n  Expect short pauses between distros, and possibly between editions, on slower servers"
+            printf "\n\n  A Pass/Fail summary will be supplied \n\n"
             quickget --full-check
+            if grep -qs FAIL "/tmp/qGet_FullResult.txt"; then
+              printColor "\n\n  FAILS: \n\n"
+              grep FAIL "/tmp/qGet_FullResult.txt"
+            else printColor "\n\n  All Tests Successfully Passed"
+            fi
           else
-            printf "\n\n"
+            printf "\n\n  Starting: "
+            printf "\n\n  Expect short pauses between distros, and possibly between editions, on slower servers"
+            printf "\n\n  A Pass/Fail summary will be supplied \n\n"
             quickget --compact-check
+            if grep -qs FAIL "/tmp/qGet_CompactResult.txt"; then
+              printColor "\n\n  FAILS: \n\n"
+              grep FAIL "/tmp/qGet_CompactResult.txt"
+            else printColor "\n\n  All Tests Successfully Passed"
+            fi
           fi
         done
         function_quick_get_wrap ; break
