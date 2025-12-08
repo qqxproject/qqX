@@ -545,7 +545,8 @@ function_quick_get_wrap ()  {
     while true ; do
 
       if [[ $QG_Modpath ]]; then
-        printColor "\n\n  [a-z] to zoom or switch zoom, or [fl] adjust filter  >  [item number] to select distro    [H] help  [R] REFRESH   [B] go back  [Q] quit"
+        # printColor "\n\n  [a-z] to zoom or switch zoom, or [fl] adjust filter  >  [item number] to select distro    [H] help  [R] REFRESH   [B] go back  [Q] quit"
+        printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] go back  [Q] quit"
       else
         printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH   [B] go back  [Q] quit"
       fi
@@ -603,7 +604,27 @@ function_quick_get_wrap ()  {
       elif [[ "${QGW_List_NumSelected,,}" == dev* ]] ; then
         CodingHotSwap="Dev" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
 
-      elif [[ $QGW_List_NumSelected == "R"  ]] ; then  test_internet_is_up ; refresh_QWG_selector
+      elif [[ $QGW_List_NumSelected == "R"  ]]; then  test_internet_is_up ; function_quick_get_wrap ; break
+
+      elif [[ $QGW_List_NumSelected == "T"  ]] && [[ $QG_Modpath ]] ; then
+        while true; do
+          printColor "\n\n\n  Tests downloadabilty of ALL available Quickget and quickGet_Mod distros"
+          printf "\n\n  Using %s:  " "$QE_SourceVersion"
+          [[ $QE_SourceVersion != "FreeSpirit" ]] && printf " >> FreeSpirit usually has the latest fixes and additions ...."
+          printf "\n\n  Tests every edition of every distro release, except Windows tests which are not possible"
+          printf "\n\n  Takes around 1/2 hour ..."
+          printf "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back \n\n"
+          read -rp "  >  " TestDistros
+          if [[ $TestDistros == "b" ]]; then break
+          elif [[ $TestDistros == "v" ]]; then
+            printf "\n\n"
+            quickget --full-check
+          else
+            printf "\n\n"
+            quickget --compact-check
+          fi
+        done
+        function_quick_get_wrap ; break
 
       elif [[ "$QGW_List_NumSelected" == [a-z] ]]; then
 

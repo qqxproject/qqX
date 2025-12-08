@@ -25,8 +25,11 @@
 
 #  However, NOT TO WORRY if you are only familiar the older more POSIX styles, there are still plenty of options
 #  for contributions to the quickemu built-ins, particularly with this file:
+
 #  4 space tabs may be used with this file, as with QuickGet, so that code can be directly pasted into here and tweaked.
-#  However, 2 space is the normal qqX tabbing. Try to keep the tabbing consistent within sections, where possible.
+#  2 space is the normal qqX tabbing and may also be employed.
+#  Try to keep the tabbing consistent within sections, where possible ...
+
 #  QuickGet and qqX house styles may be mixed, WHICHEVER IS EASIEST. See notes at end for qqX coding style.
 
 #  This script is sourced when running a Quickget builtin. It remains variable isolated from running instances of qqX.
@@ -1439,9 +1442,22 @@ function test_all {
             fi
         fi
     done
-    [[ $QuietOps ]] && printf "Log file: \"/tmp/qGet_QuietResult.txt\" \n"
-    [[ $CompactOps ]] && printf "Log file: \"/tmp/qGet_CompactResult.txt\" \n"
-    [[ $FullCheckOps ]] && printf "Log file: \"/tmp/qGet_FullResult.txt\" \n"
+
+    # prints at end of every distro set - a full test can take half an hour
+    [[ $CompactOps ]] && printf "Log file: \"/tmp/qGet_CompactResult.txt\" \n\n"
+    [[ $FullCheckOps ]] && printf "Log file: \"/tmp/qGet_FullResult.txt\" \n\n"
+    if [[ $CompactOps || $FullCheckOps ]]; then
+        printf "[s] to stop/pause tests (at next distro break point)\n"
+        read -t 0.1 -r  ChkPause
+        printf "\n\n"
+        if [[ $ChkPause == "s" || $ChkPause == "c" ]]; then
+            ChkPause= ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
+            printf "Tests paused: \n\n[enter] to restart  [c] to conclude \n\n"
+            read -rp ">  " ChkStop
+            [[ $ChkStop == "c" ]] && exit
+            printf "\n\nRestarting ...\n\n"
+        fi
+    fi
 }
 
 ##########################################
