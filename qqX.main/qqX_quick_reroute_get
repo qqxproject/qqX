@@ -496,6 +496,53 @@ iso_get_message () {
   fi
 }
 
+run_distro_tests () {
+  while true; do
+    [[ $1 == "test-all" ]] && shift
+    printf "\n\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
+    printf "\n\n  Using %s:  " "$QE_SourceVersion"
+    [[ $QE_SourceVersion != "FreeSpirit" ]] && printf " >> FreeSpirit usually has the latest fixes and additions ...."
+    if [[ $1 ]]; then
+      printf "\n\n  Tests every listed release and edition of "
+      printColor "'%s'" "$1"
+      printf "\n\n  Use Main Menu for 'test-all'"
+    else
+      printf "\n\n  Tests every edition of every distro release, except Windows tests which are not possible"
+      printf "\n\n  Takes around 1/2 hour ..."
+      printf "\n\n  Select a Distro for individual tests"
+    fi
+    printColor "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back \n\n"
+    read -rp "  >  " TestDistros
+    if [[ $TestDistros == "b" ]]; then break
+    else
+      printf "\n\n  Starting: "
+      if [[ $1 ]]; then
+        printf "\n\n  Expect possible short pauses between releases or editions on slower servers"
+      else
+        printf "\n\n  Expect possible short pauses between distros, and possibly between editions, on slower servers"
+        printf "\n\n  A Pass/Fail summary will be supplied"
+      fi
+      printf "\n\n"
+      # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
+      if [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
+      else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
+      fi
+      if [[ ! $(cat $TestLog) ]]; then
+        printColor "\n\n  ERROR: No log contents ?"
+        [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > re-check, even next day, before raising issues"
+      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -q -v FAIL ; then
+        printColor "\n\n  FAILS: \n\n"
+        # shows the straightforward fails, followed by any obscure possible error lines
+        grep FAIL "$TestLog"
+        grep -v PASS "$TestLog" | grep -v FAIL
+        printf "\n  Fails can sometimes be caused by the servers  > re-check, even next day, before raising issues"
+      else printColor "\n\n  All Tests Successfully Passed"
+      fi
+    fi
+    TestDistros=
+  done
+}
+
 function_quick_get_wrap ()  {
 
   # InternetUp= is now cleared by '[R] refresh' and now calls 'test_internet_is_up' on demand.
@@ -607,38 +654,7 @@ function_quick_get_wrap ()  {
       elif [[ $QGW_List_NumSelected == "R"  ]]; then  test_internet_is_up ; function_quick_get_wrap ; break
 
       elif [[ $QGW_List_NumSelected == "T"  ]] && [[ $QG_Modpath ]] ; then
-        while true; do
-          printf "\n\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
-          printf "\n\n  Using %s:  " "$QE_SourceVersion"
-          [[ $QE_SourceVersion != "FreeSpirit" ]] && printf " >> FreeSpirit usually has the latest fixes and additions ...."
-          printf "\n\n  Tests every edition of every distro release, except Windows tests which are not possible"
-          printf "\n\n  Takes around 1/2 hour ..."
-          printColor "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back \n\n"
-          read -rp "  >  " TestDistros
-          if [[ $TestDistros == "b" ]]; then break
-          elif [[ $TestDistros == "v" ]]; then
-            printf "\n\n  Starting: "
-            printf "\n\n  Expect short pauses between distros, and possibly between editions, on slower servers"
-            printf "\n\n  A Pass/Fail summary will be supplied \n\n"
-            quickget --full-check
-            if grep -qs FAIL "/tmp/qGet_FullResult.txt"; then
-              printColor "\n\n  FAILS: \n\n"
-              grep FAIL "/tmp/qGet_FullResult.txt"
-            else printColor "\n\n  All Tests Successfully Passed"
-            fi
-          else
-            printf "\n\n  Starting: "
-            printf "\n\n  Expect short pauses between distros, and possibly between editions, on slower servers"
-            printf "\n\n  A Pass/Fail summary will be supplied \n\n"
-            quickget --compact-check
-            if grep -qs FAIL "/tmp/qGet_CompactResult.txt"; then
-              printColor "\n\n  FAILS: \n\n"
-              grep FAIL "/tmp/qGet_CompactResult.txt"
-            else printColor "\n\n  All Tests Successfully Passed"
-            fi
-          fi
-        done
-        function_quick_get_wrap ; break
+        run_distro_tests "test-all" ; function_quick_get_wrap ; break
 
       elif [[ "$QGW_List_NumSelected" == [a-z] ]]; then
 
@@ -916,7 +932,7 @@ function_quick_get_wrap ()  {
       else QGW_List_NumSelected_Previous="${#QGW_OS_Array[@]}"
       fi
 
-      printf "\n\n  [s] scroll to next listing  [p] to previous  [r] reload/refresh/retry \n\n"
+      printf "\n\n  [s] scroll to next listing  [p] to previous  [r] reload/refresh/retry  [t] to test \n\n"
 
       if [[ $WebBrowser ]]; then
         [[ $QGW_OS_HomePage ]] && printf "  [w] to open listed page with web browser"
@@ -939,6 +955,13 @@ function_quick_get_wrap ()  {
         QGW_List_NumSelected=
         QGW_OS_Arr_NumSelected=
         QGW_OS_Arr_NameSelected=
+        GT_Exit=1
+        function_quick_get_wrap
+        break
+
+      elif [[ $QGW_List_NumSelected == "t" ]]; then
+        run_distro_tests "$QGW_OS_Arr_NameSelected"
+        QGW_List_NumSelected_Next="$QGW_VerifiedList_NumSelected"
         GT_Exit=1
         function_quick_get_wrap
         break

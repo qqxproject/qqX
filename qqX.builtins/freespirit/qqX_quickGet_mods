@@ -1374,14 +1374,17 @@ function test_result {
     local OsShort="${OS:0:30}"
     if [[ $QuietOps ]]; then {
         if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
+        elif [[ ! $URL ]]; then printf "%-30s FAIL\n" "${OsShort}"
         else printf "%-30s %s\n" "${OsShort}" "${URL}"
         fi } >> "/tmp/qGet_QuietResult.txt"
     elif [[ $CompactOps ]]; then {
         if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-40s\n" "$HashTest" "${RESULT}" "${OS}"
+        elif [[ ! $URL ]]; then printf "%-40s FAIL\n" "${OS}"
         else printf "%-40s %s\n" "${OS}" "${URL}"
         fi } | tee -a "/tmp/qGet_CompactResult.txt"
     else {
         if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
+        elif [[ ! $URL ]]; then printf "%-30s FAIL\n" "${OsShort}"
         else printf "%-30s %s\n" "${OsShort}" "${URL}"
         fi } | tee -a "/tmp/qGet_FullResult.txt"
     fi
@@ -1444,8 +1447,10 @@ function test_all {
     done
 
     # prints at end of every distro set - a full test can take half an hour
+    [[ $SingleCheck ]] && printf "\n"
     [[ $CompactOps ]] && printf "Log file: \"/tmp/qGet_CompactResult.txt\" \n\n"
     [[ $FullCheckOps ]] && printf "Log file: \"/tmp/qGet_FullResult.txt\" \n\n"
+    [[ $SingleCheck ]] && return
     if [[ $CompactOps || $FullCheckOps ]]; then
         printf "[s] to stop/pause tests (at next distro break point)\n"
         read -t 0.1 -r  ChkPause
@@ -1467,7 +1472,7 @@ function test_all {
 # Case mods will either clear any listed args and set flags early, or will run something and exit here,
 # effectively being able to bypass selected original Quickget case statements, or add new ones ...
 
-QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors=
+QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors= ; SingleCheck=
 printf "Webget NOT used\n" > "/tmp/qGet_webget_report.txt"
 
 case "${1}" in
@@ -1481,16 +1486,17 @@ case "${1}" in
         CheckMirrors=1 ; shift
     ;;
     --full-check|--check|-check)
+        FullCheckOps=1 && printf "" > "/tmp/qGet_FullResult.txt"
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
-        FullCheckOps=1 && printf "" > "/tmp/qGet_FullResult.txt"
         if [[ ! $1 ]]; then
             for OS in $(os_support); do test_all "${OS}"
             done
-            exit 0
+            exit
         elif [[ ! $2 ]]; then
+            printf "\n" ; SingleCheck=1
             test_all "${1}"
-            exit 0
+            exit
         fi ;;
     --quiet-check|--compact-check)
         [[ $1 == "--quiet-check" ]] &&  QuietOps=1 && printf "" > "/tmp/qGet_QuietResult.txt"
@@ -1500,10 +1506,11 @@ case "${1}" in
         if [[ ! $1 ]]; then
             for OS in $(os_support); do test_all "${OS}"
             done
-            exit 0
+            exit
         elif [[ ! $2 ]]; then
+            printf "\n" ; SingleCheck=1
             test_all "${1}"
-            exit 0
+            exit
         fi ;;
     --help|-help|--h|-h)
         help_message
