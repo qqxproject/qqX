@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # SC2317: Command appears to be unreachable. Check usage (or ignore if invoked indirectly).
 #  - https://www.shellcheck.net/wiki/SC2317
 #  - Disable globally because many functions are called indirectly
@@ -2637,7 +2637,7 @@ function get_solus() {
     local ISO="Solus-${EDITION}-Release-${RELEASE}.iso"
     local URL="https://downloads.getsol.us/isos/${RELEASE}"
     HASH=$(web_pipe "${URL}/${ISO}.sha256sum" | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
+    echo "${URL}/${ISO} ${HASH}" | tee
 }
 
 function get_sparkylinux() {

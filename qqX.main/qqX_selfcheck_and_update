@@ -77,8 +77,8 @@ check_for_qqX_updates() {
 
   sleep 0.5
   if [[ -e "${qqX_Latest_ReleaseFile}" ]]; then
-    if [[ $Hide_qqX_BetaUpdates ]]; then qqX_Latest_ReleaseNumber="$(fv -M  "$(grep -si 'tag_name' "${qqX_Latest_ReleaseFile}")" 2>/dev/null)"
-    else qqX_Latest_ReleaseNumber="$(fv --full -M  "$(grep -si 'tag_name' "${qqX_Latest_ReleaseFile}")" 2>/dev/null)"
+    if [[ $Hide_qqX_BetaUpdates ]]; then qqX_Latest_ReleaseNumber="$(fv -M -Q "$(grep -si 'tag_name' "${qqX_Latest_ReleaseFile}")" 2>/dev/null)"
+    else qqX_Latest_ReleaseNumber="$(fv --full -M -Q "$(grep -si 'tag_name' "${qqX_Latest_ReleaseFile}")" 2>/dev/null)"
     fi
   fi
 
@@ -92,8 +92,8 @@ check_for_qqX_updates() {
   else
     # function 'download_new_release' will react to whether 'qqX_Latest_SecureTarBall_Addr' is available
     if [[ $Hide_qqX_BetaUpdates ]]; then
-      qqX_Latest_ReleaseNumber="$(curl -qsf -m 12 --retry 3  "https://github.com/qqxproject/qqX/tags" | grep 's/tag' | fv -M )"
-    else qqX_Latest_ReleaseNumber="$(curl -qsf -m 12 --retry 3  "https://github.com/qqxproject/qqX/tags" | grep 's/tag' | fv -M --full)"
+      qqX_Latest_ReleaseNumber="$(curl -qsf -m 12 --retry 3  "https://github.com/qqxproject/qqX/tags" | grep 's/tag' | fv -M -Q )"
+    else qqX_Latest_ReleaseNumber="$(curl -qsf -m 12 --retry 3  "https://github.com/qqxproject/qqX/tags" | grep 's/tag' | fv -M -Q --full)"
     fi
   fi
 

@@ -1346,14 +1346,22 @@ function web_check {
     done
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
     printf "%s" "$URL" > "/tmp/qmod-dl-url"
-    if [[ ! $URL ]]; then return 1
-    else [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]] && return 1
+    if [[ ! $URL ]]; then
+        printf "\nERROR: No URL to/from function web_check\n"
+        return 1
+    elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
+        printf "\nERROR: Non Conformant URL sent to function web_check\n"
+        return 1
     fi
     # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
-    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0 ; else return 1 ; fi
+    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
+    else
+        printf "\nERROR: Bad check_pipe call from function web_check\n"
+        return 1
+    fi
 }
 
-## ADD HASH CHECK
+## ADD hash check, plus some output variants
 # Checks if 'get_$OS' is outputting a checksum and, if so, that it is correctly formatted
 function test_result {
     local OS="${1}" ; local RELEASE="${2}"
@@ -1390,6 +1398,7 @@ function test_result {
     fi
 }
 
+## TWEAK plus add extra tests and test output
 function test_all {
     OS="${1}"
     os_supported
@@ -1398,19 +1407,23 @@ function test_all {
     for RELEASE in $("releases_${FUNC}"); do
         if [[ $(type -t "editions_${OS}") == function ]]; then
             for EDITION in $(editions_"${OS}"); do
-                GetLine=$(get_"${OS}" "$RELEASE")
                 # 'get_$OS' should output two args; a filepath URL, followed a checksum number
                 #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
                 #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
+                GetLine=$(get_"${OS}" "$RELEASE")
                 printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                 URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
+                [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
                 [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
                 HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
                 if [ "${OPERATION}" == "show" ]; then
+                    [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
                     test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
                 elif [ "${OPERATION}" == "test" ]; then
                     CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
-                    test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
+                    if [[ ! $CHECK ]]; then echo "$OS  $RELEASE  $EDITION  FAIL"
+                    else test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
+                    fi
                 fi
             done
         elif [[ "${OS}" == "windows"* ]]; then
@@ -1433,15 +1446,19 @@ function test_all {
         else
             URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)
             if [ "${OPERATION}" == "show" ]; then
+                [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
                 test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
             elif [ "${OPERATION}" == "test" ]; then
                 GetLine=$(get_"${OS}" "$RELEASE")
                 printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                 URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
+                [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
                 [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
                 HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
                 CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
-                test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
+                if [[ ! $CHECK ]]; then echo "$OS  $RELEASE  $EDITION  FAIL"
+                else test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
+                fi
             fi
         fi
     done

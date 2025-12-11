@@ -477,16 +477,23 @@ function refresh_QWG_selector {
 
 test_internet_is_up () {
 
-  printf  "\n  Checking connections ...  \n\n" ; sleep 1
-  if   curl --disable -sLf -I -o /dev/null --retry 4 --max-time 3 --no-keepalive  "1.1.1.1"  2> /dev/null ; then InternetUp=1
-  elif curl --disable -sLf -I -o /dev/null --retry 4 --max-time 3 --no-keepalive  "cloudflare.com"  2> /dev/null ; then InternetUp=1
-  elif curl --disable -sLf -I -o /dev/null --retry 4 --max-time 4 --no-keepalive  "google.com"  2> /dev/null ; then InternetUp=1
+  printf  "\n  Checking connections ...  \n" ; sleep 0.5
+  if   curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "1.1.1.1"  2> /dev/null ; then InternetUp=1
+  elif   curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "8.8.8.8"  2> /dev/null ; then InternetUp=1
   elif wget -q -T2  -t2 --spider 1.1.1.1  2> /dev/null ; then InternetUp=1
-  elif wget -q -T2 -t2 --spider google.com 2> /dev/null ; then InternetUp=1
   # Note that 'ping' doesn't work inside a Qemu VM, so prefer wget
   # No changes to '--spider' in wget2  https://gitlab.com/gnuwget/wget2/-/wikis/home
   else InternetUp=
   fi
+  if [[ $InternetUp ]]; then
+    printf  "\n  Checking DNS ...  \n" ; sleep 0.5
+    if curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "cloudflare.com"  2> /dev/null ; then DnsUp=1
+    elif curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "google.com"  2> /dev/null ; then DnsUp=1
+    elif wget -q -T2 -t2 --spider google.com 2> /dev/null ; then DnsUp=1
+    else DnsUp=
+    fi
+  fi
+
 }
 
 iso_get_message () {
@@ -497,6 +504,12 @@ iso_get_message () {
 }
 
 run_distro_tests () {
+  if ! grep -qs 'SingleCheck' "$QG_Modpath" ; then
+    printColor "\n\n  Tests not available with this qMod version. Try FreeSpirit."
+    printf "\n\n  [enter] to return \n\n"
+    read -rp "  >  "
+    return
+  fi
   while true; do
     [[ $1 == "test-all" ]] && shift
     printf "\n\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
@@ -511,6 +524,7 @@ run_distro_tests () {
       printf "\n\n  Takes around 1/2 hour ..."
       printf "\n\n  Select a Distro for individual tests"
     fi
+    printf "\n\n  Most of the download formulas are dynamic and MOST checks include the latest version"
     printColor "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back \n\n"
     read -rp "  >  " TestDistros
     if [[ $TestDistros == "b" ]]; then break
@@ -552,12 +566,13 @@ function_quick_get_wrap ()  {
   main_loop_diagnostics ; [[ $Loop_Diagnostics ]] && echo
   clear_main_gt_start_vars
 
-  while [[ ! $InternetUp ]]; do
+  while [[ ! $InternetUp ]] || [[ ! $DnsUp ]]; do
     Test_Internet=
     tput sc
     test_internet_is_up
-    if [[ ! $InternetUp ]]; then
-      printColor "\n\n  INTERNET CONNECTION NOT FOUND. Check settings and equipment "
+    if [[ ! $InternetUp ]]|| [[ ! $DnsUp ]]; then
+      [[ ! $InternetUp ]] && printColor "\n\n  INTERNET CONNECTION NOT FOUND. Check settings and equipment "
+      [[ ! $DnsUp ]] && printColor "\n\n  DNS server PROBLEMS. Check settings and equipment "
       printf "\n\n  [enter] to re-test,  [i] ignore, continue anyway  [b] back to main menu \n\n"
       read -rp "   >  "   Test_Internet
       echo
@@ -780,10 +795,10 @@ function_quick_get_wrap ()  {
 
           QGW_OS_HomePage_Working=
           if [[ $QGW_OS_HomePage ]]; then
-            printf "\n\n  Checking Distro Home Page:  "
+            printf "\n\n  Checking Distro Home Page (max 6 tries)  \n\n"
             printf "" > "/tmp/qmod-dl-homepage-report.txt"
             {
-              printf "\n\n  HomePage = %s"  "$QGW_OS_HomePage"
+              printf "  HomePage = %s"  "$QGW_OS_HomePage"
               if curl --disable -sLf --retry 3 --retry-max-time 2 --retry-delay 0 --max-time 6 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working)"; QGW_OS_HomePage_Working=1
               elif curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 1 --max-time 12 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working, slowly ...)"; QGW_OS_HomePage_Working=1
               else
