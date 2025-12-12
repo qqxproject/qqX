@@ -1347,16 +1347,16 @@ function web_check {
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
     printf "%s" "$URL" > "/tmp/qmod-dl-url"
     if [[ ! $URL ]]; then
-        printf "\nERROR: No URL to/from function web_check\n"
+        [[ $ChkLog ]] && printf "\nERROR: No URL to/from function web_check\n" >> "$ChkLog"
         return 1
     elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
-        printf "\nERROR: Non Conformant URL sent to function web_check\n"
+        [[ $ChkLog ]] && printf "\nERROR: Non Conformant URL sent to function web_check\n" >> "$ChkLog"
         return 1
     fi
     # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
     if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
     else
-        printf "\nERROR: Bad check_pipe call from function web_check\n"
+        [[ $ChkLog ]] && printf "\nERROR: Bad check_pipe call from function web_check\n" >> "$ChkLog"
         return 1
     fi
 }
@@ -1381,20 +1381,20 @@ function test_result {
     esac
     local OsShort="${OS:0:30}"
     if [[ $QuietOps ]]; then {
-        if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
-        elif [[ ! $URL ]]; then printf "%-30s FAIL\n" "${OsShort}"
-        else printf "%-30s %s\n" "${OsShort}" "${URL}"
-        fi } >> "/tmp/qGet_QuietResult.txt"
+        if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
+        elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
+        else printf "%-30s %s ERROR\n" "${OsShort}" "${URL}"
+        fi } >> "$ChkLog"
     elif [[ $CompactOps ]]; then {
-        if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-40s\n" "$HashTest" "${RESULT}" "${OS}"
-        elif [[ ! $URL ]]; then printf "%-40s FAIL\n" "${OS}"
-        else printf "%-40s %s\n" "${OS}" "${URL}"
-        fi } | tee -a "/tmp/qGet_CompactResult.txt"
+        if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
+        elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-40s\n" "$HashTest" "${RESULT}" "${OS}"
+        else printf "%-40s %s ERROR\n" "${OS}" "${URL}"
+        fi } | tee -a "$ChkLog"
     else {
-        if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
-        elif [[ ! $URL ]]; then printf "%-30s FAIL\n" "${OsShort}"
-        else printf "%-30s %s\n" "${OsShort}" "${URL}"
-        fi } | tee -a "/tmp/qGet_FullResult.txt"
+        if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
+        elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
+        else printf "%-30s %s ERROR\n" "${OsShort}" "${URL}"
+        fi } | tee -a "$ChkLog"
     fi
 }
 
@@ -1503,7 +1503,7 @@ case "${1}" in
         CheckMirrors=1 ; shift
     ;;
     --full-check|--check|-check)
-        FullCheckOps=1 && printf "" > "/tmp/qGet_FullResult.txt"
+        FullCheckOps=1 ; ChkLog="/tmp/qGet_FullResult.txt" ; printf "" > "$ChkLog"
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
         if [[ ! $1 ]]; then
@@ -1516,8 +1516,10 @@ case "${1}" in
             exit
         fi ;;
     --quiet-check|--compact-check)
-        [[ $1 == "--quiet-check" ]] &&  QuietOps=1 && printf "" > "/tmp/qGet_QuietResult.txt"
-        [[ $1 == "--compact-check" ]] &&  CompactOps=1  && printf "" > "/tmp/qGet_CompactResult.txt"
+        if [[ $1 == "--quiet-check" ]]; then QuietOps=1 ; ChkLog="/tmp/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
+        fi
+        if [[ $1 == "--compact-check" ]]; then CompactOps=1 ; ChkLog="/tmp/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
+        fi
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
         if [[ ! $1 ]]; then
