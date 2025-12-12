@@ -490,7 +490,7 @@ run_distro_tests () {
     return
   fi
   while true; do
-    [[ $1 == "test-all" ]] && shift
+    [[ $1 == "test-all" ]] && shift ; ExitTestToMain=
     printf "\n\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
     printf "\n\n  Using %s:  " "$QE_SourceVersion"
     [[ $QE_SourceVersion != "FreeSpirit" ]] && printf " >> FreeSpirit usually has the latest fixes and additions ...."
@@ -504,9 +504,10 @@ run_distro_tests () {
       printf "\n\n  Select a Distro for individual tests"
     fi
     printf "\n\n  Most of the download formulas are dynamic and MOST checks include the latest version"
-    printColor "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back \n\n"
+    printColor "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back  [B] to main menu \n\n"
     read -rp "  >  " TestDistros
     if [[ $TestDistros == "b" ]]; then break
+    elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
     else
       printf "\n\n  Starting: "
       if [[ $1 ]]; then
@@ -957,7 +958,11 @@ function_quick_get_wrap ()  {
 
       elif [[ $QGW_List_NumSelected == "t" ]]; then
         run_distro_tests "$QGW_OS_Arr_NameSelected"
-        QGW_List_NumSelected_Next="$QGW_VerifiedList_NumSelected"
+        if [[ $ExitTestToMain ]]; then
+          ExitTestToMain= ; QGW_List_NumSelected= ; QGW_OS_Arr_NumSelected= ; QGW_OS_Arr_NameSelected=
+          QGW_List_NumSelected_Next= ; QGW_VerifiedList_NumSelected=
+        else QGW_List_NumSelected_Next="$QGW_VerifiedList_NumSelected"
+        fi
         GT_Exit=1
         function_quick_get_wrap
         break
