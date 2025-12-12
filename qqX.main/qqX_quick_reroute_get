@@ -475,27 +475,6 @@ function refresh_QWG_selector {
   fi
 }
 
-test_internet_is_up () {
-
-  printf  "\n  Checking connections ...  \n" ; sleep 0.5
-  if   curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "1.1.1.1"  2> /dev/null ; then InternetUp=1
-  elif   curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "8.8.8.8"  2> /dev/null ; then InternetUp=1
-  elif wget -q -T2  -t2 --spider 1.1.1.1  2> /dev/null ; then InternetUp=1
-  # Note that 'ping' doesn't work inside a Qemu VM, so prefer wget
-  # No changes to '--spider' in wget2  https://gitlab.com/gnuwget/wget2/-/wikis/home
-  else InternetUp=
-  fi
-  if [[ $InternetUp ]]; then
-    printf  "\n  Checking DNS ...  \n" ; sleep 0.5
-    if curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "cloudflare.com"  2> /dev/null ; then DnsUp=1
-    elif curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "google.com"  2> /dev/null ; then DnsUp=1
-    elif wget -q -T2 -t2 --spider google.com 2> /dev/null ; then DnsUp=1
-    else DnsUp=
-    fi
-  fi
-
-}
-
 iso_get_message () {
   if [[ $QGW_OS_Arr_NameSelected ]] && [[ "$QGW_OS_Arr_NameSelected" != "windows"* && $QGW_OS_Arr_NameSelected != "macos" ]]; then
     printColor "\n\n  qqX can also install Linux ISO's if downloaded directly from the distro's Web Pages"
@@ -559,25 +538,27 @@ run_distro_tests () {
 
 function_quick_get_wrap ()  {
 
-  # InternetUp= is now cleared by '[R] refresh' and now calls 'test_internet_is_up' on demand.
   show_QWG_header
   QGW_List_NumSelected=
   GT_Exit=
   main_loop_diagnostics ; [[ $Loop_Diagnostics ]] && echo
   clear_main_gt_start_vars
 
-  while [[ ! $InternetUp ]] || [[ ! $DnsUp ]]; do
-    Test_Internet=
-    tput sc
+  # Forced internet check/re-check when starting 'gt' menu (see $VM_Selection == "gt")
+  # Also '[R] refresh' calls 'test_internet_is_up' on demand
+
+  while [[ ! $InternetUp ]]; do
+    local Test_Internet=
+    #tput sc
     test_internet_is_up
-    if [[ ! $InternetUp ]]|| [[ ! $DnsUp ]]; then
-      [[ ! $InternetUp ]] && printColor "\n\n  INTERNET CONNECTION NOT FOUND. Check settings and equipment "
-      [[ ! $DnsUp ]] && printColor "\n\n  DNS server PROBLEMS. Check settings and equipment "
+    if [[ ! $InternetUp ]]; then
+      [[ ! $ipOkay ]] && printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
+      [[ ! $DnsOkay ]] && printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
       printf "\n\n  [enter] to re-test,  [i] ignore, continue anyway  [b] back to main menu \n\n"
       read -rp "   >  "   Test_Internet
       echo
     fi
-    tput rc ; tput ed  #  clear back the last lines to sc (set cursor)
+    #tput rc ; tput ed  #  clear back the last lines to sc (set cursor)
     [[ $Test_Internet == "b" ]] &&  QGW_List_NumSelected="B"  && break
     [[ $Test_Internet == "i" ]] && break
     show_QWG_header
@@ -947,7 +928,7 @@ function_quick_get_wrap ()  {
       else QGW_List_NumSelected_Previous="${#QGW_OS_Array[@]}"
       fi
 
-      printf "\n\n  [s] scroll to next listing  [p] to previous  [r] reload/refresh/retry  [t] to test \n\n"
+      printf "\n\n  [s] scroll to next listing  [p] to previous  [r] reload/refresh/retry/check-internet  [t] test distro \n\n"
 
       if [[ $WebBrowser ]]; then
         [[ $QGW_OS_HomePage ]] && printf "  [w] to open listed page with web browser"
@@ -965,7 +946,7 @@ function_quick_get_wrap ()  {
       if [[ $QGW_List_NumSelected == "s" || $QGW_List_NumSelected == "p" || $QGW_List_NumSelected == "r" || $QGW_List_NumSelected == "b" ]]; then
 
         [[ $QGW_List_NumSelected == "p" ]] && QGW_List_NumSelected_Next="$QGW_List_NumSelected_Previous"
-        [[ $QGW_List_NumSelected == "r" ]] && QGW_List_NumSelected_Next="$QGW_VerifiedList_NumSelected"
+        [[ $QGW_List_NumSelected == "r" ]] && test_internet_is_up && QGW_List_NumSelected_Next="$QGW_VerifiedList_NumSelected"
         [[ $QGW_List_NumSelected == "b" ]] && QGW_List_NumSelected_Next=
         QGW_List_NumSelected=
         QGW_OS_Arr_NumSelected=

@@ -49,9 +49,34 @@
 
 #  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154
 
+## Foreground internet test that can be called as needed  (see function_quick_get_wrap)
+# Also forced internet check/re-check when starting 'gt' menu (see $VM_Selection == "gt")
+
+test_internet_is_up () {
+  # Produces general foreground Flag 'InternetUp' plus 'ipOkay' and 'DnsOkay' for granular reportage (see function_quick_get_wrap)
+  # Note that 'ping' doesn't work inside a Qemu VM, so prefer wget as second test,
+  # as there are no changes to '--spider' in wget2  https://gitlab.com/gnuwget/wget2/-/wikis/home
+  local ShowProcess=1 ; [[ $1 == "quiet" ]] && ShowProcess=
+  [[ $ShowProcess ]] && { printf  "\n  Checking connections ...  \n" ; sleep 0.5; }
+  if   curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "1.1.1.1"  2> /dev/null ; then ipOkay=1
+  elif   curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "8.8.8.8"  2> /dev/null ; then ipOkay=1
+  elif wget -q -T2  -t2 --spider 1.1.1.1  2> /dev/null ; then ipOkay=1
+  else ipOkay=
+  fi
+  if [[ $ipOkay ]]; then
+    [[ $ShowProcess ]] && { printf  "\n  Checking DNS ...  \n" ; sleep 0.5; }
+    if curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "cloudflare.com"  2> /dev/null ; then DnsOkay=1
+    elif curl --disable -sLf -I -o /dev/null --retry 2 --max-time 3 --no-keepalive  "google.com"  2> /dev/null ; then DnsOkay=1
+    elif wget -q -T2 -t2 --spider google.com 2> /dev/null ; then DnsOkay=1
+    else DnsOkay=
+    fi
+  fi
+  if [[ $ipOkay && $DnsOkay ]]; then InternetUp=1 ; else InternetUp=
+  fi
+}
 
 # 'check_for_qqX_updates' runs once only, at qqX start-up in the background,
-#  and a transfer file is used to move the variables to the foreground
+#  and a TRANSFER FILE is used to move the variables to the foreground
 
 # clear foreground vars:
 qqX_Latest_ReleaseNumber=
@@ -71,7 +96,7 @@ check_for_qqX_updates() {
   # Using fv --full only detects beta releases
 
   curl --header "X-GitHub-Api-Version:2022-11-28" --disable -sLf -m 12 --retry 4 \
-  -o "${qqX_Latest_ReleaseFile}" "https://api.github.com/repos/qqxproject/qqX/releases/latest"
+  -o "${qqX_Latest_ReleaseFile}" "https://api.github.com/repos/qqxproject/qqX/releases/latest" 2>/dev/null
   # -m --max-time Maximum time in seconds that you allow each transfer to take.
   # If you enable retrying the transfer (--retry) then the maximum time counter is reset each time the transfer is retried.
 

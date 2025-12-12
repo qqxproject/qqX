@@ -244,6 +244,8 @@ VM_loader_selector_and_menu () {
       elif [[ $VM_Selection == "gt" || $VM_Selection == "GT" ]]; then
 
         VM_Selection=
+        # force internet check/re-check
+        InternetUp=
         function_quick_get_wrap
         ByPass_VM_Array_Loader=
         return
