@@ -482,15 +482,21 @@ iso_get_message () {
   fi
 }
 
-run_distro_tests () {
+run_distro_tests_UI () {
   if ! grep -qs 'SingleCheck' "$QG_Modpath" ; then
     printColor "\n\n  Tests not available with this qMod version. Try FreeSpirit."
     printf "\n\n  [enter] to return \n\n"
     read -rp "  >  "
     return
   fi
+  test_internet_is_up
+  ExitTestToMain=
+  [[ $1 == "test-all" ]] && shift
+  # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
+  if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
+  elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
+  fi
   while true; do
-    [[ $1 == "test-all" ]] && shift ; ExitTestToMain=
     printf "\n\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
     printf "\n\n  Using %s:  " "$QE_SourceVersion"
     [[ $QE_SourceVersion != "FreeSpirit" ]] && printf " >> FreeSpirit usually has the latest fixes and additions ...."
@@ -517,7 +523,6 @@ run_distro_tests () {
         printf "\n\n  A Pass/Fail summary will be supplied"
       fi
       printf "\n\n"
-      # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
       if [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
       else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
       fi
@@ -553,8 +558,9 @@ function_quick_get_wrap ()  {
     #tput sc
     test_internet_is_up
     if [[ ! $InternetUp ]]; then
-      [[ ! $ipOkay ]] && printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
-      [[ ! $DnsOkay ]] && printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
+      if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
+      elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
+      fi
       printf "\n\n  [enter] to re-test,  [i] ignore, continue anyway  [b] back to main menu \n\n"
       read -rp "   >  "   Test_Internet
       echo
@@ -651,7 +657,7 @@ function_quick_get_wrap ()  {
       elif [[ $QGW_List_NumSelected == "R"  ]]; then  test_internet_is_up ; function_quick_get_wrap ; break
 
       elif [[ $QGW_List_NumSelected == "T"  ]] && [[ $QG_Modpath ]] ; then
-        run_distro_tests "test-all" ; function_quick_get_wrap ; break
+        run_distro_tests_UI "test-all" ; function_quick_get_wrap ; break
 
       elif [[ "$QGW_List_NumSelected" == [a-z] ]]; then
 
@@ -957,7 +963,7 @@ function_quick_get_wrap ()  {
         break
 
       elif [[ $QGW_List_NumSelected == "t" ]]; then
-        run_distro_tests "$QGW_OS_Arr_NameSelected"
+        run_distro_tests_UI "$QGW_OS_Arr_NameSelected"
         if [[ $ExitTestToMain ]]; then
           ExitTestToMain= ; QGW_List_NumSelected= ; QGW_OS_Arr_NumSelected= ; QGW_OS_Arr_NameSelected=
           QGW_List_NumSelected_Next= ; QGW_VerifiedList_NumSelected=
