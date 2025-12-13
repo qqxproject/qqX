@@ -510,7 +510,8 @@ run_distro_tests_UI () {
       printf "\n\n  Select a Distro for individual tests"
     fi
     printf "\n\n  Most of the download formulas are dynamic and MOST checks include the latest version"
-    printColor "\n\n  [enter] to start (in compact mode)  [v] verbose mode (needs large screen)   [b] to go back  [B] to main menu \n\n"
+    printColor "\n\n  [enter] to start (in compact mode)  "
+    printf "[v] verbose mode (needs large screen)   [b] to go back  [B] to main menu \n\n"
     read -rp "  >  " TestDistros
     if [[ $TestDistros == "b" ]]; then break
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
@@ -523,6 +524,7 @@ run_distro_tests_UI () {
         printf "\n\n  A Pass/Fail summary will be supplied"
       fi
       printf "\n\n"
+      # NB: 'ChkLog' is a qGet_mod var that runs in a separate process
       if [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
       else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
       fi
@@ -533,7 +535,7 @@ run_distro_tests_UI () {
         printColor "\n\n  FAILS: \n\n"
         # shows the straightforward fails, followed by any obscure possible error lines
         grep FAIL "$TestLog"
-        grep -v PASS "$TestLog" | grep -v FAIL
+        grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP
         printf "\n  Fails can sometimes be caused by the servers  > re-check, even next day, before raising issues"
       else printColor "\n\n  All Tests Successfully Passed"
       fi

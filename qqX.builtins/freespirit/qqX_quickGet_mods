@@ -1235,8 +1235,12 @@ function web_pipe_json {
 ## ADD
 # Check the file headers. To be used for returns of 0 or 1 with pipe to log file,
 function check_pipe {
-    local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
     printf "" > "/tmp/qGet_check_pipe.txt"
+    local Args=("${@}")
+    if [[ ! "${Args[*]}" ]]; then
+        [[ $ChkLog ]] && printf "\nERROR: Missing Args for function check_pipe\n" >> "$ChkLog"
+        return 1
+    fi
     curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2 --no-keepalive --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
     if ! grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
         printf "" > "/tmp/qGet_check_pipe.txt"
@@ -1355,9 +1359,7 @@ function web_check {
     fi
     # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
     if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
-    else
-        [[ $ChkLog ]] && printf "\nERROR: Bad check_pipe call from function web_check\n" >> "$ChkLog"
-        return 1
+    else return 1
     fi
 }
 
@@ -1401,72 +1403,72 @@ function test_result {
 ## TWEAK plus add extra tests and test output
 function test_all {
     OS="${1}"
-    os_supported
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
     [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
-    for RELEASE in $("releases_${FUNC}"); do
-        if [[ $(type -t "editions_${OS}") == function ]]; then
-            for EDITION in $(editions_"${OS}"); do
-                # 'get_$OS' should output two args; a filepath URL, followed a checksum number
-                #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
-                #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
-                GetLine=$(get_"${OS}" "$RELEASE")
-                printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
-                URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
-                [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
-                [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
-                HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
+    if [[ $(type -t "releases_${OS}") == function ]]; then
+        for RELEASE in $("releases_${FUNC}"); do
+            if [[ $(type -t "editions_${OS}") == function ]]; then
+                for EDITION in $(editions_"${OS}"); do
+                    # 'get_$OS' should output two args; a filepath URL, followed a checksum number
+                    #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
+                    #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
+                    GetLine=$(get_"${OS}" "$RELEASE")
+                    printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                    URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
+                    [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
+                    [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
+                    HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
+                    if [ "${OPERATION}" == "show" ]; then
+                        [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
+                        test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
+                    elif [ "${OPERATION}" == "test" ]; then
+                        CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
+                        if [[ ! $CHECK ]]; then echo "$OS  $RELEASE  $EDITION  FAIL"
+                        else test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
+                        fi
+                    fi
+                done
+                [[ ! $EDITION ]] && [[ $ChkLog ]] && printf "ERROR: %s  %-40s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+            elif [[ "${OS}" == "windows"* ]]; then
+                # Caution with current Quickemu, --check windows with $2 (or/and $3) will trigger a windows download
+                "languages_${OS}"
+                for I18N in "${I18NS[@]}"; do
+                    if [ "${OPERATION}" == "show" ]; then
+                        test_result "${OS}" "${RELEASE}" "${I18N}" ""
+                    elif [ "${OPERATION}" == "test" ]; then
+                        test_result "${OS}" "${RELEASE}" "${I18N}" "${URL}" "SKIP"
+                    fi
+                done
+                # Caution here, the get_$OS routines must run in subshells in order to loop properly
+            elif [[ "${OS}" == "macos" ]]; then
+                (get_macos)
+            elif [ "${OS}" == "ubuntu-server" ]; then
+                (get_ubuntu-server)
+            elif [[ "${OS}" == *ubuntu* ]]; then
+                (get_ubuntu)
+            else
+                URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)
                 if [ "${OPERATION}" == "show" ]; then
                     [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
                     test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
                 elif [ "${OPERATION}" == "test" ]; then
+                    GetLine=$(get_"${OS}" "$RELEASE")
+                    printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                    URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
+                    [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
+                    [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
+                    HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
                     CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
                     if [[ ! $CHECK ]]; then echo "$OS  $RELEASE  $EDITION  FAIL"
                     else test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
                     fi
                 fi
-            done
-        elif [[ "${OS}" == "windows"* ]]; then
-            # Caution with current Quickemu, --check windows with $2 (or/and $3) will trigger a windows download
-            "languages_${OS}"
-            for I18N in "${I18NS[@]}"; do
-                if [ "${OPERATION}" == "show" ]; then
-                    test_result "${OS}" "${RELEASE}" "${I18N}" ""
-                elif [ "${OPERATION}" == "test" ]; then
-                    test_result "${OS}" "${RELEASE}" "${I18N}" "${URL}" "SKIP"
-                fi
-            done
-            # Caution here, the get_$OS routines must run in subshells in order to loop properly
-        elif [[ "${OS}" == "macos" ]]; then
-            (get_macos)
-        elif [ "${OS}" == "ubuntu-server" ]; then
-            (get_ubuntu-server)
-        elif [[ "${OS}" == *ubuntu* ]]; then
-            (get_ubuntu)
-        else
-            URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)
-            if [ "${OPERATION}" == "show" ]; then
-                [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
-                test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
-            elif [ "${OPERATION}" == "test" ]; then
-                GetLine=$(get_"${OS}" "$RELEASE")
-                printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
-                URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
-                [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
-                [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
-                HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
-                CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
-                if [[ ! $CHECK ]]; then echo "$OS  $RELEASE  $EDITION  FAIL"
-                else test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
-                fi
             fi
-        fi
-    done
-
+        done
+        [[ ! $RELEASE ]] && [[ $ChkLog ]] && printf "ERROR: %s  >  Releases function FAIL \n" "$OS" >> "$ChkLog"
+    fi
     # prints at end of every distro set - a full test can take half an hour
-    [[ $SingleCheck ]] && printf "\n"
-    [[ $CompactOps ]] && printf "Log file: \"/tmp/qGet_CompactResult.txt\" \n\n"
-    [[ $FullCheckOps ]] && printf "Log file: \"/tmp/qGet_FullResult.txt\" \n\n"
+    printf "\n\n"
     [[ $SingleCheck ]] && return
     if [[ $CompactOps || $FullCheckOps ]]; then
         printf "[s] to stop/pause tests (at next distro break point)\n"
@@ -1507,28 +1509,36 @@ case "${1}" in
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
         if [[ ! $1 ]]; then
-            for OS in $(os_support); do test_all "${OS}"
+            for OS in $(os_support); do
+                os_supported ; test_all "${OS}"
             done
+            printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
         elif [[ ! $2 ]]; then
             printf "\n" ; SingleCheck=1
-            test_all "${1}"
+            os_supported ; test_all "${1}"
+            printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
         fi ;;
     --quiet-check|--compact-check)
-        if [[ $1 == "--quiet-check" ]]; then QuietOps=1 ; ChkLog="/tmp/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
+        if [[ $1 == "--quiet-check" ]]; then
+            QuietOps=1 ; ChkLog="/tmp/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
         fi
-        if [[ $1 == "--compact-check" ]]; then CompactOps=1 ; ChkLog="/tmp/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
+        if [[ $1 == "--compact-check" ]]; then
+            CompactOps=1 ; ChkLog="/tmp/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
         fi
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
         if [[ ! $1 ]]; then
-            for OS in $(os_support); do test_all "${OS}"
+            for OS in $(os_support); do
+                os_supported ; test_all "${OS}"
             done
+            [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
         elif [[ ! $2 ]]; then
             printf "\n" ; SingleCheck=1
-            test_all "${1}"
+            os_supported ; test_all "${1}"
+            [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
         fi ;;
     --help|-help|--h|-h)
