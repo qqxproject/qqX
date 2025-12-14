@@ -703,7 +703,7 @@ function get_trisquel() {
 
 ## IMPROVE make dynamic
 function releases_truenas-scale() {
-    web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep wplink | cut -d'>' -f2 | fv -M -Q
+    web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep NAS | cut -d'>' -f2 | fv -M -Q
 }
 
 ## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
@@ -803,8 +803,7 @@ function releases_zorin() {
     echo 18 17 16
 }
 function editions_zorin() {
-    if [[ ! $RELEASE ]]; then echo "core64 lite64 education64"
-    elif [[ $RELEASE == "18" ]]; then echo "core64 education64"
+    if [[ $RELEASE == "18" ]]; then echo "core64 education64"
     else echo "core64 lite64  education64"
     fi
 }
