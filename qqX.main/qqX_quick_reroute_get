@@ -497,19 +497,19 @@ run_distro_tests_UI () {
   elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
   fi
   while true; do
-    printf "\n\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
-    printf "\n\n  Using %s:  " "$QE_SourceVersion"
-    [[ $QE_SourceVersion != "FreeSpirit" ]] && printf " >> FreeSpirit usually has the latest fixes and additions ...."
+    printf "\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
+    [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
     if [[ $1 ]]; then
-      printf "\n\n  Tests every listed release and edition of "
+      printf "\n\n  THIS TEST: checks every listed release and edition of "
       printColor "'%s'" "$1"
-      printf "\n\n  Use Main Menu for 'test-all'"
+      printf "  >  Use Main Menu for 'test-all'"
     else
       printf "\n\n  Tests every edition of every distro release, except Windows tests which are not possible"
       printf "\n\n  Takes around 1/2 hour ..."
       printf "\n\n  Select a Distro for individual tests"
     fi
-    printf "\n\n  Most of the download formulas are dynamic and MOST checks include the latest version"
+    printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
+    printf "\n\n  To manually update functions, see notes in qqX.builtins > 'freespirit/qqX_quickGet_mods'"
     printColor "\n\n  [enter] to start (in compact mode)  "
     printf "[v] verbose mode (needs large screen)   [b] to go back  [B] to main menu \n\n"
     read -rp "  >  " TestDistros
@@ -521,10 +521,10 @@ run_distro_tests_UI () {
         printf "\n\n  Expect possible short pauses between releases or editions on slower servers"
       else
         printf "\n\n  Expect possible short pauses between distros, and possibly between editions, on slower servers"
-        printf "\n\n  A Pass/Fail summary will be supplied"
+        printColor "\n\n  A Pass/Fail summary will be supplied"
       fi
       printf "\n\n"
-      # NB: 'ChkLog' is a qGet_mod var that runs in a separate process
+      # NB: 'ChkLog' is the matching qGet_mod var which runs in a separate process, with both using the same log files
       if [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
       else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
       fi
