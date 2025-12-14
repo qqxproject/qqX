@@ -134,6 +134,7 @@ function os_info {
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
+        mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
         nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
@@ -155,7 +156,7 @@ function distro_release_notes {
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
-        mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
+        mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)           RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
@@ -496,10 +497,13 @@ function editions_mxlinux() {
 function get_mxlinux() {
     local HASH= ; local URL= ; local ISO= ; local RELEASE=
     URL="https://sourceforge.net/projects/mx-linux/files/Final/${EDITION}"
-    RELEASE="$(web_pipe "$URL" | tr '<' '\n' | grep -s href | grep "$RELEASE" | cut -d'=' -f2 | fv -Q -M)"
+    #RELEASE="$(web_pipe "$URL" | tr '<' '\n' | grep -s href | grep latest | cut -d'=' -f2 | fv -Q -M)"
+    RELEASE="$(web_pipe "$URL" | tr '<' '\n' | grep -s href | grep latest | tr '/' '\n' | grep -e 'MX-' | cut -d '_' -f1 | cut -d '-' -f2)"
     # eg https://sourceforge.net/projects/mx-linux/files/Final/KDE/MX-23.6.1_KDE_x64.iso.sha256/download
+    # eg https://sourceforge.net/projects/mx-linux/files/Final/Fluxbox/MX-25_fluxbox_x64.iso/download
+    # eg https://sourceforge.net/projects/mx-linux/files/Final/Xfce/MX-25_Xfce_x64.iso/download
     case ${EDITION} in
-        Xfce) ISO="MX-${RELEASE}_x64.iso";;
+        Xfce) ISO="MX-${RELEASE}_Xfce_x64.iso";;
         KDE) ISO="MX-${RELEASE}_KDE_x64.iso";;
         Fluxbox) ISO="MX-${RELEASE}_fluxbox_x64.iso";;
     esac
