@@ -143,6 +143,7 @@ function os_info {
         anduinos)         INFO="Anduin OS|-|https://www.anduinos.com/|Ubuntu-based Linux distribution that aims to facilitate developers transitioning from Windows.";;
         archlinux)        INFO="Arch Linux|-|https://archlinux.org/|The definitive rolling release, the base of so many other Linux distros, or as the base of your own ...";;
         archcraft)        INFO="Archcraft|-|https://archcraft.io/|Arch based collection of minimal Linux desktop solutions";;
+        athenaos)         INFO="Athena OS|-|https://athenaos.org/|NixOS based pentesting distribution using BlackArch package repo";;
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
         crunchbang++)     INFO="Crunchbangplusplus|-|https://www.crunchbangplusplus.org/|The classic minimal crunchbang feel, now with Debian base.";;
         edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
@@ -170,6 +171,7 @@ function distro_release_notes {
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
+        athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
         elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
@@ -306,11 +308,12 @@ function get_artixlinux() {
 
 ## UPDATE new repo
 function releases_athenaos() {
-    echo latest
+    web_pipe "https://github.com/Athena-OS/athena/releases" | grep 's/tag' | fv -Q -M 2
 }
 function get_athenaos() {
     local HASH=""
-    local URL="https://github.com/Athena-OS/athena/releases/latest/download/athenaos-rolling-x86_64.iso"
+    local URL="https://github.com/Athena-OS/athena/releases/download/v${RELEASE}/athenaos-live-x86_64.iso"
+    # eg https://github.com/Athena-OS/athena/releases/download/v25.11/athenaos-live-x86_64.iso
     HASH=$(web_pipe "${URL}.sha256" | cut -d' ' -f1)
     echo "${URL} ${HASH}"
 }
