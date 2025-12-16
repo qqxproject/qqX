@@ -19,6 +19,8 @@
 
 #  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154
 
+##########################################
+
 ## CODING STYLE
 
 #  A more MODERN BASH style of coding is used for qqX than that used for QuickEmu.
@@ -32,12 +34,28 @@
 
 #  QuickGet and qqX house styles may be mixed, WHICHEVER IS EASIEST. See notes at end for qqX coding style.
 
-#  This script is sourced when running a Quickget builtin. It remains variable isolated from running instances of qqX.
-#  However, the builtin will pick up the qqX library location. Take care to maintain QuickGet variable name continuity where needed.
+##########################################
 
-#  To test code, run './quickget --check distroname' etc from a terminal opened in the relevant builtin folder.
+## To MOD an EXISTING Quickget entry:
+
+#  Copy and paste the relevant functions here, from Quickget, into the Mods script
+#  This is normally sections 2 and 3 only, sections 4 to 6 are only for special cases
+#  You may also want to add the distro to an existing qqX filter in section 1
+
+## To ADD, place all new work here. Make sure to use the 'osAddList' in section one.
+
+## Explanatory notes are given in all sections:
+#  Use distro alphabetical order
+#  In section 3, place 'release' immediately followed by 'edition' and then 'get' as a triplet, as needed
+
+#  This script will become sourced when running a Quickget builtin. Any functions here will take precedence.
+#  It remains variable isolated from running instances of qqX but it does pick up the qqX library location.
+#  Take care to maintain original QuickGet variable name continuity, especially when only modding single functions.
+
+#  To test code, run './quickget --check distroname' etc from a terminal opened in the relevant builtin folder, or use the std qqX UI
 
 ##########################################
+
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
