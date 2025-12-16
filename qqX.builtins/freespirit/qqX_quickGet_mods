@@ -178,7 +178,8 @@ function distro_release_notes {
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
-        opensuse)           RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
+        opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
+        rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
     esac
@@ -625,9 +626,35 @@ function get_pclinuxos() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## REDUCE release count - 14 is too many!
+## UPDATE and FIX
 function releases_rockylinux() {
-    web_pipe "http://dl.rockylinux.org/vault/rocky/" | grep "class=\"link" | grep -v -e 'full' -e  'RC' -e  'ISO' -e 'Parent'| tr -d / | fv -M 4 -qs
+    local BaseGrep= ; local ReleasesList=
+    BaseGrep="$(web_pipe "https://dl.rockylinux.org/vault/rocky/" | tr ':' '\n' | grep link)"
+    ReleasesList+=" $(fv -S 10 -M -Q <<< "$BaseGrep")"
+    ReleasesList+=" $(fv -S 9 -M -Q <<< "$BaseGrep")"
+    ReleasesList+=" $(fv -S 8 -M -Q <<< "$BaseGrep")"
+    echo "$ReleasesList"
+}
+function editions_rockylinux() {
+    if [[ "$RELEASE" == '10'* ]]; then echo "Gnome KDE"
+    elif [[ "$RELEASE" == '9'* ]]; then echo "Cinnamon Gnome KDE Mate Xfce"
+    elif [[ "$RELEASE" == '8'* ]]; then echo "Gnome KDE Mate Xfce"
+    else echo "Cinnamon Gnome KDE Mate Xfce"
+    fi
+}
+function get_rockylinux() {
+    local HASH= ; local URL= ; local ISO=
+    RelInt=${RELEASE%.*}
+    case $EDITION in
+        Gnome)  EDITION="Workstation";;
+        Mate)  EDITION="MATE";;
+        Xfce)  EDITION="XFCE";;
+    esac
+    # eg https://dl.rockylinux.org/vault/rocky/10.0/live/x86_64/Rocky-10-Workstation-x86_64-latest.iso.CHECKSUM
+    URL="https://dl.rockylinux.org/vault/rocky/${RELEASE}/live/x86_64"
+    ISO="Rocky-${RelInt}-${EDITION}-x86_64-latest.iso"
+    HASH=$(web_pipe "${URL}/${ISO}.CHECKSUM" | grep -s 'SHA256' | awk '{print $NF}')
+    echo "${URL}/${ISO} ${HASH}"
 }
 
 ## FIX url and hash, plus make dynamic (if list happens to show up)
