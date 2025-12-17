@@ -195,7 +195,7 @@ function distro_release_notes {
 # Needed for new qqX listed distros or use for "releases_${OS} ()" and "editions_${OS} ()" overwrites.
 
 # Quickget's behaviour is to continually exit on error until the correct input combination is made.
-# This means that Quickget probes normally have to be carried out via repeated and discontiguous command line args requests
+# This means that QUICKGET PROBES normally have to be carried out via repeated and discontiguous command line args requests
 # and that the use of global variables is either limited or not possible:
 
 # IF CHECKING editions, the var $RELEASE becomes available in the function editions_$OS
@@ -205,12 +205,14 @@ function distro_release_notes {
 # The first two FUNCTIONS feed STDOUT to the look-up function 'validate_release' followed by
 # the last lines of Quickget where distro editions are handled.
 
-# Transfer files may also be implemented:
-# See 'editions_anduinos' for a more complex example script and 'get_parrotsec' for simpler cases
-# Some distros single release with no editions eg. bluestar
+# TRANSFER FILES may also be implemented:
+# See 'editions_anduinos' for a more complex example script and 'get_pclinuxos' for simpler cases
+    ReleaseDataLog="/tmp/qGet.Mods.REL.data.txt"
+    EditionsDataLog="/tmp/qGet.Mods.ED.data.txt"
+    GetDataLog="/tmp/qGet.Mods.GET.data.txt"
 
 # Quickget's legacy behaviour is to return a 'STOCK LIST' of editions when no release is supplied ...
-# Probably has room for improvement but a list should be given.
+# This probably has room for improvement but a list should be given.
 # See 'editions_gnomeos' for a per edition check routine, where some may be absent.
 
 # Note that Quickget's 'web_pipe()' is an alias for Curl and will generate STDOUT by itself, without needing 'echo'.
@@ -228,6 +230,9 @@ function distro_release_notes {
 # Downloads may occasionally need a special tidy-up and finalization. See sections 4 to 6.
 
 # For testing code, run './quickget --check distroname' from a terminal opened in the relevant builtin folder.
+
+##########################################
+
 
 ## FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
 function releases_alpine() {
@@ -255,37 +260,37 @@ function editions_anduinos {
     fi
     # Otherwise check for editions per release
     while true ; do
-        if ! { grep -qs "$OS" "/tmp/qGet.Mods.REL.data.txt" && grep -s 'ReleaseName=' "/tmp/qGet.Mods.REL.data.txt" | grep -qs "$RELEASE"; } ; then
-            printf "qGetDistro=\"%s\"\nReleaseName=\"%s\"" "$OS" "$RELEASE" > "/tmp/qGet.Mods.REL.data.txt"
+        if ! { grep -qs "$OS" "$ReleaseDataLog" && grep -s 'ReleaseName=' "$ReleaseDataLog" | grep -qs "$RELEASE"; } ; then
+            printf "qGetDistro=\"%s\"\nReleaseName=\"%s\"" "$OS" "$RELEASE" > "$ReleaseDataLog"
             if [[ $RELEASE == "LTS" ]]; then ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep LTS | fv -M -Q)"
             else ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep -v LTS | fv -M -Q)"
             fi
             ReleasePoint="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/" | grep href | fv -M -Q )"
             ReleaseEditions="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}" \
             | grep -v sha256 | grep -v torrent | tr '>' '\n' | grep iso | grep -v '<a' | cut -d'<' -f1 | cut -d'-' -f3 | cut -d'.' -f1 | paste -s -d' ')"
-            printf "\nReleaseName=\"%s\"\nReleaseNumber=\"%s\"\nReleasePoint=\"%s\"\nReleaseEditions=\"%s\"" "$RELEASE" "$ReleaseNumber" "$ReleasePoint" "$ReleaseEditions" > "/tmp/qGet.Mods.REL.data.txt"
+            printf "\nReleaseName=\"%s\"\nReleaseNumber=\"%s\"\nReleasePoint=\"%s\"\nReleaseEditions=\"%s\"" "$RELEASE" "$ReleaseNumber" "$ReleasePoint" "$ReleaseEditions" > "$ReleaseDataLog"
             sleep 1
         fi
         ReleaseName= ; ReleaseNumber= ; ReleasePoint= ; ReleaseEditions=
-        source "/tmp/qGet.Mods.REL.data.txt"
+        source "$ReleaseDataLog"
         if [[ $ReleaseName && $ReleaseNumber && $ReleasePoint && $ReleaseEditions ]] ; then break
-        else printf "" > "/tmp/qGet.Mods.REL.data.txt"
+        else printf "" > "$ReleaseDataLog"
         fi
     done
-    printf "%s" "$RELEASE" > "/tmp/qGet.Mods.ED.data.txt"
-    printf "" > "/tmp/qGet.Mods.GET.data.txt"
-    [[ ! $ReleaseEditions ]] && source "/tmp/qGet.Mods.REL.data.txt"
+    printf "%s" "$RELEASE" > "$EditionsDataLog"
+    printf "" > "$GetDataLog"
+    [[ ! $ReleaseEditions ]] && source "$ReleaseDataLog"
     echo "$ReleaseEditions"
 }
 function get_anduinos {
-    source "/tmp/qGet.Mods.REL.data.txt"
+    source "$ReleaseDataLog"
     # for looping through test-all
     sleep 0.5
     AnduinIso="https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}/AnduinOS-${ReleasePoint}-${EDITION}.iso"
     AnduinHash="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}/AnduinOS-${ReleasePoint}-${EDITION}.sha256" \
     | cut -d':' -f2 | tr -cd '[:graph:]')"
     echo "$AnduinIso $AnduinHash"
-    printf "%s" "$EDITION" > "/tmp/qGet.Mods.GET.data.txt"
+    printf "%s" "$EDITION" > "$GetDataLog"
 }
 
 ## FIX Arch - Pre-emptively for PR  https://github.com/quickemu-project/quickemu/pull/1709
@@ -598,32 +603,33 @@ function get_oraclelinux() {
 ## FIX hashes and folders
 function releases_parrotsec() {
   # July 2025 > only latest folder now has iso's
-  Parrot_Latest="$(web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M)"
-  echo latest
+  web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M
 }
 function editions_parrotsec() {
     echo home htb security
 }
 function get_parrotsec() {
-    local HASH="" ; local ISO="" ; local URL="" ; local LATEST="$Parrot_Latest"
-    [[ ! $LATEST ]] && LATEST="$(web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M)"
-    ISO="Parrot-${EDITION}-${LATEST}_amd64.iso"
-    URL="https://deb.parrot.sh/parrot/iso/${LATEST}"
+    local HASH="" ; local ISO="" ; local URL=
+    ISO="Parrot-${EDITION}-${RELEASE}_amd64.iso"
+    URL="https://deb.parrot.sh/parrot/iso/${RELEASE}"
     HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -B 30 'sha384' | grep "${ISO}" | cut -d' ' -f1)"
     echo "${URL}/${ISO} ${HASH}"
 }
 
 ## FIX hash, update url and make dynamic
 function releases_pclinuxos() {
-    echo latest
+    local RelData= ; RelData="$(web_pipe "https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso/")"
+    echo "$RelData" > "$ReleaseDataLog"
+    # show nominal 'latest' > slight variations can exist
+    grep -s darkstar <<< "$RelData" |  tr '=' '\n' | grep -s title | fv -Q -M
 }
 function editions_pclinuxos() {
     echo kde kde-darkstar mate xfce
 }
 function get_pclinuxos() {
     local HASH= ; local ISO= ; local URL= ; local RelMax= ; local RelChk="${EDITION}-2"
-    URL="https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso/"
-    RelMax="$(web_pipe "$URL" | grep -e "$RelChk" | tr '=' '\n' | grep iso | fv -M)"
+    URL="https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso"
+    RelMax="$(grep -s -e "$RelChk" "$ReleaseDataLog" | tr '=' '\n' | grep iso | fv -M -Q)"
     HASH="$(web_pipe "${URL}/pclinuxos64-${EDITION}-${RelMax}.md5sum" | cut -d' ' -f1)"
     ISO="pclinuxos64-${EDITION}-${RelMax}.iso"
     echo "${URL}/${ISO} ${HASH}"
