@@ -155,6 +155,7 @@ function os_info {
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
         nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
+        popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
@@ -179,6 +180,7 @@ function distro_release_notes {
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
+        popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is around 230Mb. Select Pure for 64 bit.";;
@@ -625,6 +627,17 @@ function get_pclinuxos() {
     HASH="$(web_pipe "${URL}/pclinuxos64-${EDITION}-${RelMax}.md5sum" | cut -d' ' -f1)"
     ISO="pclinuxos64-${EDITION}-${RelMax}.iso"
     echo "${URL}/${ISO} ${HASH}"
+}
+
+## UPDATE and tweak
+function releases_popos() {
+    echo "24.04 22.04"
+}
+function editions_popos() {
+    if [[ $RELEASE == "24.04" ]]; then echo "generic nvidia"
+    elif [[ $RELEASE == "22.04" ]]; then echo "intel nvidia"
+    else echo "generic intel nvidia"
+   fi
 }
 
 ## UPDATE and FIX
