@@ -511,7 +511,7 @@ run_distro_tests_UI () {
     printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
     printf "\n\n  To manually update functions, see notes in qqX.builtins > 'freespirit/qqX_quickGet_mods'"
     printColor "\n\n  [enter] to start (in compact mode)  "
-    printf "[v] verbose mode (needs large screen)   [b] to go back  [B] to main menu \n\n"
+    printf "[v] verbose mode (needs large screen)  [vm] show mirrors   [b] to go back  [B] to main menu \n\n"
     read -rp "  >  " TestDistros
     if [[ $TestDistros == "b" ]]; then break
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
@@ -525,7 +525,8 @@ run_distro_tests_UI () {
       fi
       printf "\n\n"
       # NB: 'ChkLog' is the matching qGet_mod var which runs in a separate process, with both using the same log files
-      if [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
+      if [[ $TestDistros == "vm" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check --mirrors "$1"
+      elif [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
       else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
       fi
       if [[ ! $(cat $TestLog) ]]; then
