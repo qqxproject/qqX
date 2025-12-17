@@ -1554,6 +1554,7 @@ function_quick_get_wrap ()  {
     else
       printf "  Once a download and initial setup up has finished, the new folder and .conf file MAY BE EASILY MOVED"
       printf "\n\n  and/or edited before running. Part downloads CAN USUALLY BE RE-STARTED."
+      [[ $DL_HumanSize ]] && printf "\n\n  Download Size: %s" "$DL_HumanSize"
     fi
 
     function show_rcksum_progress {
