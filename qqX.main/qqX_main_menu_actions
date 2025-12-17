@@ -359,7 +359,7 @@ function  main_menu_actions {
     printf "\n\n"
     read -rp "  >  "  SnapTitle
     printf "\n\n"
-    [[ ! $SnapTitle ]] && SnapTitle="$(date +%b%d.%H.%M)"
+    [[ ! $SnapTitle ]] && SnapTitle="$(date +%b.%d.%H:%M)"
     if [[ $SnapTitle != "b" ]]; then
       # remove spaces, make title dot separated, as easier to IFS
       SnapTitle="${SnapTitle// /.}"

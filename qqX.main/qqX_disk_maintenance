@@ -267,7 +267,7 @@ function manage_and_repair_disks {
       [[ ! $ResizePlus ]] && return
     fi
 
-    DiskDate="$(date +%b%d.%H.%M)"
+    DiskDate="$(date +%b.%d.%H:%M)"
     DiskBackup="${Selected_Drive}.$DiskDate.OLD.qcow2"
 
     printf  "\n\n  Original drive: %s " "$Selected_Drive"
@@ -314,7 +314,7 @@ function manage_and_repair_disks {
       if [[ $DiskManage == "rz" || $DiskManage == "rd" ]]; then
         [[ $DiskManage == "rz" ]] && "$QEMU_IMG" resize -f qcow2 "$Selected_Drive" "+${ResizePlus}G" 2> "$Qemu_IMG_ErrorLog"
         if [[ $DiskManage == "rd" ]]; then
-          SnapTitle="$(date +%b%d.%H.%M)"
+          SnapTitle="$(date +%b.%d.%H:%M)"
           "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
         fi
         printf "\n BEFORE: \n\n"

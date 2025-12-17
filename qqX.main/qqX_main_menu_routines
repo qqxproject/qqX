@@ -239,7 +239,7 @@ check_disk_is_okay () {
       [[ $((DiskChkEpochTime-LastSnapEpochTime)) -gt 1209600 ]] && DiskChkAddSnap=1
     fi
     if [[ $DiskChkAddSnap ]] ; then
-      SnapTitle="$(date +%b%d.%H.%M)"
+      SnapTitle="$(date +%b.%d.%H:%M)"
       "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
     fi
   fi
