@@ -794,7 +794,10 @@ function_quick_get_wrap ()  {
               elif curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 1 --max-time 12 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working, slowly ...)"; QGW_OS_HomePage_Working=1
               else
                 [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && printf "\n\n  Microsoft download limiter: access appears blocked to this IP address. Try later or try router reboot ... ?"
-                printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN OR SITE IS DOWN ... "
+                printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
+                if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
+                  printf "\n\n  http BOT CHECKS are possibly present ...."
+                fi
               fi
             } >> "/tmp/qmod-dl-homepage-report.txt"
           fi
@@ -916,8 +919,8 @@ function_quick_get_wrap ()  {
         printColor "\n  QuickGet or internet ERROR, no releases found "
         printf "\n\n  Linux ISO's: Try downloading directly from the distro's Web Pages .... \n"
       elif [[ ${#QGW_Releases_Array[@]} -eq 1 ]] ; then
-        printColor "  One Release only >  %s " "${QGW_Releases_Array[0]}"
-        printColor " >  but Editions choice may be be possible:"
+        printColor "  One Release only: '%s' " "${QGW_Releases_Array[0]}"
+        printf " but Editions choice may be be possible"
         printColor "\n\n  [enter] to continue"
       else
         print_quickget_and_folder_choices  "QGW_Releases_Array"
