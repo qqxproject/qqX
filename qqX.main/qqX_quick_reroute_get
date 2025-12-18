@@ -1699,10 +1699,11 @@ function_quick_get_wrap ()  {
               DL_PercentageDone="0"
           fi
         fi
-        if [[ $DL_PercentageDone ]] && [[ $DL_PercentageDone != "0" ]]; then printf "\n  %s Percent appears to be downloaded \n\n"  "$DL_PercentageDone"
-        else printf "\n  Percent downloaded not known \n\n"
+        if [[ $DL_PercentageDone ]] && [[ $DL_PercentageDone != "0" ]]; then printf "\n  %s Percent appears to be downloaded"  "$DL_PercentageDone"
+        else printf "\n  Percent downloaded not known"
         fi
-        printColor "  Completed (or Stopped):  [c] to conclude  [r] to resume, retry or re-check \n\n"
+        printf "\n\n  Completed (or Stopped):"
+        printColor "  [c] to conclude  [r] to resume, retry or re-check \n\n"
         # clear any accidental double pressing of the enter key if instance was slow to close
         # also gives pause needed to give different processes time to output their summaries & finish up
         read -r -t 0.2
