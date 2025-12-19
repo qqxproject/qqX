@@ -1320,6 +1320,26 @@ function error_specify_release {
     echo -e "\nERROR! You must specify a release." ; exit 1
 }
 
+## IMPROVE (and FIX ?)
+function error_not_supported_release() {
+    if ! grep -qs " ${RELEASE} " <<< " ${RELEASES} "; then
+        echo -e "ERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
+        echo -n ' - Supported releases: '
+        "releases_${OS}"
+        exit 1
+    fi
+}
+function validate_release() {
+    local RELEASE_GENERATOR="" ; RELEASES=
+    case ${OS} in
+        *ubuntu-server*) RELEASE_GENERATOR="releases_ubuntu-server";;
+        *ubuntu*) RELEASE_GENERATOR="releases_ubuntu";;
+        *) RELEASE_GENERATOR="$(eval "${1}")";;
+    esac
+    RELEASES="$RELEASE_GENERATOR"
+    error_not_supported_release
+}
+
 ## TWEAK
 # A lot of these have already modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST
 
