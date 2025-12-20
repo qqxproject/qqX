@@ -1320,28 +1320,27 @@ function error_specify_release {
     echo -e "\nERROR! You must specify a release." ; exit 1
 }
 
-## IMPROVE (and FIX ?)
-function error_not_supported_release() {
-    if ! grep -qs " ${RELEASE} " <<< " ${RELEASES} "; then
+## IMPROVE (and FIX, hopefully and finally)
+# Remove 'error_not_supported_release' as it was only ever used by 'validate_release'
+# local DISPLAY_NAME="" was never used in 'validate' but was needed in 'error_not'
+# local RELEASES="" was a local string BUT 'error_not...' expected this as a global array ... !
+# 'case ${OS}' was a repeat as it was already checked during the initial case grep of the cmd args, found at the end of the script
+# Plus, not all calls to 'validate' will have had the release_* function evaluated ...
+
+function validate_release() {
+    local DISPLAY_NAME= ; DISPLAY_NAME="$(pretty_name "${OS}")"
+    local ReleaseList="$1"
+    [[ "$1" == releases* ]] && ReleaseList="$($1)"
+    if ! grep -qs " ${RELEASE} " <<< " ${ReleaseList} "; then
         echo -e "ERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
         echo -n ' - Supported releases: '
         "releases_${OS}"
         exit 1
     fi
 }
-function validate_release() {
-    local RELEASE_GENERATOR="" ; RELEASES=
-    case ${OS} in
-        *ubuntu-server*) RELEASE_GENERATOR="releases_ubuntu-server";;
-        *ubuntu*) RELEASE_GENERATOR="releases_ubuntu";;
-        *) RELEASE_GENERATOR="$(eval "${1}")";;
-    esac
-    RELEASES="$RELEASE_GENERATOR"
-    error_not_supported_release
-}
 
 ## TWEAK
-# A lot of these have already modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST
+# A lot of these have already been modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
 
 # Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get')
 function web_pipe {
