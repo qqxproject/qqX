@@ -1374,7 +1374,9 @@ function check_pipe {
     printf "" > "/tmp/qGet_check_pipe.txt"
     local Args=("${@}")
     if [[ ! "${Args[*]}" ]]; then
-        [[ $ChkLog ]] && printf "\nERROR: Missing Args for function check_pipe\n" >> "$ChkLog"
+        if [[ $ChkLog ]] && ! grep -qs 'Missing Args for function check_pipe' "$ChkLog" ; then
+            printf "\nERROR: Missing Args for function check_pipe\n" >> "$ChkLog"
+        fi
         return 1
     fi
     curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2 --no-keepalive --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
@@ -1487,10 +1489,14 @@ function web_check {
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
     printf "%s" "$URL" > "/tmp/qmod-dl-url"
     if [[ ! $URL ]]; then
-        [[ $ChkLog ]] && printf "\nERROR: No URL > Possible initial lookup or server problem\n" >> "$ChkLog"
+        if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
+            printf "\nERROR: No URL > Possible initial lookup or server problem\n" >> "$ChkLog"
+        fi
         return 1
     elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
-        [[ $ChkLog ]] && printf "\nERROR: Non Conformant URL > Possible initial lookup or server problem \n" >> "$ChkLog"
+        if [[ $ChkLog ]] && ! grep -qs 'Non Conformant URL' "$ChkLog" ; then
+            printf "\nERROR: Non Conformant URL > Possible initial lookup or server problem \n" >> "$ChkLog"
+        fi
         return 1
     fi
     # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
@@ -1564,7 +1570,9 @@ function test_all {
                         fi
                     fi
                 done
-                [[ ! $EDITION ]] && [[ $ChkLog ]] && printf "ERROR: %s  %-40s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                if [[ ! $EDITION ]] && [[ $ChkLog ]] && ! grep -qs "$OS" <<< "$(grep -s 'Editions function FAIL' "$ChkLog")" ; then
+                    printf "ERROR: %s  %-40s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                fi
             elif [[ "${OS}" == "windows"* ]]; then
                 # Caution with current Quickemu, --check windows with $2 (or/and $3) will trigger a windows download
                 "languages_${OS}"
@@ -1601,7 +1609,9 @@ function test_all {
                 fi
             fi
         done
-        [[ ! $RELEASE ]] && [[ $ChkLog ]] && printf "ERROR: %s  >  Releases function FAIL \n" "$OS" >> "$ChkLog"
+        if [[ ! $RELEASE ]] && [[ $ChkLog ]] && ! grep -qs "$OS  >  Releases function FAIL" "$ChkLog" ; then
+            printf "ERROR: %s  >  Releases function FAIL \n"  "$OS"  >> "$ChkLog"
+        fi
     fi
     # prints at end of every distro set - a full test can take half an hour
     printf "\n\n"
