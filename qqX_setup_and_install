@@ -64,7 +64,7 @@ fi
 if [ "$1" = "MakeTermList" ]; then MakeTermList=1 ; shift ; else MakeTermList= ; fi
 
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
-set "$@" -- "ptyxis" "kgx" "alacritty" "kitty" "foot"
+set -- "$@" "ptyxis" "kgx" "alacritty" "kitty" "foot"
 
 while [ -n "$1" ] ; do
   if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX.termlist"
@@ -87,6 +87,20 @@ fi
 if [ -z "$UserTerm" ]; then TermGrep="$(pgrep -a term | grep qqX | tr -cd '[:print:]' | awk '{print $2}')"
   if [ -n "$TermGrep" ]; then UserTerm="$(basename "$TermGrep")"
   fi
+fi
+
+if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
+  printf "\n\n  The new COSMIC terminal 'cosmic-term' has been detected on this system, "
+  printf "\n  however, at 12/2025 it is unfortunately problematic."
+  printf "\n\n  Luckily, systems are fine with more than one terminal installed and present:"
+  printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+  printf "\n  which are both lightweight and Wayland/X11 compatible."
+  printf "\n\n  If you wish to force cosmic-term, to see if changes make it now possible to use,"
+  printf "\n  edit the entry for 'UserTerm' at the start of this script, and re-run."
+  printf "\n\n  [enter] to quit, install another terminal and retry"
+  printf "\n\n  >  "
+  read -r  REPLY
+  exit
 fi
 
 DefWidth=150

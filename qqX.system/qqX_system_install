@@ -170,6 +170,11 @@ while true ; do
     printColor "\n\n  >>  'socat' is a needed dependency of QuickEmu and is also used by qqX "
     InstallationAlert=1
   fi
+  if [[ ! $(type -p "uuidgen") ]]; then
+    printColor "\n\n  >>  'uuidgen' is a needed dependency of QuickEmu and is also used by qqX "
+      printf "\n\n       uuidgen can be sometimes be packaged as 'uuid-runtime'"
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p glxinfo) ]]; then
     printColor "\n\n  >>  'glxinfo' is a needed dependency of QuickEmu and may be part of 'mesa-utils' "
     InstallationAlert=1
@@ -198,7 +203,7 @@ while true ; do
     printColor "\n\n  >>  'python3' is a listed dependency of QuickEmu "
     InstallationAlert=1
   fi
-  CoreList=("bc" "uuidgen" "ps" "pgrep" "lscpu" "lsusb")
+  CoreList=("bc" "ps" "pgrep" "lscpu" "lsusb")
   for CP in "${CoreList[@]}"; do
     if [[ ! $(type -p "$CP") ]]; then
       printColor "\n\n  >>  '%s' should normally be present and is required by qqX or by Quickemu"  "$CP"
@@ -260,7 +265,7 @@ while true ; do
     printf "\n\n\n  Ubuntu 25.10 example full set:"
     printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
     printf "\n\n  sudo apt install  spice-vdagent  spice-client-gtk  qemu-system-x86"
-    [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-info"
+    [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-utils"
     printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
     printf "\n\n  Return here to re-check:"
     printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
@@ -752,7 +757,7 @@ if [[ ! $SkipMkLauncher ]]; then
 
           printf "\n\n\n  Flatpak installs and the new Gnome Terminal 'ptyxis' are currently problematic"
           printf "\n\n  whilst, for qqX purposes, alacritty works better in tiling window managers:"
-          printf "\n\n\n  A recommended general installation is 'mate-terminal' or 'qterminal'"
+          printf "\n\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
           printf "\n\n  which are both lightweight and Wayland/X11 compatible."
           printf "\n\n\n  Systems are fine with more than one terminal installed and present ..."
           printf "\n"
@@ -826,7 +831,11 @@ if [[ ! $SkipMkLauncher ]]; then
         printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on this system, it is currently problematic:"
       fi
 
-      printf "\n\n  A recommended general installation is 'mate-terminal' or 'qterminal'"
+      if [[ $(type -p "cosmic-term") ]] ; then
+        printf "\n\n  Although the new COSMIC terminal 'cosmic-term' is present on this system, it is currently problematic:"
+      fi
+
+      printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
       printf "\n  which are both lightweight and Wayland/X11 compatible."
       printf "\n\n  Systems are fine with more than one terminal installed and present ..."
 
