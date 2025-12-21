@@ -906,7 +906,8 @@ function get_void() {
 }
 
 ## ADD 18 as in https://github.com/quickemu-project/quickemu/pull/1761
-# but FIX missing lite64 with ver 18. REVIEW making dynamic?
+# but FIX discontinued 'lite64' with ver 18 and add missing hash check
+# REVIEW making dynamic?
 function releases_zorin() {
     echo 18 17 16
 }
@@ -915,6 +916,15 @@ function editions_zorin() {
     else echo "core64 lite64  education64"
     fi
 }
+function get_zorin() {
+    local HASH=""; local ISO=""; local URL= ; local BaseUrl=
+    # Zorin's mirror system will autodetect latest version
+    URL="$(web_redirect "https://zrn.co/${RELEASE}${EDITION}")"
+    ISO="${URL##*/}" ; BaseUrl="${URL%/*}"
+    HASH="$(web_pipe "$BaseUrl/SHA256SUMS.txt" | grep "$ISO" | cut -d ' ' -f1)"
+    echo "${URL} ${HASH}"
+}
+
 
 ##########################################
 
