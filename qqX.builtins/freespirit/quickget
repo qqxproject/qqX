@@ -1143,7 +1143,7 @@ function releases_ubuntu() {
     local SUPPORTED_VERSIONS=()
     VERSION_DATA="$(IFS=$'\n' web_pipe https://api.launchpad.net/devel/ubuntu/series | jq -r '.entries[]')"
     # shellcheck disable=SC2207
-    SUPPORTED_VERSIONS=($(IFS=$'\n' jq -r 'select(.status=="Supported" or .status=="Current Stable Release") | .version' <<<"${VERSION_DATA}" | sort))
+    SUPPORTED_VERSIONS=($(IFS=$'\n' jq -r 'select(.status=="Supported" or .status=="Current Stable Release") | .version' <<<"${VERSION_DATA}" | sort ))
     case "${OS}" in
         ubuntu)
             echo "${SUPPORTED_VERSIONS[@]}" daily-live;;
