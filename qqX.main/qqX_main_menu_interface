@@ -136,7 +136,7 @@ else
     [[ $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
     [[ $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
 
-    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
+    printColor  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
     if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
     else [[ $MainDrive ]] && printf "   main (%s)" "$SnapCountMain"
     fi
@@ -151,7 +151,7 @@ else
       fi
     fi
 
-    printf "\n"
+    # printf "\n"
 
     find_kvm_msr_default_and_status
     print_kvm_status_warnings
@@ -219,13 +219,15 @@ else
 
         [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
 
+        printf "\n"
+
         if [[ $HeadlessDisplay ]]; then printColor 	"\n\n  [s]   start with Spice display (HEADLESS) "
-        else  printColor 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
+        else  printf 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
 
-        printColor "\n\n  [g]   start with GTK display                 "
+        printf "\n\n  [g]   start with GTK display                 "
 
-        if [[ $qqX_GL_Mode == "off" ]] ; then printColor "[gl]  OFF > toggle EGL/GLX > on"
-        else printColor "[gl]  ON > toggle EGL/GLX > off" ; fi
+        if [[ $qqX_GL_Mode == "off" ]] ; then printf "[gl]  OFF > toggle EGL/GLX > on"
+        else printf "[gl]  ON > toggle EGL/GLX > off" ; fi
 
         if [[ -e "$QemuArgsCustomFile" ]]; then printColor "     [C] toggle normal/custom menu "
         elif [[ $VerboseArgs ]]; then  printf  "      (all starts > Verbose)"
@@ -319,7 +321,8 @@ else
       InstanceISO_SizesCount="0"
     fi
 
-    printf  "\n\n  [gt]  quickget a new distro   [i]  VM drives info details   "
+    #printColor  "\n\n  [gt]  quickget a new distro   [i]  VM drives info details   "
+     printColor  "\n\n  [gt]  quickget a new distro   [i] VM drives info   "
     printf "Disks: %s (%s)  "  "${InstanceQcow2_Sizes}G" "$InstanceQcow2_SizesCount"
     printf "ISO's: %s (%s)  "  "${InstanceISO_Sizes}G" "$InstanceISO_SizesCount"
     [[ $(ls "$VM_InstanceName"/*.OLD.qcow2 2>/dev/null) ]] && printColor "(backup disk present)"
@@ -475,8 +478,8 @@ else
       [[ $DistroLogin == "-" ]] && DistroLogin=
     fi
 
-    printf  "  [enter] refresh   "
-    if [[ $DistroHomePage ]]; then printf "[w] distro homepage  "
+    printColor  "  [enter] refresh   "
+    if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
     else printf "(no distro webpage listed)  "
     fi
     printf " [h] show help & info  [q] quit "
