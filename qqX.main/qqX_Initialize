@@ -54,6 +54,11 @@ else
 	}
 fi
 
+
+if [[ ! $(command -v wget) ]] && [[ $(command -v wget2) ]]; then
+  wget () { wget2 "$@" ; }
+fi
+
 # Usage needs to be loaded early on, so it can be shown if initial help is required
 show_CLI_usage () {
 

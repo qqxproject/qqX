@@ -790,13 +790,14 @@ function_quick_get_wrap ()  {
             printf "" > "/tmp/qmod-dl-homepage-report.txt"
             {
               printf "  HomePage = %s"  "$QGW_OS_HomePage"
+              # note this 'HomePage =' line gets grepped (awk) for 'http' at a later point
               if curl --disable -sLf --retry 3 --retry-max-time 2 --retry-delay 0 --max-time 6 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working)"; QGW_OS_HomePage_Working=1
               elif curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 1 --max-time 12 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working, slowly ...)"; QGW_OS_HomePage_Working=1
               else
                 [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && printf "\n\n  Microsoft download limiter: access appears blocked to this IP address. Try later or try router reboot ... ?"
                 printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
                 if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
-                  printf "\n\n  http BOT CHECKS are possibly present ...."
+                  printf "\n\n  BOT CHECKS are possibly present ...."
                 fi
               fi
             } >> "/tmp/qmod-dl-homepage-report.txt"

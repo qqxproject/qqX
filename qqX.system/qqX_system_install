@@ -228,8 +228,8 @@ while true ; do
       InstallationAlert=1
     fi
   done
-  if [[ ! $(type -p wget) ]]; then
-    printColor "\n\n  >>  A 'wget' installation should normally be present and may be needed in certain places "
+  if [[ ! $(type -p wget) && ! $(type -p wget2) ]]; then
+    printColor "\n\n  >>  Either a 'wget' or 'wget2 installation should be present and may be needed in certain places "
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
@@ -262,12 +262,13 @@ while true ; do
   if [[ $InstallationAlert ]]; then
     printColor "\n\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
-    printf "\n\n\n  Ubuntu 25.10 example full set:"
+    printf "\n\n\n  Example full sets:"
+    printf "\n\n  Ubuntu 25.10"
     printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
     printf "\n\n  sudo apt install  spice-vdagent  spice-client-gtk  qemu-system-x86"
     [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-utils"
-    printf "\n\n\n  Debian KDE 13.2.0 :"
-    printf "\n\n  sudo apt install  gawk  wget  genisoimage  desktop-file-utils"
+    printf "\n\n\n  Debian KDE 13.2.0"
+    printf "\n\n  sudo apt install  gawk  wget2  genisoimage  desktop-file-utils"
     printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86"
     printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
     printf "\n\n  Return here to re-check:"
@@ -1082,7 +1083,7 @@ fi
 ## Read the .desktop file for Start_qqX as maybe Skippping MkLauncher
 #  Needs eg. Start_qqX="$UserTerm $CustomTerminalProfile -e  $qqX_Std_File_Path"
 Start_qqX=
-GrepExecLine="$(grep -s Exec "$XDG_GUI_desktop_Folder/qqX.desktop")"
+GrepExecLine="$(grep -s Exec "$XDG_GUI_desktop_PathName")"
 if [[ $GrepExecLine ]]; then GrepExecLine="${GrepExecLine/'Exec='/}" ; Start_qqX="${GrepExecLine/'%f'/}" ; fi
 if grep -qs 'kgx' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then  Start_qqX="${Start_qqX/' -- '/' --wait -- '}" ; fi
 if grep -qs 'gnome-terminal' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then  Start_qqX="${Start_qqX/' -- '/' --wait -- '}" ; fi
@@ -1091,11 +1092,11 @@ End_Install=
 if [[ $Current_qqX_Version ]]; then
   printf  "\n\n  Upgrade changes are now complete \n\n"
 else
-  printColor  "\n\n  Install process finished:  "s
-  printf "\n\n\n  Start qqX straight from the system's MAIN MENU,"
-  printf   "\n  by typing 'qqX' the terminal, or by mouse clicks on VM or ISO files ..."
-  printf "\n\n  Start qqX to edit the settings file, or before starting"
-  printf   "\n  at %s \n\n\n"  "$HOME/.qqX/qqX_settings"
+  printColor  "\n\n  Install process finished and qqX can now be started"
+  printf "\n\n"
+  [[ -e "$XDG_GUI_desktop_PathName" ]] && printf "\n  Straight from the system's GUI main menu, or"
+  printf "\n  By typing 'qqX' at the terminal, or by mouse clicks on VM or ISO files ..."
+  printf "\n\n  OR start from here:"
 fi
 if [[ $UserTerm == "qterminal" ]]; then
   printColor "\n\n  LXQT 'qterminal' does not have size commands BUT it may be resized quite easily \n\n  and should remember its sizes between uses. \n\n"
@@ -1104,7 +1105,7 @@ if [[ $UserTerm == "urxvt" ]]; then
   printColor "\n\n  In tiling Window Managers the terminal sizes tend to be auto-regulated. \n\n"
 fi
 
-[[ $Start_qqX ]] && printColor "  [enter] to close current window and start"
+[[ $Start_qqX ]] && printColor "  [enter] to close current window and start now"
 printf "   [q] to quit  \n\n "
 read -rp "  > "  End_Install
 
