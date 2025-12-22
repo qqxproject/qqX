@@ -450,8 +450,9 @@ else
     fi
 
     # qget 4.9.2 onwards - use recorded name as VM can get renamed
-    if [[ $(cat "$VM_InstanceName/dl-url.txt" 2>/dev/null) ]]; then
-      VM_RecordedName="$(awk '/http/{print $1}' "$VM_InstanceName/dl-url.txt")"
+    if [[ $(cat "$VM_InstanceName/qe_new_vm_name.txt" 2>/dev/null) ]]; then
+      source "$VM_InstanceName/qe_new_vm_name.txt"
+      VM_RecordedName="$New_VM_InstanceName"
     elif [[ $(cat "$VM_InstanceName/QemuVirtHardwareRecord.txt" 2>/dev/null) ]]; then
       VM_RecordedName="$(grep -sm1 -e '-name' "$VM_InstanceName/QemuVirtHardwareRecord.txt" | cut -d'=' -f2)"
     else  VM_RecordedName="$VM_InstanceName"
