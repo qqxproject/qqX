@@ -36,6 +36,12 @@ Plus numerous downstream fixes for _current_ Quickemu issues
 
 -----
 
+🎄 Christmas Cheer for those kicking their heels 🎄
+
+NEW RELEASE 1.15 now in final beta stages > [details and download here](https://github.com/qqxproject/qqX/releases/tag/1.15.00-beta.06)
+
+-----
+
 CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 > After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
