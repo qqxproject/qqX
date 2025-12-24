@@ -449,6 +449,7 @@ else
       printf "\n\n  A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
     fi
 
+    ## Resolve the original distro OS name so a quickget look up can be made:
     # qget 4.9.2 onwards - use recorded name as VM can get renamed
     if [[ $(cat "$VM_InstanceName/qe_new_vm_name.txt" 2>/dev/null) ]]; then
       source "$VM_InstanceName/qe_new_vm_name.txt"
@@ -461,22 +462,33 @@ else
     mapfile -t VM_RecordedNameArr <<< "$(tr '-' '\n' <<< "$VM_RecordedName")"
     # note grep with space or probs like ubuntu picks (ed)ubuntu first
     # needs to cope with ubuntu variants, for daily-live, for renamed instances, and for custom ISO installed
-    if grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" "$QG_SourcePath" ; then
+    # and for qMod avoid script start, as that de-listed distros and other bits
+    if [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
+      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
+    elif [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
+      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
+    elif grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" "$QG_SourcePath" ; then
       VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
     elif grep -qs "  ${VM_RecordedNameArr[0]})" "$QG_SourcePath" ; then
       VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
     else VM_RecordedName_Listed=
     fi
-    if [[ ! $VM_RecordedName_Listed ]]; then DistroHomePage=
-    else
-      DistroListing="$(grep -m1 "  ${VM_RecordedName_Listed})" "$QG_SourcePath" | cut -d'=' -f2)"
-      DistroListing="${DistroListing//';;'/}"
-      DistroListing="${DistroListing//'"'/}"
-      DistroListing="$(tr '|' '\n' <<< "$DistroListing")"
-      mapfile -t DistroListing_ARR <<< "$DistroListing"
-      DistroHomePage="${DistroListing_ARR[2]}"
-      DistroLogin="${DistroListing_ARR[1]}"
-      [[ $DistroLogin == "-" ]] && DistroLogin=
+
+    ## Find Distro HomePage URL
+    DistroHomePage= ; DistroInfoLine= ; DistroListing= ; DistroLogin=
+    if [[ $VM_RecordedName_Listed ]]; then
+      [[ $QG_Modpath ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_Modpath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
+      [[ ! $DistroInfoLine ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_SourcePath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
+      if [[ $DistroInfoLine ]]; then
+        DistroListing="$(cut -d'=' -f2 <<< "$DistroInfoLine")"
+        DistroListing="${DistroListing//';;'/}"
+        DistroListing="${DistroListing//'"'/}"
+        DistroListing="$(tr '|' '\n' <<< "$DistroListing")"
+        mapfile -t DistroListing_ARR <<< "$DistroListing"
+        DistroHomePage="${DistroListing_ARR[2]}"
+        DistroLogin="${DistroListing_ARR[1]}"
+        [[ $DistroLogin == "-" ]] && DistroLogin=
+      fi
     fi
 
     printColor  "  [enter] refresh   "
