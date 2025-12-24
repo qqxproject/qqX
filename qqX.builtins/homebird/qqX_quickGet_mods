@@ -19,43 +19,22 @@
 
 #  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154
 
-##########################################
-
 ## CODING STYLE
 
 #  A more MODERN BASH style of coding is used for qqX than that used for QuickEmu.
 
 #  However, NOT TO WORRY if you are only familiar the older more POSIX styles, there are still plenty of options
 #  for contributions to the quickemu built-ins, particularly with this file:
-
 #  4 space tabs may be used with this file, as with QuickGet, so that code can be directly pasted into here and tweaked.
-#  2 space is the normal qqX tabbing and may also be employed.
-#  Try to keep the tabbing consistent within sections, where possible ...
-
+#  However, 2 space is the normal qqX tabbing. Try to keep the tabbing consistent within sections, where possible.
 #  QuickGet and qqX house styles may be mixed, WHICHEVER IS EASIEST. See notes at end for qqX coding style.
 
-##########################################
+#  This script is sourced when running a Quickget builtin. It remains variable isolated from running instances of qqX.
+#  However, the builtin will pick up the qqX library location. Take care to maintain QuickGet variable name continuity where needed.
 
-## To MOD an EXISTING Quickget entry:
-
-#  Copy and paste the relevant functions here, from Quickget, into the Mods script
-#  This is normally sections 2 and 3 only, sections 4 to 6 are only for special cases
-#  You may also want to add the distro to an existing qqX filter in section 1
-
-## To ADD, place all new work here. Make sure to use the 'osAddList' in section one.
-
-## Explanatory notes are given in all sections:
-#  Use distro alphabetical order
-#  In section 3, place 'release' immediately followed by 'edition' and then 'get' as a triplet, as needed
-
-#  This script will become sourced when running a Quickget builtin. Any functions here will take precedence.
-#  It remains variable isolated from running instances of qqX but it does pick up the qqX library location.
-#  Take care to maintain original QuickGet variable name continuity, especially when only modding single functions.
-
-#  To test code, run './quickget --check distroname' etc from a terminal opened in the relevant builtin folder, or use the std qqX UI
+#  To test code, run './quickget --check distroname' etc from a terminal opened in the relevant builtin folder.
 
 ##########################################
-
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -102,21 +81,13 @@ osSecList+=" parrotsec tails "
 osSecList="${osSecList//'  '/' '}"
 osSecList="${osSecList//'  '/' '}"
 
-osNoSysDList=" artixlinux devuan "
-osNoSysDList+=" mxlinux void "
-osNoSysDList="${osNoSysDList//'  '/' '}"
-osNoSysDList="${osNoSysDList//'  '/' '}"
-
 # A qqlist- prefix is used to make sure any calls to Quickget don't confuse list names with distro names
 # See function 'load_QGW_OS_Array' in the 'reroute_get' script
-# Older version mod files will get check for qqlists that don't exist in their particular built-in
-# qqlist-all is default (add here for grepping)
 if [[ $1 == "qqlist-desktop"  ]] ; then mapfile -t -O "${#osRemoveArr[@]}" -d ' ' osRemoveArr <<< "$osServersList"
 elif [[ $1 == "qqlist-server-cl" ]] ; then osSupported="$osServersList"
 elif [[ $1 == "qqlist-gaming" ]] ; then osSupported="$osGamingList"
 elif [[ $1 == "qqlist-ultra-light" ]] ; then osSupported="$osUsbList"
 elif [[ $1 == "qqlist-security" ]] ; then osSupported="$osSecList"
-elif [[ $1 == "qqlist-no-sysd" ]] ; then osSupported="$osNoSysDList"
 else osSupported="$osSupported_All"
 fi
 
@@ -141,21 +112,13 @@ function os_info {
     case "$1" in
         #name)            INFO="PrettyName|Credentials|Homepage|Info";;
         anduinos)         INFO="Anduin OS|-|https://www.anduinos.com/|Ubuntu-based Linux distribution that aims to facilitate developers transitioning from Windows.";;
-        archlinux)        INFO="Arch Linux|-|https://archlinux.org/|The definitive rolling release, the base of so many other Linux distros, or as the base of your own ...";;
-        archcraft)        INFO="Archcraft|-|https://archcraft.io/|Arch based collection of minimal Linux desktop solutions";;
-        athenaos)         INFO="Athena OS|-|https://athenaos.org/|NixOS based pentesting distribution using BlackArch package repo";;
+        archcraft)        INFO="Archcraft|-|https://archcraft.io/|Collection of minimal Linux distributions, based on Arch Linux.";;
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
-        crunchbang++)     INFO="Crunchbangplusplus|-|https://www.crunchbangplusplus.org/|The classic minimal crunchbang feel, now with Debian base.";;
         edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
         elementary)       INFO="Elementary OS|-|https://elementary.io/|Streamlined Gnome/Vala/Flatpak distro: Thoughtful, capable, and ethical replacement for Windows and macOS.";;
         endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
-        fedora)           INFO="Fedora|-|https://www.fedoraproject.org/|Innovative Linux community distros for desktops, clouds, and containers. Security focused and enterprise funded by RedHat and others ...";;
-        garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
+        garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
-        manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
-        mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
-        nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
-        popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
@@ -172,19 +135,14 @@ function distro_release_notes {
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
-        athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
         elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
-        mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
-        nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
-        opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
-        parrotsec)        RelNotes="12/2025 Mate is still supported but KDE is now default. Home is Non-Security and HTB is for cloud use.";;
-        popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
-        rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install";;
+        mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
+        nitrux)           RelNotes="08/2025 ISO releases have been suspended for changes from KDE to Hyprland and the Cachy kernel. See https://nxos.org/news/news-farewell-nx-desktop-and-plasma/";;
+        opensuse)           RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
-        tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is up to around 230Mb. Select Pure for 64 bit.";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
     esac
     echo "$RelNotes"
@@ -196,7 +154,7 @@ function distro_release_notes {
 # Needed for new qqX listed distros or use for "releases_${OS} ()" and "editions_${OS} ()" overwrites.
 
 # Quickget's behaviour is to continually exit on error until the correct input combination is made.
-# This means that QUICKGET PROBES normally have to be carried out via repeated and discontiguous command line args requests
+# This means that Quickget probes normally have to be carried out via repeated and discontiguous command line args requests
 # and that the use of global variables is either limited or not possible:
 
 # IF CHECKING editions, the var $RELEASE becomes available in the function editions_$OS
@@ -206,14 +164,12 @@ function distro_release_notes {
 # The first two FUNCTIONS feed STDOUT to the look-up function 'validate_release' followed by
 # the last lines of Quickget where distro editions are handled.
 
-# TRANSFER FILES may also be implemented:
-# See 'editions_anduinos' for a more complex example script and 'get_pclinuxos' for simpler cases
-    ReleaseDataLog="/tmp/qGet.Mods.REL.data.txt"
-    EditionsDataLog="/tmp/qGet.Mods.ED.data.txt"
-    GetDataLog="/tmp/qGet.Mods.GET.data.txt"
+# Transfer files may also be implemented:
+# See 'editions_anduinos' for a more complex example script and 'get_parrotsec' for simpler cases
+# Some distros single release with no editions eg. bluestar
 
 # Quickget's legacy behaviour is to return a 'STOCK LIST' of editions when no release is supplied ...
-# This probably has room for improvement but a list should be given.
+# Probably has room for improvement but a list should be given.
 # See 'editions_gnomeos' for a per edition check routine, where some may be absent.
 
 # Note that Quickget's 'web_pipe()' is an alias for Curl and will generate STDOUT by itself, without needing 'echo'.
@@ -231,9 +187,6 @@ function distro_release_notes {
 # Downloads may occasionally need a special tidy-up and finalization. See sections 4 to 6.
 
 # For testing code, run './quickget --check distroname' from a terminal opened in the relevant builtin folder.
-
-##########################################
-
 
 ## FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
 function releases_alpine() {
@@ -261,37 +214,37 @@ function editions_anduinos {
     fi
     # Otherwise check for editions per release
     while true ; do
-        if ! { grep -qs "$OS" "$ReleaseDataLog" && grep -s 'ReleaseName=' "$ReleaseDataLog" | grep -qs "$RELEASE"; } ; then
-            printf "qGetDistro=\"%s\"\nReleaseName=\"%s\"" "$OS" "$RELEASE" > "$ReleaseDataLog"
+        if ! { grep -qs "$OS" "/tmp/qGet.Mods.REL.data.txt" && grep -s 'ReleaseName=' "/tmp/qGet.Mods.REL.data.txt" | grep -qs "$RELEASE"; } ; then
+            printf "qGetDistro=\"%s\"\nReleaseName=\"%s\"" "$OS" "$RELEASE" > "/tmp/qGet.Mods.REL.data.txt"
             if [[ $RELEASE == "LTS" ]]; then ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep LTS | fv -M -Q)"
             else ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep -v LTS | fv -M -Q)"
             fi
             ReleasePoint="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/" | grep href | fv -M -Q )"
             ReleaseEditions="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}" \
             | grep -v sha256 | grep -v torrent | tr '>' '\n' | grep iso | grep -v '<a' | cut -d'<' -f1 | cut -d'-' -f3 | cut -d'.' -f1 | paste -s -d' ')"
-            printf "\nReleaseName=\"%s\"\nReleaseNumber=\"%s\"\nReleasePoint=\"%s\"\nReleaseEditions=\"%s\"" "$RELEASE" "$ReleaseNumber" "$ReleasePoint" "$ReleaseEditions" > "$ReleaseDataLog"
+            printf "\nReleaseName=\"%s\"\nReleaseNumber=\"%s\"\nReleasePoint=\"%s\"\nReleaseEditions=\"%s\"" "$RELEASE" "$ReleaseNumber" "$ReleasePoint" "$ReleaseEditions" > "/tmp/qGet.Mods.REL.data.txt"
             sleep 1
         fi
         ReleaseName= ; ReleaseNumber= ; ReleasePoint= ; ReleaseEditions=
-        source "$ReleaseDataLog"
+        source "/tmp/qGet.Mods.REL.data.txt"
         if [[ $ReleaseName && $ReleaseNumber && $ReleasePoint && $ReleaseEditions ]] ; then break
-        else printf "" > "$ReleaseDataLog"
+        else printf "" > "/tmp/qGet.Mods.REL.data.txt"
         fi
     done
-    printf "%s" "$RELEASE" > "$EditionsDataLog"
-    printf "" > "$GetDataLog"
-    [[ ! $ReleaseEditions ]] && source "$ReleaseDataLog"
+    printf "%s" "$RELEASE" > "/tmp/qGet.Mods.ED.data.txt"
+    printf "" > "/tmp/qGet.Mods.GET.data.txt"
+    [[ ! $ReleaseEditions ]] && source "/tmp/qGet.Mods.REL.data.txt"
     echo "$ReleaseEditions"
 }
 function get_anduinos {
-    source "$ReleaseDataLog"
+    source "/tmp/qGet.Mods.REL.data.txt"
     # for looping through test-all
     sleep 0.5
     AnduinIso="https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}/AnduinOS-${ReleasePoint}-${EDITION}.iso"
     AnduinHash="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}/AnduinOS-${ReleasePoint}-${EDITION}.sha256" \
     | cut -d':' -f2 | tr -cd '[:graph:]')"
     echo "$AnduinIso $AnduinHash"
-    printf "%s" "$EDITION" > "$GetDataLog"
+    printf "%s" "$EDITION" > "/tmp/qGet.Mods.GET.data.txt"
 }
 
 ## FIX Arch - Pre-emptively for PR  https://github.com/quickemu-project/quickemu/pull/1709
@@ -318,12 +271,11 @@ function get_artixlinux() {
 
 ## UPDATE new repo
 function releases_athenaos() {
-    web_pipe "https://github.com/Athena-OS/athena/releases" | grep 's/tag' | fv -Q -M 2
+    echo latest
 }
 function get_athenaos() {
     local HASH=""
-    local URL="https://github.com/Athena-OS/athena/releases/download/v${RELEASE}/athenaos-live-x86_64.iso"
-    # eg https://github.com/Athena-OS/athena/releases/download/v25.11/athenaos-live-x86_64.iso
+    local URL="https://github.com/Athena-OS/athena/releases/latest/download/athenaos-rolling-x86_64.iso"
     HASH=$(web_pipe "${URL}.sha256" | cut -d' ' -f1)
     echo "${URL} ${HASH}"
 }
@@ -354,27 +306,6 @@ function editions_bodhi() {
     elif  fv -Q --gt "$RELEASE 6.9" ; then echo "standard hwe s76"
     else echo "standard hwe"
     fi
-}
-
-## FIXES for Devuan - make dynamic     #echo daedalus chimaera beowulf
-function releases_devuan() {
-    local ReadMeTxt= ; ReadMeTxt=$(web_pipe "https://files.devuan.org/README.txt")
-    mapfile -t  Dlist <<< "$(grep -s Devuan <<< "$ReadMeTxt" | grep -v archived | fv -c -M 3 -Q)"
-    local DlistStr=
-    for D in "${Dlist[@]}"; do
-        grep -s Devuan <<< "$ReadMeTxt" | grep "$D" | cut -d' ' -f6- | tr ' ' '_'
-    done
-}
-function get_devuan() {
-    local HASH="" ; local ISO="" ; local VER="" ; local URL=
-    RELEASE="$(tr -cd '[:alpha:]' <<< "$RELEASE" | tr -cd '[:graph:]')"
-    RELEASE="devuan_${RELEASE,,}"
-    URL="https://files.devuan.org/${RELEASE}/desktop-live"
-    VER="$(web_pipe "$URL" | grep -s -m 1 "amd64_desktop" | cut -d '>' -f 1 | fv -Q | tr -cd '[:graph:]')"
-    ISO="${RELEASE}_${VER}_amd64_desktop-live.iso"
-    HASH=$(web_pipe "${URL}/${ISO}.sha256" | grep -s amd64 | cut -d' ' -f1)
-    [[ ! $HASH ]] && HASH=$(web_pipe "${URL}/SHA256SUMS.txt" | grep -s amd64 | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
 }
 
 ## REDUCE release count - over 20 is too many!
@@ -528,13 +459,10 @@ function editions_mxlinux() {
 function get_mxlinux() {
     local HASH= ; local URL= ; local ISO= ; local RELEASE=
     URL="https://sourceforge.net/projects/mx-linux/files/Final/${EDITION}"
-    #RELEASE="$(web_pipe "$URL" | tr '<' '\n' | grep -s href | grep latest | cut -d'=' -f2 | fv -Q -M)"
-    RELEASE="$(web_pipe "$URL" | tr '<' '\n' | grep -s href | grep latest | tr '/' '\n' | grep -e 'MX-' | cut -d '_' -f1 | cut -d '-' -f2)"
+    RELEASE="$(web_pipe "$URL" | tr '<' '\n' | grep -s href | grep "$RELEASE" | cut -d'=' -f2 | fv -Q -M)"
     # eg https://sourceforge.net/projects/mx-linux/files/Final/KDE/MX-23.6.1_KDE_x64.iso.sha256/download
-    # eg https://sourceforge.net/projects/mx-linux/files/Final/Fluxbox/MX-25_fluxbox_x64.iso/download
-    # eg https://sourceforge.net/projects/mx-linux/files/Final/Xfce/MX-25_Xfce_x64.iso/download
     case ${EDITION} in
-        Xfce) ISO="MX-${RELEASE}_Xfce_x64.iso";;
+        Xfce) ISO="MX-${RELEASE}_x64.iso";;
         KDE) ISO="MX-${RELEASE}_KDE_x64.iso";;
         Fluxbox) ISO="MX-${RELEASE}_fluxbox_x64.iso";;
     esac
@@ -604,78 +532,40 @@ function get_oraclelinux() {
 ## FIX hashes and folders
 function releases_parrotsec() {
   # July 2025 > only latest folder now has iso's
-  web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M
+  Parrot_Latest="$(web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M)"
+  echo latest
 }
 function editions_parrotsec() {
     echo home htb security
 }
 function get_parrotsec() {
-    local HASH="" ; local ISO="" ; local URL=
-    ISO="Parrot-${EDITION}-${RELEASE}_amd64.iso"
-    URL="https://deb.parrot.sh/parrot/iso/${RELEASE}"
+    local HASH="" ; local ISO="" ; local URL="" ; local LATEST="$Parrot_Latest"
+    [[ ! $LATEST ]] && LATEST="$(web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M)"
+    ISO="Parrot-${EDITION}-${LATEST}_amd64.iso"
+    URL="https://deb.parrot.sh/parrot/iso/${LATEST}"
     HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -B 30 'sha384' | grep "${ISO}" | cut -d' ' -f1)"
     echo "${URL}/${ISO} ${HASH}"
 }
 
 ## FIX hash, update url and make dynamic
 function releases_pclinuxos() {
-    local RelData= ; RelData="$(web_pipe "https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso/")"
-    echo "$RelData" > "$ReleaseDataLog"
-    # show nominal 'latest' > slight variations can exist
-    grep -s darkstar <<< "$RelData" |  tr '=' '\n' | grep -s title | fv -Q -M
+    echo latest
 }
 function editions_pclinuxos() {
     echo kde kde-darkstar mate xfce
 }
 function get_pclinuxos() {
     local HASH= ; local ISO= ; local URL= ; local RelMax= ; local RelChk="${EDITION}-2"
-    URL="https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso"
-    RelMax="$(grep -s -e "$RelChk" "$ReleaseDataLog" | tr '=' '\n' | grep iso | fv -M -Q)"
+    URL="https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso/"
+    RelMax="$(web_pipe "$URL" | grep -e "$RelChk" | tr '=' '\n' | grep iso | fv -M)"
     HASH="$(web_pipe "${URL}/pclinuxos64-${EDITION}-${RelMax}.md5sum" | cut -d' ' -f1)"
     ISO="pclinuxos64-${EDITION}-${RelMax}.iso"
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## UPDATE and tweak
-function releases_popos() {
-    echo "24.04 22.04"
-}
-function editions_popos() {
-    if [[ $RELEASE == "24.04" ]]; then echo "generic nvidia"
-    elif [[ $RELEASE == "22.04" ]]; then echo "intel nvidia"
-    else echo "generic intel nvidia"
-   fi
-}
-
-## UPDATE and FIX
+## REDUCE release count - 14 is too many!
 function releases_rockylinux() {
-    local BaseGrep= ; local ReleasesList=
-    BaseGrep="$(web_pipe "https://dl.rockylinux.org/vault/rocky/" | tr ':' '\n' | grep link)"
-    ReleasesList+=" $(fv -S 10 -M -Q <<< "$BaseGrep")"
-    ReleasesList+=" $(fv -S 9 -M -Q <<< "$BaseGrep")"
-    ReleasesList+=" $(fv -S 8 -M -Q <<< "$BaseGrep")"
-    echo "$ReleasesList"
-}
-function editions_rockylinux() {
-    if [[ "$RELEASE" == '10'* ]]; then echo "Gnome KDE"
-    elif [[ "$RELEASE" == '9'* ]]; then echo "Cinnamon Gnome KDE Mate Xfce"
-    elif [[ "$RELEASE" == '8'* ]]; then echo "Gnome KDE Mate Xfce"
-    else echo "Cinnamon Gnome KDE Mate Xfce"
-    fi
-}
-function get_rockylinux() {
-    local HASH= ; local URL= ; local ISO=
-    RelInt=${RELEASE%.*}
-    case $EDITION in
-        Gnome)  EDITION="Workstation";;
-        Mate)  EDITION="MATE";;
-        Xfce)  EDITION="XFCE";;
-    esac
-    # eg https://dl.rockylinux.org/vault/rocky/10.0/live/x86_64/Rocky-10-Workstation-x86_64-latest.iso.CHECKSUM
-    URL="https://dl.rockylinux.org/vault/rocky/${RELEASE}/live/x86_64"
-    ISO="Rocky-${RelInt}-${EDITION}-x86_64-latest.iso"
-    HASH=$(web_pipe "${URL}/${ISO}.CHECKSUM" | grep -s 'SHA256' | awk '{print $NF}')
-    echo "${URL}/${ISO} ${HASH}"
+    web_pipe "http://dl.rockylinux.org/vault/rocky/" | grep "class=\"link" | grep -v -e 'full' -e  'RC' -e  'ISO' -e 'Parent'| tr -d / | fv -M 4 -qs
 }
 
 ## FIX url and hash, plus make dynamic (if list happens to show up)
@@ -702,23 +592,6 @@ function get_slint() {
     local URL="https://slackware.uk/slint/x86_64/slint-${RELEASE}/iso"
     HASH=$(web_pipe "${URL}/${ISO}.sha256" | cut -d' ' -f1)
     echo "${URL}/${ISO}" "${HASH}"
-}
-
-## UPDATE and FIX
-function releases_solus() {
-    echo latest
-}
-function editions_solus() {
-    web_pipe "https://getsol.us/download/" | grep iso | tr ':' '\n' | grep Release | awk '{print $1}' | cut -d'-' -f3- | grep iso | cut -d'-' -f2 | sort -u | paste -s -d ' '
-}
-function get_solus() {
-    # eg https://downloads.getsol.us/isos/2025-11-29/Solus-Budgie-Release-2025-11-29.iso.sha256sum.sign
-    local HASH= ; local BaseUrl= ; local URL=
-    BaseUrl="https:""$(web_pipe "https://getsol.us/download/" | grep iso | tr ':' '\n' | grep Release | awk '{print $1}' | grep "$EDITION" | grep sign)"
-    HASH="${BaseUrl/.sign/}"
-    URL="${HASH/.sha256sum/}"
-    HASH="$(web_pipe "$HASH" | cut -d' ' -f1)"
-    echo "${URL} ${HASH}"
 }
 
 ## UPDATE
@@ -777,25 +650,6 @@ function get_spirallinux() {
     echo "${URL}/${ISO}" "${HASH}"
 }
 
-## UPDATE, FIX and make dynamic
-function releases_tinycore() {
-    web_pipe "http://www.tinycorelinux.net/downloads.html" | grep archive | tr '<' '\n' | tr '>' '\n' | grep -e '.x' | grep -v href | sort -nr | head -n 2 | paste -s -d ' '
-}
-function editions_tinycore() {
-    echo "Core TinyCore CorePlus CorePure64 TinyCorePure64"
-}
-function get_tinycore() {
-    local ARCH="x86"; local HASH= ; local URL= ; local ISO ; local IsoPoint=
-    case "${EDITION}" in
-        *Pure*) ARCH+="_64";;
-    esac
-    URL="http://www.tinycorelinux.net/${RELEASE}/${ARCH}/release"
-    IsoPoint=$(web_pipe "$URL" | grep href | fv -M -Q)
-    ISO="${EDITION}-${IsoPoint}.iso"
-    HASH=$(web_pipe "${URL}/${ISO}.md5.txt" | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
-}
-
 ## FIX hash checker - base is now 256
 function get_trisquel() {
     local HASH="" ; local ISO="" ;local URL="https://mirrors.ocf.berkeley.edu/trisquel-images"
@@ -812,7 +666,7 @@ function get_trisquel() {
 
 ## IMPROVE make dynamic
 function releases_truenas-scale() {
-    web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep NAS | cut -d'>' -f2 | fv -M -Q
+    web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep wplink | cut -d'>' -f2 | fv -M -Q
 }
 
 ## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
@@ -907,25 +761,16 @@ function get_void() {
 }
 
 ## ADD 18 as in https://github.com/quickemu-project/quickemu/pull/1761
-# but FIX discontinued 'lite64' with ver 18 and add missing hash check
-# REVIEW making dynamic?
+# but FIX missing lite64 with ver 18. REVIEW making dynamic?
 function releases_zorin() {
     echo 18 17 16
 }
 function editions_zorin() {
-    if [[ $RELEASE == "18" ]]; then echo "core64 education64"
+    if [[ ! $RELEASE ]]; then echo "core64 lite64 education64"
+    elif [[ $RELEASE == "18" ]]; then echo "core64 education64"
     else echo "core64 lite64  education64"
     fi
 }
-function get_zorin() {
-    local HASH=""; local ISO=""; local URL= ; local BaseUrl=
-    # Zorin's mirror system will autodetect latest version
-    URL="$(web_redirect "https://zrn.co/${RELEASE}${EDITION}")"
-    ISO="${URL##*/}" ; BaseUrl="${URL%/*}"
-    HASH="$(web_pipe "$BaseUrl/SHA256SUMS.txt" | grep "$ISO" | cut -d ' ' -f1)"
-    echo "${URL} ${HASH}"
-}
-
 
 ##########################################
 
@@ -1331,27 +1176,8 @@ function error_specify_release {
     echo -e "\nERROR! You must specify a release." ; exit 1
 }
 
-## IMPROVE (and FIX, hopefully and finally)
-# Remove 'error_not_supported_release' as it was only ever used by 'validate_release'
-# local DISPLAY_NAME="" was never used in 'validate' but was needed in 'error_not'
-# local RELEASES="" was a local string BUT 'error_not...' expected this as a global array ... !
-# 'case ${OS}' was a repeat as it was already checked during the initial case grep of the cmd args, found at the end of the script
-# Plus, not all calls to 'validate' will have had the release_* function evaluated ...
-
-function validate_release() {
-    local DISPLAY_NAME= ; DISPLAY_NAME="$(pretty_name "${OS}")"
-    local ReleaseList="$1"
-    [[ "$1" == releases* ]] && ReleaseList="$($1)"
-    if ! grep -qs " ${RELEASE} " <<< " ${ReleaseList} "; then
-        echo -e "ERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
-        echo -n ' - Supported releases: '
-        "releases_${OS}"
-        exit 1
-    fi
-}
-
 ## TWEAK
-# A lot of these have already been modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
+# A lot of these have already modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST
 
 # Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get')
 function web_pipe {
@@ -1372,14 +1198,8 @@ function web_pipe_json {
 ## ADD
 # Check the file headers. To be used for returns of 0 or 1 with pipe to log file,
 function check_pipe {
+    local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
     printf "" > "/tmp/qGet_check_pipe.txt"
-    local Args=("${@}")
-    if [[ ! "${Args[*]}" ]]; then
-        if [[ $ChkLog ]] && ! grep -qs 'Missing Args for function check_pipe' "$ChkLog" ; then
-            printf "\nERROR: Missing Args for function check_pipe\n" >> "$ChkLog"
-        fi
-        return 1
-    fi
     curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2 --no-keepalive --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
     if ! grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
         printf "" > "/tmp/qGet_check_pipe.txt"
@@ -1456,6 +1276,7 @@ function web_get() {
     # - external proc should clear this file before starting so the grep test will function
     if ! grep -sq 'New_VM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
         printf "New_VM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
+        cp "/tmp/qe_new_vm_name.txt" "${DIR}/qe_new_vm_name.txt"
     fi
     if [[ ${OS} != windows && ${OS} != macos && ${OS} != windows-server ]]; then
         echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}" ; echo "- URL: ${URL}"
@@ -1489,24 +1310,14 @@ function web_check {
     done
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
     printf "%s" "$URL" > "/tmp/qmod-dl-url"
-    if [[ ! $URL ]]; then
-        if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
-            printf "\nERROR: No URL > Possible initial lookup or server problem\n" >> "$ChkLog"
-        fi
-        return 1
-    elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
-        if [[ $ChkLog ]] && ! grep -qs 'Non Conformant URL' "$ChkLog" ; then
-            printf "\nERROR: Non Conformant URL > Possible initial lookup or server problem \n" >> "$ChkLog"
-        fi
-        return 1
+    if [[ ! $URL ]]; then return 1
+    else [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]] && return 1
     fi
     # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
-    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
-    else return 1
-    fi
+    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0 ; else return 1 ; fi
 }
 
-## ADD hash check, plus some output variants
+## ADD HASH CHECK
 # Checks if 'get_$OS' is outputting a checksum and, if so, that it is correctly formatted
 function test_result {
     local OS="${1}" ; local RELEASE="${2}"
@@ -1526,109 +1337,78 @@ function test_result {
     esac
     local OsShort="${OS:0:30}"
     if [[ $QuietOps ]]; then {
-        if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
-        elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
-        else printf "%-30s %s ERROR\n" "${OsShort}" "${URL}"
-        fi } >> "$ChkLog"
+        if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
+        else printf "%-30s %s\n" "${OsShort}" "${URL}"
+        fi } >> "/tmp/qGet_QuietResult.txt"
     elif [[ $CompactOps ]]; then {
-        if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
-        elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-40s\n" "$HashTest" "${RESULT}" "${OS}"
-        else printf "%-40s %s ERROR\n" "${OS}" "${URL}"
-        fi } | tee -a "$ChkLog"
+        if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-40s\n" "$HashTest" "${RESULT}" "${OS}"
+        else printf "%-40s %s\n" "${OS}" "${URL}"
+        fi } | tee -a "/tmp/qGet_CompactResult.txt"
     else {
-        if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
-        elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
-        else printf "%-30s %s ERROR\n" "${OsShort}" "${URL}"
-        fi } | tee -a "$ChkLog"
+        if [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
+        else printf "%-30s %s\n" "${OsShort}" "${URL}"
+        fi } | tee -a "/tmp/qGet_FullResult.txt"
     fi
 }
 
-## TWEAK plus add extra tests and test output
 function test_all {
     OS="${1}"
+    os_supported
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
     [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
-    if [[ $(type -t "releases_${OS}") == function ]]; then
-        for RELEASE in $("releases_${FUNC}"); do
-            if [[ $(type -t "editions_${OS}") == function ]]; then
-                for EDITION in $(editions_"${OS}"); do
-                    # 'get_$OS' should output two args; a filepath URL, followed a checksum number
-                    #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
-                    #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
-                    GetLine=$(get_"${OS}" "$RELEASE")
-                    printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
-                    URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
-                    [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
-                    [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
-                    HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
-                    if [ "${OPERATION}" == "show" ]; then
-                        [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
-                        test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
-                    elif [ "${OPERATION}" == "test" ]; then
-                        CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
-                        if [[ ! $CHECK ]]; then echo "$OS  $RELEASE  $EDITION  FAIL"
-                        else test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
-                        fi
-                    fi
-                done
-                if [[ ! $EDITION ]] && [[ $ChkLog ]] && ! grep -qs "$OS" <<< "$(grep -s 'Editions function FAIL' "$ChkLog")" ; then
-                    printf "ERROR: %s  %-40s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
-                fi
-            elif [[ "${OS}" == "windows"* ]]; then
-                # Caution with current Quickemu, --check windows with $2 (or/and $3) will trigger a windows download
-                "languages_${OS}"
-                for I18N in "${I18NS[@]}"; do
-                    if [ "${OPERATION}" == "show" ]; then
-                        test_result "${OS}" "${RELEASE}" "${I18N}" ""
-                    elif [ "${OPERATION}" == "test" ]; then
-                        test_result "${OS}" "${RELEASE}" "${I18N}" "${URL}" "SKIP"
-                    fi
-                done
-                # Caution here, the get_$OS routines must run in subshells in order to loop properly
-            elif [[ "${OS}" == "macos" ]]; then
-                (get_macos)
-            elif [ "${OS}" == "ubuntu-server" ]; then
-                (get_ubuntu-server)
-            elif [[ "${OS}" == *ubuntu* ]]; then
-                (get_ubuntu)
-            else
-                URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)
+    for RELEASE in $("releases_${FUNC}"); do
+        if [[ $(type -t "editions_${OS}") == function ]]; then
+            for EDITION in $(editions_"${OS}"); do
+                GetLine=$(get_"${OS}" "$RELEASE")
+                # 'get_$OS' should output two args; a filepath URL, followed a checksum number
+                #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
+                #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
+                printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
+                [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
+                HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
                 if [ "${OPERATION}" == "show" ]; then
-                    [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
                     test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
                 elif [ "${OPERATION}" == "test" ]; then
-                    GetLine=$(get_"${OS}" "$RELEASE")
-                    printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
-                    URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
-                    [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS} $RELEASE"
-                    [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
-                    HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
                     CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
-                    if [[ ! $CHECK ]]; then echo "$OS  $RELEASE  $EDITION  FAIL"
-                    else test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
-                    fi
+                    test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
                 fi
+            done
+        elif [[ "${OS}" == "windows"* ]]; then
+            # Caution with current Quickemu, --check windows with $2 (or/and $3) will trigger a windows download
+            "languages_${OS}"
+            for I18N in "${I18NS[@]}"; do
+                if [ "${OPERATION}" == "show" ]; then
+                    test_result "${OS}" "${RELEASE}" "${I18N}" ""
+                elif [ "${OPERATION}" == "test" ]; then
+                    test_result "${OS}" "${RELEASE}" "${I18N}" "${URL}" "SKIP"
+                fi
+            done
+            # Caution here, the get_$OS routines must run in subshells in order to loop properly
+        elif [[ "${OS}" == "macos" ]]; then
+            (get_macos)
+        elif [ "${OS}" == "ubuntu-server" ]; then
+            (get_ubuntu-server)
+        elif [[ "${OS}" == *ubuntu* ]]; then
+            (get_ubuntu)
+        else
+            URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)
+            if [ "${OPERATION}" == "show" ]; then
+                test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
+            elif [ "${OPERATION}" == "test" ]; then
+                GetLine=$(get_"${OS}" "$RELEASE")
+                printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
+                [[ $CheckMirrors ]] &&  URL=$(web_redirect "${URL}")
+                HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
+                CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
+                test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
             fi
-        done
-        if [[ ! $RELEASE ]] && [[ $ChkLog ]] && ! grep -qs "$OS  >  Releases function FAIL" "$ChkLog" ; then
-            printf "ERROR: %s  >  Releases function FAIL \n"  "$OS"  >> "$ChkLog"
         fi
-    fi
-    # prints at end of every distro set - a full test can take half an hour
-    printf "\n\n"
-    [[ $SingleCheck ]] && return
-    if [[ $CompactOps || $FullCheckOps ]]; then
-        printf "[s] to stop/pause tests (at next distro break point)\n"
-        read -t 0.1 -r  ChkPause
-        printf "\n\n"
-        if [[ $ChkPause == "s" || $ChkPause == "c" ]]; then
-            ChkPause= ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
-            printf "Tests paused: \n\n[enter] to restart  [c] to conclude \n\n"
-            read -rp ">  " ChkStop
-            [[ $ChkStop == "c" ]] && exit
-            printf "\n\nRestarting ...\n\n"
-        fi
-    fi
+    done
+    [[ $QuietOps ]] && printf "Log file: \"/tmp/qGet_QuietResult.txt\" \n"
+    [[ $CompactOps ]] && printf "Log file: \"/tmp/qGet_CompactResult.txt\" \n"
+    [[ $FullCheckOps ]] && printf "Log file: \"/tmp/qGet_FullResult.txt\" \n"
 }
 
 ##########################################
@@ -1638,7 +1418,7 @@ function test_all {
 # Case mods will either clear any listed args and set flags early, or will run something and exit here,
 # effectively being able to bypass selected original Quickget case statements, or add new ones ...
 
-QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors= ; SingleCheck=
+QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors=
 printf "Webget NOT used\n" > "/tmp/qGet_webget_report.txt"
 
 case "${1}" in
@@ -1652,43 +1432,30 @@ case "${1}" in
         CheckMirrors=1 ; shift
     ;;
     --full-check|--check|-check)
-        FullCheckOps=1 ; ChkLog="/tmp/qGet_FullResult.txt" ; printf "" > "$ChkLog"
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
+        FullCheckOps=1 && printf "" > "/tmp/qGet_FullResult.txt"
         if [[ ! $1 ]]; then
-            for OS in $(os_support); do
-                os_supported ; test_all "${OS}"
+            for OS in $(os_support); do test_all "${OS}"
             done
-            printf "  Log file: \"%s\" \n\n" "$ChkLog"
-            exit
+            exit 0
         elif [[ ! $2 ]]; then
-            printf "\n" ; SingleCheck=1
-            os_supported ; test_all "${1}"
-            printf "  Log file: \"%s\" \n\n" "$ChkLog"
-            exit
+            test_all "${1}"
+            exit 0
         fi ;;
     --quiet-check|--compact-check)
-        if [[ $1 == "--quiet-check" ]]; then
-            QuietOps=1 ; ChkLog="/tmp/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
-        fi
-        if [[ $1 == "--compact-check" ]]; then
-            CompactOps=1 ; ChkLog="/tmp/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
-        fi
+        [[ $1 == "--quiet-check" ]] &&  QuietOps=1 && printf "" > "/tmp/qGet_QuietResult.txt"
+        [[ $1 == "--compact-check" ]] &&  CompactOps=1  && printf "" > "/tmp/qGet_CompactResult.txt"
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
         if [[ ! $1 ]]; then
-            for OS in $(os_support); do
-                os_supported ; test_all "${OS}"
+            for OS in $(os_support); do test_all "${OS}"
             done
-            [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
-            exit
+            exit 0
         elif [[ ! $2 ]]; then
-            printf "\n" ; SingleCheck=1
-            os_supported ; test_all "${1}"
-            [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
-            exit
+            test_all "${1}"
+            exit 0
         fi ;;
-         # NB: 'TestLog' is the matching 'quick_reroute_get' var which runs in a separate process, with both using the same log files
     --help|-help|--h|-h)
         help_message
         printf "\n\nExtra qqX commands: \n\nfrom a terminal opened in a qqX 'built-in' folder"
