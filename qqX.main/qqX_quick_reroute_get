@@ -797,7 +797,7 @@ function_quick_get_wrap ()  {
                 [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && printf "\n\n  Microsoft download limiter: access appears blocked to this IP address. Try later or try router reboot ... ?"
                 printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
                 if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
-                  printf "\n\n  BOT CHECKS are possibly present ...."
+                  printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the page"
                 fi
               fi
             } >> "/tmp/qmod-dl-homepage-report.txt"
@@ -983,11 +983,12 @@ function_quick_get_wrap ()  {
       elif [[ $QGW_List_NumSelected == "tx" ]]; then main_translation_menu ; printf "\n"
 
       elif [[ $QGW_List_NumSelected == "w" ||  $QGW_List_NumSelected == "W" ]]; then
-
         printf "  Opening Browser ... \n\n"
-        if [[ $QGW_List_NumSelected == "w" && $QGW_OS_HomePage_Working ]]; then
-          (nohup &> /dev/null  "$WebBrowser"  "$QGW_OS_HomePage"  & ) || web_browser_not_found_message
-        else
+        if [[ $QGW_List_NumSelected == "w" ]]; then
+          if [[ ! $QGW_OS_HomePage ]]; then printColor "  ERROR: No HomePage Listed \n\n\n"
+          else (nohup &> /dev/null  "$WebBrowser"  "$QGW_OS_HomePage"  & ) || web_browser_not_found_message
+          fi
+        elif [[ $QGW_List_NumSelected == "W" ]]; then
           (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/"  & ) || web_browser_not_found_message
         fi
         QGW_List_NumSelected_Next="$QGW_VerifiedList_NumSelected"
