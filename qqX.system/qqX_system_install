@@ -277,17 +277,17 @@ while true ; do
 
       # provisional:
 
-      printColor "\n\n\n  Arch (Endeavour) KDE 2025/12"
-      printf "\n\n  sudo pacman -Syu  bc  xorriso"
-      printf "\n\n  sudo pacman -Syu  spice-client-gtk  qemu-desktop"
+      printColor "\n\n\n  Arch (Endeavour) KDE 2026/01"
+      printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools"
+      printf "\n\n  sudo pacman -Syu  spice-gtk  spice-vdagent  qemu-desktop"
 
-      printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
-      printf "\n\n  sudo dnf install  mate-terminal  xorriso"
-      printf "\n\n  sudo dnf install  spice-client-gtk  qemu-system-x86"
+      #printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
+      #printf "\n\n  sudo dnf install  mate-terminal  xorriso  p7zip  pZzip-plugins "
+      #printf "\n\n  sudo dnf install  spice-gtk-tools qemu-system-x86"
 
-      printColor "\n\n\n  Pop! OS 24.04  Cosmic "
-      printf "\n\n  sudo apt install  qterminal"
-      printf "\n\n  sudo dnf install  spice-client-gtk  qemu-system-x86"
+      #printColor "\n\n\n  Pop! OS 24.04  Cosmic "
+      #printf "\n\n  sudo apt install  qterminal"
+      #printf "\n\n  sudo dnf install  spice-client-gtk  qemu-system-x86"
 
     fi
 
@@ -1001,6 +1001,7 @@ if [[ ! $SkipMkLauncher ]]; then
           printf "\n\n  Installing traditional links" ; sleep 1 ; break
         fi
         [[ $Missing_XDG_Utils == "q" ]] && sleep 0.6 && exit
+      else break
     fi
   done
   if [[ ! -d  "$XDG_GUI_desktop_Folder" ]] || [[ $No_XDG ]]; then
