@@ -121,6 +121,10 @@ function quickemu {
         VM_ExecBoot=
         return
       else
+        if [[ "$VM_InstanceName" != *windows* && "$VM_InstanceName" != *macos* ]]; then
+          printf "  For SPICE copy, paste and file transfer, install 'spice-vdagent' and 'spice-webdavd' INSIDE Linux GUEST VM's"
+          printf "\n\n\n"
+        fi
         if [[ $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
           printColor "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS or boot an ISO"
           printf "\n\n  Mounted ISO: Select 'Boot manager' and select 'QEMU DVD-ROM' from the list. "

@@ -250,7 +250,7 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
-    printColor "\n\n  >>  Check for 'spice' installations 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' "
+    printColor "\n\n  >>  Check for 'spice' installations: 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p qemu-system-x86_64) ]] || [[ ! $(type -p qemu-img) ]] || [[ ! $(type -p qemu-nbd) ]]; then
@@ -266,8 +266,9 @@ while true ; do
 
     printColor "\n\n  Ubuntu 25.10"
     printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
-    printf "\n\n  sudo apt install  spice-vdagent  spice-client-gtk  qemu-system-x86"
+    printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
     [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-utils"
+    # qemu-system-modules-spice > quickemu PR #1696
 
     printColor "\n\n\n  Debian KDE 13.2.0"
     printf "\n\n  sudo apt install  gawk  wget2  genisoimage  desktop-file-utils"
@@ -278,8 +279,7 @@ while true ; do
       # provisional:
 
       printColor "\n\n\n  Arch (Endeavour) KDE 2026/01"
-      printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools"
-      printf "\n\n  sudo pacman -Syu  spice-gtk  spice-vdagent  qemu-desktop"
+      printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
       #printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
       #printf "\n\n  sudo dnf install  mate-terminal  xorriso  p7zip  pZzip-plugins "
@@ -290,6 +290,12 @@ while true ; do
       #printf "\n\n  sudo dnf install  spice-client-gtk  qemu-system-x86"
 
     fi
+
+    if grep -qs 'driver=virtio' <<< "$(lshw 2>/dev/null)" ; then
+      printf "\n\n\n  Nested installation detected ...."
+    fi
+
+    printf "\n\n\n  For SPICE copy, paste and file transfer, install 'spice-vdagent' and 'spice-webdavd' INSIDE Linux GUEST VM's"
 
     printColor "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
     printf "\n\n  Return here to re-check:"
