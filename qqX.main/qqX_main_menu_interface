@@ -328,8 +328,7 @@ else
       InstanceISO_SizesCount="0"
     fi
 
-    #printColor  "\n\n  [gt]  quickget a new distro   [i]  VM drives info details   "
-     printColor  "\n\n  [gt]  quickget a new distro   [i] VM drives info   "
+    printf  "\n\n  [gt]  quickget a new distro   [i] VM drives info   "
     printf "Disks: %s (%s)  "  "${InstanceQcow2_Sizes}G" "$InstanceQcow2_SizesCount"
     printf "ISO's: %s (%s)  "  "${InstanceISO_Sizes}G" "$InstanceISO_SizesCount"
     [[ $(ls "$VM_InstanceName"/*.OLD.qcow2 2>/dev/null) ]] && printColor "(backup disk present)"
