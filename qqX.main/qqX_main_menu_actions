@@ -351,7 +351,7 @@ function  main_menu_actions {
 
   elif  [[ $MainMenuChoice == "sc" ]] ; then
 
-    drives_and_snapshots  select
+    drives_and_snapshots select  snaps
 
     printColor "\n\n  [enter] Create snap with date.time title "
     printf "  [text input] Create with text descriptor   [b] back to main menu "
@@ -377,15 +377,16 @@ function  main_menu_actions {
 
   elif  [[ $MainMenuChoice == "sd" ]] ; then
 
-    drives_and_snapshots  select
+    drives_and_snapshots select  snaps
     qqX_snapshot_delete
 
   elif  [[ $MainMenuChoice == "sa" ]] ; then
 
-    drives_and_snapshots select
+    drives_and_snapshots select  snaps
     SnapNumber=
 
-    printColor "\n\n  Give number of snapshot to use  [enter] to return to menu "
+    printf "\n\n  Return the VM to a previously recorded postion:"
+    printColor "\n\n  ID [number] of snapshot to apply  [enter] to return to menu "
     printf "\n\n"
     read -rp "  >  "  SnapNumber
     printf "\n\n"
