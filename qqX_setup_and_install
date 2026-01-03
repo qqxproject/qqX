@@ -8,11 +8,17 @@
 #  From version 1.10.03  A POSIX FRIENDLY .sh SCRIPT is USED AS A WRAPPER, to make sure that it double click executes properly
 #  in Qt / KDE XFCE etc desktop environments.
 
-#   IF: your file manager allows > double mouse click & 'run in terminal' or 'execute'
+  #########################################################################################################################################
 
-#   OR:  in the script's folder > right click > 'run as program' or 'run in konsole' or 'run in terminal'
+#   IF your FILE MANAGER allows:
 
-#   OR:  in the script's folder > right click > open in terminal >  type "./qqX_setup_and_install"   (note prefix ./)
+#   Double mouse click  >  'run in terminal' or 'execute' ....
+
+#   or     Right click  >  'run as program'  or 'run in terminal'  or 'run in konsole' ....
+
+#   or  Right click on Folder  >  'open in TERMINAL'  and  type "./qqX_setup_and_install"   (click on folder, not file, also note prefix ./)
+
+  #########################################################################################################################################
 
 #   FOR ANY NEWER OR NON-STANDARD TERMINAL, setting up a custom terminal profile is recommended
 #   as this will allow the values to be stored for future updates:
