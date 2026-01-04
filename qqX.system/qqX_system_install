@@ -212,29 +212,13 @@ while true ; do
       InstallationAlert=1
     fi
   done
-  GnuList=("awk" "sed" "gzip" "tar")
-  for GP in "${GnuList[@]}"; do
-    GnuPath="$(type -p "$GP")"
-    [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
-    if [[ ! $GnuPath ]]; then
-      printColor "\n\n  >>  '%s' should usually be present and is required by qqX"  "$GP"
-      printf "\n\n  Gnu is expected but most versions should have basic Gnu compatibilities"
-      InstallationAlert=1
-    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
-      printColor "\n\n  >>  CAUTION: Gnu '%s' is the usually supplied version eg realpath 'awk' should be 'gawk' ... "  "$GP"
-      printf "\n\n      Behaviour can vary but most versions should have basic Gnu compatibilities"
-      printf "\n      Most distro packaging systems should allow Gnu replacement upgrades"
-      printf "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
-      InstallationAlert=1
-    fi
-  done
   if [[ ! $(type -p wget) && ! $(type -p wget2) ]]; then
     printColor "\n\n  >>  Either a 'wget' or 'wget2 installation should be present and may be needed in certain places "
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
     printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
-    printf "\n\n  For some host distros, 'p7zip' may also need 'p7zip-plugins' "
+    printf "\n\n      For some host distros, 'p7zip' may also need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p unzip) ]]; then
@@ -258,28 +242,47 @@ while true ; do
     printColor "\n\n  >>  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system, and for qemu-utils etc "
     InstallationAlert=1
   fi
+  # add last as it's a bit longer on the notes
+  GnuList=("awk" "sed" "gzip" "tar")
+  for GP in "${GnuList[@]}"; do
+    GnuPath="$(type -p "$GP")"
+    [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
+    if [[ ! $GnuPath ]]; then
+      printColor "\n\n  >>  '%s' should usually be present and is required by qqX"  "$GP"
+      printf "\n\n      Gnu is expected but most versions should have basic Gnu compatibilities"
+      InstallationAlert=1
+    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
+      printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version"  "$GP"
+      printf "\n\n      eg for awk, 'realpath awk' should ideally resolve to 'gawk' and so-forth"
+      printf "\n      Most versions should have basic GNU COMPATIBILITIES but behaviour can vary ..."
+      printf "\n      See https://www.gnu.org/software/gawk/manual/html_node/Common-Extensions.html"
+      printf "\n      Most distro packaging systems should allow additional Gnu installations"
+      printf "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+      InstallationAlert=1
+    fi
+  done
 
   if [[ $InstallationAlert ]]; then
     printColor "\n\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
     printf "\n\n\n  Example full sets:"
 
-    printColor "\n\n  Ubuntu 25.10"
+    printColor "\n\n\n  Arch (Endeavour) KDE 2026/01"
+    printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
+
+    printColor "\n\n\n  Ubuntu 25.10"
     printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
     printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
     [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-utils"
     # qemu-system-modules-spice > quickemu PR #1696
 
-    printColor "\n\n\n  Debian KDE 13.2.0"
-    printf "\n\n  sudo apt install  gawk  wget2  genisoimage  desktop-file-utils"
-    printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86"
-
     if [[ $ShowMoreExamples ]]; then
 
       # provisional:
 
-      printColor "\n\n\n  Arch (Endeavour) KDE 2026/01"
-      printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
+      printColor "\n\n\n  Debian KDE 13.2.0"
+      printf "\n\n  sudo apt install  gawk  wget2  genisoimage  desktop-file-utils"
+      printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86"
 
       #printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
       #printf "\n\n  sudo dnf install  mate-terminal  xorriso  p7zip  pZzip-plugins "
@@ -295,11 +298,12 @@ while true ; do
       printf "\n\n\n  Nested installation detected ...."
     fi
 
-    printf "\n\n\n  For SPICE copy, paste and file transfer, install 'spice-vdagent' and 'spice-webdavd' INSIDE Linux GUEST VM's"
+    printColor "\n\n\n  >>  "
+    printf "Install 'spice-vdagent' and 'spice-webdavd' later on, if required, \n      inside the Linux GUEST VM's "
 
     printColor "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
     printf "\n\n  Return here to re-check:"
-    printf "\n\n  [r] re-check   [e] toggle more examples   [c] ignore and continue   [q] to quit \n\n"
+    printf "\n\n  [e] toggle MORE EXAMPLES   [r] re-check   [c] ignore and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
   else break
   fi
