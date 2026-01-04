@@ -100,7 +100,7 @@ if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
   printf "\n  however, at 12/2025 it is unfortunately problematic."
   printf "\n\n  Luckily, systems are fine with more than one terminal installed and present:"
   printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
-  printf "\n  which are both lightweight and Wayland/X11 compatible."
+  printf "\n  which are both lightweight and Wayland/X11/multi-DE compatible."
   printf "\n\n  If you wish to force cosmic-term, to see if changes make it now possible to use,"
   printf "\n  edit the entry for 'UserTerm' at the start of this script, and re-run."
   printf "\n\n  [enter] to quit, install another terminal and retry"

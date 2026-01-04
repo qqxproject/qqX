@@ -271,7 +271,7 @@ while true ; do
     printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
     printColor "\n\n\n  Ubuntu 25.10"
-    printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
+    printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  genisoimage"
     printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
     [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-utils"
     # qemu-system-modules-spice > quickemu PR #1696
@@ -281,16 +281,16 @@ while true ; do
       # provisional:
 
       printColor "\n\n\n  Debian KDE 13.2.0"
-      printf "\n\n  sudo apt install  gawk  wget2  genisoimage  desktop-file-utils"
+      printf "\n\n  sudo apt install  wget  genisoimage  desktop-file-utils"
       printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86"
 
       #printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
       #printf "\n\n  sudo dnf install  mate-terminal  xorriso  p7zip  pZzip-plugins "
       #printf "\n\n  sudo dnf install  spice-gtk-tools qemu-system-x86"
 
-      #printColor "\n\n\n  Pop! OS 24.04  Cosmic "
-      #printf "\n\n  sudo apt install  qterminal"
-      #printf "\n\n  sudo dnf install  spice-client-gtk  qemu-system-x86"
+      printColor "\n\n\n  Pop! OS 24.04 Cosmic "
+      printf "\n\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
+      printf "\n\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
 
     fi
 
@@ -303,7 +303,7 @@ while true ; do
 
     printColor "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
     printf "\n\n  Return here to re-check:"
-    printf "\n\n  [e] toggle MORE EXAMPLES   [r] re-check   [c] ignore and continue   [q] to quit \n\n"
+    printf "\n\n  [e] toggle MORE EXAMPLES   [r] re-check   [c] move-on and continue   [q] to quit \n\n"
     read -rp  "  >  "   InstallationAlert
   else break
   fi
@@ -516,9 +516,10 @@ else
 
   if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then
     printf  "\n   Upgrade the current release %s ..."   "$Current_qqX_Version"
-    # The terminal check list also needs to be available for the standard upgrader script:
-    ./qqX_setup_and_install MakeTermList || { printColor "\n\n  ERROR  'qqX setup and install' file not found \n\n" ; sleep 5; exit 1; }
   fi
+
+  # Re-Check the terminal check list as needs to be available for the standard upgrader script and refreshed in case of side installs
+  ./qqX_setup_and_install MakeTermList || { printColor "\n\n  MakeTermList  >  a Restart is required \n\n" ; sleep 5; exit 1; }
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
 
@@ -801,7 +802,7 @@ if [[ ! $SkipMkLauncher ]]; then
           printf "\n\n\n  Flatpak installs and the new Gnome Terminal 'ptyxis' are currently problematic"
           printf "\n\n  whilst, for qqX purposes, alacritty works better in tiling window managers:"
           printf "\n\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
-          printf "\n\n  which are both lightweight and Wayland/X11 compatible."
+          printf "\n\n  which are both lightweight and Wayland/X11/multi-DE compatible."
           printf "\n\n\n  Systems are fine with more than one terminal installed and present ..."
           printf "\n"
           TermChoose=
@@ -879,7 +880,7 @@ if [[ ! $SkipMkLauncher ]]; then
       fi
 
       printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
-      printf "\n  which are both lightweight and Wayland/X11 compatible."
+      printf "\n  which are both lightweight and Wayland/X11/multi-DE compatible."
       printf "\n\n  Systems are fine with more than one terminal installed and present ..."
 
       printf "\n\n\n"
