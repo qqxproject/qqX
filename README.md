@@ -38,7 +38,7 @@ Plus numerous downstream fixes for _current_ Quickemu issues
 
 🎄 Christmas and New Year Cheer for those kicking their heels  🎄
 
-NEW RELEASE 1.15 now in final beta stages > [details and download here](https://github.com/qqxproject/qqX/releases/tag/1.15.00-beta.07)
+NEW RELEASE 1.15 now in final beta stages > [details and download here](https://github.com/qqxproject/qqX/releases/tag/1.15.00-beta.08)
 
 -----
 
