@@ -1545,12 +1545,22 @@ function test_result {
 
 ## TWEAK plus add extra tests and test output
 function test_all {
+
     OS="${1}"
+    if [[ $ChkLog ]]; then {
+        if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
+        else printf "\nOS > %s:\n\n" "${OS^^}"
+        fi
+        } >> "$ChkLog"
+    fi
+    [[ ! $OS ]] && return
+
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
     [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
-    if [[ $(type -t "releases_${OS}") == function ]]; then
+
+    if [[ $(type -t "releases_${FUNC}") == function ]]; then
         for RELEASE in $("releases_${FUNC}"); do
-            if [[ $(type -t "editions_${OS}") == function ]]; then
+            if [[ $(type -t "editions_${FUNC}") == function ]]; then
                 for EDITION in $(editions_"${OS}"); do
                     # 'get_$OS' should output two args; a filepath URL, followed a checksum number
                     #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,

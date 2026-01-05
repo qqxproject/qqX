@@ -532,13 +532,16 @@ run_distro_tests_UI () {
       if [[ ! $(cat $TestLog) ]]; then
         printColor "\n\n  ERROR: No log contents ?"
         [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
-      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -q -v FAIL ; then
+      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
         printColor "\n\n  FAILS: \n\n"
         # shows the straightforward fails, followed by any obscure possible error lines
         grep FAIL "$TestLog"
-        grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP
+        grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]'
         printf "\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
-      else printColor "\n\n  All Tests Successfully Passed"
+      elif ! grep -q -e ^'[[:alnum:]]' "$TestLog" ; then
+        printColor "\n\n  FAIL: \n\n"
+        printf "\n  Empty Log File ??  > possible internal issue ??"
+      elif grep -qs PASS "$TestLog" ; then  printColor "\n\n  All Tests Successfully Passed"
       fi
     fi
     TestDistros=

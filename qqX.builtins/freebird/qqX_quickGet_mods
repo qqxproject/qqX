@@ -180,7 +180,7 @@ function distro_release_notes {
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
-        parrotsec)        RelNotes="12/2025 Mate is still supported but KDE is now default. Home is Non-Security and HTB is for cloud use.";;
+        parrotsec)        RelNotes="12/2025 Home is the Non-Security version. KDE is now default desktop.";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
@@ -607,7 +607,7 @@ function releases_parrotsec() {
   web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M
 }
 function editions_parrotsec() {
-    echo home htb security
+    echo home security
 }
 function get_parrotsec() {
     local HASH="" ; local ISO="" ; local URL=
@@ -1545,12 +1545,22 @@ function test_result {
 
 ## TWEAK plus add extra tests and test output
 function test_all {
+
     OS="${1}"
+    if [[ $ChkLog ]]; then {
+        if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
+        else printf "\nOS > %s:\n\n" "${OS^^}"
+        fi
+        } >> "$ChkLog"
+    fi
+    [[ ! $OS ]] && return
+
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
     [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
-    if [[ $(type -t "releases_${OS}") == function ]]; then
+
+    if [[ $(type -t "releases_${FUNC}") == function ]]; then
         for RELEASE in $("releases_${FUNC}"); do
-            if [[ $(type -t "editions_${OS}") == function ]]; then
+            if [[ $(type -t "editions_${FUNC}") == function ]]; then
                 for EDITION in $(editions_"${OS}"); do
                     # 'get_$OS' should output two args; a filepath URL, followed a checksum number
                     #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,

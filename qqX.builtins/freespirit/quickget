@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # SC2317: Command appears to be unreachable. Check usage (or ignore if invoked indirectly).
 #  - https://www.shellcheck.net/wiki/SC2317
 #  - Disable globally because many functions are called indirectly
