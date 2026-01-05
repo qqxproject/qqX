@@ -270,10 +270,13 @@ while true ; do
     printColor "\n\n\n  Arch (Endeavour) KDE 2026/01"
     printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
+    printColor "\n\n\n  Fedora 43 KDE"
+    printf "\n\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
+    # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
+
     printColor "\n\n\n  Ubuntu 25.10"
-    printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  genisoimage"
+    printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
     printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
-    [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-utils"
     # qemu-system-modules-spice > quickemu PR #1696
 
     if [[ $ShowMoreExamples ]]; then
