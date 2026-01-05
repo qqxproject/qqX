@@ -180,7 +180,7 @@ function distro_release_notes {
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
-        parrotsec)        RelNotes="12/2025 Mate is still supported but KDE is now default. Home is Non-Security and HTB is for cloud use.";;
+        parrotsec)        RelNotes="12/2025 Home is the Non-Security version. KDE is now default desktop.";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
@@ -607,7 +607,7 @@ function releases_parrotsec() {
   web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M
 }
 function editions_parrotsec() {
-    echo home htb security
+    echo home security
 }
 function get_parrotsec() {
     local HASH="" ; local ISO="" ; local URL=
