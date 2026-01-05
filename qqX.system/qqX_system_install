@@ -263,37 +263,36 @@ while true ; do
   done
 
   if [[ $InstallationAlert ]]; then
-    printColor "\n\n\n  [tx]  Translate from English"
-    [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
+
+    printColor "\n\n  >>  "
+    printf "Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
+
     printf "\n\n\n  Example full sets:"
 
-    printColor "\n\n\n  Arch (Endeavour) KDE 2026/01"
-    printf "\n\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
+    printColor "\n\n  Arch (Endeavour) KDE 2026/01"
+    printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
-    printColor "\n\n\n  Fedora 43 KDE"
-    printf "\n\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
+    printColor "\n\n  Fedora 43 KDE"
+    printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
     # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
-
-    printColor "\n\n\n  Ubuntu 25.10"
-    printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
-    printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
-    # qemu-system-modules-spice > quickemu PR #1696
 
     if [[ $ShowMoreExamples ]]; then
 
-      # provisional:
-
-      printColor "\n\n\n  Debian KDE 13.2.0"
-      printf "\n\n  sudo apt install  wget  genisoimage  desktop-file-utils"
-      printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86"
-
-      printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
-      printf "\n\n  sudo dnf install  mate-terminal  wayland-utils  pZzip-plugins  socat  spice-gtk-tools"
+      printColor "\n\n  Fedora 43 Workstation (Gnome 49)"
+      printf "\n  sudo dnf install  mate-terminal  wayland-utils  pZzip-plugins  socat  spice-gtk-tools"
       # @ 01/2025 seems to come with qemu ready installed
 
-      printColor "\n\n\n  Pop! OS 24.04 Cosmic "
-      printf "\n\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
-      printf "\n\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
+      printColor "\n\n  Debian KDE 13.2.0"
+      printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
+
+      printColor "\n\n  Ubuntu 25.10"
+      printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
+      printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
+      # qemu-system-modules-spice > quickemu PR #1696
+
+      printColor "\n\n  Pop! OS 24.04 Cosmic "
+      printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
+      printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
 
     fi
 
@@ -301,12 +300,13 @@ while true ; do
       printf "\n\n\n  Nested installation detected ...."
     fi
 
-    printColor "\n\n\n  >>  "
-    printf "Install 'spice-vdagent' and 'spice-webdavd' later on, if required, \n      inside the Linux GUEST VM's "
+    printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations  > return here to re-check"
 
-    printColor "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
-    printf "\n\n  Return here to re-check:"
-    printf "\n\n  [e] toggle MORE EXAMPLES   [r] re-check   [c] move-on and continue   [q] to quit \n\n"
+    printColor "\n\n  [e] toggle MORE EXAMPLES   [r] re-check   [c] move-on and continue   [q] to quit"
+    printf "\n\n  [tx]  Translate from English"
+    [[ $ShowTxTexts ]] && printf "  -  %s" "$(find_translate_text "Translate from English")"
+    printf "\n\n"
+
     read -rp  "  >  "   InstallationAlert
   else break
   fi
