@@ -218,7 +218,7 @@ while true ; do
   fi
   if [[ ! $(type -p 7z) ]]; then
     printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
-    printf "\n\n      For some host distros, 'p7zip' may also need 'p7zip-plugins' "
+    printf "\n\n      For some host distros also/instead will need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p unzip) ]]; then
@@ -287,9 +287,9 @@ while true ; do
       printf "\n\n  sudo apt install  wget  genisoimage  desktop-file-utils"
       printf "\n\n  sudo apt install  spice-client-gtk  qemu-system-x86"
 
-      #printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
-      #printf "\n\n  sudo dnf install  mate-terminal  xorriso  p7zip  pZzip-plugins "
-      #printf "\n\n  sudo dnf install  spice-gtk-tools qemu-system-x86"
+      printColor "\n\n\n  Fedora 43 Workstation (Gnome 49)"
+      printf "\n\n  sudo dnf install  mate-terminal  wayland-utils  pZzip-plugins  socat  spice-gtk-tools"
+      # @ 01/2025 seems to come with qemu ready installed
 
       printColor "\n\n\n  Pop! OS 24.04 Cosmic "
       printf "\n\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
@@ -416,7 +416,7 @@ Notes
 # Changes made here, to height and width values, will be one-time only.
 # Also to UserTerm.
 
-Term_Width=145
+Term_Width=150
 Term_Height=50
 Term_Taller=55
 
@@ -520,9 +520,6 @@ else
   if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then
     printf  "\n   Upgrade the current release %s ..."   "$Current_qqX_Version"
   fi
-
-  # Re-Check the terminal check list as needs to be available for the standard upgrader script and refreshed in case of side installs
-  ./qqX_setup_and_install MakeTermList || { printColor "\n\n  MakeTermList  >  a Restart is required \n\n" ; sleep 5; exit 1; }
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
 
@@ -644,6 +641,9 @@ else
       sudo chmod a+rx "$qqX_Std_File_Path"
       sudo chmod a+rx "$qqX_Std_lc_Link_Path"
     fi
+
+    # Re-Check the terminal check list as needs to be available for the standard upgrader script and refreshed in case of side installs
+    ./qqX_setup_and_install MakeTermList || { printColor "\n\n  MakeTermList  >  a Restart is required \n\n" ; sleep 5; exit 1; }
 
     # Check that the right version is there:
     if [[ -e "$qqX_Std_File_Path" &&  -e "$qqX_Std_lc_Link_Path" ]] && [[ "$(qqx --version 2>/dev/null)" == "$New_qqX_Version" ]] ; then
