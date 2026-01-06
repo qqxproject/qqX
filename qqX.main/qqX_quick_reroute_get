@@ -497,22 +497,24 @@ run_distro_tests_UI () {
   elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
   fi
   while true; do
-    printf "\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
-    [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
+        [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
     if [[ $1 ]]; then
       printColor "\n\n  THIS TEST: "
       printf "checks every listed release and edition of "
       printColor "'%s'" "$1"
       printf "  >  Use Main Menu for 'test-all'"
     else
+      printColor "\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
       printf "\n\n  Tests every edition of every distro release, except Windows tests which are not possible"
       printf "\n\n  Takes around 1/2 hour ..."
       printf "\n\n  Select a Distro for individual tests"
     fi
     printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
-    printf "\n\n  To manually update functions, see notes in qqX.builtins > 'freespirit/qqX_quickGet_mods'"
+    printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
     printColor "\n\n  [enter] to start (in compact mode)  "
-    printf "[v] verbose mode (needs large screen)  [vm] show mirrors   [b] to go back  [B] to main menu \n\n"
+    printf "[v] verbose mode (needs large screen)  [vm] show mirrors   [b] to go back"
+    [[ $1 ]] && printf "  [B] to main menu"
+    printf "\n\n"
     read -rp "  >  " TestDistros
     if [[ $TestDistros == "b" ]]; then break
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
