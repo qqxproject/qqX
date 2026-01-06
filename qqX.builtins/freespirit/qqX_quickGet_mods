@@ -1491,12 +1491,12 @@ function web_check {
     printf "%s" "$URL" > "/tmp/qmod-dl-url"
     if [[ ! $URL ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
-            printf "\nERROR: No URL > Possible initial lookup or server problem\n" >> "$ChkLog"
+            printf "ERROR: No URL > Possible initial lookup or server problem\n\n" >> "$ChkLog"
         fi
         return 1
     elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'Non Conformant URL' "$ChkLog" ; then
-            printf "\nERROR: Non Conformant URL > Possible initial lookup or server problem \n" >> "$ChkLog"
+            printf "ERROR: Non Conformant URL > Possible initial lookup or server problem \n\n" >> "$ChkLog"
         fi
         return 1
     fi

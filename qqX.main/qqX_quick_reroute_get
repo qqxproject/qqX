@@ -490,7 +490,7 @@ run_distro_tests_UI () {
     return
   fi
   test_internet_is_up
-  ExitTestToMain= ; qGet_TestSynopis=
+  ExitTestToMain= ; qGet_TestSynopis= ; qGet_TestSynopisTwo=
   [[ $1 == "test-all" ]] && shift
   # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
   if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
@@ -535,13 +535,17 @@ run_distro_tests_UI () {
         qGet_TestSynopis="ERROR: No log contents  > possible server issue ??"
         [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
       elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
-        printColor "\n\n  FAILS: \n\n"
+        printColor "\n  FAILS: \n"
         # shows the straightforward fails, followed by any obscure possible error lines
         qGet_TestSynopis="$(grep FAIL "$TestLog")"
-        qGet_TestSynopis+="$(grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]')"
-        printf "\n%s\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues" "$qGet_TestSynopis"
+        qGet_TestSynopisTwo="$(grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]')"
+        if [[ $qGet_TestSynopis ]]; then
+          [[ $qGet_TestSynopisTwo ]] && printf -v qGet_TestSynopis "%s\n\n%s" "$qGet_TestSynopis" "$qGet_TestSynopisTwo"
+        elif [[ $qGet_TestSynopisTwo ]] ; then qGet_TestSynopis="$qGet_TestSynopisTwo"
+        fi
+        printf "\n\n%s\n\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues" "$qGet_TestSynopis"
       elif ! grep -q -e ^'[[:alnum:]]' "$TestLog" ; then
-        printColor "\n\n  FAIL: \n\n"
+        printColor "\n  FAIL: \n"
         printf "\n  Empty Log File ??  > possible internal issue ??"
         qGet_TestSynopis="Empty Log File ??  > possible internal issue ??"
       elif grep -qs PASS "$TestLog" ; then
