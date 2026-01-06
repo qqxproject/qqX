@@ -490,7 +490,7 @@ run_distro_tests_UI () {
     return
   fi
   test_internet_is_up
-  ExitTestToMain=
+  ExitTestToMain= ; qGet_TestSynopis=
   [[ $1 == "test-all" ]] && shift
   # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
   if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
@@ -500,7 +500,8 @@ run_distro_tests_UI () {
     printf "\n\n  Test downloadabilty of ALL available Quickget and quickGet_Mod distros"
     [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
     if [[ $1 ]]; then
-      printf "\n\n  THIS TEST: checks every listed release and edition of "
+      printColor "\n\n  THIS TEST: "
+      printf "checks every listed release and edition of "
       printColor "'%s'" "$1"
       printf "  >  Use Main Menu for 'test-all'"
     else
@@ -531,18 +532,30 @@ run_distro_tests_UI () {
       fi
       if [[ ! $(cat $TestLog) ]]; then
         printColor "\n\n  ERROR: No log contents ?"
+        qGet_TestSynopis="ERROR: No log contents  > possible server issue ??"
         [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
       elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
         printColor "\n\n  FAILS: \n\n"
         # shows the straightforward fails, followed by any obscure possible error lines
-        grep FAIL "$TestLog"
-        grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]'
-        printf "\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
+        qGet_TestSynopis="$(grep FAIL "$TestLog")"
+        qGet_TestSynopis+="$(grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]')"
+        printf "\n%s\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues" "$qGet_TestSynopis"
       elif ! grep -q -e ^'[[:alnum:]]' "$TestLog" ; then
         printColor "\n\n  FAIL: \n\n"
         printf "\n  Empty Log File ??  > possible internal issue ??"
-      elif grep -qs PASS "$TestLog" ; then  printColor "\n\n  All Tests Successfully Passed"
+        qGet_TestSynopis="Empty Log File ??  > possible internal issue ??"
+      elif grep -qs PASS "$TestLog" ; then
+        printColor "\n\n  All Tests Successfully Passed"
+        qGet_TestSynopis="All Tests Successfully Passed"
       fi
+      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.$(date +%T-%b.%d).txt"
+      else qGet_TestSynopis_File="/tmp/qGet-test.ALL.$(date +%T-%b.%d).txt"
+      fi
+      printf "\n\n%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  > "$qGet_TestSynopis_File"
+      [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
+      printf "\n\n" >> "$qGet_TestSynopis_File"
+      [[ ! $1 ]] && printf "%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  >> "$qGet_TestSynopis_File"
+      printf "\n\n  Analysis Log File: '%s'" "$qGet_TestSynopis_File"
     fi
     TestDistros=
   done
