@@ -234,7 +234,15 @@ function download_new_release {
         qqX_UpdateAvail="$qqX_Newest_PreRelease"
       fi
       if [[ ! $qqX_UpdateAvail ]] ; then
-        printColor "\n\n  No new release found .... \n\n"
+        if [[ $UpdRechk == "once" ]]; then UpdRechk="done"
+        else printf "\n\n"
+        fi
+        printColor "  No new release found ...."
+        if [[ $qqX_Current_ReleaseType == "beta" ]] && floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Newest_PreRelease" ; then
+          printf "\n\n  Further add-on pre-release tweaks %s can be found at https://github.com/qqxproject/qqX/tags" "$qqX_Newest_Tag"
+          UpdRechk="once"
+        fi
+        printf "\n\n"
       elif [[ ! $Muted_BetaAlertPoint ]]; then
         [[ ! $qqX_Latest_SecureTarBall_Addr ]] && printf "\n\n  Via Non-SHA checked download ...."
         printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
