@@ -1,0 +1,983 @@
+
+
+FreeSpirit  Sun Jan 11 14:04:52 CET 2026
+
+ERROR: anduinos  LTS         >  Editions function FAIL
+
+
+OS > ALMA:
+
+Checksum: PASS   Iso: PASS   alma-9-boot
+Checksum: PASS   Iso: PASS   alma-9-minimal
+Checksum: PASS   Iso: PASS   alma-9-dvd
+Checksum: PASS   Iso: PASS   alma-8-boot
+Checksum: PASS   Iso: PASS   alma-8-minimal
+Checksum: PASS   Iso: PASS   alma-8-dvd
+
+OS > ALPINE:
+
+Checksum: PASS   Iso: PASS   alpine-3.23
+Checksum: PASS   Iso: PASS   alpine-3.22
+Checksum: PASS   Iso: PASS   alpine-3.21
+Checksum: PASS   Iso: PASS   alpine-3.20
+
+OS > ANDROID:
+
+Checksum: PASS   Iso: PASS   android-9.0-x86_64
+Checksum: PASS   Iso: PASS   android-9.0-x86
+Checksum: PASS   Iso: PASS   android-8.1-x86_64
+Checksum: PASS   Iso: PASS   android-8.1-x86
+Checksum: PASS   Iso: PASS   android-7.1-x86_64
+Checksum: PASS   Iso: PASS   android-7.1-x86
+
+OS > ANDUINOS:
+
+ERROR: anduinos  LTS         >  Editions function FAIL
+
+OS > ANTIX:
+
+Checksum: PASS   Iso: PASS   antix-23.2-net-sysv
+Checksum: PASS   Iso: PASS   antix-23.2-core-sysv
+Checksum: PASS   Iso: PASS   antix-23.2-base-sysv
+Checksum: PASS   Iso: PASS   antix-23.2-full-sysv
+Checksum: PASS   Iso: PASS   antix-23.2-net-runit
+Checksum: PASS   Iso: PASS   antix-23.2-core-runit
+Checksum: PASS   Iso: PASS   antix-23.2-base-runit
+Checksum: PASS   Iso: PASS   antix-23.2-full-runit
+
+OS > ARCHCRAFT:
+
+Checksum: n/a    Iso: PASS   archcraft-latest
+
+OS > ARCHLINUX:
+
+Checksum: PASS   Iso: PASS   archlinux-latest
+
+OS > ARTIXLINUX:
+
+Checksum: PASS   Iso: PASS   artixlinux-20250407-base-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-base-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20250407-base-runit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-base-s6
+Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-runit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-s6
+Checksum: PASS   Iso: PASS   artixlinux-20250407-community-gtk
+Checksum: PASS   Iso: PASS   artixlinux-20250407-community-qt
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-runit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-s6
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-runit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-s6
+Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-runit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-s6
+Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-runit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-s6
+Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-runit
+Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-s6
+
+OS > ATHENAOS:
+
+Checksum: PASS   Iso: PASS   athenaos-25.11
+Checksum: n/a    Iso: PASS   athenaos-23.11
+
+OS > BATOCERA:
+
+Checksum: n/a    Iso: PASS   batocera-42
+Checksum: n/a    Iso: PASS   batocera-41
+Checksum: n/a    Iso: PASS   batocera-40
+Checksum: n/a    Iso: PASS   batocera-39
+Checksum: n/a    Iso: PASS   batocera-38
+
+OS > BAZZITE:
+
+Checksum: PASS   Iso: PASS   bazzite-latest-gnome
+Checksum: PASS   Iso: PASS   bazzite-latest-plasma
+Checksum: PASS   Iso: PASS   bazzite-latest-deck-gnome
+Checksum: PASS   Iso: PASS   bazzite-latest-deck-plasma
+
+OS > BIGLINUX:
+
+Checksum: PASS   Iso: PASS   biglinux-2026-01-10-k618
+Checksum: PASS   Iso: PASS   biglinux-2026-01-10-k612
+Checksum: PASS   Iso: PASS   biglinux-2026-01-10-k66
+
+OS > BLENDOS:
+
+Checksum: n/a    Iso: PASS   blendos-latest
+
+OS > BLUESTAR:
+
+Checksum: PASS   Iso: PASS   bluestar-latest
+
+OS > BODHI:
+
+Checksum: PASS   Iso: PASS   bodhi-7.0.0-standard
+Checksum: PASS   Iso: PASS   bodhi-7.0.0-hwe
+Checksum: PASS   Iso: PASS   bodhi-7.0.0-s76
+Checksum: PASS   Iso: PASS   bodhi-6.0.0-standard
+Checksum: PASS   Iso: PASS   bodhi-6.0.0-hwe
+Checksum: PASS   Iso: PASS   bodhi-5.1.0-standard
+Checksum: PASS   Iso: PASS   bodhi-5.1.0-hwe
+
+OS > BUNSENLABS:
+
+Checksum: PASS   Iso: PASS   bunsenlabs-boron
+
+OS > CACHYOS:
+
+Checksum: PASS   Iso: PASS   cachyos-latest-desktop
+Checksum: PASS   Iso: PASS   cachyos-latest-handheld
+
+OS > CENTOS-STREAM:
+
+Checksum: PASS   Iso: PASS   centos-stream-10-boot
+Checksum: PASS   Iso: PASS   centos-stream-10-dvd1
+Checksum: PASS   Iso: PASS   centos-stream-9-boot
+Checksum: PASS   Iso: PASS   centos-stream-9-dvd1
+
+OS > CHIMERALINUX:
+
+Checksum: PASS   Iso: PASS   chimeralinux-latest-base
+Checksum: PASS   Iso: PASS   chimeralinux-latest-gnome
+
+OS > CRUNCHBANG++:
+
+Checksum: n/a    Iso: PASS   crunchbang++-12.0
+Checksum: n/a    Iso: PASS   crunchbang++-11.2
+Checksum: n/a    Iso: PASS   crunchbang++-10.1
+Checksum: n/a    Iso: PASS   crunchbang++-9.0
+
+OS > DEBIAN:
+
+Checksum: PASS   Iso: PASS   debian-13.3.0-standard
+Checksum: PASS   Iso: PASS   debian-13.3.0-cinnamon
+Checksum: PASS   Iso: PASS   debian-13.3.0-gnome
+Checksum: PASS   Iso: PASS   debian-13.3.0-kde
+Checksum: PASS   Iso: PASS   debian-13.3.0-lxde
+Checksum: PASS   Iso: PASS   debian-13.3.0-lxqt
+Checksum: PASS   Iso: PASS   debian-13.3.0-mate
+Checksum: PASS   Iso: PASS   debian-13.3.0-xfce
+Checksum: PASS   Iso: PASS   debian-13.3.0-netinst
+Checksum: PASS   Iso: PASS   debian-12.12.0-standard
+Checksum: PASS   Iso: PASS   debian-12.12.0-cinnamon
+Checksum: PASS   Iso: PASS   debian-12.12.0-gnome
+Checksum: PASS   Iso: PASS   debian-12.12.0-kde
+Checksum: PASS   Iso: PASS   debian-12.12.0-lxde
+Checksum: PASS   Iso: PASS   debian-12.12.0-lxqt
+Checksum: PASS   Iso: PASS   debian-12.12.0-mate
+Checksum: PASS   Iso: PASS   debian-12.12.0-xfce
+Checksum: PASS   Iso: PASS   debian-12.12.0-netinst
+Checksum: PASS   Iso: PASS   debian-11.11.0-standard
+Checksum: PASS   Iso: PASS   debian-11.11.0-cinnamon
+Checksum: PASS   Iso: PASS   debian-11.11.0-gnome
+Checksum: PASS   Iso: PASS   debian-11.11.0-kde
+Checksum: PASS   Iso: PASS   debian-11.11.0-lxde
+Checksum: PASS   Iso: PASS   debian-11.11.0-lxqt
+Checksum: PASS   Iso: PASS   debian-11.11.0-mate
+Checksum: PASS   Iso: PASS   debian-11.11.0-xfce
+Checksum: PASS   Iso: PASS   debian-11.11.0-netinst
+
+OS > DEEPIN:
+
+Checksum: PASS   Iso: PASS   deepin-25.0.1
+Checksum: PASS   Iso: PASS   deepin-23.1
+Checksum: PASS   Iso: PASS   deepin-20.9
+
+OS > DEVUAN:
+
+Checksum: PASS   Iso: PASS   devuan-6.0_Excalibur
+Checksum: PASS   Iso: PASS   devuan-5.0_Daedalus
+Checksum: PASS   Iso: PASS   devuan-4.0_Chimaera
+
+OS > DRAGONFLYBSD:
+
+Checksum: PASS   Iso: PASS   dragonflybsd-6.4.2
+Checksum: PASS   Iso: PASS   dragonflybsd-6.4.1
+Checksum: PASS   Iso: PASS   dragonflybsd-6.4.0
+Checksum: PASS   Iso: PASS   dragonflybsd-6.2.2
+Checksum: PASS   Iso: PASS   dragonflybsd-6.2.1
+
+OS > EASYOS:
+
+Checksum: n/a    Iso: PASS   easyos-5.9
+Checksum: n/a    Iso: PASS   easyos-5.8.5
+
+OS > EDUBUNTU:
+
+Checksum: PASS   Iso: PASS   edubuntu-24.04
+Checksum: PASS   Iso: PASS   edubuntu-25.04
+Checksum: PASS   Iso: PASS   edubuntu-25.10
+Checksum: n/a    Iso: PASS   edubuntu-daily-live
+
+OS > ELEMENTARY:
+
+Checksum: n/a    Iso: PASS   elementary-8.0
+Checksum: n/a    Iso: PASS   elementary-7.1
+Checksum: n/a    Iso: PASS   elementary-7.0
+
+OS > ENDEAVOUROS:
+
+Checksum: PASS   Iso: PASS   endeavouros-2025.11.24
+Checksum: PASS   Iso: PASS   endeavouros-2025.03.19
+Checksum: PASS   Iso: PASS   endeavouros-2025.02.08
+Checksum: PASS   Iso: PASS   endeavouros-2024.09.22
+
+OS > ENDLESS:
+
+Checksum: n/a    Iso: PASS   endless-6.0.4-base
+Checksum: n/a    Iso: PASS   endless-6.0.4-en
+Checksum: n/a    Iso: PASS   endless-6.0.4-fr
+Checksum: n/a    Iso: PASS   endless-6.0.4-pt_BR
+Checksum: n/a    Iso: PASS   endless-6.0.4-es
+
+OS > FEDORA:
+
+Checksum: PASS   Iso: PASS   fedora-43-Budgie
+Checksum: PASS   Iso: PASS   fedora-43-COSMIC
+Checksum: PASS   Iso: PASS   fedora-43-COSMIC-Atomic
+Checksum: PASS   Iso: PASS   fedora-43-Cinnamon
+Checksum: PASS   Iso: PASS   fedora-43-KDE
+Checksum: PASS   Iso: PASS   fedora-43-KDE_Mobile
+Checksum: PASS   Iso: PASS   fedora-43-Kinoite
+Checksum: PASS   Iso: PASS   fedora-43-LXDE
+Checksum: PASS   Iso: PASS   fedora-43-LXQt
+Checksum: PASS   Iso: PASS   fedora-43-Mate
+Checksum: PASS   Iso: PASS   fedora-43-MiracleWM
+Checksum: PASS   Iso: PASS   fedora-43-Onyx
+Checksum: PASS   Iso: PASS   fedora-43-Sericea
+Checksum: PASS   Iso: PASS   fedora-43-Server
+Checksum: PASS   Iso: PASS   fedora-43-Silverblue
+Checksum: PASS   Iso: PASS   fedora-43-Sway
+Checksum: PASS   Iso: PASS   fedora-43-Workstation
+Checksum: PASS   Iso: PASS   fedora-43-Xfce
+Checksum: PASS   Iso: PASS   fedora-43-i3
+Checksum: PASS   Iso: PASS   fedora-42-Budgie
+Checksum: PASS   Iso: PASS   fedora-42-COSMIC
+Checksum: PASS   Iso: PASS   fedora-42-COSMIC-Atomic
+Checksum: PASS   Iso: PASS   fedora-42-Cinnamon
+Checksum: PASS   Iso: PASS   fedora-42-KDE
+Checksum: PASS   Iso: PASS   fedora-42-KDE_Mobile
+Checksum: PASS   Iso: PASS   fedora-42-Kinoite
+Checksum: PASS   Iso: PASS   fedora-42-LXDE
+Checksum: PASS   Iso: PASS   fedora-42-LXQt
+Checksum: PASS   Iso: PASS   fedora-42-Mate
+Checksum: PASS   Iso: PASS   fedora-42-MiracleWM
+Checksum: PASS   Iso: PASS   fedora-42-Onyx
+Checksum: PASS   Iso: PASS   fedora-42-Sericea
+Checksum: PASS   Iso: PASS   fedora-42-Server
+Checksum: PASS   Iso: PASS   fedora-42-Silverblue
+Checksum: PASS   Iso: PASS   fedora-42-Sway
+Checksum: PASS   Iso: PASS   fedora-42-Workstation
+Checksum: PASS   Iso: PASS   fedora-42-Xfce
+Checksum: PASS   Iso: PASS   fedora-42-i3
+Checksum: PASS   Iso: PASS   fedora-41-Budgie
+Checksum: PASS   Iso: PASS   fedora-41-Cinnamon
+Checksum: PASS   Iso: PASS   fedora-41-KDE
+Checksum: PASS   Iso: PASS   fedora-41-KDE_Mobile
+Checksum: PASS   Iso: PASS   fedora-41-Kinoite
+Checksum: PASS   Iso: PASS   fedora-41-LXDE
+Checksum: PASS   Iso: PASS   fedora-41-LXQt
+Checksum: PASS   Iso: PASS   fedora-41-Mate
+Checksum: PASS   Iso: PASS   fedora-41-MiracleWM
+Checksum: PASS   Iso: PASS   fedora-41-Onyx
+Checksum: PASS   Iso: PASS   fedora-41-Sericea
+Checksum: PASS   Iso: PASS   fedora-41-Server
+Checksum: PASS   Iso: PASS   fedora-41-Silverblue
+Checksum: PASS   Iso: PASS   fedora-41-Sway
+Checksum: PASS   Iso: PASS   fedora-41-Workstation
+Checksum: PASS   Iso: PASS   fedora-41-Xfce
+Checksum: PASS   Iso: PASS   fedora-41-i3
+
+OS > FREEBSD:
+
+Checksum: PASS   Iso: PASS   freebsd-15.0-disc1
+Checksum: PASS   Iso: PASS   freebsd-15.0-dvd1
+Checksum: PASS   Iso: PASS   freebsd-14.3-disc1
+Checksum: PASS   Iso: PASS   freebsd-14.3-dvd1
+Checksum: PASS   Iso: PASS   freebsd-13.5-disc1
+Checksum: PASS   Iso: PASS   freebsd-13.5-dvd1
+
+OS > FREEDOS:
+
+Checksum: PASS   Iso: PASS   freedos-1.4
+Checksum: PASS   Iso: PASS   freedos-1.3
+Checksum: PASS   Iso: PASS   freedos-1.2
+
+OS > GARUDA:
+
+Checksum: PASS   Iso: PASS   garuda-latest-cinnamon
+Checksum: PASS   Iso: PASS   garuda-latest-dr460nized
+Checksum: PASS   Iso: PASS   garuda-latest-dr460nized-gaming
+Checksum: PASS   Iso: PASS   garuda-latest-gnome
+Checksum: PASS   Iso: PASS   garuda-latest-hyprland
+Checksum: PASS   Iso: PASS   garuda-latest-i3
+Checksum: PASS   Iso: PASS   garuda-latest-kde-lite
+Checksum: PASS   Iso: PASS   garuda-latest-mokka
+Checksum: PASS   Iso: PASS   garuda-latest-sway
+Checksum: PASS   Iso: PASS   garuda-latest-xfce
+
+OS > GENTOO:
+
+Checksum: PASS   Iso: PASS   gentoo-latest-minimal
+Checksum: PASS   Iso: PASS   gentoo-latest-livegui
+
+OS > GHOSTBSD:
+
+Checksum: PASS   Iso: PASS   ghostbsd-25.02-R14.3p2-mate
+Checksum: PASS   Iso: PASS   ghostbsd-25.02-R14.3p2-xfce
+Checksum: PASS   Iso: PASS   ghostbsd-25.01-R14.2p1-mate
+Checksum: PASS   Iso: PASS   ghostbsd-25.01-R14.2p1-xfce
+Checksum: PASS   Iso: PASS   ghostbsd-24.10.1-mate
+Checksum: PASS   Iso: PASS   ghostbsd-24.10.1-xfce
+
+OS > GNOMEOS:
+
+Checksum: n/a    Iso: PASS   gnomeos-49.0-release
+Checksum: n/a    Iso: PASS   gnomeos-49.0-rc
+Checksum: n/a    Iso: PASS   gnomeos-49.0-beta
+Checksum: n/a    Iso: PASS   gnomeos-48.0-release
+Checksum: n/a    Iso: PASS   gnomeos-48.0-rc
+Checksum: n/a    Iso: PASS   gnomeos-48.0-beta
+Checksum: n/a    Iso: PASS   gnomeos-48.0-alpha
+Checksum: n/a    Iso: PASS   gnomeos-47.0-release
+Checksum: n/a    Iso: PASS   gnomeos-47.0-rc
+Checksum: n/a    Iso: PASS   gnomeos-47.0-beta
+Checksum: n/a    Iso: PASS   gnomeos-47.0-alpha
+
+OS > GUIX:
+
+Checksum: n/a    Iso: PASS   guix-1.4.0
+Checksum: n/a    Iso: PASS   guix-1.3.0
+
+OS > HAIKU:
+
+Checksum: PASS   Iso: PASS   haiku-r1beta5-x86_64
+Checksum: PASS   Iso: PASS   haiku-r1beta5-x86_gcc2h
+Checksum: PASS   Iso: PASS   haiku-r1beta4-x86_64
+Checksum: PASS   Iso: PASS   haiku-r1beta4-x86_gcc2h
+Checksum: PASS   Iso: PASS   haiku-r1beta3-x86_64
+Checksum: PASS   Iso: PASS   haiku-r1beta3-x86_gcc2h
+
+OS > KALI:
+
+Checksum: PASS   Iso: PASS   kali-current
+Checksum: PASS   Iso: PASS   kali-kali-weekly
+
+OS > KDENEON:
+
+Checksum: PASS   Iso: PASS   kdeneon-user
+Checksum: PASS   Iso: PASS   kdeneon-testing
+Checksum: PASS   Iso: PASS   kdeneon-unstable
+Checksum: PASS   Iso: PASS   kdeneon-developer
+
+OS > KOLIBRIOS:
+
+Checksum: n/a    Iso: PASS   kolibrios-latest-en_US
+Checksum: n/a    Iso: PASS   kolibrios-latest-es_ES
+Checksum: n/a    Iso: PASS   kolibrios-latest-ru_RU
+
+OS > KUBUNTU:
+
+Checksum: PASS   Iso: PASS   kubuntu-16.04
+Checksum: PASS   Iso: PASS   kubuntu-18.04
+Checksum: PASS   Iso: PASS   kubuntu-20.04
+Checksum: PASS   Iso: PASS   kubuntu-22.04
+Checksum: PASS   Iso: PASS   kubuntu-24.04
+Checksum: PASS   Iso: PASS   kubuntu-25.04
+Checksum: PASS   Iso: PASS   kubuntu-25.10
+Checksum: n/a    Iso: PASS   kubuntu-daily-live
+
+OS > LINUXLITE:
+
+Checksum: PASS   Iso: PASS   linuxlite-7.6
+Checksum: PASS   Iso: PASS   linuxlite-7.2
+
+OS > LINUXMINT:
+
+Checksum: PASS   Iso: PASS   linuxmint-22.2-cinnamon
+Checksum: PASS   Iso: PASS   linuxmint-22.2-mate
+Checksum: PASS   Iso: PASS   linuxmint-22.2-xfce
+Checksum: PASS   Iso: PASS   linuxmint-22.1-cinnamon
+Checksum: PASS   Iso: PASS   linuxmint-22.1-mate
+Checksum: PASS   Iso: PASS   linuxmint-22.1-xfce
+Checksum: PASS   Iso: PASS   linuxmint-22-cinnamon
+Checksum: PASS   Iso: PASS   linuxmint-22-mate
+Checksum: PASS   Iso: PASS   linuxmint-22-xfce
+Checksum: PASS   Iso: PASS   linuxmint-21.3-cinnamon
+Checksum: PASS   Iso: PASS   linuxmint-21.3-mate
+Checksum: PASS   Iso: PASS   linuxmint-21.3-xfce
+Checksum: PASS   Iso: PASS   linuxmint-21.2-cinnamon
+Checksum: PASS   Iso: PASS   linuxmint-21.2-mate
+Checksum: PASS   Iso: PASS   linuxmint-21.2-xfce
+Checksum: PASS   Iso: PASS   linuxmint-21.1-cinnamon
+Checksum: PASS   Iso: PASS   linuxmint-21.1-mate
+Checksum: PASS   Iso: PASS   linuxmint-21.1-xfce
+
+OS > LMDE:
+
+Checksum: PASS   Iso: PASS   lmde-6-cinnamon
+
+OS > LUBUNTU:
+
+Checksum: PASS   Iso: PASS   lubuntu-16.04
+Checksum: PASS   Iso: PASS   lubuntu-18.04
+Checksum: PASS   Iso: PASS   lubuntu-20.04
+Checksum: PASS   Iso: PASS   lubuntu-22.04
+Checksum: PASS   Iso: PASS   lubuntu-24.04
+Checksum: PASS   Iso: PASS   lubuntu-25.04
+Checksum: PASS   Iso: PASS   lubuntu-25.10
+Checksum: n/a    Iso: PASS   lubuntu-daily-live
+
+OS > MABOXLINUX:
+
+Checksum: n/a    Iso: PASS   maboxlinux-latest
+
+OS > MACOS:
+
+Checksum: n/a    Iso: PASS   macos-mojave
+Checksum: n/a    Iso: PASS   macos-catalina
+Checksum: n/a    Iso: PASS   macos-big-sur
+Checksum: n/a    Iso: PASS   macos-monterey
+Checksum: n/a    Iso: PASS   macos-ventura
+Checksum: n/a    Iso: PASS   macos-sonoma
+Checksum: n/a    Iso: PASS   macos-sequoia
+
+OS > MAGEIA:
+
+Checksum: PASS   Iso: PASS   mageia-9-Plasma
+Checksum: PASS   Iso: PASS   mageia-9-GNOME
+Checksum: PASS   Iso: PASS   mageia-9-Xfce
+
+OS > MANJARO:
+
+Checksum: PASS   Iso: PASS   manjaro-xfce-full
+Checksum: PASS   Iso: PASS   manjaro-xfce-minimal
+Checksum: PASS   Iso: PASS   manjaro-gnome-full
+Checksum: PASS   Iso: PASS   manjaro-gnome-minimal
+Checksum: PASS   Iso: PASS   manjaro-plasma-full
+Checksum: PASS   Iso: PASS   manjaro-plasma-minimal
+Checksum: PASS   Iso: PASS   manjaro-cinnamon-full
+Checksum: PASS   Iso: PASS   manjaro-cinnamon-minimal
+Checksum: PASS   Iso: PASS   manjaro-i3-full
+Checksum: PASS   Iso: PASS   manjaro-i3-minimal
+Checksum: PASS   Iso: PASS   manjaro-sway-full
+Checksum: PASS   Iso: PASS   manjaro-sway-minimal
+
+OS > MXLINUX:
+
+Checksum: PASS   Iso: PASS   mxlinux-latest-Xfce
+Checksum: PASS   Iso: PASS   mxlinux-latest-KDE
+Checksum: PASS   Iso: PASS   mxlinux-latest-Fluxbox
+
+OS > NETBOOT:
+
+Checksum: PASS   Iso: PASS   netboot-latest
+
+OS > NETBSD:
+
+Checksum: PASS   Iso: PASS   netbsd-10.1
+Checksum: PASS   Iso: PASS   netbsd-10.0
+Checksum: PASS   Iso: PASS   netbsd-9.4
+Checksum: PASS   Iso: PASS   netbsd-9.3
+
+OS > NITRUX:
+
+Checksum: n/a    Iso: PASS   nitrux-latest
+
+OS > NIXOS:
+
+Checksum: PASS   Iso: PASS   nixos-unstable-minimal
+Checksum: PASS   Iso: PASS   nixos-unstable-graphical
+Checksum: PASS   Iso: PASS   nixos-25.11-minimal
+Checksum: PASS   Iso: PASS   nixos-25.11-graphical
+
+OS > NOBARA:
+
+Checksum: PASS   Iso: PASS   nobara-Standard-Official
+Checksum: PASS   Iso: PASS   nobara-Standard-GNOME
+Checksum: PASS   Iso: PASS   nobara-Standard-KDE
+Checksum: PASS   Iso: PASS   nobara-Standard-Steam-HTPC
+Checksum: PASS   Iso: PASS   nobara-Standard-Steam-Handheld
+Checksum: PASS   Iso: PASS   nobara-Nvidia-Official-NV
+Checksum: PASS   Iso: PASS   nobara-Nvidia-GNOME-NV
+Checksum: PASS   Iso: PASS   nobara-Nvidia-KDE-NV
+Checksum: PASS   Iso: PASS   nobara-Nvidia-Steam-HTPC-NV
+
+OS > NWG-SHELL:
+
+Checksum: PASS   Iso: PASS   nwg-shell-2025.07.01
+Checksum: PASS   Iso: PASS   nwg-shell-2025.06.08
+
+OS > OPENBSD:
+
+Checksum: PASS   Iso: PASS   openbsd-7.8
+Checksum: PASS   Iso: PASS   openbsd-7.7
+Checksum: PASS   Iso: PASS   openbsd-7.6
+Checksum: PASS   Iso: PASS   openbsd-7.5
+Checksum: PASS   Iso: PASS   openbsd-7.4
+Checksum: PASS   Iso: PASS   openbsd-7.3
+Checksum: PASS   Iso: PASS   openbsd-7.2
+Checksum: PASS   Iso: PASS   openbsd-7.1
+Checksum: PASS   Iso: PASS   openbsd-7.0
+Checksum: PASS   Iso: PASS   openbsd-6.9
+Checksum: PASS   Iso: PASS   openbsd-6.8
+
+OS > OPENINDIANA:
+
+Checksum: n/a    Iso: PASS   openindiana-20251026-gui
+Checksum: n/a    Iso: PASS   openindiana-20251026-text
+Checksum: n/a    Iso: PASS   openindiana-20251026-minimal
+Checksum: n/a    Iso: PASS   openindiana-20250606-gui
+Checksum: n/a    Iso: PASS   openindiana-20250606-text
+Checksum: n/a    Iso: PASS   openindiana-20250606-minimal
+Checksum: n/a    Iso: PASS   openindiana-20250402-gui
+Checksum: n/a    Iso: PASS   openindiana-20250402-text
+Checksum: n/a    Iso: PASS   openindiana-20250402-minimal
+Checksum: n/a    Iso: PASS   openindiana-20241026-gui
+Checksum: n/a    Iso: PASS   openindiana-20241026-text
+Checksum: n/a    Iso: PASS   openindiana-20241026-minimal
+Checksum: n/a    Iso: PASS   openindiana-20240426-gui
+Checksum: n/a    Iso: PASS   openindiana-20240426-text
+Checksum: n/a    Iso: PASS   openindiana-20240426-minimal
+
+OS > OPENSUSE:
+
+Checksum: PASS   Iso: PASS   opensuse-leap-micro-current
+Checksum: PASS   Iso: PASS   opensuse-slowroll-DVD
+Checksum: PASS   Iso: PASS   opensuse-tumbleweed-DVD
+Checksum: PASS   Iso: PASS   opensuse-tumbleweed-Gnome
+Checksum: PASS   Iso: PASS   opensuse-tumbleweed-KDE
+Checksum: PASS   Iso: PASS   opensuse-tumbleweed-XFCE
+Checksum: PASS   Iso: PASS   opensuse-tumbleweed-Rescue
+
+OS > ORACLELINUX:
+
+Checksum: PASS   Iso: PASS   oraclelinux-10.1
+Checksum: PASS   Iso: PASS   oraclelinux-10.0
+Checksum: PASS   Iso: PASS   oraclelinux-9.7
+Checksum: PASS   Iso: PASS   oraclelinux-9.6
+
+OS > PARROTSEC:
+
+Checksum: n/a    Iso: PASS   parrotsec-7.0-home
+Checksum: n/a    Iso: PASS   parrotsec-7.0-security
+
+OS > PCLINUXOS:
+
+Checksum: PASS   Iso: PASS   pclinuxos-2025.09-kde
+Checksum: PASS   Iso: PASS   pclinuxos-2025.09-kde-darkstar
+Checksum: PASS   Iso: PASS   pclinuxos-2025.09-mate
+Checksum: PASS   Iso: PASS   pclinuxos-2025.09-xfce
+
+OS > PEPPERMINT:
+
+Checksum: n/a    Iso: PASS   peppermint-latest-devuan-xfce
+Checksum: n/a    Iso: PASS   peppermint-latest-devuan-gnome
+Checksum: n/a    Iso: PASS   peppermint-latest-debian-xfce
+Checksum: n/a    Iso: PASS   peppermint-latest-debian-gnome
+
+OS > POPOS:
+
+Checksum: PASS   Iso: PASS   popos-24.04-generic
+Checksum: PASS   Iso: PASS   popos-24.04-nvidia
+Checksum: PASS   Iso: PASS   popos-22.04-intel
+Checksum: PASS   Iso: PASS   popos-22.04-nvidia
+
+OS > PORTEUS:
+
+Checksum: PASS   Iso: PASS   porteus-5.01-cinnamon
+Checksum: PASS   Iso: PASS   porteus-5.01-gnome
+Checksum: PASS   Iso: PASS   porteus-5.01-kde
+Checksum: PASS   Iso: PASS   porteus-5.01-lxde
+Checksum: PASS   Iso: PASS   porteus-5.01-lxqt
+Checksum: PASS   Iso: PASS   porteus-5.01-mate
+Checksum: PASS   Iso: PASS   porteus-5.01-openbox
+Checksum: PASS   Iso: PASS   porteus-5.01-xfce
+
+OS > PRIMTUX:
+
+Checksum: PASS   Iso: PASS   primtux-7-2022-10
+
+OS > PROXMOX-VE:
+
+Checksum: PASS   Iso: PASS   proxmox-ve-9.1-1
+Checksum: PASS   Iso: PASS   proxmox-ve-9.0-1
+Checksum: PASS   Iso: PASS   proxmox-ve-8.4-1
+
+OS > PUREOS:
+
+Checksum: PASS   Iso: PASS   pureos-10.3-gnome
+Checksum: PASS   Iso: PASS   pureos-10.3-plasma
+
+OS > REACTOS:
+
+Checksum: n/a    Iso: PASS   reactos-latest
+
+OS > REBORNOS:
+
+Checksum: PASS   Iso: PASS   rebornos-latest
+
+OS > ROCKYLINUX:
+
+Checksum: PASS   Iso: PASS   rockylinux-10.0-Gnome
+Checksum: PASS   Iso: PASS   rockylinux-10.0-KDE
+Checksum: PASS   Iso: PASS   rockylinux-9.6-Cinnamon
+Checksum: PASS   Iso: PASS   rockylinux-9.6-Gnome
+Checksum: PASS   Iso: PASS   rockylinux-9.6-KDE
+Checksum: PASS   Iso: PASS   rockylinux-9.6-Mate
+Checksum: PASS   Iso: PASS   rockylinux-9.6-Xfce
+Checksum: PASS   Iso: PASS   rockylinux-8.9-Gnome
+Checksum: PASS   Iso: PASS   rockylinux-8.9-KDE
+Checksum: PASS   Iso: PASS   rockylinux-8.9-Mate
+Checksum: PASS   Iso: PASS   rockylinux-8.9-Xfce
+
+OS > SIDUCTION:
+
+Checksum: PASS   Iso: PASS   siduction-latest-kde
+Checksum: PASS   Iso: PASS   siduction-latest-lxqt
+Checksum: PASS   Iso: PASS   siduction-latest-nox
+Checksum: PASS   Iso: PASS   siduction-latest-xfce
+Checksum: PASS   Iso: PASS   siduction-latest-xorg
+
+OS > SLACKWARE:
+
+Checksum: PASS   Iso: PASS   slackware-15.0
+Checksum: PASS   Iso: PASS   slackware-14.2
+Checksum: PASS   Iso: PASS   slackware-14.1
+Checksum: PASS   Iso: PASS   slackware-14.0
+Checksum: PASS   Iso: PASS   slackware-13.37
+
+OS > SLAX:
+
+Checksum: PASS   Iso: PASS   slax-latest-debian
+Checksum: PASS   Iso: PASS   slax-latest-slackware
+
+OS > SLINT:
+
+Checksum: n/a    Iso: PASS   slint-15.0
+
+OS > SLITAZ:
+
+Checksum: PASS   Iso: PASS   slitaz-core
+Checksum: PASS   Iso: PASS   slitaz-core-5in1
+Checksum: PASS   Iso: PASS   slitaz-core64
+Checksum: PASS   Iso: PASS   slitaz-loram
+Checksum: PASS   Iso: PASS   slitaz-preinit
+
+OS > SOLUS:
+
+Checksum: PASS   Iso: PASS   solus-latest-Budgie
+Checksum: PASS   Iso: PASS   solus-latest-GNOME
+Checksum: PASS   Iso: PASS   solus-latest-Plasma
+Checksum: PASS   Iso: PASS   solus-latest-Xfce
+
+OS > SPARKYLINUX:
+
+Checksum: PASS   Iso: PASS   sparkylinux-Rolling-LXQt
+Checksum: PASS   Iso: PASS   sparkylinux-Rolling-MATE
+Checksum: PASS   Iso: PASS   sparkylinux-Rolling-Xfce
+Checksum: PASS   Iso: PASS   sparkylinux-Rolling-KDE
+Checksum: PASS   Iso: PASS   sparkylinux-Rolling-MinimalGUI
+Checksum: PASS   Iso: PASS   sparkylinux-Rolling-MinimalCLI
+Checksum: PASS   Iso: PASS   sparkylinux-Stable-LXQt
+Checksum: PASS   Iso: PASS   sparkylinux-Stable-MATE
+Checksum: PASS   Iso: PASS   sparkylinux-Stable-Xfce
+Checksum: PASS   Iso: PASS   sparkylinux-Stable-KDE
+Checksum: PASS   Iso: PASS   sparkylinux-Stable-MinimalGUI
+Checksum: PASS   Iso: PASS   sparkylinux-Stable-MinimalCLI
+
+OS > SPIRALLINUX:
+
+Checksum: PASS   Iso: PASS   spirallinux-latest-Plasma
+Checksum: PASS   Iso: PASS   spirallinux-latest-XFCE
+Checksum: PASS   Iso: PASS   spirallinux-latest-Mate
+Checksum: PASS   Iso: PASS   spirallinux-latest-LXQt
+Checksum: PASS   Iso: PASS   spirallinux-latest-Gnome
+Checksum: PASS   Iso: PASS   spirallinux-latest-Budgie
+Checksum: PASS   Iso: PASS   spirallinux-latest-Cinnamon
+Checksum: PASS   Iso: PASS   spirallinux-latest-Builder
+
+OS > TAILS:
+
+Checksum: PASS   Iso: PASS   tails-stable
+
+OS > TINYCORE:
+
+Checksum: PASS   Iso: PASS   tinycore-16.x-Core
+Checksum: PASS   Iso: PASS   tinycore-16.x-TinyCore
+Checksum: PASS   Iso: PASS   tinycore-16.x-CorePlus
+Checksum: PASS   Iso: PASS   tinycore-16.x-CorePure64
+Checksum: PASS   Iso: PASS   tinycore-16.x-TinyCorePure64
+Checksum: PASS   Iso: PASS   tinycore-15.x-Core
+Checksum: PASS   Iso: PASS   tinycore-15.x-TinyCore
+Checksum: PASS   Iso: PASS   tinycore-15.x-CorePlus
+Checksum: PASS   Iso: PASS   tinycore-15.x-CorePure64
+Checksum: PASS   Iso: PASS   tinycore-15.x-TinyCorePure64
+
+OS > TRISQUEL:
+
+Checksum: PASS   Iso: PASS   trisquel-11.0.1-mate
+Checksum: PASS   Iso: PASS   trisquel-11.0.1-lxde
+Checksum: PASS   Iso: PASS   trisquel-11.0.1-kde
+Checksum: PASS   Iso: PASS   trisquel-11.0.1-sugar
+Checksum: PASS   Iso: PASS   trisquel-11.0-mate
+Checksum: PASS   Iso: PASS   trisquel-11.0-lxde
+Checksum: PASS   Iso: PASS   trisquel-11.0-kde
+Checksum: PASS   Iso: PASS   trisquel-11.0-sugar
+Checksum: PASS   Iso: PASS   trisquel-10.0.1-mate
+Checksum: PASS   Iso: PASS   trisquel-10.0.1-lxde
+Checksum: PASS   Iso: PASS   trisquel-10.0.1-kde
+Checksum: PASS   Iso: PASS   trisquel-10.0.1-sugar
+
+OS > TRUENAS-SCALE:
+
+Checksum: PASS   Iso: PASS   truenas-scale-25.04.2.6
+
+OS > TUXEDO-OS:
+
+Checksum: PASS   Iso: PASS   tuxedo-os-current
+
+OS > UBUNTU:
+
+Checksum: PASS   Iso: PASS   ubuntu-14.04
+Checksum: PASS   Iso: PASS   ubuntu-16.04
+Checksum: PASS   Iso: PASS   ubuntu-18.04
+Checksum: PASS   Iso: PASS   ubuntu-20.04
+Checksum: PASS   Iso: PASS   ubuntu-22.04
+Checksum: PASS   Iso: PASS   ubuntu-24.04
+Checksum: PASS   Iso: PASS   ubuntu-25.04
+Checksum: PASS   Iso: PASS   ubuntu-25.10
+Checksum: n/a    Iso: PASS   ubuntu-daily-live
+
+OS > UBUNTU-BUDGIE:
+
+Checksum: PASS   Iso: PASS   ubuntu-budgie-18.04
+Checksum: PASS   Iso: PASS   ubuntu-budgie-20.04
+Checksum: PASS   Iso: PASS   ubuntu-budgie-22.04
+Checksum: PASS   Iso: PASS   ubuntu-budgie-24.04
+Checksum: PASS   Iso: PASS   ubuntu-budgie-25.04
+Checksum: PASS   Iso: PASS   ubuntu-budgie-25.10
+Checksum: n/a    Iso: PASS   ubuntu-budgie-daily-live
+
+OS > UBUNTUCINNAMON:
+
+Checksum: PASS   Iso: PASS   ubuntucinnamon-24.04
+Checksum: PASS   Iso: PASS   ubuntucinnamon-25.04
+Checksum: PASS   Iso: PASS   ubuntucinnamon-25.10
+Checksum: n/a    Iso: PASS   ubuntucinnamon-daily-live
+
+OS > UBUNTUKYLIN:
+
+Checksum: PASS   Iso: PASS   ubuntukylin-16.04
+Checksum: PASS   Iso: PASS   ubuntukylin-18.04
+Checksum: PASS   Iso: PASS   ubuntukylin-20.04
+Checksum: PASS   Iso: PASS   ubuntukylin-22.04
+Checksum: PASS   Iso: PASS   ubuntukylin-24.04
+Checksum: PASS   Iso: PASS   ubuntukylin-25.04
+Checksum: PASS   Iso: PASS   ubuntukylin-25.10
+Checksum: n/a    Iso: PASS   ubuntukylin-daily-live
+
+OS > UBUNTU-MATE:
+
+Checksum: PASS   Iso: PASS   ubuntu-mate-16.04
+Checksum: PASS   Iso: PASS   ubuntu-mate-18.04
+Checksum: PASS   Iso: PASS   ubuntu-mate-20.04
+Checksum: PASS   Iso: PASS   ubuntu-mate-22.04
+Checksum: PASS   Iso: PASS   ubuntu-mate-24.04
+Checksum: PASS   Iso: PASS   ubuntu-mate-25.04
+Checksum: PASS   Iso: PASS   ubuntu-mate-25.10
+Checksum: n/a    Iso: PASS   ubuntu-mate-daily-live
+
+OS > UBUNTU-SERVER:
+
+Checksum: n/a    Iso: PASS   ubuntu-server-daily-live
+Checksum: PASS   Iso: PASS   ubuntu-server-25.10
+Checksum: PASS   Iso: PASS   ubuntu-server-25.04
+Checksum: PASS   Iso: PASS   ubuntu-server-24.04
+Checksum: PASS   Iso: PASS   ubuntu-server-22.04
+Checksum: PASS   Iso: PASS   ubuntu-server-20.04
+Checksum: PASS   Iso: PASS   ubuntu-server-18.04
+Checksum: PASS   Iso: PASS   ubuntu-server-16.04
+Checksum: PASS   Iso: PASS   ubuntu-server-14.04
+
+OS > UBUNTUSTUDIO:
+
+Checksum: PASS   Iso: PASS   ubuntustudio-16.04
+Checksum: PASS   Iso: PASS   ubuntustudio-18.04
+Checksum: PASS   Iso: PASS   ubuntustudio-20.04
+Checksum: PASS   Iso: PASS   ubuntustudio-22.04
+Checksum: PASS   Iso: PASS   ubuntustudio-24.04
+Checksum: PASS   Iso: PASS   ubuntustudio-25.04
+Checksum: PASS   Iso: PASS   ubuntustudio-25.10
+Checksum: n/a    Iso: PASS   ubuntustudio-daily-live
+
+OS > UBUNTU-UNITY:
+
+Checksum: PASS   Iso: PASS   ubuntu-unity-24.04
+Checksum: PASS   Iso: PASS   ubuntu-unity-25.04
+Checksum: n/a    Iso: PASS   ubuntu-unity-daily-live
+
+OS > VANILLAOS:
+
+Checksum: PASS   Iso: PASS   vanillaos-2.0
+
+OS > VOID:
+
+Checksum: PASS   Iso: PASS   void-20250202-glibc
+Checksum: PASS   Iso: PASS   void-20250202-musl
+Checksum: PASS   Iso: PASS   void-20250202-xfce-glibc
+Checksum: PASS   Iso: PASS   void-20250202-xfce-musl
+
+OS > WINDOWS:
+
+Checksum: n/a    Iso: SKIP   windows-11-Arabic
+Checksum: n/a    Iso: SKIP   windows-11-Brazilian Portuguese
+Checksum: n/a    Iso: SKIP   windows-11-Bulgarian
+Checksum: n/a    Iso: SKIP   windows-11-Chinese (Simplified)
+Checksum: n/a    Iso: SKIP   windows-11-Chinese (Traditional)
+Checksum: n/a    Iso: SKIP   windows-11-Croatian
+Checksum: n/a    Iso: SKIP   windows-11-Czech
+Checksum: n/a    Iso: SKIP   windows-11-Danish
+Checksum: n/a    Iso: SKIP   windows-11-Dutch
+Checksum: n/a    Iso: SKIP   windows-11-English (United States)
+Checksum: n/a    Iso: SKIP   windows-11-English International
+Checksum: n/a    Iso: SKIP   windows-11-Estonian
+Checksum: n/a    Iso: SKIP   windows-11-Finnish
+Checksum: n/a    Iso: SKIP   windows-11-French
+Checksum: n/a    Iso: SKIP   windows-11-French Canadian
+Checksum: n/a    Iso: SKIP   windows-11-German
+Checksum: n/a    Iso: SKIP   windows-11-Greek
+Checksum: n/a    Iso: SKIP   windows-11-Hebrew
+Checksum: n/a    Iso: SKIP   windows-11-Hungarian
+Checksum: n/a    Iso: SKIP   windows-11-Italian
+Checksum: n/a    Iso: SKIP   windows-11-Japanese
+Checksum: n/a    Iso: SKIP   windows-11-Korean
+Checksum: n/a    Iso: SKIP   windows-11-Latvian
+Checksum: n/a    Iso: SKIP   windows-11-Lithuanian
+Checksum: n/a    Iso: SKIP   windows-11-Norwegian
+Checksum: n/a    Iso: SKIP   windows-11-Polish
+Checksum: n/a    Iso: SKIP   windows-11-Portuguese
+Checksum: n/a    Iso: SKIP   windows-11-Romanian
+Checksum: n/a    Iso: SKIP   windows-11-Russian
+Checksum: n/a    Iso: SKIP   windows-11-Serbian Latin
+Checksum: n/a    Iso: SKIP   windows-11-Slovak
+Checksum: n/a    Iso: SKIP   windows-11-Slovenian
+Checksum: n/a    Iso: SKIP   windows-11-Spanish
+Checksum: n/a    Iso: SKIP   windows-11-Spanish (Mexico)
+Checksum: n/a    Iso: SKIP   windows-11-Swedish
+Checksum: n/a    Iso: SKIP   windows-11-Thai
+Checksum: n/a    Iso: SKIP   windows-11-Turkish
+Checksum: n/a    Iso: SKIP   windows-11-Ukrainian
+Checksum: n/a    Iso: SKIP   windows-10-Arabic
+Checksum: n/a    Iso: SKIP   windows-10-Brazilian Portuguese
+Checksum: n/a    Iso: SKIP   windows-10-Bulgarian
+Checksum: n/a    Iso: SKIP   windows-10-Chinese (Simplified)
+Checksum: n/a    Iso: SKIP   windows-10-Chinese (Traditional)
+Checksum: n/a    Iso: SKIP   windows-10-Croatian
+Checksum: n/a    Iso: SKIP   windows-10-Czech
+Checksum: n/a    Iso: SKIP   windows-10-Danish
+Checksum: n/a    Iso: SKIP   windows-10-Dutch
+Checksum: n/a    Iso: SKIP   windows-10-English (United States)
+Checksum: n/a    Iso: SKIP   windows-10-English International
+Checksum: n/a    Iso: SKIP   windows-10-Estonian
+Checksum: n/a    Iso: SKIP   windows-10-Finnish
+Checksum: n/a    Iso: SKIP   windows-10-French
+Checksum: n/a    Iso: SKIP   windows-10-French Canadian
+Checksum: n/a    Iso: SKIP   windows-10-German
+Checksum: n/a    Iso: SKIP   windows-10-Greek
+Checksum: n/a    Iso: SKIP   windows-10-Hebrew
+Checksum: n/a    Iso: SKIP   windows-10-Hungarian
+Checksum: n/a    Iso: SKIP   windows-10-Italian
+Checksum: n/a    Iso: SKIP   windows-10-Japanese
+Checksum: n/a    Iso: SKIP   windows-10-Korean
+Checksum: n/a    Iso: SKIP   windows-10-Latvian
+Checksum: n/a    Iso: SKIP   windows-10-Lithuanian
+Checksum: n/a    Iso: SKIP   windows-10-Norwegian
+Checksum: n/a    Iso: SKIP   windows-10-Polish
+Checksum: n/a    Iso: SKIP   windows-10-Portuguese
+Checksum: n/a    Iso: SKIP   windows-10-Romanian
+Checksum: n/a    Iso: SKIP   windows-10-Russian
+Checksum: n/a    Iso: SKIP   windows-10-Serbian Latin
+Checksum: n/a    Iso: SKIP   windows-10-Slovak
+Checksum: n/a    Iso: SKIP   windows-10-Slovenian
+Checksum: n/a    Iso: SKIP   windows-10-Spanish
+Checksum: n/a    Iso: SKIP   windows-10-Spanish (Mexico)
+Checksum: n/a    Iso: SKIP   windows-10-Swedish
+Checksum: n/a    Iso: SKIP   windows-10-Thai
+Checksum: n/a    Iso: SKIP   windows-10-Turkish
+Checksum: n/a    Iso: SKIP   windows-10-Ukrainian
+
+OS > WINDOWS-SERVER:
+
+Checksum: n/a    Iso: SKIP   windows-server-2022-English (United States)
+Checksum: n/a    Iso: SKIP   windows-server-2022-Chinese (Simplified)
+Checksum: n/a    Iso: SKIP   windows-server-2022-French
+Checksum: n/a    Iso: SKIP   windows-server-2022-German
+Checksum: n/a    Iso: SKIP   windows-server-2022-Italian
+Checksum: n/a    Iso: SKIP   windows-server-2022-Japanese
+Checksum: n/a    Iso: SKIP   windows-server-2022-Russian
+Checksum: n/a    Iso: SKIP   windows-server-2022-Spanish
+Checksum: n/a    Iso: SKIP   windows-server-2019-English (United States)
+Checksum: n/a    Iso: SKIP   windows-server-2019-Chinese (Simplified)
+Checksum: n/a    Iso: SKIP   windows-server-2019-French
+Checksum: n/a    Iso: SKIP   windows-server-2019-German
+Checksum: n/a    Iso: SKIP   windows-server-2019-Italian
+Checksum: n/a    Iso: SKIP   windows-server-2019-Japanese
+Checksum: n/a    Iso: SKIP   windows-server-2019-Russian
+Checksum: n/a    Iso: SKIP   windows-server-2019-Spanish
+Checksum: n/a    Iso: SKIP   windows-server-2016-English (United States)
+Checksum: n/a    Iso: SKIP   windows-server-2016-Chinese (Simplified)
+Checksum: n/a    Iso: SKIP   windows-server-2016-French
+Checksum: n/a    Iso: SKIP   windows-server-2016-German
+Checksum: n/a    Iso: SKIP   windows-server-2016-Italian
+Checksum: n/a    Iso: SKIP   windows-server-2016-Japanese
+Checksum: n/a    Iso: SKIP   windows-server-2016-Russian
+Checksum: n/a    Iso: SKIP   windows-server-2016-Spanish
+
+OS > XUBUNTU:
+
+Checksum: PASS   Iso: PASS   xubuntu-16.04
+Checksum: PASS   Iso: PASS   xubuntu-18.04
+Checksum: PASS   Iso: PASS   xubuntu-20.04
+Checksum: PASS   Iso: PASS   xubuntu-22.04
+Checksum: PASS   Iso: PASS   xubuntu-24.04
+Checksum: PASS   Iso: PASS   xubuntu-25.04
+Checksum: PASS   Iso: PASS   xubuntu-25.10
+Checksum: n/a    Iso: PASS   xubuntu-daily-live
+
+OS > ZORIN:
+
+Checksum: PASS   Iso: PASS   zorin-18-core64
+Checksum: PASS   Iso: PASS   zorin-18-education64
+Checksum: PASS   Iso: PASS   zorin-17-core64
+Checksum: PASS   Iso: PASS   zorin-17-lite64
+Checksum: PASS   Iso: PASS   zorin-17-education64
+Checksum: PASS   Iso: PASS   zorin-16-core64
+Checksum: PASS   Iso: PASS   zorin-16-lite64
+Checksum: PASS   Iso: PASS   zorin-16-education64
+
+
+FreeSpirit  Sun Jan 11 14:04:52 CET 2026
+
+ERROR: anduinos  LTS                                       >  Editions function FAIL
+Checksum: n/a    Iso: FAIL   debian-12.13.0-standard
+Checksum: n/a    Iso: FAIL   debian-12.13.0-cinnamon
+Checksum: n/a    Iso: FAIL   debian-12.13.0-gnome
+Checksum: n/a    Iso: FAIL   debian-12.13.0-kde
+Checksum: n/a    Iso: FAIL   debian-12.13.0-lxde
+Checksum: n/a    Iso: FAIL   debian-12.13.0-lxqt
+Checksum: n/a    Iso: FAIL   debian-12.13.0-mate
+Checksum: n/a    Iso: FAIL   debian-12.13.0-xfce
+Checksum: PASS   Iso: FAIL   tails-stable
+

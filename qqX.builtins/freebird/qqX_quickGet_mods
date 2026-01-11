@@ -359,6 +359,40 @@ function editions_bodhi() {
     else echo "standard hwe"
     fi
 }
+## FIX - make sure that 'live' is grepped (changes at jan 11 2026)
+function releases_debian() {
+    local ARCHIVE="" ; local MAJ="" ; local CUR="" ; local NEW="" ; local OLD=""
+    NEW=$(web_pipe "https://cdimage.debian.org/debian-cd/" tr '"' '\n' | grep live | fv --full -M -Q)
+    NEW="${NEW/-live/}"
+    echo -n "${NEW}"
+    echo "${NEW}" > "$ReleaseDataLog"
+    MAJ=$(echo "${NEW}" | cut -d'.' -f 1)
+    ARCHIVE="$(curl -qsLf "https://cdimage.debian.org/cdimage/archive/" tr '"' '\n' | grep live | fv --full -M 36)"
+    ARCHIVE="${ARCHIVE//'-live'/}"
+    ARCHIVE="$(tr ' ' '\n' <<< "$ARCHIVE")"
+    for i in {1..2}; do
+        CUR=$((MAJ - i))
+        OLD=$(grep ^"${CUR}"  <<< "${ARCHIVE}" | fv -M -Q)
+        echo -n " ${OLD}"
+    done
+    echo
+}
+function get_debian() {
+    local DEBCURRENT="" ; local HASH=""
+    local ISO="debian-live-${RELEASE}-amd64-${EDITION}.iso"
+    local URL="https://cdimage.debian.org/cdimage/archive/${RELEASE}-live/amd64/iso-hybrid"
+    DEBCURRENT="$(cat -s "$ReleaseDataLog" 2>/dev/null)"
+    case "${RELEASE}" in
+        "${DEBCURRENT}") URL="https://cdimage.debian.org/debian-cd/${RELEASE}-live/amd64/iso-hybrid";;
+    esac
+    if [ "${EDITION}" == "netinst" ]; then
+        URL="${URL/-live/}"
+        URL="${URL/hybrid/cd}"
+        ISO="${ISO/-live/}"
+    fi
+    HASH=$(web_pipe "${URL}/SHA512SUMS" | grep "${ISO}" | cut -d' ' -f1 | head -n 1)
+    echo "${URL}/${ISO} ${HASH}"
+}
 
 ## FIXES for Devuan - make dynamic     #echo daedalus chimaera beowulf
 function releases_devuan() {
