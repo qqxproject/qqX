@@ -501,7 +501,7 @@ else
     if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
     else printf "(no distro webpage listed)  "
     fi
-    printf " [h] show help & info  [q] quit "
+    printf " [h] show help & info  [b] go back  [q] quit "
 
     if [[ $LiveBoot && $DistroLogin ]]; then
       printColor "\n\n  Login:Password"

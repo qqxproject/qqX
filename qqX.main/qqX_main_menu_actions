@@ -435,7 +435,7 @@ function  main_menu_actions {
 
     if [[ $VerboseArgs ]]; then VerboseArgs= ; else VerboseArgs=1 ; fi
 
-  elif [[ $MainMenuChoice == "vm" ]] ; then
+  elif [[ $MainMenuChoice == "vm" ]] || [[ $MainMenuChoice == "b" ]] ; then
 
     # also see "gt" option
     source "$ConfClearanceLog"
