@@ -247,7 +247,7 @@ function download_new_release {
         [[ ! $qqX_Latest_SecureTarBall_Addr ]] && printf "\n\n  Via Non-SHA checked download ...."
         printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
         # if version can handle new format, otherwise leave notes as blank
-        if floatversion -Q --gt "$qqX_Version  1.13.02 " ; then
+        if floatversion -Q --gt "$qqX_Version  1.13.02" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
           AboutWidth="$(tput cols)"
           printf "\n  %s\n" "$qqX_Latest_ReleaseNumber"
           #shellcheck disable=SC1003  # the double \
