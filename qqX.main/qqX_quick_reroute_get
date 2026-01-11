@@ -271,11 +271,11 @@ function test_iso_url {
         if [[ $ShowQGetLists ]]; then echo ; echo "qGet_webget_report:" ; echo ; cat "/tmp/qGet_webget_report.txt" ; echo ; fi
         if [[ -e "/tmp/qGet_check_pipe.txt" ]]; then cp -f "/tmp/qGet_check_pipe.txt" "/tmp/qmod-dl-size" ; fi
       else
-        curl --disable -sLf --head --retry 8 --connect-timeout 2 --no-keepalive --location-trusted --output "/tmp/qmod-dl-size" "$DL_Url" &
+        curl --disable -sLf --head --retry 8 --connect-timeout 2  --location-trusted --output "/tmp/qmod-dl-size" "$DL_Url" &
         wait "$!"
         if [[ ! $(cat "/tmp/qmod-dl-size" 2>/dev/null) ]]; then
           sleep 2 ; printf "  and a second time ........ \n\n"
-          curl --disable -sLf --head --retry 8 --connect-timeout 2 --no-keepalive --location-trusted --output "/tmp/qmod-dl-size" "$DL_Url" &
+          curl --disable -sLf --head --retry 8 --connect-timeout 2 --keepalive-time 1 --location-trusted --output "/tmp/qmod-dl-size" "$DL_Url" &
           wait "$!"
         fi
       fi
