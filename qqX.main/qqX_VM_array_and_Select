@@ -20,10 +20,7 @@
 
 VM_loader_selector_and_menu () {
 
-  ShowUtilsMenu=
-  ShowCustomBootStyle=
-  ShowDefault_Hybrid=
-  ForceCustomBootStyle=
+  ShowUtilsMenu= ; ShowCustomBootStyle= ; ShowDefault_Hybrid= ; ForceCustomBootStyle=
 
   # LOADER
 
@@ -62,15 +59,9 @@ VM_loader_selector_and_menu () {
 
   else
 
-    VM_Selection=
-    VM_Conf_Dir=
-    VM_Conf_File=
-    VM_InstanceName=
-    MainDrive=
-    IsoImg=
-    Mounted_ISO=
-    NewFileTuneUp=
-    NewFileTuneUp_JustDone=
+    VM_Selection= ; VM_Conf_Dir= ; VM_Conf_File= ; VM_InstanceName=
+    MainDrive= ; IsoImg= ; Mounted_ISO=
+    NewFileTuneUp= ; NewFileTuneUp_JustDone=
 
     cd "$Default_VM_Folder" || DefaultFolderError=1
     Current_VM_Folder="$Default_VM_Folder"
@@ -133,14 +124,17 @@ VM_loader_selector_and_menu () {
           VM_Array_NameZero="${VM_Array[0,1]}"
           VM_Array_NameZero="${VM_Array_NameZero/'.conf'/}"
 
-          if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"; fi
+          read_update_check_file
 
           if [[ $qqX_UpdateAvail ]]; then printf "\n\n  [Enter]  " ; else printColor "\n\n  [Enter]  " ; fi
 
           printf "%-25s"  "${VM_Array_NameZero^^}"
           printf " [gt] quickget a new distro  [qf] qcow2 file manager  [h] Help  [f] FreeBird  [r] refresh  [q] quit"
 
-          [[ $qqX_UpdateAvail ]] &&  printColor "\n\n  [dl] >> view new qqX update details: %s %s <<" "$qqX_Latest_ReleaseType" "$qqX_Latest_ReleaseNumber"
+          check_beta_alert_count
+          if [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then printf "\n\n  [dl]  view qqX beta details: %s" "$qqX_Newest_PreRelease"
+          elif [[ $qqX_UpdateAvail ]]; then printColor "\n\n  [dl] >> view new qqX update details: %s %s <<" "$qqX_Latest_ReleaseType" "$qqX_Latest_ReleaseNumber"
+          fi
 
           if [[ $MenuStylePreviewed ]] && [[ ! $SettingsFileAdjusted ]] && [[ ! $VM_Selection_Overide ]]; then
             printColor "\n\n  Preview only - use [set] for menu permanency, [r] to return to default " ; MenuStylePreviewed=

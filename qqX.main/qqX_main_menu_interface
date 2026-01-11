@@ -158,7 +158,7 @@ else
       fi
     fi
 
-    # printf "\n"
+    [[ $ShowUtilsMenu ]] && printf "\n"
 
     find_kvm_msr_default_and_status
     print_kvm_status_warnings
@@ -435,9 +435,8 @@ else
     fi
     printf  "\n\n"
 
-    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"
-    fi
-
+    read_update_check_file
+    check_beta_alert_count
     check_disk_is_okay
     check_if_disk_needs_a_cleanup
 
@@ -445,7 +444,8 @@ else
     elif [[ $DiskDisparity -ge "4" ]]; then  printColor "  DISK.QCOW2 could benefit from a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "3" ]]; then  printColor "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "2" ]]; then  printf "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
-    else  [[ $qqX_UpdateAvail ]] &&  printColor "  [dl]  view new qqX update details: %s %s \n\n" "$qqX_Latest_ReleaseType" "$qqX_Latest_ReleaseNumber"
+    elif [[ $qqX_UpdateAvail ]]; then printColor "  [dl]  view new qqX update details: %s %s \n\n" "$qqX_Latest_ReleaseType" "$qqX_Latest_ReleaseNumber"
+    elif [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then printf "  [dl]  qqX beta details: %s \n\n" "$qqX_Newest_PreRelease"
     fi
 
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
