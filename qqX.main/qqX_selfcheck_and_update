@@ -168,7 +168,8 @@ check_for_qqX_updates() {
   fi
 
   # Inherits Vars from qqX nesting but IF A NEW UPDATE IS FOUND
-  # but needs to populate an OUTPUT TRANSFER FILE, as check runs in background ...  NB:
+  # but needs to populate an OUTPUT TRANSFER FILE, as check runs in background ...
+  # Note 'qqX_Newest_Tag' is used by d/l function to check that update checks are all done and that transfer file has been sourced
   { printf "\n # %s" "$(date)"
     printf "\n\n qqX_UpdateAvail=\"%s\"" "$qqX_UpdateAvail"
 
@@ -186,7 +187,7 @@ check_for_qqX_updates() {
 
 function read_update_check_file {
   if [[ ! $qqX_upd_FileChk ]] && [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then
-    source "$qqX_Upd_VarsTmpFile"
+    sleep 1 ; source "$qqX_Upd_VarsTmpFile"
     # tone-down the alerts if they will relate to beta, unless people are on the beta channel
     Muted_BetaAlertPoint=
     if [[ $qqX_Current_ReleaseType == "release" ]]; then
@@ -213,8 +214,14 @@ function download_new_release {
     printf "\033c \n\n"
     qqX_logo_printf_title  "$qqX_Version updater"
     printf "\n\n\n  https://github.com/qqxproject/qqX/releases"
-    local UpdRechk=
+    local UpdRechk= ; qqX_NewTagAlert=
     while true ; do
+      # check that update checks are all done and that transfer file has been sourced
+      if [[ ! $qqX_Newest_Tag ]]; then
+        printf "\n\n  Update Checking still in progress ...."
+      elif [[ $qqX_Newest_Tag ]]; then
+        printf "\n\n  Update Checking has been completed "
+      fi
       if [[ $Muted_BetaAlertPoint ]]; then
         if [[ $UpdRechk == "once" ]]; then UpdRechk="done"
         else printf "\n\n"
@@ -233,10 +240,14 @@ function download_new_release {
       fi
       if [[ ! $qqX_UpdateAvail ]] ; then
         [[ ! $UpdRechk ]] && printf "\n\n"
-        printColor "  No new release found ...."
-        if [[ $qqX_Current_ReleaseType == "beta" ]] && floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Newest_PreRelease" ; then
-          printf "\n\n  Further add-on pre-release tweaks %s can be found at https://github.com/qqxproject/qqX/tags" "$qqX_Newest_Tag"
-          UpdRechk="once"
+        if [[ $qqX_Current_ReleaseType == "beta" ]] && floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Version" ; then
+          printf "  No new release found ...."
+          printf "\n\n  However an "
+          printColor "ADD-ON %s" "$qqX_Newest_Tag"
+          printf " is available at https://github.com/qqxproject/qqX/tags"
+          UpdRechk="once" ; qqX_NewTagAlert=1
+        else
+          printColor "  No new release found ...."
         fi
         printf "\n\n"
       elif [[ ! $Muted_BetaAlertPoint ]]; then
@@ -258,7 +269,7 @@ function download_new_release {
         fi
       fi
       printf "\n"
-      if [[ $qqX_UpdateAvail ]] && [[ ! $Muted_BetaAlertPoint ]] ; then
+      if [[ $qqX_UpdateAvail ]] && [[ ! $Muted_BetaAlertPoint && ! $qqX_NewTagAlert ]] ; then
         printf "  Neatly download the release into its own sub-folder at: "
         [[ $Specified_Updates_Location ]] && printf "\n\n  [s] Specified folder:  %s"  "$Specified_Updates_Location"
         [[ -d "$HOME/Downloads" ]] && printf "\n\n  [d] Downloads folder:  %s"  "$HOME/Downloads"
@@ -277,6 +288,7 @@ function download_new_release {
       printf "  [r] to recheck"
       if [[ $WebBrowser ]]; then
         if [[ $Muted_BetaAlertPoint ]]; then  printf "   [w] popup qqX RELEASE pages with browser"
+        elif [[ $qqX_NewTagAlert ]]; then  printf "   [w] popup qqX TAG pages with browser"
         else printf "   [w] popup qqX web pages with browser"
         fi
       fi
@@ -291,7 +303,9 @@ function download_new_release {
       elif [[ $qqX_LatestTarBall_Folder == "w" ]]; then
         printf "  Opening Browser ... \n\n"
         if [[ $Muted_BetaAlertPoint ]]; then
-          (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/releases/tag/${qqX_Newest_PreRelease}" & ) || web_browser_not_found_message
+          (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/releases" & ) || web_browser_not_found_message
+        elif [[ $qqX_NewTagAlert ]]; then
+          (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/tags" & ) || web_browser_not_found_message
         else (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX" & ) || web_browser_not_found_message
         fi
         sleep 1
