@@ -36,9 +36,9 @@ Plus numerous downstream fixes for _current_ Quickemu issues
 
 -----
 
-🥂 New Year's Cheer for those kicking their heels
+2026 introduces pre-release downloading and a pre-release alert system
 
-NEW RELEASE 1.15 now in final beta stages > [details and download here](https://github.com/qqxproject/qqX/releases/tag/1.15.00-beta.10)
+New version 1.15 is getting its final shine > [details and download here](https://github.com/qqxproject/qqX/releases)
 
 -----
 
