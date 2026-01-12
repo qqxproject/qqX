@@ -124,16 +124,17 @@ VM_loader_selector_and_menu () {
           VM_Array_NameZero="${VM_Array[0,1]}"
           VM_Array_NameZero="${VM_Array_NameZero/'.conf'/}"
 
-          read_update_check_file
-
           if [[ $qqX_UpdateAvail ]]; then printf "\n\n  [Enter]  " ; else printColor "\n\n  [Enter]  " ; fi
 
           printf "%-25s"  "${VM_Array_NameZero^^}"
           printf " [gt] quickget a new distro  [qf] qcow2 file manager  [h] Help  [f] FreeBird  [r] refresh  [q] quit"
 
+          read_update_check_file
           check_beta_alert_count
-          if [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then printf "\n\n  [dl]  view qqX beta details: %s" "$qqX_Newest_PreRelease"
-          elif [[ $qqX_UpdateAvail ]]; then printColor "\n\n  [dl] >> view new qqX update details: %s %s <<" "$qqX_Latest_ReleaseType" "$qqX_Latest_ReleaseNumber"
+
+          if [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then
+            printf "\n\n  [dl]  view qqX beta details: %s %s" "$qqX_Newest_PreRelease" "$qqX_Latest_ReleaseNumber"
+          elif [[ $qqX_UpdateAvail ]]; then printColor "\n\n  [dl] >> view new qqX update details: %s <<" "$qqX_Latest_ReleaseNumber"
           fi
 
           if [[ $MenuStylePreviewed ]] && [[ ! $SettingsFileAdjusted ]] && [[ ! $VM_Selection_Overide ]]; then

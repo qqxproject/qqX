@@ -91,7 +91,7 @@ if [[ ! $qqX_SelfChk_Run ]]; then
   qqX_Newest_Tag=
   qqX_UpdateAvail=
   qqX_Upd_VarsTmpFile="/tmp/qqX.upd.chk.txt"
-  printf "\n\n qqX_UpdateAvail="  > "$qqX_Upd_VarsTmpFile"
+  printf ""  > "$qqX_Upd_VarsTmpFile"
   qqX_Latest_ReleaseFile="/tmp/latest-qqX"
   qqX_Latest_PreReleaseFile="/tmp/latest-pre-release-qqX"
   [[ -e $qqX_Latest_ReleaseFile ]] && rm "$qqX_Latest_ReleaseFile" 2>/dev/null
@@ -169,7 +169,7 @@ check_for_qqX_updates() {
 
   # Inherits Vars from qqX nesting but IF A NEW UPDATE IS FOUND
   # but needs to populate an OUTPUT TRANSFER FILE, as check runs in background ...  NB:
-  { printf "\n\n # %s" "$(date)"
+  { printf "\n # %s" "$(date)"
     printf "\n\n qqX_UpdateAvail=\"%s\"" "$qqX_UpdateAvail"
 
     printf "\n\n qqX_Latest_ReleaseNumber=\"%s\""  "$qqX_Latest_ReleaseNumber"
@@ -180,8 +180,6 @@ check_for_qqX_updates() {
     printf "\n\n qqX_Newest_PreRelease=\"%s\""  "$qqX_Newest_PreRelease"
     printf "\n\n qqX_Newest_Tag=\"%s\""  "$qqX_Newest_Tag"
 
-    printf "\n\n qqX_upd_FileChk=\"%s\""  "done"
-
   } > "$qqX_Upd_VarsTmpFile"
 
 }
@@ -189,11 +187,14 @@ check_for_qqX_updates() {
 function read_update_check_file {
   if [[ ! $qqX_upd_FileChk ]] && [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then
     source "$qqX_Upd_VarsTmpFile"
-    if [[ ! $Hide_qqX_BetaUpdates ]] && [[ $qqX_Newest_PreRelease ]] && [[ $qqX_Current_ReleaseType == "release" ]] && floatversion --gt -Q "$qqX_Newest_PreRelease  $qqX_Version"; then
-      # hide release details as will relate to non-beta unless people are on the beta channel
-      Muted_BetaAlertPoint=1
-    else Muted_BetaAlertPoint=
+    # tone-down the alerts if they will relate to beta, unless people are on the beta channel
+    Muted_BetaAlertPoint=
+    if [[ $qqX_Current_ReleaseType == "release" ]]; then
+      [[ $qqX_Newest_PreRelease ]] || [[ $qqX_Latest_ReleaseType == "beta" ]] && Muted_BetaAlertPoint=1
+    else
+      Hide_qqX_BetaUpdates=
     fi
+    qqX_upd_FileChk="done"
   fi
 }
 
@@ -212,7 +213,6 @@ function download_new_release {
     printf "\033c \n\n"
     qqX_logo_printf_title  "$qqX_Version updater"
     printf "\n\n\n  https://github.com/qqxproject/qqX/releases"
-
     local UpdRechk=
     while true ; do
       if [[ $Muted_BetaAlertPoint ]]; then
@@ -230,13 +230,9 @@ function download_new_release {
           printf "\n  Further add-on pre-release tweaks can be found at https://github.com/qqxproject/qqX/tags"
           printf "\n\n"
         fi
-        # add Avail flag here, so beta alerts are more muted
-        qqX_UpdateAvail="$qqX_Newest_PreRelease"
       fi
       if [[ ! $qqX_UpdateAvail ]] ; then
-        if [[ $UpdRechk == "once" ]]; then UpdRechk="done"
-        else printf "\n\n"
-        fi
+        [[ ! $UpdRechk ]] && printf "\n\n"
         printColor "  No new release found ...."
         if [[ $qqX_Current_ReleaseType == "beta" ]] && floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Newest_PreRelease" ; then
           printf "\n\n  Further add-on pre-release tweaks %s can be found at https://github.com/qqxproject/qqX/tags" "$qqX_Newest_Tag"

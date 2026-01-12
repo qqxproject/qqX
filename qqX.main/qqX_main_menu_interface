@@ -440,12 +440,14 @@ else
     check_disk_is_okay
     check_if_disk_needs_a_cleanup
 
-    if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then  printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils "  "$DiskChkStatus"
+    if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
+      printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils "  "$DiskChkStatus"
     elif [[ $DiskDisparity -ge "4" ]]; then  printColor "  DISK.QCOW2 could benefit from a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "3" ]]; then  printColor "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "2" ]]; then  printf "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
-    elif [[ $qqX_UpdateAvail ]]; then printColor "  [dl]  view new qqX update details: %s %s \n\n" "$qqX_Latest_ReleaseType" "$qqX_Latest_ReleaseNumber"
-    elif [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then printf "  [dl]  qqX beta details: %s \n\n" "$qqX_Newest_PreRelease"
+    elif [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then
+      printf "\n\n  [dl]  view qqX beta details: %s %s" "$qqX_Newest_PreRelease" "$qqX_Latest_ReleaseNumber"
+    elif [[ $qqX_UpdateAvail ]]; then printColor "  [dl]  view new qqX update details: %s \n\n" "$qqX_Latest_ReleaseNumber"
     fi
 
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
