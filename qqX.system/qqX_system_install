@@ -269,12 +269,15 @@ while true ; do
 
     printf "\n\n\n  Example full sets:"
 
-    printColor "\n\n  Arch (Endeavour) KDE 2026/01"
+    printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
     printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
-    printColor "\n\n  Fedora 43 KDE"
+    printColor "\n\n  Fedora 43 KDE (2025/11)"
     printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
     # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
+
+    printColor "\n\n  LinuxMint 22.3 Cinnamon (2026/01)"
+    printf "\n  sudo apt install  jq  socat  spice-client-gtk  qemu-system-x86"
 
     if [[ $ShowMoreExamples ]]; then
 
