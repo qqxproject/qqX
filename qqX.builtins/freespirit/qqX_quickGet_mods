@@ -263,11 +263,11 @@ function editions_anduinos {
     while true ; do
         if ! { grep -qs "$OS" "$ReleaseDataLog" && grep -s 'ReleaseName=' "$ReleaseDataLog" | grep -qs "$RELEASE"; } ; then
             printf "qGetDistro=\"%s\"\nReleaseName=\"%s\"" "$OS" "$RELEASE" > "$ReleaseDataLog"
-            if [[ $RELEASE == "LTS" ]]; then ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep LTS | fv -M -Q)"
-            else ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep -v LTS | fv -M -Q)"
+            if [[ $RELEASE == "LTS" ]]; then ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" | tr '>' '\n' | grep '</td' | grep LTS | fv -M -Q)"
+            else ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" | tr '>' '\n' | grep '</td' | grep -v LTS | fv -M -Q)"
             fi
             [[ ! $ReleaseNumber ]] && break
-            ReleasePoint="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/" | grep href | fv -M -Q )"
+            ReleasePoint="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/" | grep -e 'href="./'| fv -M -Q )"
             [[ ! $ReleasePoint ]] && break
             ReleaseEditions="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}" \
             | grep -v sha256 | grep -v torrent | tr '>' '\n' | grep iso | grep -v '<a' | cut -d'<' -f1 | cut -d'-' -f3 | cut -d'.' -f1 | paste -s -d' ')"
