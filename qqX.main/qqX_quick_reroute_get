@@ -1148,7 +1148,7 @@ function_quick_get_wrap ()  {
         elif [[ ! ${QGW_Editions_Array[*]} ]]; then
           printf "\n"
           if [[ $QGW_EditionsFunction && "${QGW_StockEditions_Array[*]}" && "${#QGW_Releases_Array[@]}" -gt 1 ]]; then
-            printf "  Further selection not available in this release"
+            printf "  Further selection not available in this release OR editions search error"
             printColor "\n\n  Stock List (%s), all Releases: \n\n" "$QGW_Editions_StockListTotal"
             printf "  %s"  "$QGW_Editions_StockListString"
             printColor "\n\n  [enter] to continue   [r] choose a different release or return to view web page or to test   [b] back to main menu \n\n"
