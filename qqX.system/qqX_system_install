@@ -248,16 +248,12 @@ while true ; do
     GnuPath="$(type -p "$GP")"
     [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
     if [[ ! $GnuPath ]]; then
-      printColor "\n\n  >>  '%s' should usually be present and is required by qqX"  "$GP"
-      printf "\n\n      Gnu is expected but most versions should have basic Gnu compatibilities"
+      printColor "\n\n  >>  Standard util '%s' should usually be present and is required by qqX"  "$GP"
+          printf   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
       InstallationAlert=1
-    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
-      printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version"  "$GP"
-      printf "\n\n      eg for awk, 'realpath awk' should ideally resolve to 'gawk' and so-forth"
-      printf "\n      Most versions should have basic GNU COMPATIBILITIES but behaviour can vary ..."
-      printf "\n      See https://www.gnu.org/software/gawk/manual/html_node/Common-Extensions.html"
-      printf "\n      Most distro packaging systems should allow additional Gnu installations"
-      printf "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+    elif [[ $GnuPath ]] &&  grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
+      printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
+          printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
       InstallationAlert=1
     fi
   done
