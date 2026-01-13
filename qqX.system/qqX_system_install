@@ -521,7 +521,7 @@ else
   fi
 
   if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then
-    printf  "\n   Upgrade the current release %s ..."   "$Current_qqX_Version"
+    printf  "\n   %s  >>  %s"  "$Current_qqX_Version"  "$New_qqX_Version"
   fi
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"

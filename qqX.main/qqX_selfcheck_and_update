@@ -251,8 +251,10 @@ function download_new_release {
         fi
         printf "\n\n"
       elif [[ ! $Muted_BetaAlertPoint ]]; then
-        [[ ! $qqX_Latest_SecureTarBall_Addr ]] && printf "\n\n  Via Non-SHA checked download ...."
-        printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
+        if [[ ! $qqX_Latest_SecureTarBall_Addr ]]; then
+          printf "\n\n  HTTPS download:\n"
+        else printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
+        fi
         # if version can handle new format, otherwise leave notes as blank
         if floatversion -Q --gt "$qqX_Version  1.13.02" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
           AboutWidth="$(tput cols)"
@@ -354,8 +356,7 @@ function download_new_release {
         # Drop to non-sha, if assets not available
         if [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
           rm -r ./*  2>/dev/null
-          printf "\n  Problem auto-downloading via Secure Tarball"
-          printColor "\n\n  Using standard NON sha256-checked \n\n"
+          printColor "\n\n  HTTPS non-sha256 checked download:\n\n"
           dlCount="1"
           while [[ $dlCount -le "3" ]]; do
             qqX_Latest_NonSecure_TarBall="https://github.com/qqxproject/qqX/archive/refs/tags/${qqX_Latest_ReleaseNumber}.tar.gz"
