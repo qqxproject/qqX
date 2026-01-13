@@ -300,7 +300,7 @@ function test_iso_url {
       if [[ $DL_PotentialSize ]]; then
         [[ $ShowQGetLists ]] && { echo ; echo "DL_PotentialSize: $DL_PotentialSize"; echo; }
         DL_HumanSize="$(numfmt --to=iec "$DL_PotentialSize")"
-        printf "  Reported size: %s " "$DL_HumanSize"
+        printf "  Reported size: %s   %s" "$DL_HumanSize" "$(basename "$DL_Url")"
         printf "\n"
       elif [[ $QGW_Download_BadLink ]]; then
         printf "  Reported size not available ...."
@@ -1164,7 +1164,7 @@ function_quick_get_wrap ()  {
             printf "[r] choose a different release anyway ... or return to view web page or to test  [b] back to main menu \n\n"
           elif [[ ! "${QGW_StockEditions_Array[*]}" && "${#QGW_Releases_Array[@]}" -eq 1 ]]; then
             printf "  This distro is single release option only .... "
-            printColor "\n\n  [enter] to continue   [r] return to view web page or to test   [b] back to main menu \n\n"
+            printColor "\n\n  [enter] to check details and continue   [r] return to view web page or to test   [b] back to main menu \n\n"
           fi
           read -rp "  >  "  QGW_List_NumSelected
 
