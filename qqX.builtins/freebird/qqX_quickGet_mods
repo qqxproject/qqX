@@ -173,7 +173,7 @@ function distro_release_notes {
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
-        elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
+        elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
@@ -263,11 +263,11 @@ function editions_anduinos {
     while true ; do
         if ! { grep -qs "$OS" "$ReleaseDataLog" && grep -s 'ReleaseName=' "$ReleaseDataLog" | grep -qs "$RELEASE"; } ; then
             printf "qGetDistro=\"%s\"\nReleaseName=\"%s\"" "$OS" "$RELEASE" > "$ReleaseDataLog"
-            if [[ $RELEASE == "LTS" ]]; then ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep LTS | fv -M -Q)"
-            else ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" |tr '>' '\n' | grep '</td' | grep -v LTS | fv -M -Q)"
+            if [[ $RELEASE == "LTS" ]]; then ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" | tr '>' '\n' | grep '</td' | grep LTS | fv -M -Q)"
+            else ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" | tr '>' '\n' | grep '</td' | grep -v LTS | fv -M -Q)"
             fi
             [[ ! $ReleaseNumber ]] && break
-            ReleasePoint="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/" | grep href | fv -M -Q )"
+            ReleasePoint="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/" | grep -e 'href="./'| fv -M -Q )"
             [[ ! $ReleasePoint ]] && break
             ReleaseEditions="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}" \
             | grep -v sha256 | grep -v torrent | tr '>' '\n' | grep iso | grep -v '<a' | cut -d'<' -f1 | cut -d'-' -f3 | cut -d'.' -f1 | paste -s -d' ')"
@@ -359,6 +359,7 @@ function editions_bodhi() {
     else echo "standard hwe"
     fi
 }
+
 ## FIX - make sure that 'live' is grepped (changes at jan 11 2026)
 function releases_debian() {
     local ARCHIVE="" ; local MAJ="" ; local CUR="" ; local NEW="" ; local OLD=""
@@ -431,6 +432,19 @@ function releases_easyos() {
     done
     ALL_RELEASES="$(floatversion -qs -r "$ALL_RELEASES")"
     echo "${ALL_RELEASES}"
+}
+
+## make dynamic for latest (and fix hash)
+function releases_elementary() {
+    echo latest
+}
+function get_elementary() {
+    local HASH= ; local ISO= ; local BaseUrl= ; local RelData=
+    RelData="$(web_pipe "https://elementary.io/docs/installation")"
+    HASH="$(grep -s bash <<< "$RelData" | grep code | grep -v iso | tail -n 1 | tr '>' '\n' | grep -e '</code' | cut -d '<' -f1)"
+    ISO="$(grep -s bash <<< "$RelData" | grep code | grep iso | tail -n 1 | tr ' ' '\n' | grep iso | cut -d '<' -f1)"
+    BaseUrl="https://ams3.dl.elementary.io/download"
+    echo "${BaseUrl}/$(date +%s | base64)/${ISO} ${HASH}"
 }
 
 ## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
