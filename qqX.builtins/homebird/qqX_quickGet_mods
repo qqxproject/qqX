@@ -36,6 +36,8 @@
 
 ##########################################
 
+QG_ModsNumber="v5"
+
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros

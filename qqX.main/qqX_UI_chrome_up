@@ -186,7 +186,7 @@ show_qqX_title_bar() {
     fi
   else printf "   "
   fi
-  printf "quickemu %s  &  quickget %s  '%s'"  "$QE_VerNumber" "$QG_VerNumber" "$QE_SourceVersion"
+  printf "quickemu %s (mods %s) &  quickget %s (mods %s) '%s'"  "$QE_VerNumber" "$QE_ModsNumber" "$QG_VerNumber" "$QG_ModsNumber" "$QE_SourceVersion"
 
   if [[ $CodingHotSwap && $CodingHotSwapShow ]] || [[ $DevStart ]]; then
     printf "\n\n  Using Code: %s " "$QE_SourcePath"

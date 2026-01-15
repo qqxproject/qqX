@@ -408,8 +408,11 @@ function check_new_vm_folder_name {
 function show_QWG_header {
   printf "\033c"
   qqX_logo_printf_title "$qqX_Version"
-  # printColor "  wrapping QUICKGET version %s '%s'  " "$QG_VerNumber"  "$QE_SourceVersion"
-  printColor "  wrapping QUICKGET version %s  " "$QG_VerNumber"  # REVIEW
+  if [[ $QG_Modpath && $QG_ModsNumber ]]; then
+    printColor "  wrapping %s with mods %s  " "$QG_VerNumber" "$QG_ModsNumber"
+  else
+    printColor "  wrapping QUICKGET version %s  " "$QG_VerNumber"
+  fi
   if [[ $InternetUp ]]; then
     printf "(internet working) [R] to re-check"
     if [[ $QG_Modpath ]]; then
