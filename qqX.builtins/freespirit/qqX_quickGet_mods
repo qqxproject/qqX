@@ -561,10 +561,26 @@ function releases_linuxlite() {
 function get_linuxmint() {
     local HASH=""
     local ISO="linuxmint-${RELEASE}-${EDITION}-64bit.iso"
-    #local URL="https://mirror.bytemark.co.uk/linuxmint/stable/${RELEASE}"
     local URL="https://mirror.rackspace.com/linuxmint/iso/stable/${RELEASE}"
     HASH=$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f1)
     echo "${URL}/${ISO} ${HASH}"
+}
+## FIX update mirror
+function get_lmde() {
+    local HASH=""
+    local ISO="lmde-${RELEASE}-${EDITION}-64bit.iso"
+    local URL="https://mirror.rackspace.com/linuxmint/iso/debian"
+    #HASH=$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f1)
+    HASH=$(grep -s "${ISO}" "$ReleaseDataLog" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+# make dynamic
+function releases_lmde() {
+    local RelData= ; local Releases=
+    RelData="$(web_pipe "https://mirror.rackspace.com/linuxmint/iso/debian/sha256sum.txt" | grep -s iso)"
+    echo "$RelData" > "$ReleaseDataLog"
+    Releases="$(cut -d'*' -f2 <<< "$RelData" | cut -d '-' -f2 | sort -nru | head -n 3 | paste -d ' ' -s )"
+    echo "$Releases"
 }
 
 ## UPGRADE only one release ... make dynamic
