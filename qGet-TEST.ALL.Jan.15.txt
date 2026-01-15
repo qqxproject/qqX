@@ -1,8 +1,7 @@
 
+FreeSpirit  Thu Jan 15 16:23:57 CET 2026
 
-FreeSpirit  Sun Jan 11 14:04:52 CET 2026
-
-ERROR: anduinos  LTS         >  Editions function FAIL
+All Tests Successfully Passed
 
 
 OS > ALMA:
@@ -32,7 +31,49 @@ Checksum: PASS   Iso: PASS   android-7.1-x86
 
 OS > ANDUINOS:
 
-ERROR: anduinos  LTS         >  Editions function FAIL
+Checksum: PASS   Iso: PASS   anduinos-LTS-ar_SA
+Checksum: PASS   Iso: PASS   anduinos-LTS-de_DE
+Checksum: PASS   Iso: PASS   anduinos-LTS-en_GB
+Checksum: PASS   Iso: PASS   anduinos-LTS-en_US
+Checksum: PASS   Iso: PASS   anduinos-LTS-es_ES
+Checksum: PASS   Iso: PASS   anduinos-LTS-fr_FR
+Checksum: PASS   Iso: PASS   anduinos-LTS-it_IT
+Checksum: PASS   Iso: PASS   anduinos-LTS-ja_JP
+Checksum: PASS   Iso: PASS   anduinos-LTS-ko_KR
+Checksum: PASS   Iso: PASS   anduinos-LTS-nl_NL
+Checksum: PASS   Iso: PASS   anduinos-LTS-pl_PL
+Checksum: PASS   Iso: PASS   anduinos-LTS-pt_BR
+Checksum: PASS   Iso: PASS   anduinos-LTS-pt_PT
+Checksum: PASS   Iso: PASS   anduinos-LTS-ru_RU
+Checksum: PASS   Iso: PASS   anduinos-LTS-sv_SE
+Checksum: PASS   Iso: PASS   anduinos-LTS-th_TH
+Checksum: PASS   Iso: PASS   anduinos-LTS-tr_TR
+Checksum: PASS   Iso: PASS   anduinos-LTS-vi_VN
+Checksum: PASS   Iso: PASS   anduinos-LTS-zh_CN
+Checksum: PASS   Iso: PASS   anduinos-LTS-zh_HK
+Checksum: PASS   Iso: PASS   anduinos-LTS-zh_TW
+Checksum: PASS   Iso: PASS   anduinos-Standard-ar_SA
+Checksum: PASS   Iso: PASS   anduinos-Standard-de_DE
+Checksum: PASS   Iso: PASS   anduinos-Standard-en_GB
+Checksum: PASS   Iso: PASS   anduinos-Standard-en_US
+Checksum: PASS   Iso: PASS   anduinos-Standard-es_ES
+Checksum: PASS   Iso: PASS   anduinos-Standard-fr_FR
+Checksum: PASS   Iso: PASS   anduinos-Standard-it_IT
+Checksum: PASS   Iso: PASS   anduinos-Standard-ja_JP
+Checksum: PASS   Iso: PASS   anduinos-Standard-ko_KR
+Checksum: PASS   Iso: PASS   anduinos-Standard-nl_NL
+Checksum: PASS   Iso: PASS   anduinos-Standard-pl_PL
+Checksum: PASS   Iso: PASS   anduinos-Standard-pt_BR
+Checksum: PASS   Iso: PASS   anduinos-Standard-pt_PT
+Checksum: PASS   Iso: PASS   anduinos-Standard-ro_RO
+Checksum: PASS   Iso: PASS   anduinos-Standard-ru_RU
+Checksum: PASS   Iso: PASS   anduinos-Standard-sv_SE
+Checksum: PASS   Iso: PASS   anduinos-Standard-th_TH
+Checksum: PASS   Iso: PASS   anduinos-Standard-tr_TR
+Checksum: PASS   Iso: PASS   anduinos-Standard-vi_VN
+Checksum: PASS   Iso: PASS   anduinos-Standard-zh_CN
+Checksum: PASS   Iso: PASS   anduinos-Standard-zh_HK
+Checksum: PASS   Iso: PASS   anduinos-Standard-zh_TW
 
 OS > ANTIX:
 
@@ -222,9 +263,7 @@ Checksum: n/a    Iso: PASS   edubuntu-daily-live
 
 OS > ELEMENTARY:
 
-Checksum: n/a    Iso: PASS   elementary-8.0
-Checksum: n/a    Iso: PASS   elementary-7.1
-Checksum: n/a    Iso: PASS   elementary-7.0
+Checksum: PASS   Iso: PASS   elementary-latest
 
 OS > ENDEAVOUROS:
 
@@ -401,10 +440,14 @@ Checksum: n/a    Iso: PASS   kubuntu-daily-live
 OS > LINUXLITE:
 
 Checksum: PASS   Iso: PASS   linuxlite-7.6
+Checksum: PASS   Iso: PASS   linuxlite-7.4
 Checksum: PASS   Iso: PASS   linuxlite-7.2
 
 OS > LINUXMINT:
 
+Checksum: n/a    Iso: PASS   linuxmint-22.3-cinnamon
+Checksum: PASS   Iso: PASS   linuxmint-22.3-mate
+Checksum: PASS   Iso: PASS   linuxmint-22.3-xfce
 Checksum: PASS   Iso: PASS   linuxmint-22.2-cinnamon
 Checksum: PASS   Iso: PASS   linuxmint-22.2-mate
 Checksum: PASS   Iso: PASS   linuxmint-22.2-xfce
@@ -420,13 +463,12 @@ Checksum: PASS   Iso: PASS   linuxmint-21.3-xfce
 Checksum: PASS   Iso: PASS   linuxmint-21.2-cinnamon
 Checksum: PASS   Iso: PASS   linuxmint-21.2-mate
 Checksum: PASS   Iso: PASS   linuxmint-21.2-xfce
-Checksum: PASS   Iso: PASS   linuxmint-21.1-cinnamon
-Checksum: PASS   Iso: PASS   linuxmint-21.1-mate
-Checksum: PASS   Iso: PASS   linuxmint-21.1-xfce
 
 OS > LMDE:
 
+Checksum: PASS   Iso: PASS   lmde-7-cinnamon
 Checksum: PASS   Iso: PASS   lmde-6-cinnamon
+Checksum: PASS   Iso: PASS   lmde-5-cinnamon
 
 OS > LUBUNTU:
 
@@ -527,7 +569,7 @@ Checksum: PASS   Iso: PASS   openbsd-7.6
 Checksum: PASS   Iso: PASS   openbsd-7.5
 Checksum: PASS   Iso: PASS   openbsd-7.4
 Checksum: PASS   Iso: PASS   openbsd-7.3
-Checksum: PASS   Iso: PASS   openbsd-7.2
+Checksum: n/a    Iso: PASS   openbsd-7.2
 Checksum: PASS   Iso: PASS   openbsd-7.1
 Checksum: PASS   Iso: PASS   openbsd-7.0
 Checksum: PASS   Iso: PASS   openbsd-6.9
@@ -652,7 +694,7 @@ Checksum: PASS   Iso: PASS   siduction-latest-xorg
 
 OS > SLACKWARE:
 
-Checksum: PASS   Iso: PASS   slackware-15.0
+Checksum: n/a    Iso: PASS   slackware-15.0
 Checksum: PASS   Iso: PASS   slackware-14.2
 Checksum: PASS   Iso: PASS   slackware-14.1
 Checksum: PASS   Iso: PASS   slackware-14.0
@@ -665,7 +707,7 @@ Checksum: PASS   Iso: PASS   slax-latest-slackware
 
 OS > SLINT:
 
-Checksum: n/a    Iso: PASS   slint-15.0
+Checksum: PASS   Iso: PASS   slint-15.0
 
 OS > SLITAZ:
 
@@ -691,7 +733,7 @@ Checksum: PASS   Iso: PASS   sparkylinux-Rolling-KDE
 Checksum: PASS   Iso: PASS   sparkylinux-Rolling-MinimalGUI
 Checksum: PASS   Iso: PASS   sparkylinux-Rolling-MinimalCLI
 Checksum: PASS   Iso: PASS   sparkylinux-Stable-LXQt
-Checksum: PASS   Iso: PASS   sparkylinux-Stable-MATE
+Checksum: n/a    Iso: PASS   sparkylinux-Stable-MATE
 Checksum: PASS   Iso: PASS   sparkylinux-Stable-Xfce
 Checksum: PASS   Iso: PASS   sparkylinux-Stable-KDE
 Checksum: PASS   Iso: PASS   sparkylinux-Stable-MinimalGUI
@@ -968,16 +1010,7 @@ Checksum: PASS   Iso: PASS   zorin-16-lite64
 Checksum: PASS   Iso: PASS   zorin-16-education64
 
 
-FreeSpirit  Sun Jan 11 14:04:52 CET 2026
+FreeSpirit  Thu Jan 15 16:23:57 CET 2026
 
-ERROR: anduinos  LTS                                       >  Editions function FAIL
-Checksum: n/a    Iso: FAIL   debian-12.13.0-standard
-Checksum: n/a    Iso: FAIL   debian-12.13.0-cinnamon
-Checksum: n/a    Iso: FAIL   debian-12.13.0-gnome
-Checksum: n/a    Iso: FAIL   debian-12.13.0-kde
-Checksum: n/a    Iso: FAIL   debian-12.13.0-lxde
-Checksum: n/a    Iso: FAIL   debian-12.13.0-lxqt
-Checksum: n/a    Iso: FAIL   debian-12.13.0-mate
-Checksum: n/a    Iso: FAIL   debian-12.13.0-xfce
-Checksum: PASS   Iso: FAIL   tails-stable
+
 
