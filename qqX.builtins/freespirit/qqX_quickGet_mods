@@ -56,7 +56,7 @@
 
 ##########################################
 
-QG_ModsNumber="v6"
+QG_ModsNumber="v6.1"
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -464,6 +464,27 @@ function get_fedora() {
     URL=$(echo "${JSON}" | jq -r '.link' | head -n1)
     HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n1)
     echo "${URL} ${HASH}"
+}
+
+## FIX & UPDATE to new mirrors
+function get_gentoo() {
+    local HASH= ; local ISO= ; local Branch= ; local RelDataTarget= ; local RelData=
+    local BaseUrl="https://distfiles.gentoo.org/releases/amd64/autobuilds"
+    find_data () {
+        RelDataTarget="$(web_pipe "$BaseUrl/$Branch" | grep -s sha256 | tr '"' '\n' | grep sha256 | grep -v align)"
+        RelData="$(web_pipe "$BaseUrl/$Branch/$RelDataTarget" | grep -s iso)"
+        ISO="$(awk '{print $2}' <<< "$RelData")"
+        HASH="$(awk '{print $1}' <<< "$RelData")"
+    }
+    case ${EDITION} in
+        minimal)
+            Branch="current-install-amd64-minimal"
+            find_data ;;
+        livegui)
+            Branch="current-livegui-amd64"
+            find_data ;;
+    esac
+    echo "$BaseUrl/$Branch/${ISO} ${HASH}"
 }
 
 ## FIX & UPDATE to current format
