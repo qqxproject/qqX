@@ -64,7 +64,7 @@ QG_ModsNumber="v6.1"
 osAddList=" anduinos bluestar "
 #osAddList+=" another "
 
-# osRemoveList for distros that are problematic or no longer maintained, but still listed by Quickget
+# osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
 osRemoveList=" arcolinux clearlinux holoiso truenas-core vxlinux "
 #osRemoveList+=" another and-one-more "
 
@@ -175,6 +175,8 @@ function distro_release_notes {
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
+        batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42  >> With v40 and v41, use https://wiki.batocera.org/run_batocera_in_vm#method_2 and fallocate to resize and fix the log warning ... \
+        Designed to work with game pad controller > use qqX .conf editor to set up as ps2 (?) mouse etc. Boot with SDL.  For v39, boot with Spice.  Also see https://github.com/quickemu-project/quickemu/issues/1794";;
         elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
@@ -1042,6 +1044,14 @@ function get_zorin() {
 # Needed only for special case instructions, such as decompression routines
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "finalize_${OS} ()"
+
+finalize_batocera () {
+    if [[ ${ISO} = *".gz"* ]]; then
+        printf "\n- Decompressing the zip file may take a minute ...\n\n"
+        gzip -d "${VM_PATH}/${ISO}"
+        ISO="${ISO/.gz/}"
+    fi
+}
 
 ##########################################
 

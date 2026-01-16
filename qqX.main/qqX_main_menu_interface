@@ -81,6 +81,11 @@ else
           printf "\n\n  See https://www.qemu.org/docs/master/system/images.html#cmdoption-qcow2-arg-nocow"
           printf "\n"
         fi
+        if [[ "$VM_InstanceName" == *batocera* ]]; then
+          printf "\n\n  With v40 and v41, use 'sudo fallocate -l 16GiB batocera.name.img' (or 32) to fix the resize log warning,"
+          printf "\n\n  from terminal opened in VM folder. Use qqX .conf editor to set up game controllers as ps2 (?) etc."
+          printf "\n"
+        fi
       elif [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
         printColor "\n\n\n  Live BOOT ISO NOT FOUND"
         [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
