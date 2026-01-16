@@ -203,7 +203,7 @@ while true ; do
     printColor "\n\n  >>  'python3' is a listed dependency of QuickEmu "
     InstallationAlert=1
   fi
-  CoreList=("bc" "ps" "pgrep" "lscpu" "lsusb")
+  CoreList=("bc" "ps" "pgrep" "lscpu" "lsusb" "fallocate")
   for CP in "${CoreList[@]}"; do
     if [[ ! $(type -p "$CP") ]]; then
       printColor "\n\n  >>  '%s' should normally be present and is required by qqX or by Quickemu"  "$CP"
@@ -251,7 +251,7 @@ while true ; do
       printColor "\n\n  >>  Standard util '%s' should usually be present and is required by qqX"  "$GP"
           printf   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
       InstallationAlert=1
-    elif [[ $GnuPath ]] &&  grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
+    elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
       printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
           printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
       InstallationAlert=1
