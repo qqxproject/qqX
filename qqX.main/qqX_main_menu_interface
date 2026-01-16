@@ -158,8 +158,6 @@ else
       fi
     fi
 
-    [[ $ShowUtilsMenu ]] && printf "\n"
-
     find_kvm_msr_default_and_status
     print_kvm_status_warnings
     [[ $Verbose_MSR_dialog ]] && Verbose_MSR_dialog=
