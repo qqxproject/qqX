@@ -175,8 +175,7 @@ function distro_release_notes {
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
-        batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42  >> With v40 and v41, use https://wiki.batocera.org/run_batocera_in_vm#method_2 and fallocate to resize and fix the log warning ... \
-        Designed to work with game pad controller > use qqX .conf editor to set up as ps2 (?) mouse etc. Boot with SDL.  For v39, boot with Spice.  Also see https://github.com/quickemu-project/quickemu/issues/1794";;
+        batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
         elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
@@ -1042,14 +1041,24 @@ function get_zorin() {
 ## 6: FINALIZING
 
 # Needed only for special case instructions, such as decompression routines
-# Use for new qqX listed distros or for case overwrites
+# Use for new qqX listed distros or for 'case' overwrites
 # Add in the format of "finalize_${OS} ()"
 
 finalize_batocera () {
+    # See https://wiki.batocera.org/run_batocera_in_vm#method_2 and fallocate
+    # also https://github.com/quickemu-project/quickemu/issues/1794
     if [[ ${ISO} = *".gz"* ]]; then
-        printf "\n- Decompressing the zip file may take a minute ...\n\n"
+        printf -- "- Decompressing the zip file may take a minute ...\n\n"
         gzip -d "${VM_PATH}/${ISO}"
         ISO="${ISO/.gz/}"
+        sleep 1
+        DiskFreeGiB_OnHost="$(df -H --output=avail . | tail -n 1)"
+        DiskFreeGiB_OnHost="${DiskFreeGiB_OnHost/G/}"
+        if [[ "$(bc -l <<< "$DiskFreeGiB_OnHost < 20" 2>/dev/null)" == "1" ]]; then
+           printf "\n\n  ERROR: more disk space needed > about 32G is required ...\n\n"
+        else
+            fallocate -l 24GiB "${VM_PATH}/${ISO}"
+        fi
     fi
 }
 

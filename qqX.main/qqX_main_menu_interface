@@ -82,8 +82,7 @@ else
           printf "\n"
         fi
         if [[ "$VM_InstanceName" == *batocera* ]]; then
-          printf "\n\n  With v40 and v41, use 'sudo fallocate -l 16GiB batocera.name.img' (or 32) to fix the resize log warning,"
-          printf "\n\n  from terminal opened in VM folder. Use qqX .conf editor to set up game controllers as ps2 (?) etc."
+          printf "\n\n  Use qqX .conf editor to set up game controllers as ps2 (?) etc."
           printf "\n"
         fi
       elif [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then

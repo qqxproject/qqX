@@ -56,7 +56,7 @@
 
 ##########################################
 
-QG_ModsNumber="v6"
+QG_ModsNumber="v6.1"
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -64,7 +64,7 @@ QG_ModsNumber="v6"
 osAddList=" anduinos bluestar "
 #osAddList+=" another "
 
-# osRemoveList for distros that are problematic or no longer maintained, but still listed by Quickget
+# osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
 osRemoveList=" arcolinux clearlinux holoiso truenas-core vxlinux "
 #osRemoveList+=" another and-one-more "
 
@@ -153,6 +153,7 @@ function os_info {
         fedora)           INFO="Fedora|-|https://www.fedoraproject.org/|Innovative Linux community distros for desktops, clouds, and containers. Security focused and enterprise funded by RedHat and others ...";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
+        linuxlite)        INFO="Linux Lite|-|https://www.linuxliteos.com/|Lightweight XFCE distro built on Ubuntu LTS.";;
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
         nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
@@ -174,9 +175,11 @@ function distro_release_notes {
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
+        batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
         elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
+        linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
@@ -466,6 +469,27 @@ function get_fedora() {
     echo "${URL} ${HASH}"
 }
 
+## FIX & UPDATE to new mirrors
+function get_gentoo() {
+    local HASH= ; local ISO= ; local Branch= ; local RelDataTarget= ; local RelData=
+    local BaseUrl="https://distfiles.gentoo.org/releases/amd64/autobuilds"
+    find_data () {
+        RelDataTarget="$(web_pipe "$BaseUrl/$Branch" | grep -s sha256 | tr '"' '\n' | grep sha256 | grep -v align)"
+        RelData="$(web_pipe "$BaseUrl/$Branch/$RelDataTarget" | grep -s iso)"
+        ISO="$(awk '{print $2}' <<< "$RelData")"
+        HASH="$(awk '{print $1}' <<< "$RelData")"
+    }
+    case ${EDITION} in
+        minimal)
+            Branch="current-install-amd64-minimal"
+            find_data ;;
+        livegui)
+            Branch="current-livegui-amd64"
+            find_data ;;
+    esac
+    echo "$BaseUrl/$Branch/${ISO} ${HASH}"
+}
+
 ## FIX & UPDATE to current format
 function releases_gnomeos() {
     web_pipe "https://download.gnome.org/gnomeos/" | grep -s href | grep link | fv -M 3 -Q
@@ -540,10 +564,26 @@ function releases_linuxlite() {
 function get_linuxmint() {
     local HASH=""
     local ISO="linuxmint-${RELEASE}-${EDITION}-64bit.iso"
-    #local URL="https://mirror.bytemark.co.uk/linuxmint/stable/${RELEASE}"
     local URL="https://mirror.rackspace.com/linuxmint/iso/stable/${RELEASE}"
     HASH=$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f1)
     echo "${URL}/${ISO} ${HASH}"
+}
+## FIX update mirror
+function get_lmde() {
+    local HASH=""
+    local ISO="lmde-${RELEASE}-${EDITION}-64bit.iso"
+    local URL="https://mirror.rackspace.com/linuxmint/iso/debian"
+    #HASH=$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f1)
+    HASH=$(grep -s "${ISO}" "$ReleaseDataLog" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+# make dynamic
+function releases_lmde() {
+    local RelData= ; local Releases=
+    RelData="$(web_pipe "https://mirror.rackspace.com/linuxmint/iso/debian/sha256sum.txt" | grep -s iso)"
+    echo "$RelData" > "$ReleaseDataLog"
+    Releases="$(cut -d'*' -f2 <<< "$RelData" | cut -d '-' -f2 | sort -nru | head -n 3 | paste -d ' ' -s )"
+    echo "$Releases"
 }
 
 ## UPGRADE only one release ... make dynamic
@@ -1003,6 +1043,24 @@ function get_zorin() {
 # Needed only for special case instructions, such as decompression routines
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "finalize_${OS} ()"
+
+finalize_batocera () {
+    # See https://wiki.batocera.org/run_batocera_in_vm#method_2 and fallocate
+    # also https://github.com/quickemu-project/quickemu/issues/1794
+    if [[ ${ISO} = *".gz"* ]]; then
+        printf "- Decompressing the zip file may take a minute ...\n\n"
+        gzip -d "${VM_PATH}/${ISO}"
+        ISO="${ISO/.gz/}"
+        sleep 1
+        DiskFreeGiB_OnHost="$(df -H --output=avail . | tail -n 1)"
+        DiskFreeGiB_OnHost="${DiskFreeGiB_OnHost/G/}"
+        if [[ "$(bc -l <<< "$DiskFreeGiB_OnHost < 20" 2>/dev/null)" == "1" ]]; then
+           printf "\n\n  ERROR: more disk space needed > about 32G is required ...\n\n"
+        else
+            fallocate -l 24GiB "${VM_PATH}/${ISO}"
+        fi
+    fi
+}
 
 ##########################################
 
