@@ -267,9 +267,15 @@ check_if_disk_needs_a_cleanup  () {
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
-      elif [[ $VirtualSize -le 32 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
-      elif [[ $VirtualSize -le 64 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
-      elif [[ $VirtualSize -le 96 ]]; then  DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
+      #elif [[ $VirtualSize -le 32 ]]; then
+      elif [[ "$(bc -l <<< "$VirtualSize <= 32" 2>/dev/null)" == "1" ]]; then
+        DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
+      #elif [[ $VirtualSize -le 64 ]]; then
+      elif [[ "$(bc -l <<< "$VirtualSize <= 64" 2>/dev/null)" == "1" ]]; then
+        DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+15)" 2>/dev/null)"
+      #elif [[ $VirtualSize -le 96 ]]; then
+      elif [[ "$(bc -l <<< "$VirtualSize <= 96" 2>/dev/null)" == "1" ]]; then
+        DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+20)" 2>/dev/null)"
       else DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+25)" 2>/dev/null)"
       fi
     fi
