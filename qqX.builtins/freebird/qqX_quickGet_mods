@@ -1041,14 +1041,14 @@ function get_zorin() {
 ## 6: FINALIZING
 
 # Needed only for special case instructions, such as decompression routines
-# Use for new qqX listed distros or for case overwrites
+# Use for new qqX listed distros or for 'case' overwrites
 # Add in the format of "finalize_${OS} ()"
 
 finalize_batocera () {
     # See https://wiki.batocera.org/run_batocera_in_vm#method_2 and fallocate
     # also https://github.com/quickemu-project/quickemu/issues/1794
     if [[ ${ISO} = *".gz"* ]]; then
-        printf "- Decompressing the zip file may take a minute ...\n\n"
+        printf -- "- Decompressing the zip file may take a minute ...\n\n"
         gzip -d "${VM_PATH}/${ISO}"
         ISO="${ISO/.gz/}"
         sleep 1
