@@ -514,6 +514,7 @@ run_distro_tests_UI () {
     fi
     printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
     printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
+    printf "\n\n  and the TEST ALL report file in the downloaded release folder"
     printColor "\n\n  [enter] to start (in compact mode)  "
     printf "[v] verbose mode (needs large screen)  [vm] show mirrors   [b] to go back"
     [[ $1 ]] && printf "  [B] to main menu"
