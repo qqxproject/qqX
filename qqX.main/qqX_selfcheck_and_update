@@ -190,7 +190,9 @@ function read_update_check_file {
     sleep 1 ; source "$qqX_Upd_VarsTmpFile"
     # tone-down the alerts if they will relate to beta, unless people are on the beta channel
     Muted_BetaAlertPoint=
-    if [[ $qqX_Current_ReleaseType == "release" ]]; then
+    if [[ $qqX_Current_ReleaseType == "release" ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version"; then
+      Hide_qqX_BetaUpdates=1 ; Muted_BetaAlertPoint=
+    elif [[ $qqX_Current_ReleaseType == "release" ]]; then
       [[ $qqX_Newest_PreRelease ]] || [[ $qqX_Latest_ReleaseType == "beta" ]] && Muted_BetaAlertPoint=1
     else
       Hide_qqX_BetaUpdates=
@@ -210,7 +212,6 @@ function find_latest_qemu_version {
 }
 
 function download_new_release {
-
     printf "\033c \n\n"
     qqX_logo_printf_title  "$qqX_Version updater"
     printf "\n\n\n  https://github.com/qqxproject/qqX/releases"
@@ -218,9 +219,11 @@ function download_new_release {
     while true ; do
       # check that update checks are all done and that transfer file has been sourced
       if [[ ! $qqX_Newest_Tag ]]; then
-        printf "\n\n  Update Checking still in progress ...."
+        [[ ! $UpdRechk ]] && printf "\n\n"
+        printf "  Update Checking still in progress ...."
       elif [[ $qqX_Newest_Tag ]]; then
-        printf "\n\n  Update Checking has been completed "
+        [[ ! $UpdRechk ]] && printf "\n\n"
+        printf "  Update Checking has been completed "
       fi
       if [[ $Muted_BetaAlertPoint ]]; then
         if [[ $UpdRechk == "once" ]]; then UpdRechk="done"
@@ -258,10 +261,13 @@ function download_new_release {
         # if version can handle new format, otherwise leave notes as blank
         if floatversion -Q --gt "$qqX_Version  1.13.02" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
           AboutWidth="$(tput cols)"
-          printf "\n  %s\n" "$qqX_Latest_ReleaseNumber"
+          printf "\n  %s\n\n" "$qqX_Latest_ReleaseNumber"
           #shellcheck disable=SC1003  # the double \
-          mapfile -t AboutReleaseArray <<< "$(grep body  "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4 | cut -d'\' -f2- | tr '\\' '\n' \
-          | grep -e ^'n' | cut -d'n' -f2-)"
+          #mapfile -t AboutReleaseArray <<< "$(grep body  "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4 | cut -d'\' -f2- | tr '\\' '\n' \
+          #| grep -e ^'n' | cut -d'n' -f2-)"
+          #shellcheck disable=SC2059
+          printf -v BodyTxt "$(grep -s body "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4)"
+          mapfile -t AboutReleaseArray  <<< "$BodyTxt"
           for Line in "${AboutReleaseArray[@]}" ; do  if [[ "$Line" != *'+1'* ]] ; then printColor "  %s\n" "$(fmt -uw "$AboutWidth" <<< "$Line")" ; fi ; done
         elif [[ $Muted_BetaAlertPoint ]]; then
           printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Newest_PreRelease"
@@ -297,7 +303,7 @@ function download_new_release {
       printf "  or  [b] to go back \n\n"
       read -rp "  >  "  qqX_LatestTarBall_Folder
 
-     [[ ! $qqX_UpdateAvail ]] && printf "\n\n"
+     [[ ! $qqX_UpdateAvail ]] || [[ $UpdRechk ]] && printf "\n\n"
 
       if [[ $qqX_LatestTarBall_Folder == "s" ]]; then  qqX_LatestTarBall_Folder="$Specified_Updates_Location" ; break
       elif [[ $qqX_LatestTarBall_Folder == "d" ]]; then  qqX_LatestTarBall_Folder="$HOME/Downloads" ; break
