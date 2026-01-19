@@ -259,12 +259,9 @@ function download_new_release {
         else printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
         fi
         # if version can handle new format, otherwise leave notes as blank
-        if floatversion -Q --gt "$qqX_Version  1.13.02" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
+        if floatversion -Q --gt "$qqX_Version  1.14.01" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
           AboutWidth="$(tput cols)"
           printf "\n  %s\n\n" "$qqX_Latest_ReleaseNumber"
-          #shellcheck disable=SC1003  # the double \
-          #mapfile -t AboutReleaseArray <<< "$(grep body  "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4 | cut -d'\' -f2- | tr '\\' '\n' \
-          #| grep -e ^'n' | cut -d'n' -f2-)"
           #shellcheck disable=SC2059
           printf -v BodyTxt "$(grep -s body "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4)"
           mapfile -t AboutReleaseArray  <<< "$BodyTxt"
