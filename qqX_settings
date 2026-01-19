@@ -219,6 +219,7 @@ VM_SelectorStyle="A"
   Disable_qqX_upd_Checks=
 
 # Hide beta releases  (when checking is enabled)  Default =  blank  (show)
+# note that from ver 1.15 onwards, alerts will be normally toned down and muted, unless you are on the beta channel
   Hide_qqX_BetaUpdates=
 
 # Option for a Specified folder, in which sub folder "qqX.releases" gets to be placed, other than the usual like ~/Downloads
