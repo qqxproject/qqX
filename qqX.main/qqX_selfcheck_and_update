@@ -187,13 +187,15 @@ check_for_qqX_updates() {
 
 function read_update_check_file {
   if [[ ! $qqX_upd_FileChk ]] && [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then
-    sleep 1 ; source "$qqX_Upd_VarsTmpFile"
+    sleep 0.5 ; source "$qqX_Upd_VarsTmpFile"
     # tone-down the alerts if they will relate to beta, unless people are on the beta channel
     Muted_BetaAlertPoint=
-    if [[ $qqX_Current_ReleaseType == "release" ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version"; then
+    if [[ $qqX_Current_ReleaseType == "release" ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version" ; then
       Hide_qqX_BetaUpdates=1 ; Muted_BetaAlertPoint=
     elif [[ $qqX_Current_ReleaseType == "release" ]]; then
       [[ $qqX_Newest_PreRelease ]] || [[ $qqX_Latest_ReleaseType == "beta" ]] && Muted_BetaAlertPoint=1
+      floatversion -Q --gt "$qqX_Version $qqX_Newest_PreRelease" && Muted_BetaAlertPoint=
+      floatversion -Q --gt "$qqX_Version $qqX_Latest_ReleaseType" && Muted_BetaAlertPoint=
     else
       Hide_qqX_BetaUpdates=
     fi

@@ -448,7 +448,12 @@ else
     elif [[ $DiskDisparity -ge "3" ]]; then  printColor "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "2" ]]; then  printf "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
     elif [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then
-      printf "  [dl]  view qqX beta details: %s %s\n\n" "$qqX_Newest_PreRelease" "$qqX_Latest_ReleaseNumber"
+      # beta release on the 'latest' channel takes priority over pre-releases
+      # caution \n\n differs on 'array select script'
+      if [[ $qqX_Latest_ReleaseNumber ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version" ; then
+        printf "  [dl]  view qqX beta details: %s\n\n" "$qqX_Latest_ReleaseNumber"
+      else printf "  [dl]  view qqX beta details: %s\n\n" "$qqX_Newest_PreRelease"
+      fi
     elif [[ $qqX_UpdateAvail ]]; then printColor "  [dl]  view new qqX update details: %s \n\n" "$qqX_Latest_ReleaseNumber"
     fi
 

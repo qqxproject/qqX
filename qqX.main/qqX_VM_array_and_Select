@@ -133,7 +133,12 @@ VM_loader_selector_and_menu () {
           check_beta_alert_count
 
           if [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then
-            printf "\n\n  [dl]  view qqX beta details: %s %s" "$qqX_Newest_PreRelease" "$qqX_Latest_ReleaseNumber"
+            # beta release on the 'latest' channel takes priority over pre-releases
+            # caution \n\n differs on 'main menu script'
+            if [[ $qqX_Latest_ReleaseNumber ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version" ; then
+              printf "\n\n  [dl]  view qqX beta details: %s" "$qqX_Latest_ReleaseNumber"
+            else printf "\n\n  [dl]  view qqX beta details: %s" "$qqX_Newest_PreRelease"
+            fi
           elif [[ $qqX_UpdateAvail ]]; then printColor "\n\n  [dl] >> view new qqX update details: %s <<" "$qqX_Latest_ReleaseNumber"
           fi
 
