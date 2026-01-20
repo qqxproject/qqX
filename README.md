@@ -20,7 +20,7 @@ SPIN-OFF NEXT LEVEL [QUICKEMU](https://github.com/qqxproject/qqX/blob/main/qqX.b
 
 Recent Highlights Include:
 
-- **Massive upgrades for QuickGet, that fix, sort and add over 30 distros**
+- **Massive upgrades for QuickGet, that fix, sort and add countless distros**
 
 - A new fully automated Windows installer
 
@@ -38,15 +38,15 @@ Plus numerous downstream fixes for _current_ Quickemu issues
 
 2026 introduces pre-release downloading and a pre-release alert system
 
-New version 1.15 is getting its final shine > [details and download here](https://github.com/qqxproject/qqX/releases)
+- New version 1.15 adds a newly qqX extended DISTRO TEST SUITE to the main interface
+
+- Check out the new TEST-ALL report file to see just how many distros have been sorted and fixed ...
 
 -----
 
 CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 > After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
-
-More stars and endorsements hopefully to come ....
 
 -----
 
@@ -58,7 +58,7 @@ Any qqX built machines will still run using [Quickemu](https://github.com/quicke
 
 [https://qqxproject.org](https://qqxproject.org/)
 
-See web pages for full details
+See web pages for full details and release notes
 
 -----
 
