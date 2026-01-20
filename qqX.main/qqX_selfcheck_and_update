@@ -88,7 +88,7 @@ if [[ ! $qqX_SelfChk_Run ]]; then
   qqX_Latest_SecureTarBall_Addr=
   qqX_Latest_SecureTarSha_Addr=
   qqX_Newest_PreRelease=
-  qqX_Newest_Tag=
+  qqX_Newest_Tag= ; qqX_Newest_TagText=
   qqX_UpdateAvail=
   qqX_Upd_VarsTmpFile="/tmp/qqX.upd.chk.txt"
   printf ""  > "$qqX_Upd_VarsTmpFile"
@@ -117,7 +117,8 @@ check_for_qqX_updates() {
   [[ $qqX_Newest_PreRelease != *[[:alpha:]]* ]] && qqX_Newest_PreRelease=
 
   # All tags, released or not:
-  qqX_Newest_Tag="$(curl -qsf -qsLf  -m 180  "https://github.com/qqxproject/qqX/tags" | grep -s 's/tag' | fv -M -Q --full)"
+  qqX_Newest_Tag="$(curl -qsLf  -m 180  "https://github.com/qqxproject/qqX/tags" | grep -s 's/tag' | fv -M -Q --full)"
+  qqX_Newest_TagText="$(curl -qsLf  -m 180  "https://github.com/qqxproject/qqX/tags" | grep -s -m 1 -e '<pre class="text-small color-fg-muted"' | cut -d '>' -f 2)"
 
   # ..ReleaseFiles contain the tarball addresses and other data
   # but PLAIN curl downloads won't work as the pages are javascript rendered
@@ -179,6 +180,7 @@ check_for_qqX_updates() {
     printf "\n\n qqX_Latest_SecureTarSha_Addr=\"%s\""  "$qqX_Latest_SecureTarSha_Addr"
 
     printf "\n\n qqX_Newest_PreRelease=\"%s\""  "$qqX_Newest_PreRelease"
+    printf "\n\n qqX_Newest_TagText=\"%s\""  "$qqX_Newest_TagText"
     printf "\n\n qqX_Newest_Tag=\"%s\""  "$qqX_Newest_Tag"
 
   } > "$qqX_Upd_VarsTmpFile"
@@ -250,6 +252,7 @@ function download_new_release {
           printf "\n\n  However an "
           printColor "ADD-ON %s" "$qqX_Newest_Tag"
           printf " is available at https://github.com/qqxproject/qqX/tags"
+          [[ $qqX_Newest_TagText ]] && printf "\n\n  >  %s" "$qqX_Newest_TagText"
           UpdRechk="once" ; qqX_NewTagAlert=1
         else
           printColor "  No new release found ...."
