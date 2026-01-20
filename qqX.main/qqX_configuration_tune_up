@@ -28,7 +28,7 @@ function_config_tune_up ()  {
   fi
 
   TuneUp_InstanceName="$(basename "$TuneUpTargetFile" .conf)"
-  TuneUpDate="$(date +%b%d.%H.%M)"
+  TuneUpDate="$(date +%b.%d.%H:%M)"
 
   # Should be in the group folder but make sure we are.
   # Could happen if tune up follows a download that was started in a different folder to the target new one.

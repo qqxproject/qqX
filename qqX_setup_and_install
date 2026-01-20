@@ -8,13 +8,19 @@
 #  From version 1.10.03  A POSIX FRIENDLY .sh SCRIPT is USED AS A WRAPPER, to make sure that it double click executes properly
 #  in Qt / KDE XFCE etc desktop environments.
 
-#   IF: your file manager allows > double mouse click & 'run in terminal' or 'execute'
+  #########################################################################################################################################
 
-#   OR:  in the script's folder > right click > 'run as program' or 'run in konsole' or 'run in terminal'
+#   IF your FILE MANAGER allows:
 
-#   OR:  in the script's folder > right click > open in terminal >  type "./qqX_setup_and_install"   (note prefix ./)
+#   Double mouse click  >  'run in terminal' or 'execute' ....
 
-#   FOR ANY NEWER OR NON-STANDARD TERMINAL, setting up a custom terminal profile is recommended
+#   or     Right click  >  'run as program'  or 'run in terminal'  or 'run in konsole' ....
+
+#   or  Right click on Folder  >  'open in TERMINAL'  and  type "./qqX_setup_and_install"   (click on folder, not file, also note prefix ./)
+
+  #########################################################################################################################################
+
+#   FOR ANY NEWER OR NON-STANDARD TERMINAL, setting up a custom terminal-profile is recommended
 #   as this will allow the values to be stored for future updates:
 
 #   See notes in the script "./qqX_system_install" in the folder "qqX.system",
@@ -31,7 +37,7 @@ if [ -n "$UserTerm" ]; then  printf "%s\n" "$UserTerm" > "/tmp/qqX.termlist"
 fi
 
 # https://stackoverflow.com/questions/35385962/arrays-in-a-posix-compliant-shell#59353917
-# NB 'Type' is a Bash builtin, type -p is not supported in 'dash' so command -v needed.
+# NB: 'Type' is a Bash builtin, type -p is not supported in 'dash' so command -v needed.
 
 ## Selection of terminal:
 
@@ -60,15 +66,19 @@ fi
 # Users with Window Managers, not Desktop Envs will be familiar with terminals and settings at the cmd line
 # However add some well known interfaces where possible, eg. urxvt that comes with 'i3' as this helps with running of QF
 
+# This terminal check list also needs to be available for the standard upgrader script:
+if [ "$1" = "MakeTermList" ]; then MakeTermList=1 ; shift ; else MakeTermList= ; fi
 
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
-set "$@" -- "ptyxis" "kgx" "alacritty" "kitty" "foot"
+set -- "$@" "ptyxis" "kgx" "alacritty" "kitty" "foot"
 
 while [ -n "$1" ] ; do
   if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX.termlist"
   fi
   shift
 done
+
+if [ -n "$MakeTermList" ]; then exit ; fi
 
 # Also see exception handling: 'TERMINAL not found or not suitable' towards end of script
 
@@ -83,6 +93,20 @@ fi
 if [ -z "$UserTerm" ]; then TermGrep="$(pgrep -a term | grep qqX | tr -cd '[:print:]' | awk '{print $2}')"
   if [ -n "$TermGrep" ]; then UserTerm="$(basename "$TermGrep")"
   fi
+fi
+
+if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
+  printf "\n\n  The new COSMIC terminal 'cosmic-term' has been detected on this system, "
+  printf "\n  however, at 12/2025 it is unfortunately problematic."
+  printf "\n\n  Luckily, systems are fine with more than one terminal installed and present:"
+  printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+  printf "\n  which are both lightweight and Wayland/X11/multi-DE compatible."
+  printf "\n\n  If you wish to force cosmic-term, to see if changes make it now possible to use,"
+  printf "\n  edit the entry for 'UserTerm' at the start of this script, and re-run."
+  printf "\n\n  [enter] to quit, install another terminal and retry"
+  printf "\n\n  >  "
+  read -r  REPLY
+  exit
 fi
 
 DefWidth=150
@@ -168,31 +192,41 @@ elif [ -t 1 ] ; then
   # Probably 97 to 100% chance of finding the matching desktop environment default terminal.
   # If none found, where possible, if stdout is available, give help message.
   # https://stackoverflow.com/a/911213
-  printf "\n\n   TERMINAL not found or not suitable"
+  printf "\n\n   TERMINAL NOT SUITABLE or not found:"
+
+  printf "\n\n   Recommended general installations are 'mate-terminal' or 'qterminal'"
+  printf "\n   which are both lightweight and Wayland/X11/multi-DE compatible."
+  printf "\n\n   Systems are fine with more than one terminal installed and present ..."
+
+  printf "\n\n   Try: sudo apt install (or dnf install, pacman -Syu, etc) mate-terminal "
+
   # show the help notes at top of script
   printf "\n\n\n   Pre-Configured and possibly installable terminals include:"
   printf "\n\n"
-  grep -e ^set "$0"| cut -d'-' -f 3- | fmt -w 90
+  grep -e ^set "$0"| cut -d'-' -f 3- | tr ' ' '\n' | grep -v '@' | grep '"' | paste -s -d ' ' | fmt -w 90
   if [ -n "$(command -v "flatpak")" ] ; then
     printf "\n\n  Unfortunately, Flatpak installed terminals are currently problematic"
     printf "\n\n  including a possible qqX flatpak ...."
   fi
   printf "\n\n\n"
-  grep -m 1 -A 4 'FOR ANY NEWER' "$0"
+  #grep -m 1 -A 4 'FOR ANY NEWER' "$0"
+  printf "  See notes at script start for custom terminal-profiles"
   printf "\n\n  [enter] to exit and configure ...\n\n    "
   read -r reply
 fi
 
 if [ -t 1 ] ; then
+  if [ -n "$UserTerm" ]; then
+    printf "\n"
+    printf "\n\n   qqX startup installer initially running in:  %s"  "$UserTerm"
+  fi
   printf "\n"
-  printf "\n\n    qqX startup installer initially running in:  %s"  "$UserTerm"
+  printf "\n\n   Help and info always available at https://qqxproject.org/"
   printf "\n"
-  printf "\n\n    Help and info always available at https://qqxproject.org/"
+  printf "\n\n   Your terminal or distro/terminal combination may need, or may have needed "
+  printf "\n\n   this window to stay open until qqX has completed its tasks ..."
   printf "\n"
-  printf "\n\n    Your terminal or distro/terminal combination may need, or may have needed "
-  printf "\n\n    this window to stay open until qqX has completed its tasks ..."
-  printf "\n"
-  printf "\n\n    [enter] to close \n\n  "
+  printf "\n\n   [enter] to close \n\n  "
   read -r reply
 fi
 

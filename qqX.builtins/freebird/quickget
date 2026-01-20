@@ -1143,7 +1143,7 @@ function releases_ubuntu() {
     local SUPPORTED_VERSIONS=()
     VERSION_DATA="$(IFS=$'\n' web_pipe https://api.launchpad.net/devel/ubuntu/series | jq -r '.entries[]')"
     # shellcheck disable=SC2207
-    SUPPORTED_VERSIONS=($(IFS=$'\n' jq -r 'select(.status=="Supported" or .status=="Current Stable Release") | .version' <<<"${VERSION_DATA}" | sort))
+    SUPPORTED_VERSIONS=($(IFS=$'\n' jq -r 'select(.status=="Supported" or .status=="Current Stable Release") | .version' <<<"${VERSION_DATA}" | sort ))
     case "${OS}" in
         ubuntu)
             echo "${SUPPORTED_VERSIONS[@]}" daily-live;;
@@ -1205,7 +1205,7 @@ function languages_windows-server() {
 }
 
 function releases_zorin() {
-    echo 17 16
+    echo 18 17 16
 }
 
 function editions_zorin() {
@@ -2637,7 +2637,7 @@ function get_solus() {
     local ISO="Solus-${EDITION}-Release-${RELEASE}.iso"
     local URL="https://downloads.getsol.us/isos/${RELEASE}"
     HASH=$(web_pipe "${URL}/${ISO}.sha256sum" | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
+    echo "${URL}/${ISO} ${HASH}" | tee
 }
 
 function get_sparkylinux() {
@@ -3785,7 +3785,7 @@ case "${1}" in
         fi
         exit 0;;
     --version|-version)
-        ## NB The matching 'qqX_quickGet_mods' file is required
+        ## NB: The matching 'qqX_quickGet_mods' file is required
         # when moving FreeBird/Freespirit builtins ##
         echo "FB 4.9.8.07"
         exit 0;;

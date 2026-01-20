@@ -25,15 +25,18 @@
 
 #  However, NOT TO WORRY if you are only familiar the older more POSIX styles, there are still plenty of options
 #  for contributions to the quickemu built-ins, particularly with this file:
-#  Use 4 space tabs with this file, as with QuickGet, so that code can be directly pasted into here and tweaked.
+#  4 space tabs may be used with this file, as with QuickGet, so that code can be directly pasted into here and tweaked.
+#  However, 2 space is the normal qqX tabbing. Try to keep the tabbing consistent within sections, where possible.
 #  QuickGet and qqX house styles may be mixed, WHICHEVER IS EASIEST. See notes at end for qqX coding style.
 
 #  This script is sourced when running a Quickget builtin. It remains variable isolated from running instances of qqX.
-#  Take care to maintain QuickGet variable name continuity where needed.
+#  However, the builtin will pick up the qqX library location. Take care to maintain QuickGet variable name continuity where needed.
 
 #  To test code, run './quickget --check distroname' etc from a terminal opened in the relevant builtin folder.
 
 ##########################################
+
+QG_ModsNumber="v5"
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -42,7 +45,7 @@ osAddList=" anduinos bluestar "
 #osAddList+=" another "
 
 # osRemoveList for distros that are problematic or no longer maintained, but still listed by Quickget
-osRemoveList=" arcolinux holoiso truenas-core vxlinux "
+osRemoveList=" arcolinux clearlinux holoiso truenas-core vxlinux "
 #osRemoveList+=" another and-one-more "
 
 osSupported="$(os_support)"
@@ -113,9 +116,13 @@ function os_info {
         anduinos)         INFO="Anduin OS|-|https://www.anduinos.com/|Ubuntu-based Linux distribution that aims to facilitate developers transitioning from Windows.";;
         archcraft)        INFO="Archcraft|-|https://archcraft.io/|Collection of minimal Linux distributions, based on Arch Linux.";;
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
+        edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
+        elementary)       INFO="Elementary OS|-|https://elementary.io/|Streamlined Gnome/Vala/Flatpak distro: Thoughtful, capable, and ethical replacement for Windows and macOS.";;
+        endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
+        trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
         void)             INFO="Void Linux|anon:voidlinux|https://voidlinux.org/|Non-Systemd desktop operating system based on Runit. Software is provided in binary packages or can be built directly from sources.";;
     esac
@@ -130,8 +137,13 @@ function distro_release_notes {
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
+        elementary)       RelNotes="08/2025 Although \$0 is possible, due to a donation request paywall, possible auto-downloads may not be the latest. See website.";;
+        endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
+        fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="Community Spins and 32 bit versions are also available in various flavors. See website for direct download";;
+        nitrux)           RelNotes="08/2025 ISO releases have been suspended for changes from KDE to Hyprland and the Cachy kernel. See https://nxos.org/news/news-farewell-nx-desktop-and-plasma/";;
+        opensuse)           RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
     esac
@@ -178,6 +190,21 @@ function distro_release_notes {
 
 # For testing code, run './quickget --check distroname' from a terminal opened in the relevant builtin folder.
 
+## FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
+function releases_alpine() {
+    CurrAlp="$(web_pipe "https://alpinelinux.org/downloads/" | grep -s 'Current Alpine' | fv -M -Q | cut -d '.' -f 1,2)"
+    ListAlp="$(web_pipe "https://dl-cdn.alpinelinux.org/alpine/" | fv -M 6 -Q --col)"
+    mapfile -t ArrAlp <<< "$ListAlp"
+    RelAlpCount=0 ; ArrAlpCount=0 ; RelList=
+    while [[ ${ArrAlp[ArrAlpCount]} ]] && [[ "$RelAlpCount" -lt 4 ]]; do
+        if ! fv --gt "${ArrAlp[ArrAlpCount]} $CurrAlp "; then
+            RelList+="${ArrAlp[ArrAlpCount]} " ; ((RelAlpCount+=1))
+        fi
+        ((ArrAlpCount+=1))
+    done
+    echo "$RelList"
+}
+
 ## ADD
 function releases_anduinos {
     echo "LTS Standard"
@@ -222,6 +249,16 @@ function get_anduinos {
     printf "%s" "$EDITION" > "/tmp/qGet.Mods.GET.data.txt"
 }
 
+## FIX Arch - Pre-emptively for PR  https://github.com/quickemu-project/quickemu/pull/1709
+function get_archlinux() {
+    local HASH=""
+    local ISO=""
+    local URL="https://geo.mirror.pkgbuild.com"
+    ISO=$(web_pipe "https://archlinux.org/releng/releases/json/" | jq -r '.releases[0].iso_url')
+    HASH=$(web_pipe "https://archlinux.org/releng/releases/json/" | jq -r '.releases[0].sha256_sum')
+    echo "${URL}${ISO} ${HASH}"
+}
+
 ## FIX artix community editions and hash grep
 function get_artixlinux() {
     local HASH="" ; local ISO=""
@@ -257,7 +294,8 @@ function releases_bluestar {
     echo "latest"
 }
 function get_bluestar {
-    BlueStarRelease="$(web_pipe https://sourceforge.net/projects/bluestarlinux/ | tr ' ' '\n' | grep -s -e '\.iso')"
+    BlueStarRelease="$(web_pipe https://sourceforge.net/projects/bluestarlinux/files/distro/ \
+    | grep green | grep title | cut -d'=' -f4 | cut -d':' -f1 | cut -d'/' -f3)"
     BlueStarIso="https://sourceforge.net/projects/bluestarlinux/files/distro/${BlueStarRelease}"
     BlueStarHash="https://sourceforge.net/projects/bluestarlinux/files/distro/${BlueStarRelease/iso/md5}"
     BlueStarHash="$(web_pipe "$BlueStarHash" | cut -d' ' -f1)"
@@ -272,6 +310,12 @@ function editions_bodhi() {
     fi
 }
 
+## REDUCE release count - over 20 is too many!
+function releases_dragonflybsd() {
+    # If you remove "".bz2" from the end of the searched URL, you will get only the current release
+   web_pipe "https://mirror-master.dragonflybsd.org/iso-images/" | grep -E -o '"dfly-x86_64-.*_REL.iso.bz2"' | grep -o -E '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | fv -M 5 -qs
+}
+
 ## FIX Easy OS release list
 function releases_easyos() {
     local ALL_RELEASES="" ; local YEAR=""
@@ -284,7 +328,7 @@ function releases_easyos() {
     echo "${ALL_RELEASES}"
 }
 
-## FIX Cosmic Atomic
+## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
 function get_fedora() {
     local HASH="" ; local ISO="" ; local JSON="" ; local URL="" ; local VARIANT=""
     case ${EDITION} in
@@ -361,12 +405,33 @@ function get_kdeneon() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## TWEAK  only 9 now ... REVIEW make dynamic?
-function releases_mageia() {
-    echo 9
+## FIX omit dirs only having an RC sub-folder
+function releases_linuxlite() {
+    local ReleasesList= ; local ReleasesTrue= ; i=0
+    ReleasesList="$(floatversion -M 5 -qs "$(web_pipe "https://sourceforge.net/projects/linux-lite/files/" | grep -s 'class="name')")"
+    for ChkRel in $ReleasesList; do
+        web_check "https://sourceforge.net/projects/linux-lite/files/${ChkRel}/linux-lite-${ChkRel}-64bit.iso" &&  ReleasesTrue+="$ChkRel "
+        ((i++)) ; [[ $i -gt 3 ]] && break
+    done
+    echo "$ReleasesTrue"
 }
 
-## FIX sway
+## FIX update mirror
+function get_linuxmint() {
+    local HASH=""
+    local ISO="linuxmint-${RELEASE}-${EDITION}-64bit.iso"
+    #local URL="https://mirror.bytemark.co.uk/linuxmint/stable/${RELEASE}"
+    local URL="https://mirror.rackspace.com/linuxmint/iso/stable/${RELEASE}"
+    HASH=$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
+## UPGRADE only one release ... make dynamic
+function releases_mageia() {
+    web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
+}
+
+## FIX manjaro sway
 function get_manjaro() {
     local HASH="" ; local ISO="" ; local MANIFEST="" ; local URL="" ; local TYPE="official"
     MANIFEST="$(web_pipe https://gitlab.manjaro.org/web/iso-info/-/raw/master/file-info.json)"
@@ -409,7 +474,8 @@ function get_mxlinux() {
 
 ## FIX and UPDATE to new folder styles and names
 function releases_opensuse() {
-    echo "leap leap-micro slowroll tumbleweed"
+    #echo "leap leap-micro slowroll tumbleweed"  @ 11/2025 leap has become inconsistent and/or absent
+    echo "leap-micro slowroll tumbleweed"
 }
 function editions_opensuse() {
     if [[ ! $RELEASE ]]; then echo "DVD Gnome KDE XFCE Rescue"
@@ -446,6 +512,25 @@ function get_opensuse() {
     echo "$URL/${ISO} $HASH"
 }
 
+## FIX - make sure integers -gt 9 can be used ...
+# eg. 6.10 and 10.0 > OracleLinux-R6-U10-Server-x86_64-dvd.iso and OracleLinux-R10-U0-x86_64-dvd.iso
+function releases_oraclelinux() {
+    #echo 9.3 9.2 9.1 9.0 8.9 8.8 8.7 8.6 8.5 8.4 7.9 7.8 7.7
+    floatversion -qs -M 4  "$(web_pipe "https://yum.oracle.com/oracle-linux-isos.html" | grep -s -e '<td><strong>')"
+}
+function get_oraclelinux() {
+    local HASH="" ; local ISO="" ; local VER_MAJ= ; local VER_MIN=
+    #local VER_MAJ=${RELEASE::1} #local VER_MIN=${RELEASE:2:1}
+    VER_MAJ=${RELEASE/.*/} ; VER_MIN=${RELEASE/*./}
+    local URL="https://yum.oracle.com/ISOS/OracleLinux/OL${VER_MAJ}/u${VER_MIN}/x86_64"
+    case ${VER_MAJ} in
+        7) ISO="OracleLinux-R${VER_MAJ}-U${VER_MIN}-Server-x86_64-dvd.iso";;
+        *) ISO="OracleLinux-R${VER_MAJ}-U${VER_MIN}-x86_64-dvd.iso";;
+    esac
+    HASH=$(web_pipe "https://linux.oracle.com/security/gpg/checksum/OracleLinux-R${VER_MAJ}-U${VER_MIN}-Server-x86_64.checksum" | grep "${ISO}" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIX hashes and folders
 function releases_parrotsec() {
   # July 2025 > only latest folder now has iso's
@@ -464,6 +549,40 @@ function get_parrotsec() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## FIX hash, update url and make dynamic
+function releases_pclinuxos() {
+    echo latest
+}
+function editions_pclinuxos() {
+    echo kde kde-darkstar mate xfce
+}
+function get_pclinuxos() {
+    local HASH= ; local ISO= ; local URL= ; local RelMax= ; local RelChk="${EDITION}-2"
+    URL="https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso/"
+    RelMax="$(web_pipe "$URL" | grep -e "$RelChk" | tr '=' '\n' | grep iso | fv -M)"
+    HASH="$(web_pipe "${URL}/pclinuxos64-${EDITION}-${RelMax}.md5sum" | cut -d' ' -f1)"
+    ISO="pclinuxos64-${EDITION}-${RelMax}.iso"
+    echo "${URL}/${ISO} ${HASH}"
+}
+
+## REDUCE release count - 14 is too many!
+function releases_rockylinux() {
+    web_pipe "http://dl.rockylinux.org/vault/rocky/" | grep "class=\"link" | grep -v -e 'full' -e  'RC' -e  'ISO' -e 'Parent'| tr -d / | fv -M 4 -qs
+}
+
+## FIX url and hash, plus make dynamic (if list happens to show up)
+function get_siduction() {
+    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ; local Data=
+    NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
+    URL="https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/${EDITION}"
+    Data="$(web_pipe "${URL}"| grep .iso.md5)"
+    VERSION="$(cut -d'-' -f2 <<< "$Data" | fv -M)"
+    DATE="$(grep "${VERSION}" <<< "$Data" | cut -d'-' -f6 | cut -d'.' -f1)"
+    ISO="siduction-${VERSION}-${NAME}-${EDITION}-amd64-${DATE}.iso"
+    HASH=$(web_pipe "${URL}/${ISO}.md5" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIX  SLINT (only 15.0, and hopefully higher, has downloadable iso's)
 function releases_slint() {
     web_pipe "https://slackware.uk/slint/x86_64/" | grep -e '<a href=' | fv -M -Q
@@ -479,14 +598,14 @@ function get_slint() {
 
 ## UPDATE
 function releases_sparkylinux() {
-    printf "" > "/tmp/qGet.Mods.REL.data.txt" ; echo "Rolling Stable"
+    echo "Rolling Stable"
 }
 function editions_sparkylinux() {
     # May 2025 > listing task tends to exceed quickget's capabilities but July 2025 now allows Mods installer notes
     # Website subject to change, plus older specialist versions still being listed in addition to the newer ones
-    if [[ ! $RELEASE ]]; then  echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI  MinimalGUI_32bit MinimalCLI_32bit"
+    if [[ ! $RELEASE ]]; then  echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
     elif [[ $RELEASE == "Rolling" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
-    elif [[ $RELEASE == "Stable" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI MinimalGUI_32bit MinimalCLI_32bit"
+    elif [[ $RELEASE == "Stable" ]] ; then echo "LXQt MATE Xfce KDE MinimalGUI MinimalCLI"
     fi
 }
 function get_sparkylinux() {
@@ -495,8 +614,11 @@ function get_sparkylinux() {
     # Stable    https://sourceforge.net/projects/sparkylinux/files/base/sparkylinux-7.7-x86_64-minimalgui.iso/download
     # Rolling   https://sourceforge.net/projects/sparkylinux/files/lxqt/sparkylinux-2025.03-x86_64-lxqt.iso/download
     # Rolling   https://sourceforge.net/projects/sparkylinux/files/base/sparkylinux-2025.03-x86_64-minimalgui.iso/download
+    #           https://sourceforge.net/projects/sparkylinux/files/lxqt/sparkylinux-2025.09-x86_64-lxqt.iso/download
+    #           https://sourceforge.net/projects/sparkylinux/files/mate/sparkylinux-2025.09-x86_64-mate.iso/download
     # But not all roll at the same speed:
     # eg.       https://sourceforge.net/projects/sparkylinux/files/kde/sparkylinux-2024.12-x86_64-kde.iso/download
+
     EDITION="${EDITION,,}"
     case "$EDITION" in
         minimalcli*)    SparkyFolder="cli" ;;
@@ -504,12 +626,11 @@ function get_sparkylinux() {
                   *)    SparkyFolder="$EDITION" ;;
     esac
     URL="https://sourceforge.net/projects/sparkylinux/files/${SparkyFolder}"
-    if [[ $RELEASE == "Rolling" ]]; then ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep 2'[[:digit:]]')"
-    else ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep -v 2'[[:digit:]]' | fv -Q -M)"
+    if [[ $RELEASE == "Rolling" ]]; then ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep 2'[[:digit:]]' | fv -M )"
+    else ReleaseNumber="$(web_pipe "$URL" | tr '=' '\n' | grep source | cut -d'"' -f2 | grep -v "iso\." | tr -d '-' | fv -c -Q | grep -v 2'[[:digit:]]' | fv -M )"
     fi
-    if [[ "$EDITION" == *'32bit'* ]]; then EDITION="${EDITION/_32bit/}" ; ISO="sparkylinux-${ReleaseNumber}-i686-${EDITION}.iso"
-    else ISO="sparkylinux-${ReleaseNumber}-x86_64-${EDITION}.iso"
-    fi
+    # Minimal 32 bit discontinued @ 2025 09 and needs fv -M as sometimes has two editions in archive
+    ISO="sparkylinux-${ReleaseNumber}-x86_64-${EDITION}.iso"
     HASH="$(web_pipe "${URL}/${ISO}.allsums.txt" | head -n 2 | grep 'iso' | cut -d' ' -f1)"
     echo "${URL}/${ISO}" "${HASH}"
 }
@@ -531,9 +652,98 @@ function get_spirallinux() {
     echo "${URL}/${ISO}" "${HASH}"
 }
 
+## FIX hash checker - base is now 256
+function get_trisquel() {
+    local HASH="" ; local ISO="" ;local URL="https://mirrors.ocf.berkeley.edu/trisquel-images"
+    case ${EDITION} in
+        mate) ISO="trisquel_${RELEASE}_amd64.iso";;
+        lxde) ISO="trisquel-mini_${RELEASE}_amd64.iso";;
+        kde) ISO="triskel_${RELEASE}_amd64.iso";;
+        sugar) ISO="trisquel-sugar_${RELEASE}_amd64.iso";;
+    esac
+    HASH=$(web_pipe "${URL}/${ISO}.sha256" | grep "${ISO}" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
+
 ## IMPROVE make dynamic
 function releases_truenas-scale() {
     web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep wplink | cut -d'>' -f2 | fv -M -Q
+}
+
+## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
+function get_ubuntu-server() {
+    local HASH="" ; local ISO="" ; local NAME="live-server" ; local URL="" ; local DATA="" ; local RelMax=
+    if [[ "${RELEASE}" == "daily"* ]]; then URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
+    else URL="https://releases.ubuntu.com/${RELEASE}"
+    fi
+    case "${RELEASE}" in 14*|16*) NAME="server";;
+    esac
+    if web_check "${URL}/SHA256SUMS"; then
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    else
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/MD5SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        ISO=$(cut -d' ' -f3 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    fi
+    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
+        make_vm_config "${OS}-devel.iso"
+    else
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+    fi
+}
+function get_ubuntu() {
+    local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
+    if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
+        # Ubuntu Studio daily-live images are in the dvd directory  @ feb 2025 no longer the case
+        RELEASE="dvd"
+    fi
+    if [[ "${RELEASE}" == "jammy-daily" ]]; then
+        if [[ "${OS}" == "ubuntustudio" ]]; then URL="https://cdimage.ubuntu.com/${OS}/jammy/dvd/current"
+        else URL="https://cdimage.ubuntu.com/${OS}/jammy/daily-live/current"
+        fi
+        VM_PATH="${OS}-jammy-live"
+    elif [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
+        VM_PATH="${OS}-${RELEASE}"
+    elif [ "${OS}" == "ubuntu" ]; then
+        URL="https://releases.ubuntu.com/${RELEASE}"
+    else
+        URL="https://cdimage.ubuntu.com/${OS}/releases/${RELEASE}/release"
+    fi
+    if web_check "${URL}/SHA256SUMS"; then
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    else
+        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
+        DATA=$(web_pipe "${URL}/MD5SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
+        ISO=$(cut -d'*' -f2 <<<"${DATA}")
+        HASH=$(cut -d' ' -f1 <<<"${DATA}")
+    fi
+    if [ -z "${ISO}" ] || [ -z "${HASH}" ]; then
+        echo "$(pretty_name "${OS}") ${RELEASE} is currently unavailable. Please select other OS/Release combination"
+        exit 1
+    fi
+    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
+        make_vm_config "${OS}-devel.iso"
+    elif [[ "${RELEASE}" == "jammy-daily" ]]; then
+        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-jammy-live.iso"
+        make_vm_config "${OS}-jammy-live.iso"
+    else
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+    fi
 }
 
 ## FIX invalid VOID folders (use 'current' only as some folders have variants)
@@ -550,6 +760,18 @@ function get_void() {
     esac
     HASH="$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f4)"
     echo "${URL}/${ISO} ${HASH}"
+}
+
+## ADD 18 as in https://github.com/quickemu-project/quickemu/pull/1761
+# but FIX missing lite64 with ver 18. REVIEW making dynamic?
+function releases_zorin() {
+    echo 18 17 16
+}
+function editions_zorin() {
+    if [[ ! $RELEASE ]]; then echo "core64 lite64 education64"
+    elif [[ $RELEASE == "18" ]]; then echo "core64 education64"
+    else echo "core64 lite64  education64"
+    fi
 }
 
 ##########################################
@@ -581,6 +803,336 @@ function get_void() {
 ## 7: DOWNLOAD XL
 # For special and oversized 'get' functions or "get_${OS} ()" overwrites, eg Windows or Mac
 # Normally place 'get' functions next to releases and editions
+
+function unattended_windows() {
+
+  mkdir -p "${1}/unattended" 2>/dev/null
+
+  RndSeq="$( (tr -cd 'b-zB-Z1-9' | tr -d 'eiouyEIOUY' | head -c 16) < /dev/urandom )"
+  {
+    echo "Admin  $RndSeq"
+    echo; echo "# Password recorded to hand but OS isolated. May be changed ...."
+  } > "${1}/Credentials.txt"
+  # Strengthen: Quickemu uses Quickemu/Quickemu for Admin ....
+
+  cat << 'EOF' > "${1}/unattended/autounattend.xml"
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend"
+  xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!--
+       For documentation on components:
+       https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/
+  -->
+ <settings pass="offlineServicing">
+    <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <EnableLUA>false</EnableLUA>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <ComputerName>*</ComputerName>
+    </component>
+  </settings>
+
+  <settings pass="generalize">
+    <component name="Microsoft-Windows-PnPSysprep" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <PersistAllDeviceInstalls>true</PersistAllDeviceInstalls>
+    </component>
+    <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <SkipRearm>1</SkipRearm>
+    </component>
+  </settings>
+
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <SkipAutoActivation>true</SkipAutoActivation>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <ComputerName>*</ComputerName>
+      <OEMInformation>
+        <Manufacturer>qqX Project</Manufacturer>
+        <Model>qqX</Model>
+        <SupportHours>24/7</SupportHours>
+        <SupportPhone></SupportPhone>
+        <SupportProvider>qqX Project</SupportProvider>
+        <SupportURL>https://qqxproject.org</SupportURL>
+      </OEMInformation>
+      <OEMName>qqX Project</OEMName>
+      <ProductKey>W269N-WFGWX-YVC9B-4J6C9-T83GX</ProductKey>
+    </component>
+    <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <CEIPEnabled>0</CEIPEnabled>
+    </component>
+  </settings>
+
+  <settings pass="windowsPE">
+    <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <Diagnostics>
+        <OptIn>false</OptIn>
+      </Diagnostics>
+      <DiskConfiguration>
+        <Disk wcm:action="add">
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+          <CreatePartitions>
+            <!-- Windows RE Tools partition -->
+            <CreatePartition wcm:action="add">
+              <Order>1</Order>
+              <Type>Primary</Type>
+              <Size>256</Size>
+            </CreatePartition>
+            <!-- System partition (ESP) -->
+            <CreatePartition wcm:action="add">
+              <Order>2</Order>
+              <Type>EFI</Type>
+              <Size>128</Size>
+            </CreatePartition>
+            <!-- Microsoft reserved partition (MSR) -->
+            <CreatePartition wcm:action="add">
+              <Order>3</Order>
+              <Type>MSR</Type>
+              <Size>128</Size>
+            </CreatePartition>
+            <!-- Windows partition -->
+            <CreatePartition wcm:action="add">
+              <Order>4</Order>
+              <Type>Primary</Type>
+              <Extend>true</Extend>
+            </CreatePartition>
+          </CreatePartitions>
+          <ModifyPartitions>
+            <!-- Windows RE Tools partition -->
+            <ModifyPartition wcm:action="add">
+              <Order>1</Order>
+              <PartitionID>1</PartitionID>
+              <Label>WINRE</Label>
+              <Format>NTFS</Format>
+              <TypeID>DE94BBA4-06D1-4D40-A16A-BFD50179D6AC</TypeID>
+            </ModifyPartition>
+            <!-- System partition (ESP) -->
+            <ModifyPartition wcm:action="add">
+              <Order>2</Order>
+              <PartitionID>2</PartitionID>
+              <Label>System</Label>
+              <Format>FAT32</Format>
+            </ModifyPartition>
+            <!-- MSR partition does not need to be modified -->
+            <ModifyPartition wcm:action="add">
+              <Order>3</Order>
+              <PartitionID>3</PartitionID>
+            </ModifyPartition>
+            <!-- Windows partition -->
+              <ModifyPartition wcm:action="add">
+              <Order>4</Order>
+              <PartitionID>4</PartitionID>
+              <Label>Windows</Label>
+              <Letter>C</Letter>
+              <Format>NTFS</Format>
+            </ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+      </DiskConfiguration>
+      <DynamicUpdate>
+        <Enable>true</Enable>
+        <WillShowUI>Never</WillShowUI>
+      </DynamicUpdate>
+      <ImageInstall>
+        <OSImage>
+          <InstallTo>
+            <DiskID>0</DiskID>
+            <PartitionID>4</PartitionID>
+          </InstallTo>
+          <InstallToAvailablePartition>false</InstallToAvailablePartition>
+        </OSImage>
+      </ImageInstall>
+      <RunSynchronous>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassCPUCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>2</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>3</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>4</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 0x00000001 /f</Path>
+        </RunSynchronousCommand>
+      </RunSynchronous>
+      <UpgradeData>
+        <Upgrade>false</Upgrade>
+        <WillShowUI>Never</WillShowUI>
+      </UpgradeData>
+      <UserData>
+        <AcceptEula>true</AcceptEula>
+        <FullName>Admin</FullName>
+        <Organization>qqX Project</Organization>
+        <!-- https://docs.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys -->
+        <ProductKey>
+          <Key>W269N-WFGWX-YVC9B-4J6C9-T83GX</Key>
+          <WillShowUI>Never</WillShowUI>
+        </ProductKey>
+      </UserData>
+    </component>
+
+    <component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <!--
+           This makes the VirtIO drivers available to Windows, assuming that
+           the VirtIO driver disk is available as drive F: (keep as in qqX 1.12 fix)
+           https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/README.md
+
+           Also see: https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/data/virtio-win-pre-installable-drivers-win-11.xml
+           as it seems that NOT all drivers can be pre-installed ...
+           BUT this link/file is from 'old-drivers' and there is no link to 'current-drivers'
+           AND the given list is out of date, SO use a reduced list, importantly the scsi and stor which featured in the 1.12 fix.
+           Also add split output, as the original only had w10 listed.
+      -->
+EOF
+
+  if [[ $RELEASE == "11" ]]; then
+    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+      <DriverPaths>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+          <Path>F:\vioscsi\w11\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+          <Path>F:\viostor\w11\amd64</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+EOF
+  else
+    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+      <DriverPaths>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+          <Path>F:\vioscsi\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+          <Path>F:\viostor\w10\amd64</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+EOF
+  fi
+
+# shellcheck disable=SC2129
+cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+    </component>
+  </settings>
+
+    <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <AutoLogon>
+        <Password>
+EOF
+
+  printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
+
+  cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+          <PlainText>true</PlainText>
+        </Password>
+        <Enabled>true</Enabled>
+        <Username>Admin</Username>
+      </AutoLogon>
+      <DisableAutoDaylightTimeSet>false</DisableAutoDaylightTimeSet>
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <NetworkLocation>Home</NetworkLocation>
+        <ProtectYourPC>3</ProtectYourPC>
+        <SkipUserOOBE>true</SkipUserOOBE>
+        <SkipMachineOOBE>true</SkipMachineOOBE>
+        <VMModeOptimizations>
+          <SkipWinREInitialization>true</SkipWinREInitialization>
+        </VMModeOptimizations>
+      </OOBE>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Password>
+EOF
+
+  printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
+
+  cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+              <PlainText>true</PlainText>
+            </Password>
+            <Description>Admin</Description>
+            <DisplayName>qqX community</DisplayName>
+            <Group>Administrators</Group>
+            <Name>Admin</Name>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+      <RegisteredOrganization>qqX Project</RegisteredOrganization>
+      <RegisteredOwner>Admin</RegisteredOwner>
+      <FirstLogonCommands>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>msiexec /i F:\virtio-win-gt-x64.msi /passive /qn</CommandLine>
+          <Description>Install virtio drivers</Description>
+          <Order>1</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>msiexec /i E:\spice-vdagent-x64-0.10.0.msi /passive /qn</CommandLine>
+          <Description>Install spice-vdagent SPICE agent</Description>
+          <Order>2</Order>
+        </SynchronousCommand>
+       <SynchronousCommand wcm:action="add">
+          <CommandLine>msiexec /i E:\spice-webdavd-x64-latest.msi /passive /qn</CommandLine>
+          <Description>Install spice-webdavd file sharing agent</Description>
+          <Order>3</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>F:\virtio-win-guest-tools.exe /quiet</CommandLine>
+          <Description>Install virtio tools</Description>
+          <Order>4</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>cmd /c POWERCFG -H OFF</CommandLine>
+          <Description>Disable Hibernation</Description>
+          <Order>5</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+        <CommandLine>cmd /c net accounts /maxpwage:unlimited</CommandLine>
+        <Description>Local account passwords never expire</Description>
+        <Order>6</Order>
+      </SynchronousCommand>
+      </FirstLogonCommands>
+    </component>
+  </settings>
+</unattend>
+EOF
+
+  echo "Downloading Spice drivers..."
+  web_get https://www.spice-space.org/download/windows/spice-webdavd/spice-webdavd-x64-latest.msi "${VM_PATH}/unattended"
+  web_get https://www.spice-space.org/download/windows/vdagent/vdagent-win-0.10.0/spice-vdagent-x64-0.10.0.msi "${VM_PATH}/unattended"
+
+  # Spice downloads are difficult to enable dynamically as they are infrequent and differ in format.
+  # However, a qqX based version notifier is possible:
+
+  LatestSpiceAgent="$(web_pipe "https://www.spice-space.org/download/windows/vdagent" | tr '"' '\n' | grep -s vdagent | fv -Q -M)"
+  if fv -qg "$LatestSpiceAgent 0.10.0" ; then
+    echo; echo "A NEWER Spice agent has been found at https://www.spice-space.org/download/windows/vdagent"
+    echo "but auto adjusting downloads are difficult to enable for the Spice website:"
+    echo; echo "After the installation is finished, please manually update Spice to version $LatestSpiceAgent from inside Windows"
+    echo; echo "Please report this at https://github.com/qqxproject/qqX/issues "
+    echo "if a fix is not already in the development branch, so that a fix can be released."
+  fi
+
+  # REMOVE - UsbDk is for Hosts (aka clients), not for Guests.
+  # See: https://www.ovirt.org/documentation/virtual_machine_management_guide/#sect-Configuring_USB_Devices
+  # web_get https://www.spice-space.org/download/windows/usbdk/UsbDk_1.0.22_x64.msi "${VM_PATH}/unattended"
+
+  # passwords never expire: See https://github.com/quickemu-project/quickemu/issues/1622
+
+  echo "Making unattended.iso"
+  mkisofs -quiet -J -R -input-charset utf-8 -o "${VM_PATH}/unattended.iso" "${VM_PATH}/unattended/"
+
+}
 
 ##########################################
 
@@ -719,29 +1271,33 @@ function web_get() {
     fi
 
     if [ "${DIR}" != "$(pwd)" ] && ! mkdir -p "${DIR}" 2>/dev/null; then
-        echo "ERROR! Unable to create directory ${DIR}"
-        exit 1
+        echo "ERROR: Unable to create directory ${DIR}" ; exit 1
     fi
-    #  Allow qqX or any external process to pick up the FINALIZED NAME
+    #  Allow qqX or any external process to pick up the FINALIZED VM-NAME
     # - avoids overwrites eg windows 'unattended'
     # - external proc should clear this file before starting so the grep test will function
     if ! grep -sq 'New_VM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
         printf "New_VM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
+        cp "/tmp/qe_new_vm_name.txt" "${DIR}/qe_new_vm_name.txt"
     fi
     if [[ ${OS} != windows && ${OS} != macos && ${OS} != windows-server ]]; then
-        echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}"
-        echo "- URL: ${URL}"
+        echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}" ; echo "- URL: ${URL}"
     fi
     # Add retries to the standard Quickemu 4.9.x method:
     # --continue-at -  will continue/resume a previous file transfer but we need to make sure we actually have a connection to start with ...
-    if ! curl --disable -Lf --retry 6 --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - --output "${DIR}/${FILE}" \
-    --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
-        # qqX needs to take control here, use exit instead
-        if pgrep qqX >/dev/null ; then echo ; exit
-        else
-            echo "ERROR! Failed to download ${URL} with curl." ; rm -f "${DIR}/${FILE}"
+    tput civis ; echo
+    local CurlParallel=
+    if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
+        CurlParallel="--parallel" ; printf "  qqX multiplexed parallel download: \n\n"
+    fi
+    if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
+    --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
+        # qqX needs to take control here, use exit instead  # $CurlParallel - unquoted
+        if pgrep qqX >/dev/null ; then echo ; tput cnorm ; exit
+        else echo "ERROR: Failed to download ${URL} with curl." ; tput cnorm ; echo ; rm -f "${DIR}/${FILE}"
         fi
     fi
+    tput cnorm ; echo
 }
 
 
@@ -868,6 +1424,12 @@ QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors=
 printf "Webget NOT used\n" > "/tmp/qGet_webget_report.txt"
 
 case "${1}" in
+    --info-line)
+        os_info "$2" ; exit 1
+    ;;
+    --rel-notes)
+        distro_release_notes "$2" ; exit 1
+    ;;
     --mirrors)
         CheckMirrors=1 ; shift
     ;;
@@ -900,6 +1462,8 @@ case "${1}" in
         help_message
         printf "\n\nExtra qqX commands: \n\nfrom a terminal opened in a qqX 'built-in' folder"
         printf "\n\n----------------------------- ./quickget -------------------------------"
+        printf "\n\n  --info-line       Output the OS info line in raw field separated format for alternative processing"
+        printf "\n\n  --rel-notes       Output the additional release and installation notes, if supplied"
         printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qGet_FullResult.txt\""
         printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
         printf "\n\n  --quiet-check     [os] [release] [edition] : Only log check image URL(s) to file \"/tmp/qGet_QuietResult.txt\""
@@ -908,6 +1472,13 @@ case "${1}" in
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."
         printf "\n\n----------------------------------------------------------------------------------\n\n"
         exit 0 ;;
+
+    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possibile:
+
+    --curl-no-para)
+        Curl_NoPara=1 ; shift
+    ;;
+
 esac
 
 ##########################################

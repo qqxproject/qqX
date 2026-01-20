@@ -21,6 +21,7 @@ drives_and_snapshots() {
   #  @ 2023/08  with adding of second and shared drives,
   #  also start accessing qemu-img directly instead of going round the houses with with quickemu calls
   #  Omitting $1 will give simple lists, otherwise $1 may be given either as 'info' or 'select'
+  #  $2 as 'snaps' to show snaps only, not full info
   #  Or $1 as 'info_current' to avoid the 'refresh_conf_vars_and_values' call
   #  $2 "as_disk_util" is for disk utility to hide the message to use the disk utility
 
@@ -150,7 +151,9 @@ drives_and_snapshots() {
   if [[ $1 == "select" ]] && [[ -e "$Selected_Drive" ]] ; then
 
     printColor "\n\n Selected Drive = %s \n\n"  "$Selected_DriveName"
-    "$QEMU_IMG" info "$Selected_Drive"
+    if [[ $2 == "snaps" ]]; then  "$QEMU_IMG" snapshot -l "$Selected_Drive"
+    else "$QEMU_IMG" info "$Selected_Drive"
+    fi
     check_disk_is_okay "$Selected_Drive"
     Selected_DriveSize="$("$QEMU_IMG" info "$Selected_Drive" | grep -m 1 'disk size' | cut -d: -f2)"
     if [[ $2 != "as_disk_util" ]]; then
@@ -267,7 +270,7 @@ function manage_and_repair_disks {
       [[ ! $ResizePlus ]] && return
     fi
 
-    DiskDate="$(date +%b%d.%H.%M)"
+    DiskDate="$(date +%b.%d.%H:%M)"
     DiskBackup="${Selected_Drive}.$DiskDate.OLD.qcow2"
 
     printf  "\n\n  Original drive: %s " "$Selected_Drive"
@@ -314,7 +317,7 @@ function manage_and_repair_disks {
       if [[ $DiskManage == "rz" || $DiskManage == "rd" ]]; then
         [[ $DiskManage == "rz" ]] && "$QEMU_IMG" resize -f qcow2 "$Selected_Drive" "+${ResizePlus}G" 2> "$Qemu_IMG_ErrorLog"
         if [[ $DiskManage == "rd" ]]; then
-          SnapTitle="$(date +%b%d.%H.%M)"
+          SnapTitle="$(date +%b.%d.%H:%M)"
           "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
         fi
         printf "\n BEFORE: \n\n"
@@ -346,7 +349,7 @@ function manage_and_repair_disks {
 
 function qqX_snapshot_delete {
 
-  # NB qqX prefix to avoid cross-linking with the quickemu one
+  # NB: qqX prefix to avoid cross-linking with the quickemu one
 
   printColor "\n\n qqX Snapshot Delete function "
   printf "\n\n %s  (reselection & cancel prompts are given before starting)" "$Selected_DriveName"

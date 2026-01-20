@@ -45,12 +45,12 @@ print_kvm_status_warnings () {
       Show_MSR_Status=1 ; else Show_MSR_Status=
     fi
     if [[ $KVM_MSR_status == "Y" ]] ; then
-      [[ $KVM_MSR_Error || $Show_MSR_Status ]] && printf "\n  MSR Host Session = Y"
+      [[ $KVM_MSR_Error || $Show_MSR_Status ]] && printf "\n\n  MSR Host Session = Y"
       if  [[ $KVM_MSR_Error ]]; then  printColor "  ERROR > [m] msrs controls\n"
       elif [[ $Show_MSR_Status ]]; then printf "   [m] msrs controls\n"
       fi
     else
-      [[ $KVM_MSR_Error || $Show_MSR_Status ]] && printf "\n  MSR Host Session = N"
+      [[ $KVM_MSR_Error || $Show_MSR_Status ]] && printf "\n\n  MSR Host Session = N"
       if [[ $KVM_MSR_Error ]]; then printColor "  ERROR > [m] msrs controls\n"
       elif [[ $Show_MSR_Status ]] ; then printf "   [m] msrs controls\n"
       fi

@@ -38,6 +38,8 @@
 
 ##########################################
 
+QE_ModsNumber="v2"
+
 ## FIX null bytes error BUT keep awkward true flag method, for now, to maintain 'vm_boot' upstream compatibility
 function is_firmware_qcow2() {
     # Check for the magic bytes that indicate the firmware is in qcow2 format,

@@ -111,8 +111,8 @@ function find_quickemu_source_functions_and_vars {
 
   source  "/tmp/qmod-qe-rw-vars-temp"
 
-  # Separate the re-writeable vars  # NB not all vars are listed by the quickemu script ...
-  # Also NB the quickemu variables QEMU= etc for qemu versioning get carried out separately by qqX so that machine switching can happen
+  # Separate the re-writeable vars  # NB: not all vars are listed by the quickemu script ...
+  # Also NB: the quickemu variables QEMU= etc for qemu versioning get carried out separately by qqX so that machine switching can happen
 
 }
 

@@ -120,7 +120,7 @@ find_texteditor () {
   fi
 }
 
-# NB Also needs calling if re-loading the settings file  See refresh_sources_and_load_VM_arrays
+# NB: Also needs calling if re-loading the settings file  See refresh_sources_and_load_VM_arrays
 find_file_manager_browser
 find_texteditor
 
@@ -217,9 +217,6 @@ function sort_qqX_builtin_settings {
     export PATH="${qqX_LibraryFolder}:${OriginalPATH}"
   fi
 
-  QE_VerNumber=
-  QG_VerNumber=
-
   if [[ $QE_SourcePath ]] && [[ ! -e "$QE_SourcePath" ]]; then
     printf "\n\n  ERROR - quickemu not found \n\n  Re-check Installation &/or Installation instructions"
     printf "\n\n  Settings File: %s \n\n" "$qqX_SettingsFile"  ; sleep 10
@@ -239,10 +236,13 @@ function find_quick_version_numbers {
 
   # To be run only after rerouting functions for quickemu & quickget are in place & code has been sourced.
   # But place early as emu and get may load initially out of sequence ...
-
   # And if rerunning after a settings change, to be run after 'find_quickemu_source_functions_and_vars'
   # has been, so that the right QE & QG versions have been established and loaded.
   # See function 'refresh_and_load_quickemu_sources'
+  QE_VerNumber= ; QG_VerNumber=
+
+  # Also, @ 2026/01, start checking the Mods for versioning, as the Mods files are now becoming more featured and more frequently updated
+  QE_ModsNumber= ; QG_ModsNumber=
 
   # QuickEMU also uses an internal variable '$VERSION' but this only works after the correct script has been sourced.
   # But use grep to avoid bad original source $QEMU_VER_SHORT routines throwing errors
@@ -251,7 +251,9 @@ function find_quick_version_numbers {
   # QuickGET as @ ver 4.9.2 'official-vanilla' actually makes a call to EMU to find the number.
   # But the 'quickget' call goes to a qqX capture function of the same name,
   # and allows re-routes to custom versions that may work differently.
-  if [[ $QE_SourceVersion == "System" || $QE_SourceVersion == "Echo" ]]; then QG_VerNumber="$QE_VerNumber"
+  if [[ $QE_SourceVersion == "System" || $QE_SourceVersion == "Echo" ]]; then
+    QG_VerNumber="$QE_VerNumber"
+    QE_Modpath= ; QE_ModsNumber= ; QG_Modpath= ; QG_ModsNumber=
   else QG_VerNumber="$("$QG_SourcePath" --version 2>/dev/null)"
   fi
 
@@ -271,6 +273,15 @@ function find_quick_version_numbers {
     read -rp "  >  "
     exit directly
   fi
+
+  if [[ $QE_Modpath ]]; then
+    QE_ModsNumber="$(grep -s 'QE_ModsNumber=' "$QE_Modpath" | cut -d'"' -f2)"
+  fi
+  if [[ $QG_Modpath ]]; then
+    QG_ModsNumber="$(grep -s 'QG_ModsNumber=' "$QG_Modpath" | cut -d'"' -f2)"
+  fi
+  [[ ! $QE_ModsNumber ]] && QE_ModsNumber="n/a"
+  [[ ! $QG_ModsNumber ]] && QG_ModsNumber="n/a"
 }
 
 find_quick_version_numbers

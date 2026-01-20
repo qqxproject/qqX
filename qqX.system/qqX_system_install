@@ -170,6 +170,11 @@ while true ; do
     printColor "\n\n  >>  'socat' is a needed dependency of QuickEmu and is also used by qqX "
     InstallationAlert=1
   fi
+  if [[ ! $(type -p "uuidgen") ]]; then
+    printColor "\n\n  >>  'uuidgen' is a needed dependency of QuickEmu and is also used by qqX "
+      printf "\n\n       uuidgen can be sometimes be packaged as 'uuid-runtime'"
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p glxinfo) ]]; then
     printColor "\n\n  >>  'glxinfo' is a needed dependency of QuickEmu and may be part of 'mesa-utils' "
     InstallationAlert=1
@@ -198,7 +203,7 @@ while true ; do
     printColor "\n\n  >>  'python3' is a listed dependency of QuickEmu "
     InstallationAlert=1
   fi
-  CoreList=("bc" "uuidgen" "ps" "pgrep" "lscpu" "lsusb")
+  CoreList=("bc" "ps" "pgrep" "lscpu" "lsusb" "fallocate")
   for CP in "${CoreList[@]}"; do
     if [[ ! $(type -p "$CP") ]]; then
       printColor "\n\n  >>  '%s' should normally be present and is required by qqX or by Quickemu"  "$CP"
@@ -207,29 +212,13 @@ while true ; do
       InstallationAlert=1
     fi
   done
-  GnuList=("awk" "sed" "gzip" "tar")
-  for GP in "${GnuList[@]}"; do
-    GnuPath="$(type -p "$GP")"
-    [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
-    if [[ ! $GnuPath ]]; then
-      printColor "\n\n  >>  '%s' should usually be present and is required by qqX"  "$GP"
-      printf "\n\n  Gnu is expected but most versions should have basic Gnu compatibilities"
-      InstallationAlert=1
-    elif [[ $GnuPath ]] && ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
-      printColor "\n\n  >>  CAUTION: Gnu '%s' is the usually supplied version eg realpath 'awk' should be 'gawk' ... "  "$GP"
-      printf "\n\n      Behaviour can vary but most versions should have basic Gnu compatibilities"
-      printf "\n      Most distro packaging systems should allow Gnu replacement upgrades"
-      printf "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
-      InstallationAlert=1
-    fi
-  done
-  if [[ ! $(type -p wget) ]]; then
-    printColor "\n\n  >>  A 'wget' installation should normally be present and may be needed in certain places "
+  if [[ ! $(type -p wget) && ! $(type -p wget2) ]]; then
+    printColor "\n\n  >>  Either a 'wget' or 'wget2 installation should be present and may be needed in certain places "
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
     printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
-    printf "\n\n  For some host distros, 'p7zip' may also need 'p7zip-plugins' "
+    printf "\n\n      For some host distros also/instead will need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p unzip) ]]; then
@@ -245,7 +234,7 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
-    printColor "\n\n  >>  Check for 'spice' installations 'spice-vdagent' and 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' "
+    printColor "\n\n  >>  Check for 'spice' installations: 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p qemu-system-x86_64) ]] || [[ ! $(type -p qemu-img) ]] || [[ ! $(type -p qemu-nbd) ]]; then
@@ -253,23 +242,84 @@ while true ; do
     printColor "\n\n  >>  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system, and for qemu-utils etc "
     InstallationAlert=1
   fi
+  # add last as it's a bit longer on the notes
+  GnuList=("awk" "sed" "gzip" "tar")
+  for GP in "${GnuList[@]}"; do
+    GnuPath="$(type -p "$GP")"
+    [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
+    if [[ ! $GnuPath ]]; then
+      printColor "\n\n  >>  Standard util '%s' should usually be present and is required by qqX"  "$GP"
+          printf   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
+      InstallationAlert=1
+    elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
+      printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
+          printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+      InstallationAlert=1
+    fi
+  done
 
   if [[ $InstallationAlert ]]; then
-    printColor "\n\n\n  [tx]  Translate from English"
-    [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
-    printf "\n\n\n  Ubuntu 25.10 example full set:"
-    printf "\n\n  sudo apt install  curl  7zip  bzip2  socat  gawk  mesa-utils  genisoimage"
-    printf "\n\n  sudo apt install  spice-vdagent  spice-client-gtk  qemu-system-x86"
-    [[ $XDG_SESSION_TYPE == "wayland" ]] && printf "\n\n  sudo apt install  wayland-info"
-    printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations"
-    printf "\n\n  Return here to re-check:"
-    printf "\n\n  [r] re-check   [c] ignore and continue   [q] to quit \n\n"
+
+    printColor "\n\n  >>  "
+    printf "Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
+
+    printf "\n\n\n  Example full sets:"
+
+    printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
+    printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
+
+    printColor "\n\n  Fedora 43 KDE (2025/11)"
+    printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
+    # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
+
+    printColor "\n\n  LinuxMint 22.3 Cinnamon (2026/01)"
+    printf "\n  sudo apt install  jq  socat  spice-client-gtk  qemu-system-x86"
+
+    if [[ $ShowMoreExamples ]]; then
+
+      printColor "\n\n  Fedora 43 Workstation (Gnome 49)"
+      printf "\n  sudo dnf install  mate-terminal  wayland-utils  pZzip-plugins  socat  spice-gtk-tools"
+      # @ 01/2025 seems to come with qemu ready installed
+
+      printColor "\n\n  Debian KDE 13.2.0"
+      printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
+
+      printColor "\n\n  Ubuntu 25.10"
+      printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
+      printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
+      # qemu-system-modules-spice > quickemu PR #1696
+
+      printColor "\n\n  Pop! OS 24.04 Cosmic "
+      printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
+      printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
+
+    fi
+
+    if grep -qs 'driver=virtio' <<< "$(lshw 2>/dev/null)" ; then
+      printf "\n\n\n  Nested installation detected ...."
+    fi
+
+    printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations  > return here to re-check"
+
+    printColor "\n\n  [e] toggle MORE EXAMPLES   [r] re-check   [c] move-on and continue   [q] to quit"
+    printf "\n\n  [tx]  Translate from English"
+    [[ $ShowTxTexts ]] && printf "  -  %s" "$(find_translate_text "Translate from English")"
+    printf "\n\n"
+
     read -rp  "  >  "   InstallationAlert
   else break
   fi
-    [[ $InstallationAlert == "q" ]] &&  exit
-    if [[ $InstallationAlert == "c" || $InstallationAlert == "i" ]]; then InstallationAlert= ; break ; fi
-    if [[ $InstallationAlert == "tx" ]]; then sleep 0.6 ; open_installer_tx_screens_in_browser ; fi
+
+  case "$InstallationAlert" in
+    q)      exit ;;
+    c|i)    break ;;
+    tx)     sleep 0.6 ; open_installer_tx_screens_in_browser ;;
+    e)      if [[ $ShowMoreExamples ]]; then ShowMoreExamples=
+            else  ShowMoreExamples=1
+            fi ;;
+    *)      true ;;
+  esac
+
 done
 
 
@@ -295,7 +345,7 @@ fi
 qqX_Std_File_Path="$qqX_Std_Bin_Dir/qqX"
 qqX_Std_lc_Link_Path="$qqX_Std_Bin_Dir/qqx"
 
-#  NB For non FHS OS packaging, also edit at start of main file 'qqX' ...
+#  NB: For non FHS OS packaging, also edit at start of main file 'qqX' ...
 #  WiP: attention may need to be given to the qqX updater too ...
 
 #  From qqX 1.6 onwards, a folder /usr/share/qqX should be created for the subfolder and files of qqX.main
@@ -333,7 +383,7 @@ Notes
 
 function print_terminal_notes {
   # See https://stackoverflow.com/questions/22697688/how-to-cat-eof-a-file-containing-code
-  # ( NB use of escape EOF, or quotes, not used )
+  # ( NB: use of escape EOF, or quotes, not used )
   cat << Notes
 
   TO MANUALLY SPECIFY the terminal name, the installer script's 'UserTerm' variable may be used.
@@ -365,7 +415,7 @@ Notes
 # Changes made here, to height and width values, will be one-time only.
 # Also to UserTerm.
 
-Term_Width=145
+Term_Width=150
 Term_Height=50
 Term_Taller=55
 
@@ -377,7 +427,7 @@ UserTerm=
 # eg.  CustomTerminalProfile=" --geometry=145x50 --hide-menubar --title=qqX  -e "
 # or   CustomTerminalProfile="" --geometry=${Term_Width}x${Term_Taller} --hide-menubar --title=qqX  -- "
 
-# NB the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
+# NB: the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
 
 # The use of CustomTerminalProfile will also cause UserTerm to be stored.
 # Any size variables copied from below will eventually become stored as numerics.
@@ -466,7 +516,8 @@ else
   else Current_qqX_Version=
   fi
 
-  if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then  printf  "\n   Upgrade the current release %s ..."   "$Current_qqX_Version"
+  if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then
+    printf  "\n   %s  >>  %s"  "$Current_qqX_Version"  "$New_qqX_Version"
   fi
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
@@ -590,6 +641,9 @@ else
       sudo chmod a+rx "$qqX_Std_lc_Link_Path"
     fi
 
+    # Re-Check the terminal check list as needs to be available for the standard upgrader script and refreshed in case of side installs
+    ./qqX_setup_and_install MakeTermList || { printColor "\n\n  MakeTermList  >  a Restart is required \n\n" ; sleep 5; exit 1; }
+
     # Check that the right version is there:
     if [[ -e "$qqX_Std_File_Path" &&  -e "$qqX_Std_lc_Link_Path" ]] && [[ "$(qqx --version 2>/dev/null)" == "$New_qqX_Version" ]] ; then
       printColor "\n  Files installed: "; printf " All good"
@@ -675,9 +729,8 @@ if [[ -e  "$XDG_GUI_desktop_PathName" ]] ; then
     printf "\n\n  BUT... to enable new qqX features, we need to take a few seconds to reconfigure the launcher"
     printColor "\n\n  [enter] to continue   "
   else
-    printf "\n\n  Unless changing the terminal size, the icon or similar, may be skipped ..."
     printColor "\n\n  [enter] to skip   "
-    printf "[r] to reconfigure \n\n"
+    printf "[r] to RECONFIGURE terminal, terminal size, the icon or similar ...\n\n"
   fi
   read -rp "  >  "  SkipMkLauncher
 
@@ -745,13 +798,14 @@ if [[ ! $SkipMkLauncher ]]; then
           UserTerm="${TermChooseArr[i]}"
           break ;;
         h)
-          printf "\n\n\n  85%% of users are probably covered by \"gnome-terminal\" \"konsole\" \"mate-terminal\" "
-          printf "\n\n  \"xfce4-terminal\" and over 95%% probably when \"qterminal\" and \"alacritty\" are added."
+          printf "\n\n\n  85%% of users are probably covered by \"gnome-terminal\" \"konsole\" \"mate-terminal\" \"xfce4-terminal\""
+          printf "\n\n  and over 95%% probably when \"qterminal\" and \"alacritty\" are added."
 
-          printf "\n\n\n  Flatpak installed terminals and the new Gnome Terminal 'ptyxis' are currently problematic ..."
-          printf "\n\n  For qqX purposes, alacritty works better in tiling window managers"
-          printf "\n\n  A recommended general installation is 'mate-terminal' "
-          printf "\n\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
+          printf "\n\n\n  Flatpak installs and the new Gnome Terminal 'ptyxis' are currently problematic"
+          printf "\n\n  whilst, for qqX purposes, alacritty works better in tiling window managers:"
+          printf "\n\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+          printf "\n\n  which are both lightweight and Wayland/X11/multi-DE compatible."
+          printf "\n\n\n  Systems are fine with more than one terminal installed and present ..."
           printf "\n"
           TermChoose=
           ;;
@@ -820,11 +874,16 @@ if [[ ! $SkipMkLauncher ]]; then
 
       if [[ $(type -p "ptyxis") ]] ; then
         # 10/2025 ptyxis  partly resolved, from ver 49.1 (tested on Fedora 43 beta) but fails to open QF second windows
-        printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on the system this is currently problematic ..."
+        printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on this system, it is currently problematic:"
       fi
 
-      printf "\n\n  A recommended general installation is 'mate-terminal' "
-      printf "\n  which is lightweight, Wayland / X11 compatible and has geometry settings."
+      if [[ $(type -p "cosmic-term") ]] ; then
+        printf "\n\n  Although the new COSMIC terminal 'cosmic-term' is present on this system, it is currently problematic:"
+      fi
+
+      printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+      printf "\n  which are both lightweight and Wayland/X11/multi-DE compatible."
+      printf "\n\n  Systems are fine with more than one terminal installed and present ..."
 
       printf "\n\n\n"
 
@@ -940,14 +999,24 @@ if [[ ! $SkipMkLauncher ]]; then
 
   fi
 
-  if [[ ! $(type -p update-desktop-database) ]] || [[ $No_XDG ]] ; then
-
-      printColor "\n\n  Incomplete XDG desktop installation. \n\n  Check your distro repository for ""'""desktop-file-utils""'"" "
-      printColor "\n\n  or see https://www.freedesktop.org/software/desktop-file-utils/releases/ \n\n"
-      read -rp "  [q] to quit  or [enter] to install traditional links only " Missing_XDG_Utils
-      [[ $Missing_XDG_Utils == "q" ]] && sleep 0.6 && exit
-  fi
-
+  while true; do
+    if [[ ! $(type -p update-desktop-database) ]] || [[ $No_XDG ]] ; then
+        printColor "\n\n  Incomplete XDG desktop installation. \n\n  Check your distro repository for ""'""desktop-file-utils""'"" "
+        printColor "\n\n  or see https://www.freedesktop.org/software/desktop-file-utils/releases/"
+        printf "\n\n  May also be installed via a second terminal ..."
+        printf "\n\n  For non-desktop or specialist environments, select 'links only'"
+        printf "\n\n"
+        read -rp "  [enter] to re-check  [L] install traditional links only  [q] to quit " Missing_XDG_Utils
+        if [[ $(type -p update-desktop-database) ]]; then
+          printf "\n\n  Success: desktop-file-utils found" ; sleep 1 ; break
+        fi
+        if [[ $Missing_XDG_Utils == "l" || $Missing_XDG_Utils == "L" ]]; then
+          printf "\n\n  Installing traditional links" ; sleep 1 ; break
+        fi
+        [[ $Missing_XDG_Utils == "q" ]] && sleep 0.6 && exit
+      else break
+    fi
+  done
   if [[ ! -d  "$XDG_GUI_desktop_Folder" ]] || [[ $No_XDG ]]; then
     mkdir "$XDG_GUI_desktop_Folder"  ||  printColor "\n\n  ERROR  making basic XDG folders \n\n"
   fi
@@ -1057,7 +1126,7 @@ fi
 ## Read the .desktop file for Start_qqX as maybe Skippping MkLauncher
 #  Needs eg. Start_qqX="$UserTerm $CustomTerminalProfile -e  $qqX_Std_File_Path"
 Start_qqX=
-GrepExecLine="$(grep -s Exec "$XDG_GUI_desktop_Folder/qqX.desktop")"
+GrepExecLine="$(grep -s Exec "$XDG_GUI_desktop_PathName")"
 if [[ $GrepExecLine ]]; then GrepExecLine="${GrepExecLine/'Exec='/}" ; Start_qqX="${GrepExecLine/'%f'/}" ; fi
 if grep -qs 'kgx' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then  Start_qqX="${Start_qqX/' -- '/' --wait -- '}" ; fi
 if grep -qs 'gnome-terminal' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then  Start_qqX="${Start_qqX/' -- '/' --wait -- '}" ; fi
@@ -1066,11 +1135,11 @@ End_Install=
 if [[ $Current_qqX_Version ]]; then
   printf  "\n\n  Upgrade changes are now complete \n\n"
 else
-  printColor  "\n\n  Install process finished:  "s
-  printf "\n\n\n  Start qqX straight from the system's MAIN MENU,"
-  printf   "\n  by typing 'qqX' the terminal, or by mouse clicks on VM or ISO files ..."
-  printf "\n\n  Start qqX to edit the settings file, or before starting"
-  printf   "\n  at %s \n\n\n"  "$HOME/.qqX/qqX_settings"
+  printColor  "\n\n  Install process finished and qqX can now be started"
+  printf "\n\n"
+  [[ -e "$XDG_GUI_desktop_PathName" ]] && printf "\n  Straight from the system's GUI main menu, or"
+  printf "\n  By typing 'qqX' at the terminal, or by mouse clicks on VM or ISO files ..."
+  printf "\n\n  OR start from here:"
 fi
 if [[ $UserTerm == "qterminal" ]]; then
   printColor "\n\n  LXQT 'qterminal' does not have size commands BUT it may be resized quite easily \n\n  and should remember its sizes between uses. \n\n"
@@ -1079,7 +1148,7 @@ if [[ $UserTerm == "urxvt" ]]; then
   printColor "\n\n  In tiling Window Managers the terminal sizes tend to be auto-regulated. \n\n"
 fi
 
-[[ $Start_qqX ]] && printColor "  [enter] to close current window and start"
+[[ $Start_qqX ]] && printColor "  [enter] to close current window and start now"
 printf "   [q] to quit  \n\n "
 read -rp "  > "  End_Install
 

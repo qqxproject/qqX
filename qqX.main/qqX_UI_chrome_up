@@ -186,7 +186,7 @@ show_qqX_title_bar() {
     fi
   else printf "   "
   fi
-  printf "quickemu %s  &  quickget %s  '%s'"  "$QE_VerNumber" "$QG_VerNumber" "$QE_SourceVersion"
+  printf "quickemu %s (mods %s) &  quickget %s (mods %s) '%s'"  "$QE_VerNumber" "$QE_ModsNumber" "$QG_VerNumber" "$QG_ModsNumber" "$QE_SourceVersion"
 
   if [[ $CodingHotSwap && $CodingHotSwapShow ]] || [[ $DevStart ]]; then
     printf "\n\n  Using Code: %s " "$QE_SourcePath"
@@ -227,11 +227,11 @@ function show_qqX_general_help {
     printf "\033c"
     printColor "\n\n  GENERAL HELP:"
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"
-    printf "\n  Translations:  https://qqxproject.org/Translation   Release Notes:  https://qqxproject.org/Release-Notes"
-    printf "\n\n  For SETTINGS, user modes, screen sizes etc  >>  [s] see notes in the general settings file"
-    printf  "\n\n  [f] FreeBird notes  [c] command line & mouse notes"
+    printf "\n  [s] open general settings file for notes on the  SETTINGS, user modes, screen sizes etc"
+    printf  "\n\n  [f] see FreeBird notes  [c] command line & mouse notes"
     if [[ $WebBrowser ]]; then
-      printColor "\n\n  [w] Online: HELP PAGES and FAQs"
+      printColor "\n\n  [w] Online: HELP PAGES, FAQs and Release Notes @ https://qqxproject.org"
+      printf "\n\n"
       if [[ $ShowTxTexts ]]; then printColor  "  [tx] %s" "$MainTxOptionLine"
       else printf  "  [tx] %s" "$MainTxOptionLine"
       fi
@@ -244,7 +244,8 @@ function show_qqX_general_help {
 
     if [[ $HelpSelect == "c" ]]; then
       show_CLI_usage
-      printf "\n"
+      printf  "\n  [enter] to return"
+      printf "\n\n"
       read -rp  "   >  " HelpSelect
 
     elif [[ $HelpSelect == "f" ]]; then

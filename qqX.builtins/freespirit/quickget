@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # SC2317: Command appears to be unreachable. Check usage (or ignore if invoked indirectly).
 #  - https://www.shellcheck.net/wiki/SC2317
 #  - Disable globally because many functions are called indirectly
@@ -692,7 +693,7 @@ function releases_debian() {
     NEW=$(web_pipe "https://cdimage.debian.org/debian-cd/" | grep '\.[0-9]/' | cut -d'>' -f 9 | cut -d'/' -f 1)
     echo -n "${NEW}"
     MAJ=$(echo "${NEW}" | cut -d'.' -f 1)
-    ARCHIVE="$(web_pipe "https://cdimage.debian.org/cdimage/archive/" | grep folder | grep -v NEVER | cut -d'"' -f 6)"
+    ARCHIVE="$(web_pipe "https://cdimage.debian.org/cdimage/archive/" | grep folder | grep live | grep -v NEVER | cut -d'"' -f 6)"
     for i in {1..2}; do
         CUR=$((MAJ - i))
         OLD=$(grep ^"${CUR}"  <<< "${ARCHIVE}" | tail -n 1 | tr -d '/')
@@ -1143,7 +1144,7 @@ function releases_ubuntu() {
     local SUPPORTED_VERSIONS=()
     VERSION_DATA="$(IFS=$'\n' web_pipe https://api.launchpad.net/devel/ubuntu/series | jq -r '.entries[]')"
     # shellcheck disable=SC2207
-    SUPPORTED_VERSIONS=($(IFS=$'\n' jq -r 'select(.status=="Supported" or .status=="Current Stable Release") | .version' <<<"${VERSION_DATA}" | sort))
+    SUPPORTED_VERSIONS=($(IFS=$'\n' jq -r 'select(.status=="Supported" or .status=="Current Stable Release") | .version' <<<"${VERSION_DATA}" | sort ))
     case "${OS}" in
         ubuntu)
             echo "${SUPPORTED_VERSIONS[@]}" daily-live;;
@@ -2637,7 +2638,7 @@ function get_solus() {
     local ISO="Solus-${EDITION}-Release-${RELEASE}.iso"
     local URL="https://downloads.getsol.us/isos/${RELEASE}"
     HASH=$(web_pipe "${URL}/${ISO}.sha256sum" | cut -d' ' -f1)
-    echo "${URL}/${ISO} ${HASH}"
+    echo "${URL}/${ISO} ${HASH}" | tee
 }
 
 function get_sparkylinux() {
@@ -3785,7 +3786,7 @@ case "${1}" in
         fi
         exit 0;;
     --version|-version)
-        ## NB The matching 'qqX_quickGet_mods' file is required
+        ## NB: The matching 'qqX_quickGet_mods' file is required
         # when moving FreeBird/Freespirit builtins ##
         echo "FS 4.9.8.07"
         exit 0;;

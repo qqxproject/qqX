@@ -254,7 +254,7 @@ function set_drive_paths {
 #  MAIN DRIVE & BOOT
 # 'refresh_conf_vars_and_values' from qqX ver 1.5 will source the quickemu .conf file
 #  everytime a different VM is selected or the .conf file is reconfigured
-#  NB Quickemu uses vars:  'disk_img' for  main .qcow2  &  either a bootable 'iso=' or 'img=' for first time or Live boots
+#  NB: Quickemu uses vars:  'disk_img' for  main .qcow2  &  either a bootable 'iso=' or 'img=' for first time or Live boots
 #  Error handling for this function is also actioned by 'show_main_menu_header'
 
 function read_main_drive_and_img_iso_conf_vars {
@@ -483,7 +483,7 @@ qqX_edit_settings() {
     # Note, app opening commands can throw a complaint if 'xapps' has not not been installed.
     # https://askubuntu.com/questions/1396739/failed-to-load-module-xapp-gtk3-module
 
-    # NB  don't set to run the editor in the background, as the web browser does, as qqX needs to take the new settings
+    # NB:  don't set to run the editor in the background, as the web browser does, as qqX needs to take the new settings
 
   fi
 

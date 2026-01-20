@@ -121,17 +121,21 @@ function quickemu {
         VM_ExecBoot=
         return
       else
+        if [[ "$VM_InstanceName" != *windows* && "$VM_InstanceName" != *macos* ]]; then
+          printf "  For SPICE copy, paste and file transfer, install 'spice-vdagent' and 'spice-webdavd' INSIDE Linux GUEST VM's"
+          printf "\n\n\n"
+        fi
         if [[ $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
           printColor "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS or boot an ISO"
           printf "\n\n  Mounted ISO: Select 'Boot manager' and select 'QEMU DVD-ROM' from the list. "
           [[ ! $LiveBoot ]] && printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
-          if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printColor "\n\n  Designated Live Boot: %s" "$(basename "$IsoImg")"
-          elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Designated Boot: Main Drive"
+          if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printColor "\n\n  Currently Designated Live Boot: %s" "$(basename "$IsoImg")"
+          elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Currently Designated Boot: Main Drive"
           fi
           if [[ $LiveBoot ]]; then printf "\n\n  Additionally mounted ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
           else printColor "\n\n  Additionally mounted ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
           fi
-          printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
+          printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection"
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
           read -rp "  >  "  Mounted_ISO_Return
 
@@ -145,7 +149,7 @@ function quickemu {
           fi
           printColor "\n\n  NO ISO/DVD has been specifically mounted ... "
           [[ $LiveBoot ]] && printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
-          printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
+          printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection"
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
           read -rp "  >  "  Mounted_ISO_Return
 
@@ -156,13 +160,13 @@ function quickemu {
             [[ $img || $iso ]] && printf "\n\n  Booting from: %s  %s" "$(basename "$img")" "$(basename "$iso")"
             printf "\n\n\n"
           elif [[ $Mounted_ISO ]]; then
-            printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file"
-            if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printf "\n\n  Designated Live Boot: %s" "$(basename "$IsoImg")"
-            elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Designated Boot: Main Drive"
+            printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection"
+            if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printf "\n\n  Currently Designated Live Boot: %s" "$(basename "$IsoImg")"
+            elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Currently Designated Boot: Main Drive"
             fi
             printf "\n\n  Additionally mounted ISO is '%s' \n\n\n" "$Mounted_ISO_DisplayName"
           else
-            printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file \n\n\n"
+            printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection \n\n\n"
           fi
         elif [[ $BootStyle == "slow" ]]; then
           printColor "  Press 'esc' once, to access BIOS Boot Manager, when 'Start boot Option' appears"
@@ -172,7 +176,7 @@ function quickemu {
           elif [[ $Mounted_ISO ]]; then printf "\n\n  Currently mounted ISO is '%s' \n\n" "$Mounted_ISO_DisplayName"
           else printf "\n\n  NO ISO/DVD has been specifically mounted ... "
           fi
-          printf "\n\n  Use the qqX [iso] utility to select a specific bootable image file \n\n\n"
+          printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection \n\n\n"
         fi
       fi
 

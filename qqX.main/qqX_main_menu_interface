@@ -60,7 +60,7 @@ else
           printf "\n\n\n"
           [[ $WebBrowser ]] && printColor "  [qW]"
           printColor "  From qqX 1.14 onwards, ALL the Windows drivers should be autodetected and should autoinstall"
-          printf "\n\n  However, take a moment to overview things at https://qqxproject.org/Guides/Windows-OS"
+          printf "\n\n  An overview guide is available at https://qqxproject.org/Guides/Windows-OS if needed"
           [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT"
           [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT"
           printf "\n"
@@ -73,6 +73,17 @@ else
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
           printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
+        fi
+        if [[ $(type -p lsblk) ]] && [[ $boot != "legacy" ]] && [[ "$VM_InstanceName" != *windows* ]] \
+        &&	[[ "$VM_InstanceName" != *macos* ]] && grep -qs 'btrfs' <<< "$(lsblk -f -o FSTYPE)"; then
+          printf "\n\n\n  BTRFS detected: Installing VM's as btrfs, on top of btrfs hosts, can cause slowdown issues"
+          printf "\n\n  [cc] mitigation fixes may be possible using a qqX custom booting .... "
+          printf "\n\n  See https://www.qemu.org/docs/master/system/images.html#cmdoption-qcow2-arg-nocow"
+          printf "\n"
+        fi
+        if [[ "$VM_InstanceName" == *batocera* ]]; then
+          printf "\n\n  Use qqX .conf editor to set up game controllers as ps2 (?) etc."
+          printf "\n"
         fi
       elif [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
         printColor "\n\n\n  Live BOOT ISO NOT FOUND"
@@ -136,7 +147,7 @@ else
     [[ $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
     [[ $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
 
-    printf  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
+    printColor  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
     if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
     else [[ $MainDrive ]] && printf "   main (%s)" "$SnapCountMain"
     fi
@@ -151,8 +162,7 @@ else
       fi
     fi
 
-    printf "\n"
-    [[ $SettingsFileAdjusted ]] && Verbose_MSR_dialog=1
+    find_kvm_msr_default_and_status
     print_kvm_status_warnings
     [[ $Verbose_MSR_dialog ]] && Verbose_MSR_dialog=
 
@@ -187,7 +197,7 @@ else
 
       if [[ $ShowCustomBootStyle ]] ; then
 
-        # NB  "$QemuArgsCustomFile" may exist BUT [c] $UseCustomBootArgs remains menu selectable
+        # NB:  "$QemuArgsCustomFile" may exist BUT [c] $UseCustomBootArgs remains menu selectable
         printColor "\n\n  [c]  start VM using custom args with %s %s" "$MenuCustomSystem" "$MenuCustomMachine"
         printf "\n\n  [C]  toggle normal/custom menu  or  use normal:  [d] or [df] > sdl   [s] or [sf] > spice   [g] std gtk "
         printf "\n\n  [ce] edit custom args file    [qd] open Qemu docs in browser"
@@ -218,13 +228,15 @@ else
 
         [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
 
+        printf "\n"
+
         if [[ $HeadlessDisplay ]]; then printColor 	"\n\n  [s]   start with Spice display (HEADLESS) "
-        else  printColor 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
+        else  printf 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
 
-        printColor "\n\n  [g]   start with GTK display                 "
+        printf "\n\n  [g]   start with GTK display                 "
 
-        if [[ $qqX_GL_Mode == "off" ]] ; then printColor "[gl]  OFF > toggle EGL/GLX > on"
-        else printColor "[gl]  ON > toggle EGL/GLX > off" ; fi
+        if [[ $qqX_GL_Mode == "off" ]] ; then printf "[gl]  OFF > toggle EGL/GLX > on"
+        else printf "[gl]  ON > toggle EGL/GLX > off" ; fi
 
         if [[ -e "$QemuArgsCustomFile" ]]; then printColor "     [C] toggle normal/custom menu "
         elif [[ $VerboseArgs ]]; then  printf  "      (all starts > Verbose)"
@@ -318,7 +330,7 @@ else
       InstanceISO_SizesCount="0"
     fi
 
-    printf  "\n\n  [gt]  quickget a new distro   [i]  VM drives info details   "
+    printf  "\n\n  [gt]  quickget a new distro   [i] VM drives info   "
     printf "Disks: %s (%s)  "  "${InstanceQcow2_Sizes}G" "$InstanceQcow2_SizesCount"
     printf "ISO's: %s (%s)  "  "${InstanceISO_Sizes}G" "$InstanceISO_SizesCount"
     [[ $(ls "$VM_InstanceName"/*.OLD.qcow2 2>/dev/null) ]] && printColor "(backup disk present)"
@@ -363,7 +375,7 @@ else
         if [[ $LastZsync -gt 259200 ]]; then  printf "  [z]   daily-live - last zsync over %d hrs ago"  "$((LastZsync/3600))"
         else  printf "  [z]   daily-live - last zsync %d hrs ago"  "$((LastZsync/3600))"
         fi  #  older than 3 days (in epoch seconds)  REVIEW
-        if [[ $LastZsync -gt 864000 ]]; then printColor "  (out-of-date)"  # 10 days  (NB esp. important at change of url naming at xx.04 etc)
+        if [[ $LastZsync -gt 864000 ]]; then printColor "  (out-of-date)"  # 10 days  (NB: esp. important at change of url naming at xx.04 etc)
         elif [[ $New_Zsync_SHA ]] && [[ $(cat "$VM_InstanceName/dl-sha.txt") ]]; then
           Curr_Zsync_SHA="$(awk '{print $1}' "$VM_InstanceName/dl-sha.txt")"
           if [[ ${Curr_Zsync_SHA// /} == "${New_Zsync_SHA// /}"  ]]; then printf "  (up-to-date)"; else printColor "  (update available)"
@@ -377,7 +389,7 @@ else
 
       ##  ZSYNC   See  functions 'get_ubuntu' & 'list_csv' in quickget
 
-        # qqX: NB only the iso gets dubbed with 'devel' suffix, otherwise VMs they keep their names
+        # qqX: NB: only the iso gets dubbed with 'devel' suffix, otherwise VMs they keep their names
         # eg  'ubuntu-mate-daily-live' 'ubuntustudio-dvd' 'ubuntu-daily-canary'
         # An actual 'ubuntu-devel' release or folder doesn't seem to ever get created or offered.
         # Presume release=devel (@2023/07) has now been superseded, or was merely intended as an indicative name only ...
@@ -425,17 +437,24 @@ else
     fi
     printf  "\n\n"
 
-    if [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then source "$qqX_Upd_VarsTmpFile"
-    fi
-
+    read_update_check_file
+    check_beta_alert_count
     check_disk_is_okay
     check_if_disk_needs_a_cleanup
 
-    if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then  printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils "  "$DiskChkStatus"
+    if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
+      printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils "  "$DiskChkStatus"
     elif [[ $DiskDisparity -ge "4" ]]; then  printColor "  DISK.QCOW2 could benefit from a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "3" ]]; then  printColor "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "2" ]]; then  printf "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
-    else  [[ $qqX_UpdateAvail ]] &&  printColor "  [dl]  view new qqX update details: %s %s \n\n" "$qqX_Latest_ReleaseType" "$qqX_Latest_ReleaseNumber"
+    elif [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then
+      # beta release on the 'latest' channel takes priority over pre-releases
+      # caution \n\n differs on 'array select script'
+      if [[ $qqX_Latest_ReleaseNumber ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version" ; then
+        printColor "  [dl]  view new qqX update details: %s\n\n" "$qqX_Latest_ReleaseNumber"
+      elif [[ $qqX_Newest_PreRelease ]]; then printf "  [dl]  view new qqX update details: %s\n\n" "$qqX_Newest_PreRelease"
+      fi
+    elif [[ $qqX_UpdateAvail ]]; then printColor "  [dl]  view new qqX update details: %s \n\n" "$qqX_Latest_ReleaseNumber"
     fi
 
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
@@ -445,9 +464,11 @@ else
       printf "\n\n  A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
     fi
 
+    ## Resolve the original distro OS name so a quickget look up can be made:
     # qget 4.9.2 onwards - use recorded name as VM can get renamed
-    if [[ $(cat "$VM_InstanceName/dl-url.txt" 2>/dev/null) ]]; then
-      VM_RecordedName="$(awk '/http/{print $1}' "$VM_InstanceName/dl-url.txt")"
+    if [[ $(cat "$VM_InstanceName/qe_new_vm_name.txt" 2>/dev/null) ]]; then
+      source "$VM_InstanceName/qe_new_vm_name.txt"
+      VM_RecordedName="$New_VM_InstanceName"
     elif [[ $(cat "$VM_InstanceName/QemuVirtHardwareRecord.txt" 2>/dev/null) ]]; then
       VM_RecordedName="$(grep -sm1 -e '-name' "$VM_InstanceName/QemuVirtHardwareRecord.txt" | cut -d'=' -f2)"
     else  VM_RecordedName="$VM_InstanceName"
@@ -456,29 +477,40 @@ else
     mapfile -t VM_RecordedNameArr <<< "$(tr '-' '\n' <<< "$VM_RecordedName")"
     # note grep with space or probs like ubuntu picks (ed)ubuntu first
     # needs to cope with ubuntu variants, for daily-live, for renamed instances, and for custom ISO installed
-    if grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" "$QG_SourcePath" ; then
+    # and for qMod avoid script start, as that de-listed distros and other bits
+    if [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
+      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
+    elif [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
+      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
+    elif grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" "$QG_SourcePath" ; then
       VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
     elif grep -qs "  ${VM_RecordedNameArr[0]})" "$QG_SourcePath" ; then
       VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
     else VM_RecordedName_Listed=
     fi
-    if [[ ! $VM_RecordedName_Listed ]]; then DistroHomePage=
-    else
-      DistroListing="$(grep -m1 "  ${VM_RecordedName_Listed})" "$QG_SourcePath" | cut -d'=' -f2)"
-      DistroListing="${DistroListing//';;'/}"
-      DistroListing="${DistroListing//'"'/}"
-      DistroListing="$(tr '|' '\n' <<< "$DistroListing")"
-      mapfile -t DistroListing_ARR <<< "$DistroListing"
-      DistroHomePage="${DistroListing_ARR[2]}"
-      DistroLogin="${DistroListing_ARR[1]}"
-      [[ $DistroLogin == "-" ]] && DistroLogin=
+
+    ## Find Distro HomePage URL
+    DistroHomePage= ; DistroInfoLine= ; DistroListing= ; DistroLogin=
+    if [[ $VM_RecordedName_Listed ]]; then
+      [[ $QG_Modpath ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_Modpath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
+      [[ ! $DistroInfoLine ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_SourcePath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
+      if [[ $DistroInfoLine ]]; then
+        DistroListing="$(cut -d'=' -f2 <<< "$DistroInfoLine")"
+        DistroListing="${DistroListing//';;'/}"
+        DistroListing="${DistroListing//'"'/}"
+        DistroListing="$(tr '|' '\n' <<< "$DistroListing")"
+        mapfile -t DistroListing_ARR <<< "$DistroListing"
+        DistroHomePage="${DistroListing_ARR[2]}"
+        DistroLogin="${DistroListing_ARR[1]}"
+        [[ $DistroLogin == "-" ]] && DistroLogin=
+      fi
     fi
 
-    printf  "  [enter] refresh   "
-    if [[ $DistroHomePage ]]; then printf "[w] distro homepage  "
+    printColor  "  [enter] refresh   "
+    if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
     else printf "(no distro webpage listed)  "
     fi
-    printf " [h] show help & info  [q] quit "
+    printf " [h] show help & info  [b] go back  [q] quit "
 
     if [[ $LiveBoot && $DistroLogin ]]; then
       printColor "\n\n  Login:Password"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NB Avoid use of "#!/usr/bin/env bash" in this script
+# NB: Avoid use of "#!/usr/bin/env bash" in this script
 # as it will mask process names & inhibit process controls.
 
 # qqX - quickemu quickget X terminal project  https://github.com/qqxproject/qqX
@@ -41,7 +41,7 @@
 # Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
 # Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
 # but minor numbers remain padded to 2dp
-  qqX_Version="1.14.01"
+  qqX_Version="1.15.00-beta.22"
 
 # Allow Posix sub-shell checks (without -t 1) eg. qqX_Version="$(./qqX --version 2>/dev/null)"
 if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit ; fi
@@ -124,7 +124,7 @@ System_qqX_Path="$(type -p qqX)"
 # BUT 'QE_SystemFilePath' should be probed at the start of qqX, and before any builtins or re-routes happen,
 # otherwise finding the filepath gets a bit complex ...
 
-# Respect standard FHS locations but allow local overide for qqX dev work. NB no spaces in qqX dev path, see notes at end of settings file.
+# Respect standard FHS locations but allow local overide for qqX dev work. NB: no spaces in qqX dev path, see notes at end of settings file.
 if [[ -d "./qqX.main" ]]; then qqX_MainFolder="$(realpath "./qqX.main")" ; else qqX_MainFolder="/usr/share/qqX/qqX.main"; fi
 if [[ ! -d "$qqX_MainFolder" ]]; then echo; echo "  ERROR: qqX main files not found.  Please re-check your installation."; echo; sleep 10; exit 1 ; fi
 
@@ -219,11 +219,13 @@ printf "\033c"
 show_qqX_title_bar
 printf "\n  Running initial checks .... \n"
 
-# Once only, at the start.
-if [[ ! $Disable_qqX_upd_Checks ]]; then
+# Once only, at the start, and in the background
+if [[ $Disable_qqX_upd_Checks ]]; then
+  qqX_upd_FileChk="done"
+else
   check_for_qqX_updates &
-  qqX_UpdaterPID="$!"
   find_latest_qemu_version &
+  qqX_upd_FileChk= ; Muted_BetaAlert_Count=0
 fi
 
 #  The '$1' check for any MOUSE CLICK or COMMAND LINE parameters will read and set flags during 'qqX_initialize'
