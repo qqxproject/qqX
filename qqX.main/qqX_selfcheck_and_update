@@ -134,19 +134,18 @@ check_for_qqX_updates() {
 
   if floatversion --gt -Q "$qqX_Latest_ReleaseNumber  $qqX_Version"; then
     qqX_UpdateAvail="$qqX_Latest_ReleaseNumber"
+    # see if GitHub is listing a tarball download address
+    # eg. "https://github.com/qqxproject/qqX/releases/download/$qqX_Latest_ReleaseNumber/qqX-$qqX_Latest_ReleaseNumber.tar.gz"
+    if [[ "$(tr '"' '\n' < "${qqX_Latest_ReleaseFile}" | grep -s http | grep -sc '/releases/download/')" == "2" ]] ; then
+      qqX_Latest_SecureTarBall_Addr="$(tr '"' '\n' < "${qqX_Latest_ReleaseFile}" | grep -s http | grep -s -m 1 '/releases/download/')"
+      qqX_Latest_SecureTarSha_Addr="${qqX_Latest_SecureTarBall_Addr}.sha256"
+    fi
     # Flag up release type > allows a beta release on the standard 'latest' channel, if required
     if [[ $qqX_Latest_ReleaseNumber == *[[:alpha:]]* ]] ; then  qqX_Latest_ReleaseType="beta"
     else qqX_Latest_ReleaseType="release"
     fi
-    [[ $qqX_Latest_ReleaseType == "beta" ]] && [[ $Hide_qqX_BetaUpdates ]] && qqX_UpdateAvail=
-    if [[ $qqX_UpdateAvail ]]; then
-      # make sure that GitHub is listing a tarball download address
-      # eg. "https://github.com/qqxproject/qqX/releases/download/$qqX_Latest_ReleaseNumber/qqX-$qqX_Latest_ReleaseNumber.tar.gz"
-      if [[ "$(tr '"' '\n' < "${qqX_Latest_ReleaseFile}" | grep -s http | grep -sc '/releases/download/')" == "2" ]] ; then
-        qqX_Latest_SecureTarBall_Addr="$(tr '"' '\n' < "${qqX_Latest_ReleaseFile}" | grep -s http | grep -s -m 1 '/releases/download/')"
-        qqX_Latest_SecureTarSha_Addr="${qqX_Latest_SecureTarBall_Addr}.sha256"
-      fi
-    fi
+    # Change upd flag for beta or rc in the latest channel
+    [[ $qqX_Latest_ReleaseType == "beta" ]] && qqX_UpdateAvail=
   elif [[ $qqX_Current_ReleaseType == "beta" ]]; then
     # Then give a flag and easy download to people who are on the pre-release beta channel
     # Although, offering a return to the standard release channel first,
@@ -189,11 +188,19 @@ check_for_qqX_updates() {
 
 function read_update_check_file {
   if [[ ! $qqX_upd_FileChk ]] && [[ $(cat "$qqX_Upd_VarsTmpFile" 2>/dev/null) ]]; then
-    sleep 0.5 ; source "$qqX_Upd_VarsTmpFile"
+    local count=0
+    while [[ ! $qqX_Newest_Tag ]] && [[ ! $qqX_upd_FileChk ]]; do
+      source "$qqX_Upd_VarsTmpFile"
+      sleep 0.3 ; ((count++))
+      # make sure the file data is all present, if too long try another time
+      [[ $count -gt 10 ]] && qqX_upd_FileChk="done" && return
+    done
     # tone-down the alerts if they will relate to beta, unless people are on the beta channel
     Muted_BetaAlertPoint=
     if [[ $qqX_Current_ReleaseType == "release" ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version" ; then
-      Hide_qqX_BetaUpdates=1 ; Muted_BetaAlertPoint=
+      if [[ $qqX_Latest_ReleaseType == "beta" ]]; then Muted_BetaAlertPoint=1 ; Hide_qqX_BetaUpdates=
+      else Hide_qqX_BetaUpdates=1 ; Muted_BetaAlertPoint=
+      fi
     elif [[ $qqX_Current_ReleaseType == "release" ]]; then
       [[ $qqX_Newest_PreRelease ]] || [[ $qqX_Latest_ReleaseType == "beta" ]] && Muted_BetaAlertPoint=1
       floatversion -Q --gt "$qqX_Version $qqX_Newest_PreRelease" && Muted_BetaAlertPoint=
@@ -219,7 +226,7 @@ function download_new_release {
     printf "\033c \n\n"
     qqX_logo_printf_title  "$qqX_Version updater"
     printf "\n\n\n  https://github.com/qqxproject/qqX/releases"
-    local UpdRechk= ; qqX_NewTagAlert=
+    local UpdRechk= ; local ShowRelsPages= ; qqX_NewTagAlert=
     while true ; do
       # check that update checks are all done and that transfer file has been sourced
       if [[ ! $qqX_Newest_Tag ]]; then
@@ -270,17 +277,37 @@ function download_new_release {
           #shellcheck disable=SC2059
           printf -v BodyTxt "$(grep -s body "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4)"
           mapfile -t AboutReleaseArray  <<< "$BodyTxt"
-          for Line in "${AboutReleaseArray[@]}" ; do  if [[ "$Line" != *'+1'* ]] ; then printColor "  %s\n" "$(fmt -uw "$AboutWidth" <<< "$Line")" ; fi ; done
+          for Line in "${AboutReleaseArray[@]}" ; do
+            if [[ "$Line" != *'+1'* ]] ; then printColor "  %s\n" "$(fmt -uw "$AboutWidth" <<< "$Line")" ; fi
+          done
+          if [[ $qqX_Current_ReleaseType == "release" ]] && [[ $qqX_Latest_ReleaseType == "beta" ]]; then
+            if [[ "$qqX_Latest_ReleaseNumber" == *'-rc'* ]]; then
+              printf  "\n\n  RELEASE CANDIDATE CODE will have been extensively checked before being placed in the standard release channel"
+              printf  "\n\n  People who able to assist with Community pre-testing should give the new features a try"
+              printf  "\n\n  A full release update will be provided later ....\n"
+            else
+              printf  "\n\n  Beta code is normally placed in the pre-release channel:"
+              printf  "\n\n  On this occasion, it is being standard highlighted as it has EXCITING NEW FEATURES"
+              printf    "\n  or IMPORTANT NEW FIXES that initial tests have shown as stable and unlikely to cause any problems."
+              printf  "\n\n  Installing beta code will place you in the pre-release channel but this can be reverted"
+              printf    "\n  when later updating with the full release, or at any point by re-installing with any standard version.\n"
+            fi
+          fi
         elif [[ $Muted_BetaAlertPoint ]]; then
           printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Newest_PreRelease"
           qqX_UpdateAvail=
         else
           printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Latest_ReleaseNumber"
+          ShowRelsPages=1
         fi
       fi
       printf "\n"
       if [[ $qqX_UpdateAvail ]] && [[ ! $Muted_BetaAlertPoint && ! $qqX_NewTagAlert ]] ; then
-        printf "  Neatly download the release into its own sub-folder at: "
+        if [[ $qqX_Latest_ReleaseType == "release" ]]; then
+          printf "  Neatly download the release into its own sub-folder at: "
+        else
+          printf "  Neatly download the code into its own sub-folder at: "
+        fi
         [[ $Specified_Updates_Location ]] && printf "\n\n  [s] Specified folder:  %s"  "$Specified_Updates_Location"
         [[ -d "$HOME/Downloads" ]] && printf "\n\n  [d] Downloads folder:  %s"  "$HOME/Downloads"
 
@@ -297,7 +324,7 @@ function download_new_release {
       fi
       printf "  [r] to recheck"
       if [[ $WebBrowser ]]; then
-        if [[ $Muted_BetaAlertPoint ]]; then  printf "   [w] popup qqX RELEASE pages with browser"
+        if [[ $Muted_BetaAlertPoint || $ShowRelsPages ]]; then  printf "   [w] popup qqX RELEASE pages with browser"
         elif [[ $qqX_NewTagAlert ]]; then  printf "   [w] popup qqX TAG pages with browser"
         else printf "   [w] popup qqX web pages with browser"
         fi
@@ -312,7 +339,7 @@ function download_new_release {
       elif [[ $qqX_LatestTarBall_Folder == "c" ]]; then  qqX_LatestTarBall_Folder="$(pwd)" ; break
       elif [[ $qqX_LatestTarBall_Folder == "w" ]]; then
         printf "  Opening Browser ... \n\n"
-        if [[ $Muted_BetaAlertPoint ]]; then
+        if [[ $Muted_BetaAlertPoint || $ShowRelsPages ]]; then
           (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/releases" & ) || web_browser_not_found_message
         elif [[ $qqX_NewTagAlert ]]; then
           (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/tags" & ) || web_browser_not_found_message
