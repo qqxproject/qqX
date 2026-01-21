@@ -20,10 +20,10 @@
 
   #########################################################################################################################################
 
-#   FOR ANY NEWER OR NON-STANDARD TERMINAL, setting up a custom terminal-profile is recommended
+#   FOR ANY NEWER OR NON-STANDARD TERMINAL, setting up a CUSTOM TERMINAL-PROFILE is recommended
 #   as this will allow the values to be stored for future updates:
 
-#   See notes in the script "./qqX_system_install" in the folder "qqX.system",
+#   See notes in the system script "./qqX_system_install" in the folder "qqX.system",
 #   just after the initial checking lines, for 'CustomTerminalProfile=' at around line 300
 
 #   shellcheck disable=SC2009,SC2034
@@ -31,47 +31,52 @@
 #   Terminal name may also be set here, for one-time usage, if '-e' exec functions are recognised:
     UserTerm=
 
-printf "" > "/tmp/qqX.termlist"
+#########################################################################################################################################
 
-if [ -n "$UserTerm" ]; then  printf "%s\n" "$UserTerm" > "/tmp/qqX.termlist"
-fi
-
-# https://stackoverflow.com/questions/35385962/arrays-in-a-posix-compliant-shell#59353917
-# NB: 'Type' is a Bash builtin, type -p is not supported in 'dash' so command -v needed.
-
-## Selection of terminal:
+## SELECTION OF TERMINAL:
 
 # Priority is given to main stream user bases and those offering geometry parameters
-# 85% of users are probably covered by the first four: "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal"
-# Over 95% probably when "qterminal" and "alacritty" are added.
-# But 08/2025 add a kgx check as some Gnome distros are using 'Gnome Console' aka kgx as an alias call for Gnome Terminal ....
 
-# There are several popular post-install terminals with various special feature sets.
-# However, it is very unlikely to find these and these alone. An underlying standard desktop environment terminal
-# can generally be expected to be available so exhaustive checks are not needed.
+# At the beginning of 2026, 'qterminal' and' mate-terminal' are now being generally RECOMMENDED for qqX as they are
+# both lightweight and can both be easily installed as alternatives on almost any desktop or window manager, either X11 or Wayland
 
-# Kitty is relatively stable and has more or less standard behaviour, so it has been added for good measure.
+# In 2024, 85% of users were probably covered by the first four: "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal"
+# Over 95% probably when "qterminal" and "alacritty" were added.
+# At 08/2025 a kgx check was included as some Gnome distros were using 'Gnome Console' aka 'kgx' as an alias call for Gnome Terminal ....
 
-# On the other hand, many of these leading edge, often cross-platform terminals are still in active development
-# and are liable to change. We need to view these as unstable.
-
-# But, development should be encouraged and revisits made:
-
-# Wezterm @ 10/2024, for example, has much potential but an idiosyncratic command line,
-# requests manual closure and has over 900 open issues with which to contend ...
-
-# At the other extreme, and with the advent of Wayland, other projects have been abandoned completely.
+# There are also several popular post-install terminals with various special feature sets.
+# However, it is very unlikely to find any of these alone and an underlying standard desktop environment terminal
+# can generally be expected to be available:
+#
+# Kitty, in 2024 was relatively stable and had a more or less standard behaviour, so it was added for good measure.
+#
+# On the other hand, many other leading edge, often cross-platform terminals were/are still in active development
+# and are liable to change. We need to view these as unstable BUT development should be encouraged and revisits made.
+#
+# Wezterm @ 01/2026, for example, has much potential. Its command line is now less idiosyncratic than two years ago,
+# but it now has 50% more open issues, now nearly 1,400 with which to contend ...
+#
+# The advent of Wayland has also seen other projects have being abandoned completely.
 # Termite, for example, now encourages the use of Alacritty ...
 
 # Users with Window Managers, not Desktop Envs will be familiar with terminals and settings at the cmd line
 # However add some well known interfaces where possible, eg. urxvt that comes with 'i3' as this helps with running of QF
 
+#########################################################################################################################################
+
 # This terminal check list also needs to be available for the standard upgrader script:
 if [ "$1" = "MakeTermList" ]; then MakeTermList=1 ; shift ; else MakeTermList= ; fi
 
+printf "" > "/tmp/qqX.termlist"
+if [ -n "$UserTerm" ]; then  printf "%s\n" "$UserTerm" > "/tmp/qqX.termlist"
+fi
+
+# Use 'set' to make an array of usable terminals
+# See https://stackoverflow.com/questions/35385962/arrays-in-a-posix-compliant-shell#59353917
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
 set -- "$@" "ptyxis" "kgx" "alacritty" "kitty" "foot"
 
+# Check through the array and output a list of those possibly found, using 'command -v'  (not 'type -p' which is Bash)
 while [ -n "$1" ] ; do
   if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX.termlist"
   fi
@@ -82,10 +87,8 @@ if [ -n "$MakeTermList" ]; then exit ; fi
 
 # Also see exception handling: 'TERMINAL not found or not suitable' towards end of script
 
-# 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
-
 # Priority listing should have placed the top entry as being the most main stream and being one with sufficient size.
-# At this stage we are looking for something reliable to run the actual terminal selection script.
+# At this stage we are just looking for something reliable to run the actual terminal selection script.
 if [ -n "$(cat "/tmp/qqX.termlist")" ]; then UserTerm="$(head -n 1 "/tmp/qqX.termlist")"
 fi
 
@@ -94,6 +97,8 @@ if [ -z "$UserTerm" ]; then TermGrep="$(pgrep -a term | grep qqX | tr -cd '[:pri
   if [ -n "$TermGrep" ]; then UserTerm="$(basename "$TermGrep")"
   fi
 fi
+
+# 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
 
 if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
   printf "\n\n  The new COSMIC terminal 'cosmic-term' has been detected on this system, "
@@ -181,7 +186,9 @@ elif [ "$UserTerm" = "foot" ] ; then
   "$UserTerm"  "./qqX.system/qqX_system_install"  2>/dev/null
 
 # elif [ "$UserTerm" = "wezterm" ] ; then
-  #"$UserTerm" start --cwd "$(pwd)" -- "./qqX.system/qqX_system_install"  # REVIEW
+  #"$UserTerm" start --cwd "$(pwd)" -- "./qqX.system/qqX_system_install"
+  # @ 01/2026 now accepts '-e' as an alias for 'start' and may not now need the '--cwd'
+  # See https://wezterm.org/cli/general.html#synopsis  But still has lots of open issues ...  # REVIEW
 
 elif [ -n "$UserTerm" ]; then
   # Standard start for unknown possibilities, size params not used:
