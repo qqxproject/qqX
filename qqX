@@ -213,7 +213,6 @@ function main_menu {
   done
 }
 
-#find_quick_version_numbers
 tput civis
 printf "\033c"
 show_qqX_title_bar
@@ -225,6 +224,7 @@ if [[ $Disable_qqX_upd_Checks ]]; then
 else
   check_for_qqX_updates &
   find_latest_qemu_version &
+  # These vars for when the output file gets read later on, in the foreground:
   qqX_upd_FileChk= ; Muted_BetaAlert_Count=0
 fi
 
