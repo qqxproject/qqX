@@ -148,6 +148,7 @@ show_main_menu_header () {
 
   [[ $VM_Conf_Dir ]] && printf "  @   %s"  "$VM_Conf_Dir"
   if [[ "$BootAlert" == *'ERROR'* ||  "$BootAlert" == *'NOT FOUND'* ]]; then printColor "   %s" "$BootAlert"
+  elif [[ $VerboseArgs ]]; then [[ $BootAlert ]] && printf "   %s" "$BootAlert" ; printColor "   (Verbose Start)"
   else printf "   %s" "$BootAlert"
   fi
   printf "\n"

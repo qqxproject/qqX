@@ -239,7 +239,7 @@ else
         else printf "[gl]  ON > toggle EGL/GLX > off" ; fi
 
         if [[ -e "$QemuArgsCustomFile" ]]; then printColor "     [C] toggle normal/custom menu "
-        elif [[ $VerboseArgs ]]; then  printf  "      (all starts > Verbose)"
+        # elif [[ $VerboseArgs ]]; then  printf  "      (all starts > Verbose)"
         fi
 
       fi
