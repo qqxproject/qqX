@@ -39,7 +39,8 @@ custom_conf_notes () {
     keyboard=           'usb' (default), 'ps2', 'virtio'
     keyboard_layout=    'en-us' (default)
     mouse=              'tablet' (default), 'ps2', 'usb', 'virtio'
-    network=            'bridge' >> -nic bridge,br=bridge,model=virtio-net-pci
+    network=             blank loads default drivers, or use 'none' (no drivers), 'restrict' (drivers but NO I/O)
+                         or 'bridge' (see general settings)
     usb_controller=     'ehci' (default), 'xhci', 'none'
     sound_card=         'intel-hda' (default), 'ich9-intel-hda' 'ac97', 'es1370', 'sb16', 'usb-audio', 'none'
     sound_duplex=        for intel: 'hda-micro' (default: speaker/mic), 'hda-duplex' (line-in/line-out), 'hda-output' (output-only)
@@ -67,13 +68,11 @@ function check_screen_percentage_and_output {
   HeadlessCmd=
 
   #  Function 'refresh_conf_vars_and_values' should clear all existing .conf vars before sourcing a new conf file
-  #  Note that 'gl' is a quickemu internal variable which quickemu defaults to "on"
   #  From quickemu 4.8 onwards, the value " --screenpct xx"  may be used on SDL, where xx is a value from 25 to 99  & Linux VM's only.
   #  But check the source to see if the case option exists, don't rely on the version number as formats change or could be a custom version.
 
+  #  Note that 'gl' is a quickemu internal variable which quickemu defaults to "on" and which can also be set in .conf file
   if [[ $gl == "off" || $gl == "on" ]]; then  qqX_GL_Mode="$gl"
-  else
-    if [[ $SetGL_DefaultAsOff ]]; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on" ; fi
   fi
 
   SDL_ScreenPercent=
@@ -537,7 +536,9 @@ function refresh_conf_vars_and_values {
 
     source "$ConfClearanceLog"
 
-    # clear any qqX specifics
+    # Clear any qqX specifics
+    # for NON-CONF general setting menu toggle items place in 'VM_check_and_load' where they should survive a .conf refresh
+
     SecondDrive=
     SharedDrive=
     DriveLocationError=
@@ -552,7 +553,7 @@ function refresh_conf_vars_and_values {
     QemuArgsCustomFile=
     QemuErrorLog=
 
-    ## make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
+    ## Make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
 
     # first fully unset any that don't auto-reset
     # eg sound_duplex="${sound_duplex:-hda-micro}" won't work if a empty var name is present
@@ -626,12 +627,13 @@ function refresh_conf_vars_and_values {
     source "$VM_Conf_Dir/$VM_Conf_File"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 2:" &&  main_loop_diagnostics
+
     # check any menu values that are based on the file .conf
     check_screen_percentage_and_output
     read_main_drive_and_img_iso_conf_vars
     set_drive_paths
     check_disk_is_okay
-
+    check_net_mode
     refresh_logfile_locations
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 3:" &&  main_loop_diagnostics

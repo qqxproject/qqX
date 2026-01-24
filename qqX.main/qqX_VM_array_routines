@@ -281,6 +281,24 @@ show_VM_Array_sizes_text () {
   (nohup &> /dev/null  "$TextEditor" "/tmp/qqX.SizesTotals.txt" & ) || texteditor_not_found_message
 }
 
+check_net_mode () {
+  if [[ $network ]]; then
+    # use .conf file overide value
+    qqX_NetMode="$network"
+  elif [[ $SetNetWork_DefaultAs ]]; then
+    # use general settings value
+    case "$SetNetWork_DefaultAs" in
+      none)                 qqX_NetMode="none" ;;
+      restrict|restricted)  qqX_NetMode="restrict" ;;
+      bridge|bridged)       qqX_NetMode="bridge" ;;
+      # failsafe
+      *)                    qqX_NetMode="restrict" ;;
+    esac
+  else
+    # use std default
+    qqX_NetMode="on"
+  fi
+}
 
 VM_check_and_load () {
 
@@ -288,23 +306,17 @@ VM_check_and_load () {
   #  VM_Conf_Dir and VM_Conf_File are expected to be present at this point
 
   if  [[ $VM_Renamed || ! $ByPass_VM_Array_Selector ]] && [[ ! $SelectArrayError ]]; then
-
     [[ $Loop_Diagnostics ]] && printf "\n\n VM Array_Selector 2:" &&  main_loop_diagnostics
-
     ## Check file/folder exists and that we are where we need to be
     [[ ! -d "$VM_Conf_Dir" ]] &&  function_conf_error  "folder" "$VM_Conf_Dir" && SelectArrayError=1
-
     # change directory to where the VM is
     ! cd "$VM_Conf_Dir"  &&  printColor "\n\n  ERROR  .conf  folder switching \n\n" && sleep 5 && exit 1
     Current_VM_Folder="$VM_Conf_Dir"
-
     if [[ ! $IgnoreFolderCheck ]] && [[ $VM_Conf_File != "empty" ]] && [[ ! -e "$VM_Conf_File" ]]; then
       function_conf_error  ".conf file" && SelectArrayError=1
     fi
-
     # Set Instance Name, following Quickemu pattern which sets the same name to the .conf file and to the main folder
     VM_InstanceName="${VM_Conf_File/.conf}"
-
     # Check that the dir contains the right files  &&  grep .conf for right content
     if [[ $IgnoreFolderCheck || $VM_Conf_File == "empty" ]]; then IgnoreFolderCheck=
     elif [[ ! $(ls "$VM_InstanceName"/*.qcow2 2>/dev/null) ]]; then
@@ -314,42 +326,41 @@ VM_check_and_load () {
         SelectArrayError=1; function_conf_error  "folder"
       fi
     fi
-
     if [[ ! $SelectArrayError ]]; then
       ! grep -q -s 'guest_os=' "$VM_Conf_File" && function_conf_error  ".conf file"   && SelectArrayError=1
     fi
-
     if [[ ! $SelectArrayError ]]; then
       # Check KVM parameter settings of new selection & advise accordingly
       KVM_MSR_selector=
       if [[ "$VM_InstanceName" == *windows* || "$VM_InstanceName" == *macos* ]]; then msrs_conflict_check_resolver
       else find_kvm_msr_default_and_status
       fi
-      if grep -qs -e "Verbose_MSR_dialog=1" "$qqX_SettingsFile"; then Verbose_MSR_dialog=1
-      fi
     fi
-
   fi
 
   [[ $ByPass_VM_Array_Selector ]] && msrs_conflict_check_resolver
+  # return verbosity to settings default, in case of any changes invoked following msr checks
+  if grep -qs -e 'Verbose_MSR_dialog=1' -e 'Verbose_MSR_dialog="1' "$qqX_SettingsFile"; then Verbose_MSR_dialog=1
+  else Verbose_MSR_dialog=
+  fi
 
   if [[ $SelectArrayError || $SettingsFileAdjusted ]] && [[ ! $NewFileTuneUp_JustDone ]]; then
-
     VM_Conf_Dir= ; VM_Conf_File= ; VM_InstanceName=
     # reload if the editor was called, or called due to settings error > zero vars triggers the main qqX loop
-
   else
-
     [[ $Loop_Diagnostics ]] && printf "\n\n VM Array_Selector 3:" &&  main_loop_diagnostics
-
     # All existing .CONF VARS MUST BE CLEARED before sourcing a new conf file
     # otherwise any items specified in the previous config, but not in the new one, will remain.
+    # BUT non-conf general setting menu toggle items should survive a .conf refresh if placed here and not in the refresh function
+    if grep -qs -e 'VerboseArgs=1' -e 'VerboseArgs="1' "$qqX_SettingsFile"; then VerboseArgs=1
+    else VerboseArgs=
+    fi
+    if [[ $SetGL_DefaultAsOff ]]; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on"
+    fi
+    check_net_mode
     refresh_conf_vars_and_values
-
     # Set or adjust any VM_Conf_Dir or other related globals  (VM is now selected OR has been re-selected)
-    refresh_logfile_locations
     alert_on_new
-
     # clear any no-longer needed flags
     VM_Selection=
     ByPass_VM_Array_Loader=
@@ -357,9 +368,7 @@ VM_check_and_load () {
     MenuStylePreviewed=
     NewFileTuneUp=
     VM_Renamed=
-
     [[ $Loop_Diagnostics ]] && printf "\n\n VM Array_Selector 4:" &&  main_loop_diagnostics
-
   fi
 
 }

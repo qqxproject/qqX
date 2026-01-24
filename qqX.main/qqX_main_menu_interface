@@ -211,8 +211,16 @@ else
         else  printf 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
         printf "\n\n  [g]   start with GTK display                 "
 
-        if [[ $qqX_GL_Mode == "off" ]] ; then printf "[gl]  OFF > toggle EGL/GLX > on"
-        else printf "[gl]  ON > toggle EGL/GLX > off" ; fi
+        if [[ $qqX_GL_Mode == "off" ]] ; then printf "[gl] is OFF > toggle EGL/GLX on/off"
+        else printf "[gl] is ON > toggle EGL/GLX on/off"
+        fi
+        if [[ $network == "restrict" ]] && [[ $qqX_NetMode == "on" ]]; then printf "  [net] is "; printColor "ON"; printf " > toggle I/O on/off"
+        elif [[ $network == "restrict" ]]; then printf "  [net] is "; printf "RESTRICTED"; printf " > toggle I/O on/off"
+        elif [[ $qqX_NetMode == "restrict" ]]; then printf "  [net] is "; printColor "RESTRICTED"; printf " > toggle I/O on/off"
+        elif [[ $qqX_NetMode == "restrict" ]]; then printf "  [net] is "; printColor "RESTRICTED"; printf " > toggle I/O on/off"
+        elif [[ $qqX_NetMode == "on" ]] ; then printf "  [net] is ON > toggle I/O on/off"
+        else printf "  [net] is %s > toggle I/O on/off" "${qqX_NetMode^^}"
+        fi
 
       fi
 

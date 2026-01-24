@@ -281,12 +281,22 @@ VM_SelectorStyle="A"
 # PHYSICAL MONITOR  - SELECTION   See Extra Args section
 
 # GL GRAPHICS by default are "on".  Individually, placing gl as = "off" in the .conf file will reverse this.
-# This state may be toggled from the main menu or set here to normally boot as "off"
+# This state *may be toggled* from the main menu or set here to normally boot as "off"
 
 # While "on" can give enhanced output, "off" has increased distro compatibility and also allows scaling in SDL mode
 # Leave blank for "on" or set =1 for "off"  Individually, both states of "on" or "off" may be set in the .conf file.
   SetGL_DefaultAsOff=
 #
+
+# NETWORK and INTERNET  are by default "on" (set blank)  *May be toggled* in the main boot menu,
+# or set individually by placing network as = "none" or "restrict" in the .conf file which will turn VM internet off.
+# Where 'none' does not load any drivers; and where 'restrict' does load them and appears to be working BUT allows NO I/O
+# Additional setting = 'bridge' where users should refer to Quickemu notes:
+# https://github.com/quickemu-project/quickemu/wiki/05-Advanced-quickemu-configuration
+  SetNetWork_DefaultAs=
+#
+
+# PORT FORWARDING may be set in the .conf file. See Quickemu advanced notes, as above.
 
 # LOCALE
 # Setting to =1  will increase the use of more locale-centric language/typeface features, if needed

@@ -65,13 +65,9 @@ vm_pid_kill_menu() {
 
   # return to menu requires VM to be shutdown first
   # run a check every second (-t 1)
-
   while true ; do
-
     read -rp  "  >  " -t 1  KillPID_Menu
-
     if [[ $KillPID_Menu == "k" ]]; then
-
       printf "\n\n"
       if [[ $( ps -p "$InstancePID" --no-headers 2>/dev/null) ]]; then
         [[ $SpicyPID ]] && kill "$SpicyPID" 2>/dev/null &
@@ -81,17 +77,13 @@ vm_pid_kill_menu() {
       printf "\n\n"
       tput cnorm
       break
-
     elif [[ $KillPID_Menu == "r" ]]; then
-
       if [[ ! $(pgrep spicy) ]]; then
         eval "$SpicyReStartCmd"
         sleep 2
         SpicyPID="$(pgrep spicy)"
       fi
-
     else
-
       if [[ ! $( ps -p "$InstancePID" --no-headers 2>/dev/null) ]]; then
         tput cnorm
         break
@@ -99,9 +91,7 @@ vm_pid_kill_menu() {
         #  Erase text and adjust cursor:   "\e[1A\r"  "\e[2K\r"  etc    See https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
         printf "\r"
       fi
-
     fi
-
   done
 
   KillPID_Menu=

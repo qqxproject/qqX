@@ -238,6 +238,12 @@ function  main_menu_actions {
     elif [[ $qqX_GL_Mode == "off" ]] ; then qqX_GL_Mode="on"
     fi
 
+  elif [[ $MainMenuChoice == "net" ]] ; then
+
+    if [[ $qqX_NetMode == "on" ]] ; then qqX_NetMode="restrict"
+    else qqX_NetMode="on"
+    fi
+
   elif [[ $MainMenuChoice == "C" ]] ; then
 
     if [[ $ShowCustomBootStyle ]]; then  ForceCustomBootStyle="hide" ; else  ForceCustomBootStyle="show" ; fi
