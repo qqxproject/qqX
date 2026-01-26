@@ -351,13 +351,13 @@ VM_check_and_load () {
     [[ $Loop_Diagnostics ]] && printf "\n\n VM Array_Selector 3:" &&  main_loop_diagnostics
     # All existing .CONF VARS MUST BE CLEARED before sourcing a new conf file
     # otherwise any items specified in the previous config, but not in the new one, will remain.
-    # BUT non-conf general setting menu toggle items should survive a .conf refresh if placed here and not in the refresh function
-    if grep -qs -e 'VerboseArgs=1' -e 'VerboseArgs="1' "$qqX_SettingsFile"; then VerboseArgs=1
-    else VerboseArgs=
-    fi
-    if [[ $SetGL_DefaultAsOff ]]; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on"
-    fi
-    check_net_mode
+    #
+    # Return general setting menu toggle items to set values:
+    Toggled_VerboseArgs= ; Toggled_GL_Mode= ; Toggled_NetMode=
+    if grep -qs -e 'VerboseArgs=1' -e 'VerboseArgs="1' "$qqX_SettingsFile"; then VerboseArgs=1; else VerboseArgs= ; fi
+    if [[ $SetGL_DefaultAsOff ]]; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on"; fi
+    network= ; check_net_mode
+    #
     refresh_conf_vars_and_values
     # Set or adjust any VM_Conf_Dir or other related globals  (VM is now selected OR has been re-selected)
     alert_on_new

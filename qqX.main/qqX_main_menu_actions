@@ -232,17 +232,20 @@ function  main_menu_actions {
 
     select_msr_config
 
+  elif [[ $MainMenuChoice == "v" ]] ; then
+
+    if [[ $VerboseArgs ]]; then VerboseArgs= ; else VerboseArgs=1 ; fi
+    Toggled_VerboseArgs="$VerboseArgs"
+
   elif [[ $MainMenuChoice == "gl" ]] ; then
 
-    if [[ $qqX_GL_Mode == "on" ]] ; then qqX_GL_Mode="off"
-    elif [[ $qqX_GL_Mode == "off" ]] ; then qqX_GL_Mode="on"
-    fi
+    if [[ $qqX_GL_Mode == "on" ]] ; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on" ; fi
+    Toggled_GL_Mode="$qqX_GL_Mode"
 
   elif [[ $MainMenuChoice == "net" ]] ; then
 
-    if [[ $qqX_NetMode == "on" ]] ; then qqX_NetMode="restrict"
-    else qqX_NetMode="on"
-    fi
+    if [[ $qqX_NetMode == "on" ]] ; then qqX_NetMode="restrict" ; else qqX_NetMode="on" ; fi
+    Toggled_NetMode="$qqX_NetMode"
 
   elif [[ $MainMenuChoice == "C" ]] ; then
 
@@ -436,10 +439,6 @@ function  main_menu_actions {
     fi
     printf "\n\n  [enter] to return \n\n"
     read -rp "  >  "
-
-  elif [[ $MainMenuChoice == "v" ]] ; then
-
-    if [[ $VerboseArgs ]]; then VerboseArgs= ; else VerboseArgs=1 ; fi
 
   elif [[ $MainMenuChoice == "vm" ]] || [[ $MainMenuChoice == "b" ]] ; then
 

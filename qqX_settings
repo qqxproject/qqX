@@ -27,6 +27,7 @@
   #   qqX UPDATES
   #   EDITOR & BROWSER PROGRAMS
   #   BOOT DEFAULTS, MSR, LOCALE, SCREENS and SIZES
+  #   NETWORK and INTERNET
 
   #   SHARED or SECOND DRIVES
   #   SNAPSHOTS
@@ -293,6 +294,7 @@ VM_SelectorStyle="A"
 # Where 'none' does not load any drivers; and where 'restrict' does load them and appears to be working BUT allows NO I/O
 # Additional setting = 'bridge' where users should refer to Quickemu notes:
 # https://github.com/quickemu-project/quickemu/wiki/05-Advanced-quickemu-configuration
+#
   SetNetWork_DefaultAs=
 #
 

@@ -531,14 +531,17 @@ function refresh_conf_vars_and_values {
     VM_Conf_File="$(basename "$VM_Conf_File")"
     if [[ ! -e "$VM_Conf_Dir/$VM_Conf_File" ]]; then function_conf_error  "Conf Refresh:  WRONG FOLDER/FILE ," ; fi
 
-    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    # Toggle values get stored, so they don't they don't have to be continually re-entered on a .conf refresh
+    # Get normally cleared with 'VM_check_and_load'
+    if [[ $SettingsFileAdjusted ]]; then
+      Toggled_VerboseArgs= ; Toggled_GL_Mode= ; Toggled_NetMode=
+    fi
 
+    # Make sure any settings edits have finished writing using 'ps aux' and source the clearance
+    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
     source "$ConfClearanceLog"
 
     # Clear any qqX specifics
-    # for NON-CONF general setting menu toggle items place in 'VM_check_and_load' where they should survive a .conf refresh
-
     SecondDrive=
     SharedDrive=
     DriveLocationError=
@@ -582,6 +585,7 @@ function refresh_conf_vars_and_values {
     # then reset
     source  "/tmp/qmod-qe-rw-vars-temp"
 
+
     # reload_boot_style_defaults  # REVIEW
     # left off as if active then utils menu bm function reverts to defaults after booting once ...
     # at ver 1.12.01 has been placed into qqX main loop so switching vm is clean
@@ -590,7 +594,7 @@ function refresh_conf_vars_and_values {
 
     # CLEAR & RE-POPULATE the ConfClearanceLog with current fields, for the next occasion
 
-    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
+    # make sure any settings edits have finished writing using 'ps aux'
     # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
 
     SECONDS=0
@@ -614,7 +618,7 @@ function refresh_conf_vars_and_values {
       fi
     done
 
-    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
+    # make sure any settings edits have finished writing using 'ps aux'
     # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
     SECONDS=0
     [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
@@ -635,6 +639,13 @@ function refresh_conf_vars_and_values {
     check_disk_is_okay
     check_net_mode
     refresh_logfile_locations
+
+    # Return stored toggle values, so they don't they don't have to be continually re-entered on a .conf refresh
+    # Get normally cleared with 'VM_check_and_load'  but also when setting file is adjusted
+    [[ $Toggled_VerboseArgs ]] && VerboseArgs="$Toggled_VerboseArgs"
+    [[ $Toggled_GL_Mode ]] && qqX_GL_Mode="$Toggled_GL_Mode"
+    [[ $Toggled_NetMode ]] && qqX_NetMode="$Toggled_NetMode"
+
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 3:" &&  main_loop_diagnostics
 
