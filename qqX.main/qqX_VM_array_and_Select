@@ -210,10 +210,6 @@ VM_loader_selector_and_menu () {
         CodingHotSwap="FreeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
       elif [[ ${VM_Selection^^} == "HB" ]] ; then
         CodingHotSwap="HomeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
-      elif [[ "${VM_Selection,,}" == ech* ]] ; then
-        CodingHotSwap="Echo" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
-      elif [[ "${VM_Selection,,}" == sys* ]] ; then
-        CodingHotSwap="System" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
       elif [[ "${VM_Selection}" == cust* ]] ; then
         CodingHotSwap="Custom" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
       elif [[ "${VM_Selection,,}" == dev* ]] ; then
