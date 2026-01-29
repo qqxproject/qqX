@@ -30,19 +30,7 @@
 
 function system_code_check_and_warn {
 
-  if [[ $CodingHotSwap == "System" && ! $QE_SystemFilePath ]]; then
-    printColor "\n\n  A standard plain Quickemu System Version has not been installed, or has NOT been LOCATED in \$PATH "
-    printf "\n\n  See https://github.com/quickemu-project/quickemu for more details"
-    printf "\n  Official Quickemu packages will install to /usr/bin, as loose files"
-    printf "\n\n  'Echo' is an older plain Quickemu version that is supplied as a built-in."
-    printf "\n\n  qqX will default to using FreeBird and FreeSpirit as these have the latest mods,"
-    printf "\n  contain general improvements, plus various tweaks to enable process controls."
-    printf "\n  Also fixes, where testing has revealed upstream Quickemu errors yet to be sorted."
-    printf "\n\n  [enter] to continue with FreeBird and/or re-select\n\n"
-    read -rp "  >  "
-    CodingHotSwap="FreeBird"
-
-  elif [[ $CodingHotSwap == "Custom" && ! -d "$Default_VM_Folder/qqX.custom/QE.Custom"  ]]; then
+  if [[ $CodingHotSwap == "Custom" && ! -d "$Default_VM_Folder/qqX.custom/QE.Custom"  ]]; then
     printColor "\n\n  Custom files should be located as detailed in the general settings file."
     printf "\n\n  [enter] to continue with FreeBird and/or set/re-select\n\n"
     read -rp "  >  "
@@ -56,16 +44,6 @@ function system_code_check_and_warn {
     read -rp "  >  "
     CodingHotSwap="FreeSpirit"
 
-  elif [[ ! $WarnedOnQE ]] && [[ $CodingHotSwap == "System" || $CodingHotSwap == "Echo" ]]; then
-    printColor "\n\n  CAUTION Legacy Source Version '%s' " "$QE_SourceVersion"
-    printColor "\n\n  Running of STANDARD QUICKEMU FILES is NOW DEPRECATED - not all of the features and functions will work"
-    printf "\n\n  To run qqX generated machines in original upstream mode, use 'quickemu -vm  distro-name.conf' at the command line"
-    printf "\n\n  qqX versions contain multiple downstream fixes and general improvements,"
-    printf "\n  plus various adjustments to runtime process controls ...."
-    printf "\n\n  [enter] to proceed with care  [f] to select FreeBird\n\n"
-    read -rp "  >  "  WarnedOnQE
-    [[ $WarnedOnQE ]] && CodingHotSwap="FreeBird"
-    WarnedOnQE=1
   fi
 }
 

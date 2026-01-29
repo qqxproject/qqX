@@ -103,8 +103,6 @@ function  main_menu_actions {
   elif [[ ${MainMenuChoice^^} == "FS" ]] ; then  CodingHotSwap="FreeSpirit" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ ${MainMenuChoice^^} == "FB" ]] ; then  CodingHotSwap="FreeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ ${MainMenuChoice^^} == "HB" ]] ; then  CodingHotSwap="HomeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
-  elif [[ "${MainMenuChoice,,}" == ech* ]] ; then  CodingHotSwap="Echo" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
-  elif [[ "${MainMenuChoice,,}" == sys* ]] ; then  CodingHotSwap="System" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ "${MainMenuChoice,,}" == cust* ]] ; then  CodingHotSwap="Custom" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ "${MainMenuChoice,,}" == dev* ]] ; then  CodingHotSwap="Dev" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
 
@@ -490,6 +488,9 @@ function  main_menu_actions {
   else
 
     # the [enter] to refresh option with 'rq' as hidden quiet
+    if [[ $MainMenuChoice == "rq" || $MainMenuChoice == "u" ]]; then true
+    elif [[ $MainMenuChoice ]]; then printColor "\n\n  '%s' was not recognised ... \n\n" "$MainMenuChoice" ; sleep 1.2
+    fi
     ShowUtilsMenu=
     VM_ExecBoot=
     refresh_and_load_quickemu_sources

@@ -156,51 +156,26 @@ VM_SelectorStyle="A"
 
 ## FREEBIRD and BUILT-INS:
 
-# IMPORTANT @ 2024/04  quickemu underwent major changes.
+# Built-ins allow qqX to be CLOSELY CONNECTED to the quickemu source, BUT to be PROTECTED from any unexpected code changes,
+# AND to have the possibilty of independently adding fixes when needed.
+# See https://github.com/qqxproject/quickemu#quickemu-freebird--freespirit-branch
 
-# TO KEEP qqX STABLE, built-in releases were introduced from qqX version 1.8 onwards.
-# These are essentially identical to the official releases, except for changes to the version number, for identification purposes.
+# Built-in code versions may be default set and/or hot-swapped via the standard qqX menus.
+# Versions are named as follows:
 
-# Quickemu is a good project but it has suffered at times from an intermittent maintenance cycle with
-# short notice releases and often months long periods of community-only activity.
-
-# The idea is still to REMAIN CLOSELY CONNECTED TO THE QUICKEMU SOURCE but to protect qqX from any unexpected API or code changes,
-# and to have the possibilty, if needed or wished, of allowing in selected pre-release community contributions.
-
-# 2024/04 was A TURNING POINT which came at the end of what was a frustratingly long period for many people,
-# during which fixes and features from the quickemu community had accumulated and sat there waiting to be merged.
-
-# However @ 2025/04 patchy upstream maintainence and developer differences continue ...
-
-# Running of STANDARD QUICKEMU FILES is NOW DEPRECATED as not all of the features and functions will work.
-# qqX versions now contain multiple downstream fixes and general improvements, plus various adjustments to runtime process controls
-
-# To run qqX generated machines in original upstream mode, use 'quickemu -vm  distro-name.conf' at the command line
-
-# Versions may be start default set and  additionally hot-swapped via the standard qqX menus
-
-# Branches    - Source code and diff comparisons are at  https://github.com/qqxproject/quickemu/branches
-
-# Named versions are generally as follows:
-
-# FreeSpirit - As FreeBird, or as FreeBird but more spirited, with newer ideas and fixes if they are EXPECTED TO BE STABLE.
-#              Probably includes some official pre-release, or qqX and Community pre-release, or both.
-
-# FreeBird   - Based on time tested FreeSpirit or on official code. Generally tested as STABLE.
-#              Contains the usual qqX additions and tweaks. May contain a few official pre-release improvements.
-
+# FreeSpirit - Contains the new ideas and fixes if they are EXPECTED TO BE STABLE.
+#            - Often includes some official pre-release, or qqX and Community pre-release, or both.
+#
+# FreeBird   - Usually based on older versions of FreeSpirit and more generally TESTED.
+#
 # HomeBird   - An older FreeBird release.  Just in case of the unforeseen ....
+#
+# Custom/Dev - Your own customised or development version (see notes towards the end)
 
-# Echo       - An older official quickemu release. Should generally work with qqX.  May be useful?
+# Set qqX start default in the settings file as quoted "name" or may be set blank for qqX selected
+# Any qqX generated machines may still be run in quickemu upstream mode, using 'quickemu -vm  distro-name.conf' at the command line
 
-# System     - The latest official quickemu release, as it is on the system. Use with caution. New releases can often have problems.
-
-# Custom/Dev - Your own customised or development version.  SEE THE NOTES TOWARDS THE END OF THE SETTINGS FILE.
-
-# Set qqX start default in the settings file as quoted "name" or may be set blank for qqX selected.
-
-# FreeBird or FreeSpirit are recommended.
-
+# FreeBird or FreeSpirit are recommended
   QE_SourceVersion="FreeBird"
 
 #  -------------------------------------------------------------------------------------------------------------------
@@ -479,47 +454,38 @@ VM_SelectorStyle="A"
 # CUSTOM QUICKEMU & QUICKGET and DEVELOPMENT
 # Sometimes different quickemu/quickget versions maybe be needed, or different custom versions produced.
 
-# Official versions may be downloaded at https://github.com/quickemu-project/quickemu/releases
-# Remember that official releases of quickget tend to check quickemu for the version number.
-# In the past, different quickget/quickemu release/custom versions have been generally mix/matchable,
-# as long as, a structure similar to quickemu 4.4 onwards has been used.
+# Quickemu is a popular WELL INTENTIONED project but it continues to suffer from a sporadic maintenance
+# Upstream bursts of code can happen at short notice and often contain errors ...
+# Developer differences continue and many upstream contributors have left ...
+# https://github.com/quickemu-project/quickemu/releases
 
 # Place 'Custom' scripts in a 'QE.Custom' sub-folder to "$Default_VM_Folder/qqX.custom" in a similar manner
 # to that used for FreeBird. This preset path will be auto-checked.
+# Be aware that upstream releases use quickemu to supply the version number for quickget.
 
 # For 'Dev' give full path of your Quickemu source clone here, "$HOME/Files/myClone"
 # QE_DevPath may be left set. This path will only be used if Version is set to 'Dev'
+#
+# Inside the Dev folder, all script names should be as standard. Plus, add all ancilliary scripts, such as macrecovery/chunkcheck etc.
+# qqX will select this folder and will also add it to '$PATH' to make sure the correct ancilliaries are found.
+# NB: no spaces in path, as quoted paths can only be added to the end of the System Var '$PATH' and we need the source path as first.
   QE_DevPath=
 
-# QE_SourceVersion may also be set here as a temporary overwrite to the main settings at the top of the script.
-# This will get reset here, if doing a settings update ...
+# 'QE_SourceVersion' may ALSO be set here as a TEMPORARY OVERWRITE to the main settings at the top of the script.
+# FreeBird is default.  Set 'QE_SourceVersion' blank for default. Remove '#' to unComment and activate.
+# Will get reset if doing a settings update:
 # QE_SourceVersion="Dev"
 
-# Inside the folder, all script names should be as standard. Plus, add all ancilliary scripts, such as macrecovery/chunkcheck etc.
-# qqX will select this folder and will also add it to '$PATH' to make sure the correct ancilliaries are found.
+# Versions are named as follows:
 
-# NB: no spaces in path, as quoted paths can only be added to the end of $PATH and we need the source path as first.
-
-# Branches    - Source code and diff comparisons are at  https://github.com/qqxproject/quickemu/branches
-
-# Named versions are generally as follows:
-
-# FreeSpirit - As FreeBird, or as FreeBird but more spirited, with newer ideas and fixes if they are EXPECTED TO BE STABLE.
-#              Probably includes some official pre-release, or qqX and Community pre-release, or both.
-
-# FreeBird   - Based on time tested FreeSpirit or on official code. Generally tested as STABLE.
-#              Contains the usual qqX additions and tweaks. May contain a few official pre-release improvements.
-
+# FreeSpirit - Contains the new ideas and fixes if they are EXPECTED TO BE STABLE.
+#            - Often includes some official pre-release, or qqX and Community pre-release, or both.
+#
+# FreeBird   - Usually based on older versions of FreeSpirit and more generally TESTED.
+#
 # HomeBird   - An older FreeBird release.  Just in case of the unforeseen ....
-
-# Echo       - An older official quickemu release. Should generally work with qqX.  May be useful?
-
-# System     - The latest official quickemu release, as it is on the system. Use with caution. New releases can often have problems.
-
-# Custom/Dev - Your own customised or development version.  See the notes here, at the end of the settings file.
-
-# FreeBird is default.  Set blank for default.
-
+#
+# Custom/Dev - Your own customised or development version
 
 ## End of Settings
 
