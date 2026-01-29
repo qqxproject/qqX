@@ -117,7 +117,7 @@ else
       printf  "\n\n  [tune] config tune-up wizard   [disk]  resize or repair existing drives   [rtv] reset Tiano VMF Vars"
 
       printColor "\n\n  ----------------------------------------------------------------------------"
-      printf "\n\n  [FS] Switch to FreeSpirit  [FB] FreeBird  [HB]  [Ech]  [Sys]  [Cust]  [Dev] "
+      printf "\n\n  [FS] Switch to FreeSpirit  [FB] FreeBird  [HB]  [Cust]  [Dev] "
       printf "\n\n  [hdw] add current config to this VM's Virtual Hardware Record "
 
       [[ -e "$HOME/.qqX/qqX_term.conf" ]] && printf "\n\n   [tmc] terminal config"

@@ -249,8 +249,8 @@ function show_qqX_general_help {
       read -rp  "   >  " HelpSelect
 
     elif [[ $HelpSelect == "f" ]]; then
-      printf "\n  Hot-Swappable from all main menus:  [FS] FreeSpirit  [FB] FreeBird  [HB]  [Ech]  [Sys]  [Cust]  [Dev] \n\n"
-      grep -m 1 -A 100  '# Named versions' "$qqX_SettingsFile" | grep -m 1 -B 100 '# FreeBird or FreeSpirit are recommended'| tr '#' ' '
+      printf "\n  Hot-Swappable from all main menus:  [FS] FreeSpirit  [FB] FreeBird  [HB]  [Cust]  [Dev] \n\n"
+      grep -m 1 -A 100  'named as follows' "$qqX_SettingsFile" | grep -m 1 -B 100 '# FreeBird or FreeSpirit are recommended'| tr '#' ' '
       if [[ -e "$Default_VM_Folder/qqX.custom/QE.Custom/quickemu" ]]; then
         printf "\n\n  Custom =   Default_VM_Folder > qqX.custom  > %s " "$("$Default_VM_Folder/qqX.custom/QE.Custom/quickemu" --version)"
       fi
