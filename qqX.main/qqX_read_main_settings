@@ -125,9 +125,11 @@ find_file_manager_browser
 find_texteditor
 
 ## PATHS
-
 # Set the original initial value of paths as found on start up. Check Once.
 OriginalPATH="$PATH"
+# System paths stored for info BUT direct support removed 2026/01
+# Note that 'QE_SystemFilePath' should be probed before any builtins or re-routes happen,
+# otherwise finding the filepath gets a bit complex ... (needed for compatability tune-ups)
 QE_SystemFilePath="$(type -p quickemu)"
 QG_SystemFilePath="$(type -p quickget)"
 
@@ -158,63 +160,46 @@ function sort_qqX_builtin_settings {
     printf "\n\n  Settings File: %s \n\n" "$qqX_SettingsFile"  ; sleep 4
   fi
 
-  if [[ $QE_SourceVersion == "system" ]]; then
-    if [[ $QE_SystemFilePath && $QG_SystemFilePath ]]; then
-      QE_SourceVersion="System"
-      QE_SourcePath="$QE_SystemFilePath"
-      QG_SourcePath="$QG_SystemFilePath"
-    else
-      QE_SourceVersion="Missing System Files"
-      QE_SourcePath= ; QG_SourcePath= ; FreePath=
-    fi
-  fi
-
-  if [[ $QE_SourceVersion != "System" ]]; then
-
-    if [[ $QE_SourceVersion == "freebird" ]]; then
-      QE_SourceVersion="FreeBird"
-      FreePath="$qqX_BuiltinsFolder/freebird"
-    elif [[ $QE_SourceVersion == "freespirit" ]]; then
+  if [[ $QE_SourceVersion == "freebird" ]]; then
+    QE_SourceVersion="FreeBird"
+    FreePath="$qqX_BuiltinsFolder/freebird"
+  elif [[ $QE_SourceVersion == "freespirit" ]]; then
+    QE_SourceVersion="FreeSpirit"
+    FreePath="$qqX_BuiltinsFolder/freespirit"
+  elif [[ $QE_SourceVersion == "homebird" ]]; then
+    QE_SourceVersion="HomeBird"
+    FreePath="$qqX_BuiltinsFolder/homebird"
+  elif [[ $QE_SourceVersion == "echo" ]]; then
+    QE_SourceVersion="Echo"
+    FreePath="$qqX_BuiltinsFolder/echo"
+  elif [[ $QE_SourceVersion == "custom" ]]; then
+    QE_SourceVersion="Custom"
+    FreePath="$Default_VM_Folder/qqX.custom/QE.Custom"
+    if [[ ! -e "$FreePath" ]]; then FreePath="$qqX_BuiltinsFolder/freebird" ; fi
+  elif [[ $QE_SourceVersion == "dev" ]]; then
+    QE_SourceVersion="Dev"
+    FreePath="$QE_DevPath"
+    if [[ ! -e "$FreePath" ]]; then
       QE_SourceVersion="FreeSpirit"
       FreePath="$qqX_BuiltinsFolder/freespirit"
-    elif [[ $QE_SourceVersion == "homebird" ]]; then
-      QE_SourceVersion="HomeBird"
-      FreePath="$qqX_BuiltinsFolder/homebird"
-    elif [[ $QE_SourceVersion == "echo" ]]; then
-      QE_SourceVersion="Echo"
-      FreePath="$qqX_BuiltinsFolder/echo"
-    elif [[ $QE_SourceVersion == "custom" ]]; then
-      QE_SourceVersion="Custom"
-      FreePath="$Default_VM_Folder/qqX.custom/QE.Custom"
-      if [[ ! -e "$FreePath" ]]; then FreePath="$qqX_BuiltinsFolder/freebird" ; fi
-    elif [[ $QE_SourceVersion == "dev" ]]; then
-      QE_SourceVersion="Dev"
-      FreePath="$QE_DevPath"
-      if [[ ! -e "$FreePath" ]]; then
-        QE_SourceVersion="FreeSpirit"
-        FreePath="$qqX_BuiltinsFolder/freespirit"
-        printf "\n\n  Dev path  '%s'  Not Found   >>  Using FreeSpirit \n\n"  "$QE_DevPath"
-        sleep 2 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
-      fi
-    else
-      printf "\n\n  Source Setting  '%s'  Not Recognised   >>  Using FreeBird \n\n"  "$QE_SourceVersion"
-      sleep 3 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
-      QE_SourceVersion="FreeBird"
-      FreePath="$qqX_BuiltinsFolder/freebird"
+      printf "\n\n  Dev path  '%s'  Not Found   >>  Using FreeSpirit \n\n"  "$QE_DevPath"
+      sleep 2 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
     fi
-
-    QE_SourcePath="$FreePath/quickemu"
-    QG_SourcePath="$FreePath/quickget"
-    if [[ -e "$FreePath/qqX_quickGet_mods" ]]; then QG_Modpath="$FreePath/qqX_quickGet_mods"
-    else QG_Modpath= ; fi
-    if [[ -e "$FreePath/qqX_quickEmu_mods" ]]; then QE_Modpath="$FreePath/qqX_quickEmu_mods"
-    else QE_Modpath= ; fi
+  else
+    printf "\n\n  Source Setting  '%s'  Not Recognised   >>  Using FreeBird \n\n"  "$QE_SourceVersion"
+    sleep 3 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
+    QE_SourceVersion="FreeBird"
+    FreePath="$qqX_BuiltinsFolder/freebird"
   fi
+
+  QE_SourcePath="$FreePath/quickemu"
+  QG_SourcePath="$FreePath/quickget"
+  if [[ -e "$FreePath/qqX_quickGet_mods" ]]; then QG_Modpath="$FreePath/qqX_quickGet_mods" ; else QG_Modpath= ; fi
+  if [[ -e "$FreePath/qqX_quickEmu_mods" ]]; then QE_Modpath="$FreePath/qqX_quickEmu_mods" ; else QE_Modpath= ; fi
 
   if [[ $FreePath ]]; then
     export PATH="${FreePath}:${qqX_LibraryFolder}:${OriginalPATH}"
-  else
-    export PATH="${qqX_LibraryFolder}:${OriginalPATH}"
+  else export PATH="${qqX_LibraryFolder}:${OriginalPATH}"
   fi
 
   if [[ $QE_SourcePath ]] && [[ ! -e "$QE_SourcePath" ]]; then

@@ -57,6 +57,7 @@ function_config_tune_up ()  {
 
   # We should be using 'QE_SystemFilePath' declared at the start of qqX, and before any builtins or re-routes happen,
   # otherwise finding the filepath gets a bit complex so attempt to use the standard or warn ...
+  # Retained for users seeking compatibility with QuickGui etc
   [[ ! $QE_SystemFilePath ]] && [[ -e "/usr/bin/quickemu" ]] && QE_SystemFilePath="/usr/bin/quickemu"
 
   # Check starter, where QE_SystemFilePath is normally '/usr/bin/quickemu'

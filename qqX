@@ -83,7 +83,7 @@ function main_loop_diagnostics {
     echo "NewFileTuneUp_JustDone=$NewFileTuneUp_JustDone  QemuErrorLog=$QemuErrorLog"
     echo "MainDrive=$MainDrive disk_img=$disk_img IsoImg=$IsoImg"
     echo "SharedDrive=$SharedDrive SharedDrive_Conf=$SharedDrive_Conf SharedDrive_Mount=$SharedDrive_Mount"
-    echo "QE Source=$FreePath  QE_SystemFilePath=$QE_SystemFilePath  "
+    echo "QE Source=$FreePath"
     echo "QE_495_Script=$QE_495_Script  QE_496_Script=$QE_496_Script    CodingHotSwap=$CodingHotSwap  CodingHotSwapShow=$CodingHotSwapShow"
     sleep "$Loop_Diagnostics"
   fi
@@ -99,7 +99,7 @@ function path_diagnostics {
     echo "qqX_LibraryFolder: $qqX_LibraryFolder"
     echo "qqX_CustomFolder: $qqX_CustomFolder"
     echo "XDG_GUI_desktop_Folder: $XDG_GUI_desktop_Folder"
-    echo; echo "FreePath=$FreePath  QE_SystemFilePath=$QE_SystemFilePath"
+    echo; echo "FreePath=$FreePath"
     echo "QE_495_Script=$QE_495_Script  QE_496_Script=$QE_496_Script  CodingHotSwap=$CodingHotSwap  CodingHotSwapShow=$CodingHotSwapShow"
     echo "QE_SourceVersion: $QE_SourceVersion"
     echo "QE_SourcePath: $QE_SourcePath  QE_VerNumber: $QE_VerNumber"
@@ -121,8 +121,6 @@ System_qqX_Path="$(type -p qqX)"
 
 # Use 'type -p' which is the 'newer' method and qqX tests have shown problems using 'command -v'
 # Using caps (type -P) will show aliases and qqX re-routes
-# BUT 'QE_SystemFilePath' should be probed at the start of qqX, and before any builtins or re-routes happen,
-# otherwise finding the filepath gets a bit complex ...
 
 # Respect standard FHS locations but allow local overide for qqX dev work. NB: no spaces in qqX dev path, see notes at end of settings file.
 if [[ -d "./qqX.main" ]]; then qqX_MainFolder="$(realpath "./qqX.main")" ; else qqX_MainFolder="/usr/share/qqX/qqX.main"; fi
