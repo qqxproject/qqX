@@ -41,7 +41,7 @@
 # Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
 # Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
 # but minor numbers remain padded to 2dp
-  qqX_Version="1.15.00"
+  qqX_Version="1.15.01-dev.01"
 
 # Allow Posix sub-shell checks (without -t 1) eg. qqX_Version="$(./qqX --version 2>/dev/null)"
 if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit ; fi
@@ -213,7 +213,6 @@ function main_menu {
   done
 }
 
-#find_quick_version_numbers
 tput civis
 printf "\033c"
 show_qqX_title_bar
@@ -225,6 +224,7 @@ if [[ $Disable_qqX_upd_Checks ]]; then
 else
   check_for_qqX_updates &
   find_latest_qemu_version &
+  # These vars for when the output file gets read later on, in the foreground:
   qqX_upd_FileChk= ; Muted_BetaAlert_Count=0
 fi
 

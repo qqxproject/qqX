@@ -15,16 +15,10 @@
 
 #  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154,SC2009
 
-
-## Check for Custom Main Menu
-
 if [[ -e "$Default_VM_Folder/qqX.custom/custom_main_menu" ]]; then
 
   #  CAUTION  creating a custom main menu may put you out-of-sync with any qqX updates
   #  Changes here are different to VM selector styles which don't change the underlying code
-
-  #  First stage work only. Expect further modularization, possibly with language options (?).
-
   source "$Default_VM_Folder/qqX.custom/custom_main_menu"
 
 else
@@ -169,55 +163,40 @@ else
     if [[ ! $ShowUtilsMenu ]]; then
 
       if [[ -e "$QemuArgsCustomFile" ]]; then
-
         #QEMU_Default_SystemType= #QEMU_Default_MachineType=  in the general settings file BUT if not present then = 'qemu-system-x86_64'
         MenuCustomSystem="$(grep 'qemu-system' "$QemuArgsCustomFile" | grep -v '#' )"
         MenuCustomMachine="$(grep -m 1 -e '-machine' "$QemuArgsCustomFile" | grep -v '#' | cut -d ',' -f 1)"
         MenuCustomSystemBaseName="$(basename "$MenuCustomSystem")"
         MenuCustomSystemBaseName="$(tr -cd '[:graph:]' <<<"$MenuCustomSystemBaseName")"
-
         if [[ $QEMU_Default_SystemType == "$MenuCustomSystemBaseName" ]]; then ShowDefault_Hybrid=1 ; else ShowDefault_Hybrid= ; fi
-
         if [[ $ShowDefault_Hybrid ]] ; then ShowCustomBootStyle= ; else ShowCustomBootStyle=1 ; fi
-
         [[ $ForceCustomBootStyle == "hide" ]] && ShowCustomBootStyle=  && ShowDefault_Hybrid=1
         [[ $ForceCustomBootStyle == "show" ]] && ShowCustomBootStyle=1 && ShowDefault_Hybrid=
-
         [[ $PreferHybridCustomMenus ]] && [[ ! $ForceCustomBootStyle ]] && ShowDefault_Hybrid=1 && ShowCustomBootStyle=
-
       else
-
         #[[ $ShowCustomBootStyle || $ShowDefault_Hybrid ]] &&  printColor "\n\n  Warning:  Custom boot file removed or name has changed?  Re/Select [vm] to refresh \n"
         if [[ $ShowCustomBootStyle || $ShowDefault_Hybrid ]]; then
           SettingsFileAdjusted=1
           refresh_sources_and_load_VM_arrays
         fi
-
       fi
 
       if [[ $ShowCustomBootStyle ]] ; then
-
         # NB:  "$QemuArgsCustomFile" may exist BUT [c] $UseCustomBootArgs remains menu selectable
         printColor "\n\n  [c]  start VM using custom args with %s %s" "$MenuCustomSystem" "$MenuCustomMachine"
         printf "\n\n  [C]  toggle normal/custom menu  or  use normal:  [d] or [df] > sdl   [s] or [sf] > spice   [g] std gtk "
         printf "\n\n  [ce] edit custom args file    [qd] open Qemu docs in browser"
-
       elif [[ $LiveBoot && $LiveBootMissing ]]; then
-
         printColor "\n\n   Hopefully, just a few a tweaks:  "
         if [[ $img || $iso ]]; then  printColor "%s  %s ??" "$img" "$iso"
         else printColor "No Image or ISO listed ??"
         fi
-
       else
-
         if [[ $ShowDefault_Hybrid ]]; then
-          printColor "\n\n  [c]   start VM using custom args"
-          printf "      [ce] edit custom args file    [qd] open Qemu docs in browser"
+          printColor "\n\n  [c]   start VM with custom args"
+          printf "   [ce] edit custom args   [C] toggle normal/custom menu   [qd] browse Qemu docs"
         fi
-
         printColor  "\n\n  [d]   start with SDL display"
-
         if [[ $guest_os == "windows" ]]; then  printColor "   (size as set by qqX and/or by Windows)"
         elif [[ $guest_os == "macos" ]] && [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then  printColor " (size determined by MacOS with this QE version)"
         elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > see settings)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
@@ -225,21 +204,25 @@ else
         elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
         else printColor " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
         fi
-
         [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
-
         printf "\n"
 
         if [[ $HeadlessDisplay ]]; then printColor 	"\n\n  [s]   start with Spice display (HEADLESS) "
         else  printf 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
-
         printf "\n\n  [g]   start with GTK display                 "
 
-        if [[ $qqX_GL_Mode == "off" ]] ; then printf "[gl]  OFF > toggle EGL/GLX > on"
-        else printf "[gl]  ON > toggle EGL/GLX > off" ; fi
-
-        if [[ -e "$QemuArgsCustomFile" ]]; then printColor "     [C] toggle normal/custom menu "
-        elif [[ $VerboseArgs ]]; then  printf  "      (all starts > Verbose)"
+        #if [[ $qqX_GL_Mode == "off" ]] ; then printf "[gl] is OFF > toggle EGL/GLX on/off"
+        #else printf "[gl] is ON > toggle EGL/GLX on/off"
+        #fi
+        if [[ $gl == "off" ]] && [[ $qqX_GL_Mode == "on" ]]; then printf "[gl] is "; printColor "ON"; printf " > toggle I/O on/off"
+        elif [[ ! $gl ]] && [[ $qqX_GL_Mode == "off" ]]; then printf "[gl] is "; printColor "OFF"; printf " > toggle I/O on/off"
+        else printf "[gl] is ON > toggle I/O on/off"
+        fi
+        printf " "
+        if [[ $network == "restrict" ]] && [[ $qqX_NetMode == "on" ]]; then printf "  [net] is "; printf "ON"; printf " > toggle I/O on/off"
+        elif [[ $network == "restrict" || $qqX_NetMode == "restrict" ]]; then printf "  [net] is "; printColor "RESTRICTED"; printf " > toggle I/O on/off"
+        elif [[ $qqX_NetMode == "on" ]] ; then printf "  [net] is ON > toggle I/O on/off"
+        else printf "  [net] is %s > toggle I/O on/off" "${qqX_NetMode^^}"
         fi
 
       fi
@@ -251,7 +234,6 @@ else
     [[ $DriveLocationError ]] &&  printColor "\n\n  %s"  "$DriveLocationError"
 
     if [[ $ConfSettingsAdjusted || $SettingsFileAdjusted ]]; then
-
       if [[ $SelectArrayError ]]; then printColor "\n\n  Settings Error = %s"  "$SelectArrayError" ; SelectArrayError=
       elif [[ $DefaultFolderError ]]; then printColor "\n\n  Settings Error = Default Folder NOT found" ; DefaultFolderError=
       elif [[ $ExtraFolderError ]]; then printColor "\n\n  Settings Error = %s  NOT found"  "$ExtraFolderError" ; ExtraFolderError=
@@ -262,28 +244,21 @@ else
       ConfSettingsAdjusted=
       SettingsFileAdjusted=
       FileManager_Run=
-
     fi
 
     if [[ -f "$VM_InstanceName/rtv.date.txt" ]]; then
-
       SyncDateNow="$(date +%s)"
       SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
       LastRtvUpd="$((SyncDateNow - SyncDateOld))"
-
       if [[ $RtvManualOnly ]]; then
-
         if [[ "$VM_InstanceName" == *macos* ]]; then
           [[ ! $RtvMacosRmdOff ]] && [[ $LastRtvUpd -gt 2592000 ]] && printColor "\n\n  [rtv]  run Tiano update - last run %d days ago"  "$((LastRtvUpd/86400))"
         elif [[ ! $RtvStdRmdOff ]] && [[ $LastRtvUpd -gt 10368000 ]]; then
           printColor "\n\n  [rtv]  run Tiano update - last run %d days ago"  "$((LastRtvUpd/86400))"
         fi
-
         #  Reminders @ older than 120 days std vars or 30 for mac as has binaries (in epoch seconds)
         #  Auto-updates: do all at 30 days.  Status message for std vars probably OTT, not needed (?)   REVIEW
-
       elif [[ $LastRtvUpd -gt 2592000 ]]; then
-
          if [[ "$VM_InstanceName" == *macos* ]]; then
           printf "\n\n  Tiano Core Security Updates .....  "
           refresh_tiano_vars &
@@ -293,11 +268,8 @@ else
           [[ $RtvMacGet == "Fail" ]] && printColor "\n\n  Failed to update. See rtv logs in the VM folder ...."
         else  refresh_tiano_vars &
         fi
-
       fi
-
     else  date +%s > "$VM_Conf_Dir/$VM_InstanceName/rtv.date.txt"  2>/dev/null
-
     fi
 
     main_loop_diagnostics

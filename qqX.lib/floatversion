@@ -93,7 +93,7 @@ float_version_from_string ()  {
   -RM [int]           Outputs the single lowest/earliest value in the list. With integer, as -M but
                       reverses only the M filter set, not the list, eg. -M 3  > 3 2 1  -RM 3 > 1 2 3
                       also accepts '-r' to reverse a lowest set filter ...
-  -g | -qg | --gt     A > B, returns true/false eg. if fv -g \"A B\"; then .. (.nums or sem ver)
+  -g | -qg | --gt     A > B, returns true/false eg. if fv -g \"A B\"; then .. (.nums or sem-ver, implies -f)
                       use -v for dev output, normally quiet and allows conditional testing (-qg quieter errors)
   -Q | --quiet        Quieten general error messages, as alternative to using '2>/dev/null'
                       Use -qc | -qs | -qg  for reduced error output on full machine tests (no help notes)
@@ -117,8 +117,20 @@ float_version_from_string ()  {
   Further Usage/Help/Details @ https://github.com/Alex-Genovese/floatversion
 
 "
-fi
+    fi
   }
+
+bad_input () {
+  printf "\n  ERROR with supplied data stream or supplied file address"
+  printf "\n  Check input sources and/or Input formats (floatversion --help)"
+  printf "\n\n"
+}
+
+bad_cmd () {
+  printf "\n  ERROR with supplied floatversion commands"
+  printf "\n  Check Input formats (floatversion --help)"
+  printf "\n\n"
+}
 
   local ShowAsCol=
   local ShowAsStr=
@@ -160,7 +172,7 @@ fi
       -h|--help)
         show_help ; return 0 ;;
       -V|--version)
-        CurrentVersion="1.4.03"
+        CurrentVersion="1.5.0"
         printf "\n CurrentVersion: %s" "$CurrentVersion"
         printf "\n\n Checking for updates....   "
         LatestVersion="$(floatversion -M "$(curl -sf --max-time 5 "https://github.com/Alex-Genovese/floatversion/releases" | grep 's/tag')" 2>/dev/null)"
@@ -196,14 +208,14 @@ fi
       -f|--full)
         GrepFull=1 ; shift ;;
       -F|--filter)
-        [[ ! $2 ]] && show_help && return 1
-        FilterString="$2" ; shift 2 ;;
+        [[ ! $2 || -e $2 ]] && bad_cmd && return 1
+        GrepFull=1 ; FilterString="$2" ; shift 2 ;;
       -S|--start)
-        [[ ! $2 ]] && show_help && return 1
-        StartString="$2" ; shift 2 ;;
+        [[ ! $2 || -e $2 ]] && bad_cmd && return 1
+        GrepFull=1 ; StartString="$2" ; shift 2 ;;
       -D|--delete)
-        [[ ! $2 ]] && show_help && return 1
-        DeleteString="$2" ; shift 2 ;;
+        [[ ! $2 || -e $2 ]] && bad_cmd && return 1
+        GrepFull=1 ; DeleteString="$2" ; shift 2 ;;
       -M|--max)
         ShowMax=1 ; shift
         [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]] && { TopMax="$1"; ShowMax=; shift; } ;;
@@ -215,11 +227,11 @@ fi
         GTcompare=1; shift ;;
       *)
         if [[ "$1" == '-'* ]]; then
-          if [[ ! $HideErrors ]]; then  printf "\n  FloatVersion:  '%s'  not recognised \n\n" "$1" >&2 ; show_help >&2
+          if [[ ! $HideErrors ]]; then  printf "\n  FloatVersion:  '%s'  not recognised \n" "$1" >&2 ; bad_cmd >&2
           fi
           return 1
         elif [[ $InputText ]]; then
-          if [[ ! $HideErrors ]]; then printf "\n  FloatVersion: QUOTED Input String or Text File Name not found \n\n" >&2 ; show_help >&2
+          if [[ ! $HideErrors ]]; then printf "\n  FloatVersion: QUOTED Input String or Text File Name not found \n" >&2 ; bad_input >&2
           fi
           return 1
         else
@@ -244,8 +256,8 @@ fi
 
   if [[ ! $InputText ]]; then
     if [[ ! $HideErrors ]]; then
-      printf "\n  FloatVersion: Input Data Missing or not found. \n\n" >&2
-      show_help >&2
+      printf "\n  FloatVersion: Input Data Missing or not found. \n" >&2
+      bad_input >&2
     fi
     return 1
   fi
@@ -308,8 +320,8 @@ fi
 
   if [[ $GTcompare ]] && [[ "$NumsCount" != 2 ]]; then
     if [[ ! $HideErrors ]]; then
-      printf "\n  FloatVersion:  TWO floating point or TWO semantic version values should be supplied \n\n" >&2
-      show_help >&2
+      printf "\n  FloatVersion:  TWO floating point or TWO semantic version values should be supplied \n" >&2
+      bad_input >&2
     fi
     return 1
   fi
@@ -482,9 +494,9 @@ floatversion ()  {
       -a|--all)     ShowAll=1 ;   shift ;;
       -n|--num)     SortNum=1 ;   shift ;;
       -f|--full)    GrepFull=1 ;  shift ;;
-      -F|--filter)  [[ ! $2 ]] && return 1 ; FilterString="$2" ;  shift 2 ;;
-      -S|--start)   [[ ! $2 ]] && return 1 ; StartString="$2" ;   shift 2 ;;
-      -D|--delete)  [[ ! $2 ]] && return 1 ; DeleteString="$2" ;  shift 2 ;;
+      -F|--filter)  [[ ! $2 || -e $2 ]] && return 1 ; GrepFull=1 ; FilterString="$2" ;  shift 2 ;;
+      -S|--start)   [[ ! $2 || -e $2 ]] && return 1 ; GrepFull=1 ; StartString="$2" ;   shift 2 ;;
+      -D|--delete)  [[ ! $2 || -e $2 ]] && return 1 ; GrepFull=1 ; DeleteString="$2" ;  shift 2 ;;
       -M|--max)     ShowMax=1 ; shift ; [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]] && { TopMax="$1"; ShowMax=; shift; } ;;
       -RM)          ShowMax=1 ; RevMax=1 ; shift ; [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]] && { TopMax="$1"; ShowMax=; shift; } ;;
       -g|-qg|--gt)  GTcompare=1 ; shift ;;

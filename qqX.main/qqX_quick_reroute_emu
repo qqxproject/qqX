@@ -78,6 +78,12 @@ function quickemu {
     # So, some setting confirmations and overides can be placed here, others go into the modded function 'vm_boot'
 
     gl="$qqX_GL_Mode"
+    if [[ $qqX_NetMode ]]; then
+      case "$qqX_NetMode" in
+        on)  network= ;;
+        *)   network="$qqX_NetMode" ;;
+      esac
+    fi
     fixed_iso="$Mounted_ISO"
     [[ $guest_os == "macos" ]] && [[ ! $cpu_cores ]] && cpu_cores=8
     source "/tmp/qmod-actions-temp"
