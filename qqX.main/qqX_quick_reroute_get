@@ -52,7 +52,7 @@ refresh_load_listing_filters () {
   declare -gA VM_Listing_Info=()
   VM_Listing_Info[all,info]="All listed Distros, of all types."
   VM_Listing_Info[desktop,info]="All distros, minus the server list. The mainly Desktop focused distros."
-  VM_Listing_Info[server-cl,info]="The mainly Server focused distros."
+  VM_Listing_Info[server-cl,info]="The mainly Server or Command Line focused distros."
   VM_Listing_Info[gaming,info]="Distros with gaming tuned kernels or with releases that offer gaming focused options."
   VM_Listing_Info[ultra-light,info]="Super Small from ~100 to 500 Mb or so, ideal for USB sticks and similar."
   VM_Listing_Info[security,info]="Distros for network specialists, security engineers, pen-testers and those wanting privacy lock-downs."
@@ -414,13 +414,15 @@ function show_QWG_header {
     printColor "  wrapping QUICKGET version %s  " "$QG_VerNumber"
   fi
   if [[ $InternetUp ]]; then
-    printf "(internet working) [R] to re-check"
+    printf "(internet working) [R] re-check"
     if [[ $QG_Modpath ]]; then
       printf "   ("
       printColor "%s" "$VM_ListingFilter"
       printf ") ["
       printColor "fl"
-      printf "] adjust filter "
+      printf "] "
+      [[ $VM_ListingFilter != "all" ]] && printf "[all] "
+      printf "adjust filter"
     fi
     printf "\n\n"
   else
@@ -469,6 +471,7 @@ function refresh_QWG_selector {
   if [[ $1 == "no-set" ]] ; then
     clear_main_gt_start_vars
     show_QWG_header ; show_hot_swap_line
+    [[ $FilterInfo ]] && printColor "\n  %s \n\n" "$FilterInfo"
     print_quickget_and_folder_choices  "QGW_OS_Array"
     QGW_List_NumSelected=
     SettingsFileAdjusted=
@@ -628,7 +631,6 @@ function_quick_get_wrap ()  {
     while true ; do
 
       if [[ $QG_Modpath ]]; then
-        # printColor "\n\n  [a-z] to zoom or switch zoom, or [fl] adjust filter  >  [item number] to select distro    [H] help  [R] REFRESH   [B] go back  [Q] quit"
         printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] go back  [Q] quit"
       else
         printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH   [B] go back  [Q] quit"
@@ -644,10 +646,14 @@ function_quick_get_wrap ()  {
 
       elif [[ ${QGW_List_NumSelected^^} == "HF" ]]; then  QGW_List_NumSelected= ; show_qqX_general_help "f" ; GT_Help=1
 
+      elif [[ ${QGW_List_NumSelected,,} == "all" ]] && [[ $QG_Modpath ]]; then
+        refresh_load_listing_filters
+        VM_ListingFilter="all" ; FilterInfo=
+        load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
       elif [[ ${QGW_List_NumSelected,,} == "fl" ]] && [[ $QG_Modpath ]]; then
         refresh_load_listing_filters
         while true ; do
-          qqLselect= ; local fNum=0
+          qqLselect= ; local fNum=0 ; FilterInfo=
           while [[ ${VM_ListingArray[fNum]} ]]; do
             [[ ${VM_ListingArray[fNum]} == "${VM_ListingFilter,,}" ]] && break
             ((fNum+=1))
@@ -655,8 +661,10 @@ function_quick_get_wrap ()  {
           printf "\n  FilterDefault (%s) is editable in the general settings file ... " "$VM_ListingFilterDefault_Display"
           printf "\n\n  Some listed distros may have releases that offer other options. Some lists may overlap with others.\n\n"
           print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
-          printColor "\n\n  CURRENT FILTER  =  %s  =  %s" "${VM_ListingFilter^^}" "${VM_Listing_Info[$VM_ListingFilter,info]}"
-          printf "\n\n  [number] to reselect"
+          printf "\n\n  CURRENT FILTER  "
+          printColor "=  %s  =" "${VM_ListingFilter^^}"
+          printf "  %s" "${VM_Listing_Info[$VM_ListingFilter,info]}"
+          printColor "\n\n  [number] to reselect"
           printf "   [enter] to return or continue"
           printf "\n\n"
           read -rp "  >  " qqLselect
@@ -664,7 +672,10 @@ function_quick_get_wrap ()  {
           if [[ $(tr -cd '[:digit:]' <<< "$qqLselect") ]] && (( 0 < qqLselect && qqLselect <= VM_ListingArrayCount )); then
             VM_ListingFilter="${VM_ListingArray[qqLselect-1]}"
           fi
-          [[ ! $qqLselect ]] && break
+          if [[ ! $qqLselect ]]; then
+            [[ $VM_ListingFilter == "all" || $VM_ListingFilter == "desktop" ]] && break
+            FilterInfo="${VM_Listing_Info[$VM_ListingFilter,info]}" ; break
+          fi
         done
         load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
 
