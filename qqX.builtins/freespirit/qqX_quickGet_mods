@@ -83,7 +83,7 @@ mapfile -t -d ' ' osRemoveArr <<< "$osRemoveList"
 ## For FILTER CALLS, see/add at start of quick_REROUTE_get
 # The call will cause a defined list to be shown by triggering a controlled error state in Quickget ...
 
-osServersList=" alpine azurelinux centos-stream freedos proxmox-ve "
+osServersList=" alpine azurelinux centos-stream netboot freedos proxmox-ve "
 osServersList+=" truenas-scale ubuntu-server windows-server "
 osServersList="${osServersList//'  '/' '}"
 osServersList="${osServersList//'  '/' '}"
@@ -156,6 +156,7 @@ function os_info {
         linuxlite)        INFO="Linux Lite|-|https://www.linuxliteos.com/|Lightweight XFCE distro built on Ubuntu LTS.";;
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
+        netboot)          INFO="netboot.xyz|-|https://netboot.xyz/|Bootable Iso with collection distro net-installation boots.";;
         nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
