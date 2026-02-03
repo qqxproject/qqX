@@ -600,6 +600,18 @@ function releases_lmde() {
     echo "$Releases"
 }
 
+# FIX the URL which, at 02/26 SourceForge has pointing to the wrong folder, the one with the old kernel,
+# and thus is breaking the hash check as the name is wrong
+function get_maboxlinux() {
+    local HASH= ; local HashFile= ; IsoFile=
+    RepoUrl="https://repo.maboxlinux.org/iso"
+    HashFile=$(web_pipe "$RepoUrl" | tr ' ' '\n' | grep md5 | cut -d '"' -f 2)
+    HashFile="${HashFile/'/iso/'/}"
+    IsoFile="${HashFile/'.md5'/}"
+    HASH=$(web_pipe "$RepoUrl/$HashFile" | cut -d' ' -f1)
+    echo "$RepoUrl/$IsoFile ${HASH}"
+}
+
 ## UPGRADE only one release ... make dynamic
 function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2

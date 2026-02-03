@@ -56,7 +56,7 @@
 
 ##########################################
 
-QG_ModsNumber="v6.1"
+QG_ModsNumber="v6.2"
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -586,6 +586,18 @@ function releases_lmde() {
     echo "$Releases"
 }
 
+# FIX the URL which, at 02/26 SourceForge has pointing to the wrong folder, the one with the old kernel,
+# and thus is breaking the hash check as the name is wrong
+function get_maboxlinux() {
+    local HASH= ; local HashFile= ; IsoFile=
+    RepoUrl="https://repo.maboxlinux.org/iso"
+    HashFile=$(web_pipe "$RepoUrl" | tr ' ' '\n' | grep md5 | cut -d '"' -f 2)
+    HashFile="${HashFile/'/iso/'/}"
+    IsoFile="${HashFile/'.md5'/}"
+    HASH=$(web_pipe "$RepoUrl/$HashFile" | cut -d' ' -f1)
+    echo "$RepoUrl/$IsoFile ${HASH}"
+}
+
 ## UPGRADE only one release ... make dynamic
 function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
@@ -633,6 +645,19 @@ function get_mxlinux() {
     esac
     HASH=$(web_pipe "${URL}/${ISO}.sha256" | cut -d' ' -f1)
     echo "${URL}/${ISO} ${HASH}"
+}
+
+# FIX - 02/2026 sees differing releases date/names for different editions
+function get_nobara() {
+    local HASH= ; local URL= ; local IsoRef=
+    if [[ "$EDITION" == *NV* ]]; then
+        IsoRef="$(web_pipe "https://nobaraproject.org/download-nobara/" | tr '/' '\n' | grep 'iso"' | cut -d'"' -f1 | grep "$EDITION" )"
+    else
+        IsoRef="$(web_pipe "https://nobaraproject.org/download-nobara/" | tr '/' '\n' | grep 'iso"' | cut -d'"' -f1 | grep -v NV | grep "$EDITION")"
+    fi
+    URL="https://nobara-images.nobaraproject.org/${IsoRef}"
+    HASH="$(web_pipe "${URL}.sha256sum" | cut -d' ' -f1)"
+    echo "${URL} ${HASH}"
 }
 
 ## FIX and UPDATE to new folder styles and names
