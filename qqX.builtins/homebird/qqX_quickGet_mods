@@ -1854,7 +1854,7 @@ case "${1}" in
         printf "\n\n----------------------------------------------------------------------------------\n\n"
         exit 0 ;;
 
-    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possibile:
+    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possible:
 
     --curl-no-para)
         Curl_NoPara=1 ; shift

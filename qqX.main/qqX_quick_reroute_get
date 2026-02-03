@@ -512,7 +512,11 @@ run_distro_tests_UI () {
       printf "\n\n  Takes around 1/2 hour ..."
       printf "\n\n  Select a Distro for individual tests"
     fi
-    printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
+    if [[ "$QGW_OS_Arr_NameSelected" == *windows* ]]; then
+      printColor "\n\n  LISTS all possibilities but servers cannot be checked due to restrictions"
+    else
+      printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
+    fi
     printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
     printf "\n\n  and the TEST ALL report file in the downloaded release folder"
     printColor "\n\n  [enter] to start (in compact mode)  "
