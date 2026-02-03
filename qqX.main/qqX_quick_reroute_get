@@ -540,7 +540,7 @@ run_distro_tests_UI () {
         printColor "\n\n  ERROR: No log contents ?"
         qGet_TestSynopis="ERROR: No log contents  > possible server issue ??"
         [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
-      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
+      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
         printColor "\n  FAILS: \n"
         # shows the straightforward fails, followed by any obscure possible error lines
         qGet_TestSynopis="$(grep FAIL "$TestLog")"
