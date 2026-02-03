@@ -843,7 +843,7 @@ custom_boot_file () {
 
   if [[ $1 == "create" ]]; then
 
-    printColor "\n\n  Utility to copy QEMU args list from the last qemu boot formula"
+    printColor "\n\n  Utility to CREATE CUSTOM QEMU args from the last qemu boot formula"
     printf "\n\n  Boot in 'Verbose mode' is sufficient. Actual boot is not required."
     printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
@@ -872,7 +872,7 @@ custom_boot_file () {
 
   elif [[ $1 == "delete" ]]; then
 
-    printColor "\n\n  Utility to delete existing custom qemu boot formula"
+    printColor "\n\n  Utility to DELETE existing custom qemu boot formula"
     printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
     if [[ ! -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then

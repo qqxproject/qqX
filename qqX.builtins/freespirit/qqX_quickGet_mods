@@ -56,16 +56,16 @@
 
 ##########################################
 
-QG_ModsNumber="v6.1"
+QG_ModsNumber="v7.0"
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
-osAddList=" anduinos bluestar "
+osAddList=" anduinos athenaos bluestar truenas-scale "
 #osAddList+=" another "
 
 # osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
-osRemoveList=" android arcolinux clearlinux holoiso truenas-core vxlinux "
+osRemoveList=" android "
 #osRemoveList+=" another and-one-more "
 
 osSupported="$(os_support)"
@@ -83,7 +83,7 @@ mapfile -t -d ' ' osRemoveArr <<< "$osRemoveList"
 ## For FILTER CALLS, see/add at start of quick_REROUTE_get
 # The call will cause a defined list to be shown by triggering a controlled error state in Quickget ...
 
-osServersList=" alpine centos-stream freedos proxmox-ve "
+osServersList=" alpine azurelinux centos-stream freedos proxmox-ve "
 osServersList+=" truenas-scale ubuntu-server windows-server "
 osServersList="${osServersList//'  '/' '}"
 osServersList="${osServersList//'  '/' '}"
@@ -160,6 +160,7 @@ function os_info {
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
+        truenas-scale)    INFO="TrueNAS Scale|-|https://www.truenas.com/truenas-scale/|Open Source Hyperconverged Infrastructure (HCI) solution. In addition to powerful scale-out storage capabilities, SCALE adds Linux Containers and VMs (KVM) so apps run closer to data.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
         void)             INFO="Void Linux|anon:voidlinux|https://voidlinux.org/|Non-Systemd desktop operating system based on Runit. Software is provided in binary packages or can be built directly from sources.";;
     esac
@@ -253,6 +254,19 @@ function releases_alpine() {
     done
     echo "$RelList"
 }
+
+function get_alpine() {
+    local HASH="" ; local ISO="" ; local RelName="v${RELEASE}"
+    local QEMU_ARCH="x86_64"
+    [ "${ARCH}" == "arm64" ] && QEMU_ARCH="aarch64"
+    local URL="https://dl-cdn.alpinelinux.org/alpine/${RelName}/releases/${QEMU_ARCH}"
+    local VERSION=""
+    VERSION=$(web_pipe "${URL}/latest-releases.yaml" | awk '/"Xen"/{found=0} {if(found) print} /"Virtual"/{found=1}' | grep 'version:' | head -1 | awk '{print $2}')
+    ISO="alpine-virt-${VERSION}-${QEMU_ARCH}.iso"
+    HASH=$(web_pipe "${URL}/latest-releases.yaml" | awk '/"Xen"/{found=0} {if(found) print} /"Virtual"/{found=1}' | grep 'sha256:' | head -1 | awk '{print $2}')
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 
 ## ADD
 function releases_anduinos {
@@ -907,6 +921,16 @@ function get_trisquel() {
 function releases_truenas-scale() {
     web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep NAS | cut -d'>' -f2 | fv -M -Q
 }
+# and restore from 4.99.01 removal
+function get_truenas-scale() {
+    local HASH=""
+    local ISO=""
+    local URL=""
+    local DLINFO="https://www.truenas.com/download-truenas-scale/"
+    URL=$(web_pipe "${DLINFO}" | grep -o "\"https://.*${RELEASE}.*\.iso\"" | cut -d'"' -f 2)
+    HASH=$(web_pipe "${URL}.sha256" | cut -d' ' -f1)
+    echo "${URL} ${HASH}"
+}
 
 ## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
 function get_ubuntu-server() {
@@ -1028,6 +1052,10 @@ function get_zorin() {
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "guest_type_${OS} ()"
 
+guest_type_truenas-scale () {
+    GUEST="truenas" ; IMAGE_TYPE="iso"
+}
+
 ##########################################
 
 ## 5: CONFIGURATION
@@ -1035,6 +1063,10 @@ function get_zorin() {
 # Needed only for special case instructions, such as needs legacy boot etc
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "config_${OS} ()"
+
+config_truenas-scale () {
+    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+}
 
 ##########################################
 

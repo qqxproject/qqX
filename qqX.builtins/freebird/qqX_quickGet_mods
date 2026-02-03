@@ -65,7 +65,7 @@ osAddList=" anduinos bluestar "
 #osAddList+=" another "
 
 # osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
-osRemoveList=" arcolinux clearlinux holoiso truenas-core vxlinux "
+osRemoveList=" android arcolinux clearlinux holoiso truenas-core vxlinux "
 #osRemoveList+=" another and-one-more "
 
 osSupported="$(os_support)"
