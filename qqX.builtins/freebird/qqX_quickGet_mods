@@ -665,6 +665,15 @@ function get_nobara() {
     echo "${URL} ${HASH}"
 }
 
+## FIX HASH
+function get_openindiana() {
+    local HASH="" ; local ISO="" ; local URL=""
+    URL="https://dlc.openindiana.org/isos/hipster/${RELEASE}"
+    ISO="OI-hipster-${EDITION}-${RELEASE}.iso"
+    HASH=$(web_pipe "${URL}/${ISO}.sha256sum" |cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIX and UPDATE to new folder styles and names
 function releases_opensuse() {
     #echo "leap leap-micro slowroll tumbleweed"  @ 11/2025 leap has become inconsistent and/or absent
