@@ -1606,8 +1606,8 @@ function make_vm_config() {
     IMAGE_FILE="${1}"
     ISO_FILE="${2}"
 
-    if [[ $(type -t "guest_type_${OS}") == function ]]; then
-        "guest_type_${OS}"
+    if [[ $(type -t "mods_guest_type_${OS}") == function ]]; then
+        "mods_guest_type_${OS}"
     else
         case "${OS}" in
             batocera)
@@ -1697,8 +1697,8 @@ EOF
         if [ -n "${ISO_FILE}" ]; then
             echo "fixed_iso=\"${VM_PATH}/${ISO_FILE}\"" >> "${CONF_FILE}"
         fi
-        if [[ $(type -t "config_${OS}") == function ]]; then
-            "config_${OS}"
+        if [[ $(type -t "mods_config_${OS}") == function ]]; then
+            "mods_config_${OS}"
         else
             # OS specific tweaks
             case ${OS} in
@@ -3765,8 +3765,8 @@ function create_vm() {
     if [ -n "${HASH}" ]; then
         check_hash "${ISO}" "${HASH}"
     fi
-    if [[ $(type -t "finalize_${OS}") == function ]]; then
-        "finalize_${OS}"
+    if [[ $(type -t "mods_finalize_${OS}") == function ]]; then
+        "mods_finalize_${OS}"
     else
         case "${OS}" in
             batocera)

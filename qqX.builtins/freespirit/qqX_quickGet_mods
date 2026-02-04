@@ -1063,9 +1063,9 @@ function get_zorin() {
 
 # Needed only for special case instructions, such as non-iso
 # Use for new qqX listed distros or for case overwrites
-# Add in the format of "guest_type_${OS} ()"
+# Add in the format of "mods_guest_type_${OS} ()"
 
-guest_type_truenas-scale () {
+mods_guest_type_truenas-scale () {
     GUEST="truenas" ; IMAGE_TYPE="iso"
 }
 
@@ -1075,9 +1075,9 @@ guest_type_truenas-scale () {
 
 # Needed only for special case instructions, such as needs legacy boot etc
 # Use for new qqX listed distros or for case overwrites
-# Add in the format of "config_${OS} ()"
+# Add in the format of "mods_config_${OS} ()"
 
-config_truenas-scale () {
+mods_config_truenas-scale () {
     echo "boot=\"legacy\"" >> "${CONF_FILE}"
 }
 
@@ -1087,9 +1087,9 @@ config_truenas-scale () {
 
 # Needed only for special case instructions, such as decompression routines
 # Use for new qqX listed distros or for 'case' overwrites
-# Add in the format of "finalize_${OS} ()"
+# Add in the format of "mods_finalize_${OS} ()"
 
-finalize_batocera () {
+mods_finalize_batocera () {
     # See https://wiki.batocera.org/run_batocera_in_vm#method_2 and fallocate
     # also https://github.com/quickemu-project/quickemu/issues/1794
     if [[ ${ISO} = *".gz"* ]]; then
