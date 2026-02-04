@@ -239,6 +239,10 @@ function distro_release_notes {
 
 ##########################################
 
+## UPDATE and make DYNAMIC
+function releases_alma() {
+    web_pipe "https://repo.almalinux.org/almalinux/" | grep -s href | tr '/' '\n' | grep ^'[[:digit:]]' | grep -v -e '\.' | sort -nr | paste -d' ' -s
+}
 
 ## FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
 function releases_alpine() {

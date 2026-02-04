@@ -176,6 +176,7 @@ function distro_release_notes {
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
+        alma)             RelNotes="Compare to Rocky/Oracle/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
         batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
         elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
@@ -186,9 +187,10 @@ function distro_release_notes {
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
+        oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         parrotsec)        RelNotes="12/2025 Home is the Non-Security version. KDE is now default desktop.";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
-        rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install";;
+        rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install. Also see https://wiki.almalinux.org/Comparison.html";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is up to around 230Mb. Select Pure for 64 bit.";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
@@ -240,6 +242,10 @@ function distro_release_notes {
 
 ##########################################
 
+## UPDATE and make DYNAMIC
+function releases_alma() {
+    web_pipe "https://repo.almalinux.org/almalinux/" | grep -s href | tr '/' '\n' | grep ^'[[:digit:]]' | grep -v -e '\.' | sort -nr | paste -d' ' -s
+}
 
 ## FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
 function releases_alpine() {
@@ -255,7 +261,6 @@ function releases_alpine() {
     done
     echo "$RelList"
 }
-
 function get_alpine() {
     local HASH="" ; local ISO="" ; local RelName="v${RELEASE}"
     local QEMU_ARCH="x86_64"
@@ -267,7 +272,6 @@ function get_alpine() {
     HASH=$(web_pipe "${URL}/latest-releases.yaml" | awk '/"Xen"/{found=0} {if(found) print} /"Virtual"/{found=1}' | grep 'sha256:' | head -1 | awk '{print $2}')
     echo "${URL}/${ISO} ${HASH}"
 }
-
 
 ## ADD
 function releases_anduinos {
