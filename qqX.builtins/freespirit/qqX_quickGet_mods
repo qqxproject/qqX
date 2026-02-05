@@ -188,7 +188,7 @@ function distro_release_notes {
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
         oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
-        parrotsec)        RelNotes="12/2025 Home is the Non-Security version. KDE is now default desktop.";;
+        parrotsec)        RelNotes="Home is the Non-Security version. From v7.0 KDE becomes the default desktop but MATE spins may still be available > See Website.";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install. Also see https://wiki.almalinux.org/Comparison.html";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
@@ -747,8 +747,18 @@ function get_oraclelinux() {
 
 ## FIX hashes and folders
 function releases_parrotsec() {
-  # July 2025 > only latest folder now has iso's
-  web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M
+  # July 2025 > only latest folder has iso's  But @ Feb 2026 content is variable, so folder grep becomes needed.
+  local Latest= ; local ReleaseList= ; local ReleasesTrue=
+  ReleaseList="$(web_pipe "https://deb.parrot.sh/parrot/iso" | grep -s href | tr '"' '\n' | grep -e ^'[[:digit:]]' | fv -qs -M 4)"
+  for ChkRel in $ReleaseList ; do
+        if web_check "https://deb.parrot.sh/parrot/iso/${ChkRel}/signed-hashes.txt" && \
+        web_check "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-home-${ChkRel}_amd64.iso" && \
+        web_check "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-security-${ChkRel}_amd64.iso" ; then
+            ReleasesTrue+="$ChkRel "
+        fi
+        # eg https://deb.parrot.sh/parrot/iso/6.4/signed-hashes.txt
+  done
+  echo "$ReleasesTrue"
 }
 function editions_parrotsec() {
     echo home security
@@ -757,7 +767,7 @@ function get_parrotsec() {
     local HASH="" ; local ISO="" ; local URL=
     ISO="Parrot-${EDITION}-${RELEASE}_amd64.iso"
     URL="https://deb.parrot.sh/parrot/iso/${RELEASE}"
-    HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -B 30 'sha384' | grep "${ISO}" | cut -d' ' -f1)"
+    HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -m 1 "${ISO}" | cut -d' ' -f1)"
     echo "${URL}/${ISO} ${HASH}"
 }
 
