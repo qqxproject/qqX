@@ -495,13 +495,6 @@ run_distro_tests_UI () {
     read -rp "  >  "
     return
   fi
-  test_internet_is_up
-  ExitTestToMain= ; qGet_TestSynopis= ; qGet_TestSynopisTwo=
-  [[ $1 == "test-all" ]] && shift
-  # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
-  if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
-  elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
-  fi
   while true; do
         [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
     if [[ $1 ]]; then
@@ -530,6 +523,13 @@ run_distro_tests_UI () {
     if [[ $TestDistros == "b" ]]; then break
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
     else
+      test_internet_is_up
+      ExitTestToMain= ; qGet_TestSynopis= ; qGet_TestSynopisTwo= ; qGet_TestSynopisRedux=
+      [[ $1 == "test-all" ]] && shift
+      # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
+      if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? " ; continue
+      elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? " ; continue
+      fi
       printf "\n\n  Starting: "
       if [[ $1 ]]; then
         printf "\n\n  Expect possible short pauses between releases or editions on slower servers"
@@ -537,18 +537,21 @@ run_distro_tests_UI () {
         printf "\n\n  Expect possible short pauses between distros, and possibly between editions, on slower servers"
         printColor "\n\n  A Pass/Fail summary will be supplied"
       fi
-      printf "\n\n"
+      printf "\n"
       # NB: 'ChkLog' is the matching qGet_mod var which runs in a separate process, with both using the same log files
       if [[ $TestDistros == "vm" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check --mirrors "$1"
       elif [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
       else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
       fi
+      while pgrep -af bash | grep -q 'quickget' ; do
+        sleep 0.5
+      done
       if [[ ! $(cat $TestLog) ]]; then
         printColor "\n\n  ERROR: No log contents ?"
         qGet_TestSynopis="ERROR: No log contents  > possible server issue ??"
         [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
       elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
-        printColor "\n  FAILS: \n"
+        printColor "\n  FAILS DETECTED: \n"
         # shows the straightforward fails, followed by any obscure possible error lines
         qGet_TestSynopis="$(grep FAIL "$TestLog")"
         qGet_TestSynopisTwo="$(grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]')"
@@ -556,23 +559,30 @@ run_distro_tests_UI () {
           [[ $qGet_TestSynopisTwo ]] && printf -v qGet_TestSynopis "%s\n\n%s" "$qGet_TestSynopis" "$qGet_TestSynopisTwo"
         elif [[ $qGet_TestSynopisTwo ]] ; then qGet_TestSynopis="$qGet_TestSynopisTwo"
         fi
-        printf "\n\n%s\n\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues" "$qGet_TestSynopis"
+        if [[ "$(grep -sc -e ^'[[:alnum:]]' "$TestLog")" -gt 20 ]]; then printf "\n%s\n" "$qGet_TestSynopis"
+        else
+          qGet_TestSynopisRedux="$(grep -sv Checksum <<< "$qGet_TestSynopis" | grep -e ^'[[:alnum:]]')"
+          printf "\n%s\n" "$qGet_TestSynopisRedux"
+        fi
+        printColor "\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
       elif ! grep -q -e ^'[[:alnum:]]' "$TestLog" ; then
         printColor "\n  FAIL: \n"
         printf "\n  Empty Log File ??  > possible internal issue ??"
         qGet_TestSynopis="Empty Log File ??  > possible internal issue ??"
       elif grep -qs PASS "$TestLog" ; then
-        printColor "\n\n  All Tests Successfully Passed"
+        # at this point, is not empty and at least one PASS present, without errors or fails
+        printColor "\n  All Tests Successfully Passed"
         qGet_TestSynopis="All Tests Successfully Passed"
       fi
-      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.$(date +%T-%b.%d).txt"
-      else qGet_TestSynopis_File="/tmp/qGet-test.ALL.$(date +%T-%b.%d).txt"
+      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.$(date +%s | tail -c 7).$(date +%b.%d).txt"
+      else qGet_TestSynopis_File="/tmp/qGet-test.ALL.$(date +%s | tail -c 7).$(date +%b.%d).txt"
       fi
       printf "\n\n%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  > "$qGet_TestSynopis_File"
       [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
       printf "\n\n" >> "$qGet_TestSynopis_File"
       [[ ! $1 ]] && printf "%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  >> "$qGet_TestSynopis_File"
       printf "\n\n  Analysis Log File: '%s'" "$qGet_TestSynopis_File"
+      printf "\n"
     fi
     TestDistros=
   done
