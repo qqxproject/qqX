@@ -238,6 +238,7 @@ function  main_menu_actions {
   elif [[ $MainMenuChoice == "gl" ]] ; then
 
     if [[ $qqX_GL_Mode == "on" ]] ; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on" ; fi
+    if [[ $gl == "on" ]] ; then gl="off" ; else gle="on" ; fi
     Toggled_GL_Mode="$qqX_GL_Mode"
 
   elif [[ $MainMenuChoice == "net" ]] ; then

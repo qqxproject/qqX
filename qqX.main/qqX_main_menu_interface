@@ -211,11 +211,10 @@ else
         else  printf 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
         printf "\n\n  [g]   start with GTK display                 "
 
-        #if [[ $qqX_GL_Mode == "off" ]] ; then printf "[gl] is OFF > toggle EGL/GLX on/off"
-        #else printf "[gl] is ON > toggle EGL/GLX on/off"
-        #fi
-        if [[ $gl == "off" ]] && [[ $qqX_GL_Mode == "on" ]]; then printf "[gl] is "; printColor "ON"; printf " > toggle I/O on/off"
-        elif [[ ! $gl ]] && [[ $qqX_GL_Mode == "off" ]]; then printf "[gl] is "; printColor "OFF"; printf " > toggle I/O on/off"
+        if [[ $gl ]] && [[ $Toggled_GL_Mode == "on" ]]; then printf "[gl] is "; printColor "ON"; printf " > toggle I/O on/off"
+        elif [[ $gl ]] && [[ $Toggled_GL_Mode == "off" ]] ; then printf "[gl] is "; printColor "OFF"; printf " > toggle I/O on/off"
+        elif [[ ! $gl ]] && [[ $Toggled_GL_Mode == "off" ]]; then printf "[gl] is "; printColor "OFF"; printf " > toggle I/O on/off"
+        elif [[ $gl == "off" ]]; then printf "[gl] is OFF > toggle I/O on/off"
         else printf "[gl] is ON > toggle I/O on/off"
         fi
         printf " "
