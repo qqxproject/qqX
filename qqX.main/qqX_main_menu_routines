@@ -779,8 +779,12 @@ refresh_tiano_vars () {
       -O "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" || RtvMacGet="Fail"
       [[ $RtvText ]] && printf "....."
 
-      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OVMF_CODE.fd" \
+      #wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OVMF_CODE.fd" \
+      # see https://github.com/kholia/OSX-KVM/blob/master/OVMF-notes.txt
+      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/blob/master/OVMF_CODE_4M.fd" \
       -O "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" || RtvMacGet="Fail"
+      # @ feb 2026 qemu complains that it needs size multiple of 65536 (0x1000)
+      fallocate -l 1966080 "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd"
       [[ $RtvText ]] && printf "........ \n\n"
 
       wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OpenCore/OpenCore.qcow2" \
