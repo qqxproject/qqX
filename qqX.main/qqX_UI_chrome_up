@@ -122,18 +122,23 @@ function exit {
     command exit
 
   elif [[ $1 ]] && [[ ! $NoExit ]]; then
-    printf "\n\n"
-    printColor "  ERROR :  [c] ignore and continue  [m] return to menus  [q] quit  \n\n"
-    read -rp  "  >  "
     ExitTrap=
-    printf "\n\n  Confirm: [c] ignore and continue  [m] return to menus  [q] quit  \n\n"
-    read -rp "  >  "  ExitTrap
+    printf "\n\n"
+    printColor "  ERROR :    [c] ignore and continue  [m] attempt return to menus  [q] quit  \n\n"
+    read -rp  "  >  "  ExitTrap
+    if [[ $ExitTrap != "m" ]]; then
+      ExitTrap=
+      printf "\n\n  CONFIRM >  [c] ignore and continue  [m] attempt return to menus  [q] quit  \n\n"
+      read -rp "  >  "  ExitTrap
+    fi
     if [[ $ExitTrap == "q" ]]; then
       tput cnorm
       command exit "$@"
+    # 'm' attempts a return, given an error situation exists
     elif [[ $ExitTrap == "c" ]]; then true
     else RouteToMenus=1
     fi
+    ExitTrap=
     return
 
   elif [[ ! $disk_img ]]; then
