@@ -307,7 +307,11 @@ function manage_and_repair_disks {
       "$QEMU_IMG" dd -f qcow2 -O qcow2  if="$DiskBackup" of="$Selected_Drive" 2> "$Qemu_IMG_ErrorLog"
     else
       printf "\n  Processing >  monitor the hard drive activity light ... \n\n"
+      # REVIEW add Zstd option here (?)
+      # See https://github.com/quickemu-project/quickemu/issues/1783
+      # qqX TESTS show ZSTD to be slightly better BUT by tiny amounts only ...
       "$QEMU_IMG" convert -O qcow2 "$DiskBackup" "$Selected_Drive"
+      # "$QEMU_IMG" convert -O qcow2 -o compression_type=zstd "$DiskBackup" "$Selected_Drive"
     fi
 
     if [[ -e  "$DiskBackup" ]] && [[ -e "$Selected_Drive" ]]; then
