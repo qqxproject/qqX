@@ -112,7 +112,8 @@ function  main_menu_actions {
     printf "\n\n"
     if [[ $(cat "$QemuErrorLog" 2>/dev/null) ]] ; then
       cat "$QemuErrorLog"
-      printf "\n\n  This log gets cleared when you run the VM, or it can be cleared now.  For permanent adjustments, see notes in the main settings."
+      printf "\n\n  This log gets cleared when you run the VM, or it can be cleared now."
+      printf "\n\n  For permanent adjustments, see the 'QemuErrorFilter' notes in the main settings."
     else  printf "  No qemu errors were present on the last VM load ...  ?? "
     fi
 

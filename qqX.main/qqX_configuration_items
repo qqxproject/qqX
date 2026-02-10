@@ -48,14 +48,15 @@ custom_conf_notes () {
     boot=\"legacy\"     (use bios, not UEFI) default: =\"efi\"
 
     Windows:
-    tpm=\"on\"          secureboot=\"off\"
+    tpm=\"on\"          secureboot=\"on\"
     gl=\"off\"          (scaleable SDL, easier restarts) (?)
 
-    Early 2025 Insider betas are now requesting Secure Boot.
-    Tests are showing seemingly successful outcomes when set to \"on\"
+    Older Windows releases were better with Secure Boot set to \"off\"
+    but tests on 25H2 are now showing better outcomes when set to \"on\"
 
     Difficult booting:
-    boot=\"legacy\"  &  gl=\"off\"  may help ...
+    QemuErrorFilter+=("")  NB \'+=\' with any new values as double quoted and space separated
+    boot=\"legacy\"  and  gl=\"off\"  may help ...
 
     highlight then shift-ctrl-c  to copy ...
   \n"

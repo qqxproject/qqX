@@ -339,9 +339,11 @@ VM_SelectorStyle="A"
 # Add QemuError_VM_Filter=("warning" "deprecated") eg. to the .conf file for INDIVIDUALLY problematic distros.
 # @ 2023/12 Defaults:  # QemuErrorFilter=("gl_version" "signal 15 from pid")
 # 2024/07 add https://discussion.fedoraproject.org/t/selinux-alert-gst-plugin-scan-getattr-run-pcscd-pcscd-comm/79378
-# MacOS can often throw "usb_desc_get_descriptor" if the mouse/keyboard setting is not quite right,
-# but these not always critical and can be session supressed in the [ql] menu, then permanently in the .conf when the config is okay ...
-# Add any new values to the checking arrays as double quoted & space separated. Use the '+=' for further lines.
+# MacOS can often throw "usb_desc_get_descriptor" if the mouse/keyboard/sound setting is not quite right,
+# but these not always critical and can be session supressed in the [ql] menu,
+# or permanently in the .conf as eg QemuError_VM_Filter+=("usb_desc_get_descriptor") when the config is okay ...
+# Add any new values to the checking arrays as double quoted & space separated
+# AND  >>  use the '+=' for further lines  << including when used in the .conf file
   QemuErrorFilter=("gl_version" "signal 15 from pid" "gst-plugin-scan")
 # QemuErrorFilter+=("")
 

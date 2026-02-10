@@ -140,10 +140,12 @@ function_config_tune_up ()  {
   done
 
   if [[ $ConfEdit_Qstart == "q" ]]; then
-    printColor "\n  Post-install LINUX distros:"
-    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
-    printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
-    printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
+    if [[ "$guest_os" != *windows* && "$guest_os" != *macos* ]]; then
+      printColor "\n  Post-install LINUX distros:"
+      printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
+      printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
+      printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
+    fi
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
       printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
@@ -424,12 +426,12 @@ function_config_tune_up ()  {
     printf "\n\n  Re-run this checker after the guest_os line has been added"
   else
     eval "$ConfLine"
-    if [[ $guest_os == "windows" ]]; then
+    if [[ "$guest_os" == *windows* ]]; then
       printColor "\n\n Windows: "
       printf "\n\n  Software TPM should be set as \"on\" until at least the registration process is complete"
       printf "\n\n  but can possibly be set to \"off\" at later stages. Lines may commented-out with a \"#\" \n"
-      printf "\n\n  Older releases may be better set to \"off\" but early 2025 Insider betas are now requesting this feature."
-      printf "\n\n  Tests on 25H2 are now showing better outcomes when set to \"on\" \n"
+      printf "\n\n  Older releases were better with Secure Boot set to \"off\""
+      printf "\n\n  but tests on 25H2 are now showing better outcomes when set to \"on\" \n"
 
       ConfLine="$(grep -s '# for Windows, normally' "$TuneUpTmpCopy")"
       # see https://github.com/qqxproject/qqX/issues/12
@@ -442,7 +444,7 @@ function_config_tune_up ()  {
           printf "\nsecureboot=\"on\"\n\n"
       }   >> "$TuneUpTargetDraft"
 
-    elif [[ $guest_os == "macos" ]]; then
+    elif [[ "$guest_os" == *macos* ]]; then
 
       ConfLine="$(grep -s 'macos_release=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then  printf "macos_release=\"\"\n"  >> "$TuneUpTargetDraft" ; fi
@@ -496,10 +498,12 @@ function_config_tune_up ()  {
 
     fi
 
-    printColor "\n\n  Post-install LINUX distros:"
-    printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
-    printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
-    printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
+    if [[ "$guest_os" != *windows* && "$guest_os" != *macos* ]]; then
+      printColor "\n\n  Post-install LINUX distros:"
+      printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
+      printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
+      printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
+    fi
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
       printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
