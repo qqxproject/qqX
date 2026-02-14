@@ -429,6 +429,8 @@ UserTerm=
 
 # NB: the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
 
+# NB: edits here, can impact on '$Terminal_Start' in disk maintenance script (qf function)
+
 # The use of CustomTerminalProfile will also cause UserTerm to be stored.
 # Any size variables copied from below will eventually become stored as numerics.
 

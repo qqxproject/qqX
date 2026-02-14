@@ -85,6 +85,7 @@ done
 
 if [ -n "$MakeTermList" ]; then exit ; fi
 
+# NB: edits here, can impact on '$Terminal_Start' in disk maintenance script (qf function)
 # Also see exception handling: 'TERMINAL not found or not suitable' towards end of script
 
 # Priority listing should have placed the top entry as being the most main stream and being one with sufficient size.

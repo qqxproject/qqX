@@ -67,6 +67,7 @@ input_re_route () {
     MainDrive=
     IsoImg=
     XDG_MimeType_is_QCOW=
+    printf "\n\n  Loading ... \n\n"
     refresh_sources_and_load_VM_arrays
   else  exit directly
   fi
@@ -155,11 +156,20 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
       read -rp "  [enter] to continue  >  "
     fi
     qcow2_filemanagement_launcher "$qqf_Input_Drivepath"
-    sleep 2
-    exit directly
+    printf "\n\n  [vm] switch to qqX VM selector menu  [c] cancel & close \n\n"
+    read -rp "  >  "  QF_Return
+    if [[ $QF_Return == "c" ]]; then exit directly
+    elif [[ $QF_Return == "vm" ]]; then
+      VM_InstanceName=
+      VM_Conf_Dir=
+      VM_Conf_File=
+      XDG_MimeType_is_QCOW=
+      printf "\n\n  Loading ... \n\n"
+    fi
   else
     # not qf, and not close, so re-check but with qqX_Main flag
     QF_exit_to_Main=1
+    sleep 1
   fi
 
 fi
