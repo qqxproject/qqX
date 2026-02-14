@@ -157,19 +157,21 @@ while true; do
   printf "\n\n  The elevated permissions required to prepare the drives will remain isolated."
   printf "\n\n  Any opening of new qqF windows will terminate other qqF instances that are running."
   printf "\n"
-  printf "\n\n  Run option 'qqf' from the qqX menu if the VM is swapped.  Follow with [r] to refresh"
-  printf "\n\n  Mounting of the connected drives is to be carried out as standard in the file-manager."
+  printf "\n\n  Run option 'qqf' from the qqX menu if the VM is swapped.  Follow with [r] to refresh."
+  printf "\n"
+  printColor "\n\n  Mounting of the connected drives may be carried out as standard in the file-manager"
+  printColor "\n\n  BUT use 'Gnome Disks' or similar if a drive appears empty or multi-partitioning is suspected."
   printf "\n"
 
   if [[ ! $HideRefreshMsgs ]] && [[ $qqf_CmdLineStart ]]; then
-    printColor "\n\n  qqF - Cmd Line Start  >  "
-    printf "  Use option 'qqf' from a selected qqX VM menu to populate the VM drives."
+    printf "\n\n  qqF - Cmd Line Start  >  "
+    printf "  Use option 'qqf' from a selected qqX VM menu to populate the Main drives."
     printf "\n\n  For spot input, use a right mouse click on the disk or at a new terminal type qqX \"/path/disk_name.qcow2\""
     printf "\n"
   fi
   if [[ ! $HideRefreshMsgs ]] && [[ $InputAvailable ]] && [[ ! $qqf_CmdLineStart ]]; then
-    printColor "\n\n  qqF - Spot Input  >  "
-    printf "  Use option 'qqf' from a selected qqX VM menu to populate the VM drives."
+    printf "\n\n  qqF - Spot Input  >  "
+    printf "  Use option 'qqf' from a selected qqX VM menu to populate the Main drives."
     printf "\n"
   fi
 

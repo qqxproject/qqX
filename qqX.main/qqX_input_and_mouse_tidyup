@@ -69,7 +69,7 @@ input_re_route () {
     XDG_MimeType_is_QCOW=
     printf "\n\n  Loading ... \n\n"
     refresh_sources_and_load_VM_arrays
-  else  exit directly
+  else  sleep 0.7 ; exit directly
   fi
 }
 
@@ -90,12 +90,16 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
   if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then printColor "\n\n DISK.QCOW2 ERROR  %s \n"  "$DiskChkStatus"
   fi
 
+  if ps -ef | grep nbd | grep -q qcow ; then
+    printColor  "\n\n  QEMU qcow2 drive/s ARE ALREADY CONNECTED and may create 'write locks'"
+    printf "\n\n  May be left connected, or to disconnect use the 'qf' utility \n"
+  fi
+
   if [[ $XDG_Input_NON_qqX ]]; then
     if [[ $DiskChkStatus == "Okay" ]]; then printColor  "\n\n QEMU qcow2 disk found BUT not configured as qqX/quickemu bootable: \n\n"
     else printColor  "\n\n QEMU qcow2 disk found \n\n BUT not configured as qqX/quickemu bootable \n\n AND has ERRORS .... \n\n"
     fi
   else
-    show_qqX_title_bar
     printColor  "\n\n  qqX/quickemu bootable: \n\n"
     if [[ $DiskChkStatus != "Okay" ]]; then
       printColor "  BUT has errors: Try qqX [disk] utils "
@@ -119,7 +123,7 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
   else
     printColor "\n\n  [enter] to continue   [qf] open qcow2 in file manager   [c] to cancel and close \n\n"
     read -rp  "  >  "  InputTidy
-    [[ $InputTidy == "c" ]] && exit directly
+    [[ $InputTidy == "c" ]] && sleep 0.5 && exit directly
   fi
 
   if [[ $XDG_Input_VM_qqX ]]; then
@@ -139,7 +143,7 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
       function_conf_error  " COMMAND LINE .Conf Instruction,"
     fi
   elif [[ $InputReRouted ]]; then true
-  else  exit directly
+  else  sleep 0.5 ; exit directly
   fi
 
   if [[ $InputTidy == "qf" ]]; then
@@ -155,17 +159,25 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
       echo ; sleep "$Trace_InputVars"
       read -rp "  [enter] to continue  >  "
     fi
-    qcow2_filemanagement_launcher "$qqf_Input_Drivepath"
-    printf "\n\n  [vm] switch to qqX VM selector menu  [c] cancel & close \n\n"
-    read -rp "  >  "  QF_Return
-    if [[ $QF_Return == "c" ]]; then exit directly
-    elif [[ $QF_Return == "vm" ]]; then
-      VM_InstanceName=
-      VM_Conf_Dir=
-      VM_Conf_File=
-      XDG_MimeType_is_QCOW=
-      printf "\n\n  Loading ... \n\n"
-    fi
+    while true ; do
+      qcow2_filemanagement_launcher "$qqf_Input_Drivepath"
+      if ps -ef | grep nbd | grep -q qcow ; then
+        printColor  "\n\n  QEMU qcow2 drive/s CONNECTIONS PRESENT"
+        printf "\n\n  May be left connected, or to disconnect use the 'qf' utility \n"
+      else printColor  "\n\n  All qcow2 drive/s are disconnected"
+      fi
+      printf "\n\n  [vm] switch to qqX VM selector menu  [qf] relaunch utility  [c] close and quit \n\n"
+      read -rp "  >  "  QF_Return
+      if [[ $QF_Return == "c" ]]; then sleep 0.5 ; exit directly
+      elif [[ $QF_Return == "vm" ]]; then
+        VM_InstanceName=
+        VM_Conf_Dir=
+        VM_Conf_File=
+        XDG_MimeType_is_QCOW=
+        printf "\n\n  Loading ... \n\n"
+        break
+      fi
+    done
   else
     # not qf, and not close, so re-check but with qqX_Main flag
     QF_exit_to_Main=1
@@ -194,7 +206,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ||
     printf "[vm] switch to qqX VM selector menu  [c] cancel & close \n\n"
     read -rp "  >  "  Cancel_ISO
 
-    if [[ $Cancel_ISO == "c" ]]; then exit directly
+    if [[ $Cancel_ISO == "c" ]]; then sleep 0.5 ; exit directly
     elif [[ $Cancel_ISO == "vm" ]]; then
       VM_InstanceName=
       VM_Conf_Dir=
@@ -209,7 +221,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ||
       read -rp "  >  "  ISO_NewVM_Name
       [[ ! $ISO_NewVM_Name ]] && ISO_NewVM_Name="$(basename "$XDG_ISO_Name" .iso)"
       [[ $ISO_NewVM_Name == "vm" ]] && break
-      [[ $ISO_NewVM_Name == "c" ]] && exit directly
+      [[ $ISO_NewVM_Name == "c" ]] && sleep 0.5 && exit directly
     fi
 
     # If name then start
