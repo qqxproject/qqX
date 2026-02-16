@@ -229,7 +229,7 @@ fi
 #  The '$1' check for any MOUSE CLICK or COMMAND LINE parameters will read and set flags during 'qqX_initialize'
 #  General format is  --vm  "path/folder/file.conf", including .desktop starts which will have originally had 'XDG' as $1
 
-[[ $Initial_Input ]] && source "$qqX_MainFolder/qqX_input_and_mouse_tidyup"
+[[ $Initial_Input ]] && source "$qqX_MainFolder/qqX_input_and_mouse_tidyup" &&  multi_instance_checks
 
 [[ $QF_exit_to_Main ]] && printf "\033c"  &&  multi_instance_checks
 

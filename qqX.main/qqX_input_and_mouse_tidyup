@@ -42,11 +42,10 @@ if [[ $Trace_InputVars ]]; then
 fi
 
 input_re_route () {
-  if [[ $xxXDG_MimeType_is_QCOW ]] && [[ "$(pgrep -af qqX_filemanage 2>/dev/null)" ]]; then
-    printColor "\n\n Note that opening of new qqF windows will terminate other qqF instances that are running"
+  if [[ $XDG_Input_NON_qqX || $XDG_StartVariant ]]; then printf "\n\n  [enter] to run the VM selection menu   "
+  else printf "\n\n  [enter] to run qqX   "
   fi
-  printf "\n\n  [enter] to run qqX   "
-  [[ $XDG_MimeType_is_QCOW ]] && printf "[qf] open qcow2 in file manager   "
+  [[ $XDG_MimeType_is_QCOW ]] && printColor "[qf] open qcow2 in file manager   "
   printf "[c] to close \n\n"
   read -rp "  >  "  XDG_StartVariant
 
@@ -111,16 +110,17 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
   # show disk info:
   "$QEMU_IMG" info "$QCOW_Input_Dir/$QCOW_Input_DiskName"
 
-  if [[ $XDG_MimeType_is_QCOW ]] && [[ "$(pgrep -af qqX_filemanage 2>/dev/null)" ]]; then
-    printColor "\n\n Note that opening of new qqF windows will terminate other qqF instances that are running"
-  fi
-
   if [[ $XDG_Input_NON_qqX ]]; then
     printColor "\n\n See  https://qemu.readthedocs.io  "
-    printf  "> QEMU's disk image utility or the qf/qqF drive mounter may be useful"
-    InputReRouted=1
-    input_re_route
+    printf  "> use of both QEMU's disk image utility and the qf/qqF drive mounter may be useful"
+    if [[ $XDG_MimeType_is_QCOW ]] && [[ "$(pgrep -af qqX_filemanage 2>/dev/null)" ]]; then
+    printf "\n\n  NOTE that opening of new qf/qqF windows will terminate other qqF instances that are running"
+    fi
+    InputReRouted=1 ; input_re_route
   else
+    if [[ $XDG_MimeType_is_QCOW ]] && [[ "$(pgrep -af qqX_filemanage 2>/dev/null)" ]]; then
+    printf "\n\n  NOTE that opening of new qf/qqF windows will terminate other qqF instances that are running"
+    fi
     printColor "\n\n  [enter] to continue   [qf] open qcow2 in file manager   [c] to cancel and close \n\n"
     read -rp  "  >  "  InputTidy
     [[ $InputTidy == "c" ]] && sleep 0.5 && exit directly

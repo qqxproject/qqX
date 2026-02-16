@@ -351,9 +351,10 @@ function multi_instance_checks {
       if [[ "$QQ" != *"$CurrentQQ"* ]]; then
         if [[ "$QQ" == *'--qqf'* ]] || [[ "$QQ" == *'qqX_filemanage'* ]]; then
           OtherQQ_F_Arr+=("$(awk '{print $1}' <<< "$QQ")")
-        elif [[ "$QQ" != *'qqX_copy_over'* ]]; then
-          OtherQQ_MainArr+=("$(awk '{print $1}' <<< "$QQ")")
         elif [[ $QF_exit_to_Main ]] && [[ "$QQ" != *'qqX_copy_over'* ]]; then
+          QF_exit_to_Main=
+          OtherQQ_MainArr+=("$(awk '{print $1}' <<< "$QQ")")
+        elif [[ "$QQ" != *'qqX_copy_over'* ]]; then
           OtherQQ_MainArr+=("$(awk '{print $1}' <<< "$QQ")")
         fi
       fi

@@ -156,7 +156,7 @@ while true; do
   printf "\n\n  This terminal window is PROCESS SEPARATED from qqX and may be LEFT OPEN, repositioned or minimized"
   printf "\n\n  The elevated permissions required to prepare the drives will remain isolated."
   printf "\n\n  Any opening of new qqF windows will terminate other qqF instances that are running."
-  printf "\n"
+  #printf "\n"
   printf "\n\n  Run option 'qqf' from the qqX menu if the VM is swapped.  Follow with [r] to refresh."
   printf "\n"
   printColor "\n\n  Mounting of the connected drives may be carried out as standard in the file-manager"
