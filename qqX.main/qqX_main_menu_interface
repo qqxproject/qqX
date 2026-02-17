@@ -245,30 +245,42 @@ else
       FileManager_Run=
     fi
 
-    if [[ -f "$VM_InstanceName/rtv.date.txt" ]]; then
-      SyncDateNow="$(date +%s)"
-      SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
-      LastRtvUpd="$((SyncDateNow - SyncDateOld))"
-      if [[ $RtvManualOnly ]]; then
-        if [[ "$VM_InstanceName" == *macos* ]]; then
-          [[ ! $RtvMacosRmdOff ]] && [[ $LastRtvUpd -gt 2592000 ]] && printColor "\n\n  [rtv]  run Tiano update - last run %d days ago"  "$((LastRtvUpd/86400))"
-        elif [[ ! $RtvStdRmdOff ]] && [[ $LastRtvUpd -gt 10368000 ]]; then
-          printColor "\n\n  [rtv]  run Tiano update - last run %d days ago"  "$((LastRtvUpd/86400))"
-        fi
-        #  Reminders @ older than 120 days std vars or 30 for mac as has binaries (in epoch seconds)
-        #  Auto-updates: do all at 30 days.  Status message for std vars probably OTT, not needed (?)   REVIEW
-      elif [[ $LastRtvUpd -gt 2592000 ]]; then
-         if [[ "$VM_InstanceName" == *macos* ]]; then
-          printf "\n\n  Tiano Core Security Updates .....  "
-          refresh_tiano_vars &
-          wait "$!"
-          RtvMacGet="$(cat "$VM_Conf_Dir/$VM_InstanceName/rtv.status.log" 2>/dev/null)"
-          [[ $RtvMacGet == "Okay" ]] && printf "All Good"
-          [[ $RtvMacGet == "Fail" ]] && printColor "\n\n  Failed to update. See rtv logs in the VM folder ...."
-        else  refresh_tiano_vars &
+    ## OVMF
+    RtvUpd= ; RtvArm=
+    if  [[ -f "$VM_InstanceName/rtv.date.txt" ]]; then
+      if [[ "$VM_InstanceName" == *macos* ]]; then
+        SyncDateNow="1771316058"
+        # @ feb 2026 (QE 4.9.9) upstream problems appeared from using Kholia's Mac repo > Change to using fixed sync dates
+        # '1771316058' = Feb 17th  (built-ins to be later implemented, if workable) REVIEW
+        SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
+        [[ $SyncDateNow -gt $SyncDateOld ]] && RtvUpd=1
+      fi
+      if [[ $(ls "$VM_Conf_Dir/$VM_InstanceName/AAVMF"* 2>/dev/null) ]]; then
+        RtvArm=1 ; SyncDateNow="$(date +%s)"
+          SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
+        (( (SyncDateNow - SyncDateOld) > 2592000 ))&& RtvUpd=1
+      fi
+      if [[ $RtvUpd ]]; then
+        if [[ $RtvArm ]]; then
+            printColor "\n\n  [rtv]  OVMF updates may be available > Last checked 120 days ago ..."
+        elif [[ "$VM_InstanceName" == *macos* ]] && [[ ! $RtvMacosUpdOff ]]; then
+            printf "\n\n  BootLoader Security Updates and Improvements .....  "
+            refresh_tiano_vars &
+            wait "$!"
+            RtvMacGet="$(cat "$VM_Conf_Dir/$VM_InstanceName/rtv.status.log" 2>/dev/null)"
+            if [[ $RtvMacGet == "Okay" ]]; then
+              printf "All Good"
+              printf "\n\n  Old versions have been stored in the VM folder with epoch suffix '%s'" "$SyncDateNow"
+              printf " in case they are required.  \n\n  To adjust updater, see general settings \n"
+            fi
+            [[ $RtvMacGet == "Fail" ]] && printColor "\n\n  Failed to update. See rtv logs in the VM folder ...."
+        elif [[ "$VM_InstanceName" == *macos* ]] && [[ ! $RtvMacosRmdOff ]]; then
+            printf "\n\n  [rtv]  BootLoader update available ..."
         fi
       fi
-    else  date +%s > "$VM_Conf_Dir/$VM_InstanceName/rtv.date.txt"  2>/dev/null
+    else
+      # Sets rtv date log, if doesn't exist, and any QE upstream can get qqX overwritten, if needed
+      refresh_tiano_vars &
     fi
 
     main_loop_diagnostics

@@ -706,14 +706,14 @@ read_x86_tiano_vars_list () {
 
 refresh_tiano_vars () {
 
-  RtvBack= ; RtvArm=
+  RtvBack=
   read_x86_tiano_vars_list
 
-  if [[ $RunRtvCheck || $RtvManualOnly ]]; then RtvText=1 ; else RtvText=
+  if [[ $RunRtvCheck ]]; then RtvText=1
+  else RtvText=
   fi
 
   if [[ $RtvText ]]; then
-
     if [[ $TianoVarsGrepError ]]; then
       printColor  "\n\n  ERROR finding Tiano Variables List in current Source Code ?? "
       printf "\n\n  %s \n\n" "$QE_SourcePath"
@@ -724,8 +724,7 @@ refresh_tiano_vars () {
         printf "\n\n  MacOS refreshes require an internet connection. The small boot drive 'OpenCore.qcow2' is also needed."
         printf "\n\n  For security reasons, these Mac specific files should generally be updated at regular intervals...."
       fi
-      if [[ $(ls "$VM_Conf_Dir/$VM_InstanceName/AAVMF"* 2>/dev/null) ]]; then
-        RtvArm=1
+      if [[ $RtvArm ]]; then
         if [[ ! $RtvArmFolder ]]; then
           printf  "\n\n  Using Standard Folder '/usr/share/AAVMF' >> Variations may be placed in main settings"
           RtvArmFolder="/usr/share/AAVMF"
@@ -737,7 +736,6 @@ refresh_tiano_vars () {
     fi
     printf  "  [b] to go back "
     read -rp "  >  "  RtvBack
-
   fi
 
   [[ $TianoVarsGrepError ]] && RtvBack="b"
@@ -760,35 +758,43 @@ refresh_tiano_vars () {
 
     elif [[ "$VM_InstanceName" == *macos* ]]; then
 
-      RtvMacGet="Okay"
+      RtvMacGet="Okay"; local MvDate
+      if [[ $SyncDateNow ]]; then  MvDate="$SyncDateNow"
+      else MvDate="$(date +%s)"
+      fi
 
       [[ -e "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" ]] &&  \
-      mv "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2.old"
+      mv "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2.$MvDate.old"
 
       [[ -e "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" ]] &&  \
-      mv "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd.old"
+      mv "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd.$MvDate.old"
 
       [[ -e "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" ]] &&  \
-      mv "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd.old"
+      mv "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd.$MvDate.old"
 
-      # as per quickget 4.9.2
+      # Originally based on/as per quickget 4.9.2  BUT @ feb 2026 (4.9.9) upstream problems appeared from using Kholia's repo
+      # The whole Mac bootloader and 'rtv' updater needs a REVIEW
 
      [[ $RtvText ]] && printf "\n\n  Checking ..."
+
+      # Pin to last known-good commit (https://github.com/quickemu-project/quickemu/pull/1854)
+      local OSX_KVM_COMMIT="da4b23b5e92c5b939568700034367e8b7649fe90"
 
       wget -t 3 -T 2 -o "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OVMF_VARS-1920x1080.fd" \
       -O "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" || RtvMacGet="Fail"
       [[ $RtvText ]] && printf "....."
 
-      #wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OVMF_CODE.fd" \
-      # see https://github.com/kholia/OSX-KVM/blob/master/OVMF-notes.txt
-      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/blob/master/OVMF_CODE_4M.fd" \
+      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/${OSX_KVM_COMMIT}/OVMF_CODE.fd" \
       -O "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" || RtvMacGet="Fail"
-      # @ feb 2026 qemu complains that it needs size multiple of 65536 (0x1000)
-      fallocate -l 1966080 "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd"
+
+      # @ feb 2026 qemu complains that it needs size multiple of 65536 (0x1000) (qqX)
+      # fallocate -l 1966080 "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd"
+
       [[ $RtvText ]] && printf "........ \n\n"
 
-      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OpenCore/OpenCore.qcow2" \
+      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/${OSX_KVM_COMMIT}/OpenCore/OpenCore.qcow2" \
       -O "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" || RtvMacGet="Fail"
+
       [[ $RtvText ]] && grep -v '\.\.\.\.\.\.\.' "$VM_Conf_Dir/$VM_InstanceName/rtv.log"
 
       echo "$RtvMacGet" > "$VM_Conf_Dir/$VM_InstanceName/rtv.status.log"
@@ -821,7 +827,10 @@ refresh_tiano_vars () {
 
     fi
 
-    date +%s > "$VM_InstanceName/rtv.date.txt"
+    # @ feb 2026 (QE 4.9.9) Changed to using fixed sync dates for MacOS, set in main menu interface, from where this function is called.
+    if [[ "$VM_InstanceName" == *macos* ]]; then echo "$SyncDateNow" > "$VM_InstanceName/rtv.date.txt"
+    else echo "$MvDate" > "$VM_InstanceName/rtv.date.txt"
+    fi
 
     if [[ $RtvText ]]; then
       printf "\n\n  [enter] to return \n\n "

@@ -413,21 +413,16 @@ VM_SelectorStyle="A"
 
 ## TIANO BIOS
 
-# The Tiano boot system that is used by quickemu will require updating if there are feature or security changes made to the code.
-# (03/2024) Quickemu, currently places edk.fd vars into the VM folder. And there they remain.
-# It is theoretically possible that system updates containing feature changes may seek variables in these files that don't exist.
-# Quickemu will also place binary files, in the case of MacOS, which are only downloaded by running Quickget.
-# There are also .bin files listed in the Quickemu code for use by some Linux distros ....
+# The Tiano boot system is used by QEMU to start the VM. All the code files should update along Qemu.
+# QuickEmu places an empty file for the OVMF_VARS in the VM folder which might need clearing, if there are problems
+# In the case of MacOS, special additional bootloader files are required.
+# If running Arm (aarch) on non-native, then qqX will place code files in the VM folder too.
 
-# qqX features an [rtv] option which may be run manually, to Refresh (the) Tiano Variables (and such).
-# But to avoid tedium, this feature defaults to periodically auto-running. Set = 1 to turn this off, if required (?)
-  RtvManualOnly=
-
-# In manual-only mode, qqX will remind you, from time to time, to run the updater.
-# The MacOS reminder runs more frequently, as this is viewed as more critical.
-# As above, set = 1 to turn these off too, if required (?)
-  RtvStdRmdOff=
+# qqX will tell if a Mac update is available and in the case of Arm, remind you, from time to time, to run the updater.
+# To quieten the MacOS reminder, and updater, if you wish to force a fixed Mac bootloader, use the settings below:
+# Set =1 to to activate
   RtvMacosRmdOff=
+  RtvMacosUpdOff=
 
 # Standard Arm AAVMF source folder = "/usr/share/AAVMF"  >>  Variations may be placed here.
 # Defaults to auto-update, as below.
