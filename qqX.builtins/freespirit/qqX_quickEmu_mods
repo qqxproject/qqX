@@ -38,7 +38,7 @@
 
 ##########################################
 
-QE_ModsNumber="v2"
+QE_ModsNumber="v2.1"
 
 ## FIX null bytes error BUT keep awkward true flag method, for now, to maintain 'vm_boot' upstream compatibility
 function is_firmware_qcow2() {
@@ -47,9 +47,8 @@ function is_firmware_qcow2() {
     if grep -qs "QFI" <<< "$(head -c 4 "$1" | tr -cd '[:graph:]')" ; then echo "true" ; fi
 }
 
-## FIX ovmfs array parse
-# TODO: add builtins and rationalize the whole function
-function configure_bios() {
+## FIX ovmfs array parse BUT @ feb 2026 suspend due to upstream changes 4.9.9 REVIEW
+function xxconfigure_bios() {
 
     # Always Boot macOS using EFI
     if [ "${guest_os}" == "macos" ]; then
