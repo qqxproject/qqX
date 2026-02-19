@@ -421,8 +421,8 @@ VM_SelectorStyle="A"
 # qqX will tell if a Mac update is available and in the case of Arm, remind you, from time to time, to run the updater.
 # To quieten the MacOS reminder, and updater, if you wish to force a fixed Mac bootloader, use the settings below:
 # Set =1 to to activate
-  RtvMacosRmdOff=
-  RtvMacosUpdOff=
+  RtvMacos_RMD_Off=
+  RtvMacos_Upd_Off=
 
 # Standard Arm AAVMF source folder = "/usr/share/AAVMF"  >>  Variations may be placed here.
 # Defaults to auto-update, as below.
