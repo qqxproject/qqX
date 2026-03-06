@@ -283,7 +283,7 @@ else
       refresh_tiano_vars &
     fi
 
-    main_loop_diagnostics
+    [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
     if [[ "$VM_InstanceName" == *macos* && "$VM_InstanceName" == *sonoma* ]]; then
      if ! grep -q -s 'ventura|sonoma' "$QE_SourcePath" ; then printColor "\n\n  Warning: This version of QuickEmu will not run MacOS Sonoma ..." ; fi
@@ -501,7 +501,7 @@ else
     fi
     printf "\n\n"
 
-    path_diagnostics
+    [[ $PathDiagnostics ]] && path_diagnostics
 
     if [[ $MainMenuChoicePreset ]]; then
       printf "  >  %s \n" "$MainMenuChoicePreset"

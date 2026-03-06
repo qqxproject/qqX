@@ -290,95 +290,108 @@ function show_qqX_general_help {
 
 function multi_instance_checks {
 
-  MultiQuit=
-  KillQQ=
-  CurrentQQ_FullLine=
-  CurrentQQ=
-  CurrentQQ_LastField=
-  AnotherQQ=
-
   # Make sure that all current processes have been statted properly before moving on.
   # pgrep -an is not reliable and pgrep sub-shell creates another pid too.
   # BUT new PID always goes on end of list so check for this until no 'kworker' grep errors
+  # and without any background updater checks (qqxproject/qqX/tags) or calls to qqX lib (/usr/share)
+
+  # The 'up' bit  of Chrome Up  but REVIEW placing elsewhere ??
+
+  if [[ $ShowProcesses ]]; then
+    printf "\n\nScript: qqX_UI_chrome_up > function 'MULTI_INSTANCE_CHECKS' > \n\n"
+    printf "\n\n    PRE find pid/ppid > pgrep -afi '/qqX' > \n\n"
+    pgrep -afi '/qqX'
+  fi
+
   sleep 0.2
-  i=0
-  while true; do
-    CurrentQQ_FullLine="$(pgrep -afi qqX | tail -n 1  2>/dev/null)"
-    [[ $ShowProcesses ]] && printf "\n(i%s) %s " "$i" "$CurrentQQ_FullLine"
-    if [[ "$CurrentQQ_FullLine" == *kworker* ]]; then sleep 0.2 ; ((i+=1))
-    else
-      CurrentQQ_LastField="$(awk '{print $NF}' <<< "$CurrentQQ_FullLine")"
-      CurrentQQ="$(awk '{print $1}' <<< "$CurrentQQ_FullLine")"
-      break
-    fi
-    if [[ $i -gt 25 ]]; then
-      printColor "\n\n ERROR statting current PID > restart required"
-      printf "\n\n\n  [enter] to close \n\n"
-      read -rp "  >  "
-    fi
-  done
+  MultiQuit= ; KillQQ= ; AnotherQQ=
+  CurrentQQ_FullLine= ; CurrentQQ_LastField= ; CurrentQQ= ; CurrentQQ_Parent= ;
+  CurrentQQ="$$"
+  CurrentQQ_FullLine="$$  $0"
+  CurrentQQ_Parent="$(ps --no-header -fo ppid "$CurrentQQ" | tr -cd '[:digit:]')"
 
-  # All qqX, exactly, will exclude 'qqX_copy_over' but doesn't make reading the parameters and variants too easy
-  # Also pgrep -aAxi qqX, with x, doesn't count itself ..... but -afi does .... REVIEW
-  # Note: needs -i ignore case, so that CLI starts using 'qqx' (lower) get counted
+  if [[ $ShowProcesses ]]; then
+    [[ $CurrentQQ ]] && printf "\n    CurrentQQ = %s" "$CurrentQQ"
+    [[ $CurrentQQ_Parent ]] && printf "    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
+    printf "\n\n"
+    printf "\n\n    POST find pid/ppid > pgrep -afi '/qqX' > \n\n"
+    pgrep -afi '/qqX'
+  fi
 
-  AnotherQQ="$(pgrep -aAi qqX 2>/dev/null)"
+  # NOTE use 'ps' here as pgrep can cause problems
+  # shellcheck disable=SC2009
+  AnotherQQ="$(ps -ef | grep -e'/qqX' | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v grep  2>/dev/null)"
 
-  # Also Note: CL launched running of qcow2 file management happens before this script is called. See qqX start.
-  # Running CL instances will show up with 'pgrep -aAxi qqX' as 'pid /bin/bash /usr/bin/qqX --qqf' or similar.
+  # If loading up the qcow menu, but then not choosing the qf option,
+  # then the currrent qcow ceases to be a duplicate, and we need the VM selector interface, not the main selected one
+  if [[ $Trace_InputVars ]]; then
+    printf "\n\n Positional Vars = %s" "$*"
+    printf "\n\n QF_exit_to_Main is %s" "$QF_exit_to_Main"
+    printf "\n\n XDG_MimeType_is_QCOW is %s" "$XDG_MimeType_is_QCOW"
+    printf "\n\n XDG_Input_NON_qqX is %s \n\n" "$XDG_Input_NON_qqX"
+    echo " pwd  $(pwd)"
+    echo; sleep "$Trace_InputVars"
+  fi
+
+  # CL launched running of qcow2 file management happens before this script is called. See qqX start.
+  # Running CL instances will show up with 'pgrep -aAxi qqX' as 'pid /bin/bash /usr/bin/qqX --qqf' or similar
   # With pgrep -afi qqX_filemanage as: pid /bin/bash /usr/share/qqX/qqX.main/qqX_filemanage_qcow_drive --qqf
 
   if [[ $ShowProcesses ]]; then
-    echo
-    echo; echo "CurrentQQ  $CurrentQQ"; echo; echo "LastField  $CurrentQQ_LastField"
-    echo; echo "AnotherQQ:"; echo; echo "$AnotherQQ"; echo
-    echo; echo "QF_exit_to_Main = $QF_exit_to_Main"; echo
-    read -rp " >  "
+    echo; echo " AnotherQQ String List:"; [[ $AnotherQQ ]] && printf "\n%s" "$AnotherQQ"
+    printf "\n\n QF_exit_to_Main = %s \n\n" "$QF_exit_to_Main"
   fi
 
   CurrentQQ_mode="main"
   if [[ ! $QF_exit_to_Main ]]; then
+    # qcow, in the sense of manage a qcow disk, not just use one trigger a main menu ...
     case "$CurrentQQ_LastField" in
       *'.qcow2'*|*'--qqf'*|*'qqX_filemanage '*) CurrentQQ_mode="qcow" ;;
     esac
   fi
 
+  # Starting Main via the .qcow2 route needs to counted too. And only 1 QF instance should exist.
+  # .qcow2 remains when 'exit to main' but changes to 'filemanage' when switching to QF
+  # while elif [[ "$QQ" == *'.qcow2'* ]]; gets included in [[ "$QQ" != *'qqX_copy_over'* ]]
+
   if [[ $AnotherQQ ]]; then
+    # NB: awk '{print $1}' for pgrep and awk '{print $2}' for ps
     OtherQQ_MainArr=()
-    OtherQQ_F_Arr=()
+    OtherQQ_qqF_Arr=()
     mapfile -t AnotherQQ_Arr <<< "$AnotherQQ"
     for QQ in "${AnotherQQ_Arr[@]}"; do
-      if [[ "$QQ" != *"$CurrentQQ"* ]]; then
-        if [[ "$QQ" == *'--qqf'* ]] || [[ "$QQ" == *'qqX_filemanage'* ]]; then
-          OtherQQ_F_Arr+=("$(awk '{print $1}' <<< "$QQ")")
-        elif [[ $QF_exit_to_Main ]] && [[ "$QQ" != *'qqX_copy_over'* ]]; then
-          QF_exit_to_Main=
-          OtherQQ_MainArr+=("$(awk '{print $1}' <<< "$QQ")")
-        elif [[ "$QQ" != *'qqX_copy_over'* ]]; then
-          OtherQQ_MainArr+=("$(awk '{print $1}' <<< "$QQ")")
-        fi
+      [[ "$QQ" == *"$CurrentQQ"* ]] || [[ "$QQ" == *"$CurrentQQ_Parent"* ]] && continue
+      [[ "$QQ" == *'/usr/share/'* ]] && [[ "$QQ" != *'/usr/share/qqX'* ]] && continue
+      if [[ "$QQ" == *'--qqf'* ]] || [[ "$QQ" == *'qqX_filemanage'* ]]; then
+        OtherQQ_qqF_Arr+=("$(awk '{print $2}' <<< "$QQ")")
+      elif [[ $QF_exit_to_Main ]] && [[ "$QQ" != *'qqX_copy_over'* ]]; then
+        QF_exit_to_Main=
+        OtherQQ_MainArr+=("$(awk '{print $2}' <<< "$QQ")")
+      elif [[ "$QQ" != *'qqX_copy_over'* ]]; then
+        OtherQQ_MainArr+=("$(awk '{print $2}' <<< "$QQ")")
       fi
     done
-    # Starting Main via the .qcow2 route needs to counted too. And only 1 QF instance should exist.
-    # .qcow2 remains when 'exit to main' but changes to 'filemanage' when switching to QF
-    # while elif [[ "$QQ" == *'.qcow2'* ]]; gets included in [[ "$QQ" != *'qqX_copy_over'* ]]
+
     if [[ $ShowProcesses ]]; then
+      [[ $CurrentQQ ]] && printf "\n CurrentQQ = %s" "$CurrentQQ"
+      [[ $CurrentQQ_Parent ]] && printf "    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
+      printf "\n\n"
       echo; declare -p AnotherQQ_Arr; echo
       echo; declare -p OtherQQ_MainArr; echo
-      echo; declare -p OtherQQ_F_Arr; echo
+      echo; declare -p OtherQQ_qqF_Arr; echo
+      echo; echo " CurrentQQ_mode= $CurrentQQ_mode"; echo
       read -rp " >  "
     fi
   fi
 
-  if [[ $AnotherQQ ]] && [[ $CurrentQQ_mode == "main" ]] && [[ "${#OtherQQ_MainArr[@]}" -ge 1 ]]; then
+  if [[ $CurrentQQ_mode == "main" ]] && [[ "${#OtherQQ_MainArr[@]}" -ge 1 ]]; then
 
-    tput sc
+    [[ $ShowProcesses ]] && printf "\n\n qqX_UI_chrome_up > Messaging and Options > Current Process PID: %s" "$CurrentQQ"
+
     qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running "
-
     printf "\n"
     printf "\n\n  QEMU will lock protect key files and will prevent VM's being run simultaneously ..."
     printf "\n\n  Simple usage can be possible but be aware that minor cross-linking problems could occur"
-
     printf "\n\n\n  [enter] to continue with all   [k] kill other instances and continue with just this one "
     printColor "\n\n  [q] to quit \n\n"
     read -rp "  >  "   MultiQuit
@@ -396,17 +409,25 @@ function multi_instance_checks {
       read -rp "  >  "  KillQQ
       if [[ $KillQQ == "k" ]]; then
         for QQ in "${OtherQQ_MainArr[@]}"; do
-          KillTarget="$(awk '{print $1}' <<< "$QQ" | tr -cd '[:digit:]' 2>/dev/null)"
+          KillTarget="$(tr -cd '[:digit:]' <<< "$QQ"  2>/dev/null)"
           [[ $ShowProcesses ]] && printf "\n QQ = %  > killing: %s" "$QQ" "$KillTarget"
-          kill "$KillTarget" 2>/dev/null
+          [[ $KillTarget ]] &&  kill "$KillTarget" 2>/dev/null
         done
         printColor "\n\n  Closed  \n\n" ; sleep 0.7
       elif [[ $KillQQ == "q" ]]; then exit directly
       fi
     fi
 
-    tput rc ; tput ed  #  clear back the last lines to sc (set cursor)
+  fi
 
+  if [[ $ShowProcesses ]]; then
+    echo; echo "Script: qqX_UI_chrome_up - end of function 'MULTI_INSTANCE_CHECKS' > "
+    if [[ ${AnotherQQ_Arr[0]} ]]; then echo; declare -p AnotherQQ_Arr; echo; else printf "\n\n 'AnotherQQ_Arr' not present"; fi
+    if [[ ${OtherQQ_MainArr[0]} ]]; then echo; declare -p OtherQQ_MainArr; echo; else printf "\n\n 'OtherQQ_MainArr' not present"; fi
+    if [[ ${OtherQQ_qqF_Arr[0]} ]]; then echo; declare -p OtherQQ_qqF_Arr; echo; else printf "\n\n 'OtherQQ_qqF_Arr' not present"; fi
+    printf "\n\n  CurrentQQ = %s\n\n" "$CurrentQQ"
+    printf "\n\n  CurrentQQ_mode = %s\n\n" "$CurrentQQ_mode"
+    read -rp " >  "
   fi
 
   if [[ "$(pgrep quickgui 2>/dev/null)" ]] ; then

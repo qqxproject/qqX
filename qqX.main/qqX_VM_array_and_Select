@@ -93,7 +93,7 @@ VM_loader_selector_and_menu () {
           printColor "\n\n  For future display, add the NEW Current Folder to the VM array, [set] general settings ..."
         fi
 
-        main_loop_diagnostics
+        [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
         [[ $DefaultFolderError ]] && printf "\n\n  ERROR: DEFAULT FOLDER "
         [[ $ExtraFolderError ]] && printf "\n\n  ERROR: VM FOLDER ARRAY '%s' "  "$ExtraFolderError"
@@ -151,7 +151,7 @@ VM_loader_selector_and_menu () {
 
         [[ $FD_Phrase || $FD_Start ]] && [[ ! $FD_Found ]] && printColor "\n\n  NOT FOUND  %s/ %s" "Contains: $FD_Phrase " "Starts: $FD_Start"
 
-        path_diagnostics
+        [[ $PathDiagnostics ]] && path_diagnostics
         IgnoreConfigErrors=
         FD_Phrase= ; FD_Start= ; FD_Found=
 

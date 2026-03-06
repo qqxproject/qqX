@@ -263,7 +263,7 @@ function read_main_drive_and_img_iso_conf_vars {
   IsoImg=
 
   if [[ $Trace_InputVars ]]; then
-    echo "QE Conf Var 'disk_img': $disk_img"  ; echo
+    echo; echo "QE Conf Var 'disk_img': $disk_img"  ; echo
     echo "QE Conf Var 'img': $img"  ; echo
     echo "QE Conf Var 'iso': $iso"  ; echo
     sleep "$Trace_InputVars"
@@ -315,8 +315,7 @@ function_conf_error () {
     printf "\n\n  Check the settings and re-run this script ... "
   fi
 
- [[ $Loop_Diagnostics ]] && echo
-  main_loop_diagnostics
+ [[ $Loop_Diagnostics ]] && echo && main_loop_diagnostics
 
   printf "\n\n  General Settings file:  %s \n\n" "$qqX_SettingsFile"
 

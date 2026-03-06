@@ -108,7 +108,11 @@ fi
 #  Check any MOUSE CLICK or COMMAND LINE parameters and set any initial flags
 #  Further processing is done in the 'qqX_input_and_mouse_tidyup' script, after other functions have been loaded
 
-if [[ $Trace_InputVars ]]; then echo "Input Args 1: $*"  ; echo  ; sleep "$Trace_InputVars" ; fi
+if [[ $Trace_InputVars ]]; then
+  printf "\n\nScript qqX_Initialize, sorting out of 'mime types' and what is being input > "
+  printf "\n\nInput Args 1: %s \n\n" "$*"
+  sleep "$Trace_InputVars"
+fi
 
 if [[ $1 == "--help" || $1 == "-h" ]] ; then echo; show_CLI_usage ; exit ; fi
 
@@ -145,8 +149,10 @@ if [[ -e "$InputFilePath" ]]; then
     XDG_MimeType="$(mimetype "$XDG_RealPathName" 2>/dev/null)"
   fi
   Current_VM_Folder="$(dirname "$XDG_RealPathName")"
+
   if [[ $Trace_InputVars ]]; then
-    echo "RealPathName $XDG_RealPathName" ; echo "MimeType $XDG_MimeType" ; echo "Current_VM_Folder  $Current_VM_Folder"  ; echo  ; sleep "$Trace_InputVars"
+    echo "RealPathName $XDG_RealPathName"; echo; echo "Current_VM_Folder  $Current_VM_Folder"
+    echo; echo "MIME TYPE = $XDG_MimeType"; echo; sleep "$Trace_InputVars"
   fi
 
   if [[ "$XDG_MimeType" == *'application/x-qemu-disk' ]]; then
@@ -173,6 +179,7 @@ if [[ -e "$InputFilePath" ]]; then
       Current_VM_Folder="$QCOW_Input_Conf_Dir"
     fi
     if [[ $Trace_InputVars ]]; then
+      printf "\nXDG_MimeType_is_QCOW: \n\n"
       echo "In D $QCOW_Input_Dir  Conf D $QCOW_Input_Conf_Dir"
       echo "VDN  $QCOW_Input_VM_Dir_Name  N  $QCOW_Input_DiskName "
       echo "VDN  $QCOW_Input_VM_Dir_Name  N  $QCOW_Input_DiskName "
@@ -187,6 +194,14 @@ if [[ -e "$InputFilePath" ]]; then
     if [[ "$XDG_MimeType" == *'application/x-cd-image' || "$XDG_MimeType" == *'application/vnd.efi.iso' ]]; then
       XDG_MimeType_is_ISO=1 ; XDG_MimeType_Recognised=1
     fi
+    if [[ $Trace_InputVars ]]; then
+      printf "\n XDG_RealPathName is .ISO  >"
+      printf "\n\n XDG_FileType_Recognised = 1"
+      printf "\n\n XDG_MimeType_is_ISO is %s" "$XDG_MimeType_is_ISO"
+      printf "\n\n XDG_MimeType_Recognised is %s" "$XDG_MimeType_Recognised"
+      echo; echo; echo "pwd  $(pwd)"
+      echo; sleep "$Trace_InputVars"
+    fi
 
   elif [[ "$XDG_MimeType" == *'text/plain' ]] || [[ $XDG_RealPathName == *'.conf' ]] ; then
       # NB: .conf files may also be mime sym-links
@@ -199,6 +214,7 @@ if [[ -e "$InputFilePath" ]]; then
       VM_Conf_File="$(basename "$XDG_RealPathName")"
       VM_InstanceName="${VM_Conf_File/'.conf'/}"
       if [[ $Trace_InputVars ]]; then
+        printf "\n\nXDG_MimeType is %s" "$XDG_MimeType"
         echo; echo "R: $XDG_RealPathName" ; echo
         echo "D: $VM_Conf_Dir"  ; echo
         echo "C: $VM_Conf_File"  ; echo
@@ -254,7 +270,11 @@ fi
 if [[ $1 ]]; then Initial_Input="$InputFilePath" ; shift ; else Initial_Input=
 fi
 
-[[ $Loop_Diagnostics ]] && printf "\n\n End of qqX Initialize:" &&  main_loop_diagnostics
-
+if [[ $Loop_Diagnostics || $Trace_InputVars ]]; then
+  printf "\nEnd of qqX Initialize and sorting out of input types: \n\n"
+  [[ $Loop_Diagnostics ]] && main_loop_diagnostics && printf "\n\n"
+  printf " [enter]\n\n"
+  read -rp " >  "
+fi
 
 # vim:tabstop=2:shiftwidth=2:expandtab

@@ -601,7 +601,7 @@ function_quick_get_wrap ()  {
 
   while [[ ! $InternetUp ]]; do
     local Test_Internet=
-    #tput sc
+    # tput sc
     test_internet_is_up
     if [[ ! $InternetUp ]]; then
       if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
@@ -611,7 +611,7 @@ function_quick_get_wrap ()  {
       read -rp "   >  "   Test_Internet
       echo
     fi
-    #tput rc ; tput ed  #  clear back the last lines to sc (set cursor)
+    # tput rc ; tput ed  #  clear back the last lines to sc (set cursor)
     [[ $Test_Internet == "b" ]] &&  QGW_List_NumSelected="B"  && break
     [[ $Test_Internet == "i" ]] && break
     show_QWG_header
@@ -1330,7 +1330,7 @@ function_quick_get_wrap ()  {
 
     while true ; do
 
-      main_loop_diagnostics
+      [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
       if [[ $MainMenuZsync ]]; then
         QGW_OverWriteAlert=1
@@ -1580,7 +1580,7 @@ function_quick_get_wrap ()  {
   [[ $GT_Exit ]] && return
   finalize_QGW_targets
 
-  main_loop_diagnostics
+  [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
   [[ $GT_Exit ]] && return
 

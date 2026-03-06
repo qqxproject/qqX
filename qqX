@@ -41,7 +41,7 @@
 # Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
 # Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
 # but minor numbers remain padded to 2dp
-  qqX_Version="1.15.01-dev.04"
+  qqX_Version="1.15.01-dev.05"
 
 # Allow Posix sub-shell checks (without -t 1) eg. qqX_Version="$(./qqX --version 2>/dev/null)"
 if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit ; fi
@@ -72,44 +72,42 @@ if [[ -d "./qqX.system" ]]; then DevStart=1 ; else DevStart= ; fi
 NoClear=  ;  Loop_Diagnostics=  ;  Trace_InputVars=  ; ShowProcesses=  ; PathDiagnostics=  ; ShowQGetLists=        ### DEV ###
 
 function main_loop_diagnostics {
-  if [[ $Loop_Diagnostics ]]; then
-    echo; echo "VM_Conf_Dir=$VM_Conf_Dir   VM_Conf_File=$VM_Conf_File   VM_InstanceName=$VM_InstanceName"
-    echo "pwd: $(pwd)   Current_VM_Folder=$Current_VM_Folder"
-    echo "BootStyle=$BootStyle   BootStyleMsg=$BootStyleMsg    BootStyle_Default=$BootStyle_Default   BootStyleMsg_Default=$BootStyleMsg_Default"
-    echo "ram=$ram   cpu_cores=$cpu_cores  mouse=$mouse  keyboard=$keyboard  boot=$boot"
-    echo "SelectArrayError=$SelectArrayError  DefaultFolderError=$DefaultFolderError  ExtraFolderError=$ExtraFolderError"
-    echo "VM_Selection=$VM_Selection  VM_Selection_Overide=$VM_Selection_Overide"
-    echo "ByPass_VM_Array_Loader=$ByPass_VM_Array_Loader  ByPass_VM_Array_Selector=$ByPass_VM_Array_Selector  MSR_DistrosFound=$MSR_DistrosFound"
-    echo "NewFileTuneUp_JustDone=$NewFileTuneUp_JustDone  QemuErrorLog=$QemuErrorLog"
-    echo "MainDrive=$MainDrive disk_img=$disk_img IsoImg=$IsoImg"
-    echo "SharedDrive=$SharedDrive SharedDrive_Conf=$SharedDrive_Conf SharedDrive_Mount=$SharedDrive_Mount"
-    echo "QE Source=$FreePath"
-    echo "QE_495_Script=$QE_495_Script  QE_496_Script=$QE_496_Script    CodingHotSwap=$CodingHotSwap  CodingHotSwapShow=$CodingHotSwapShow"
-    sleep "$Loop_Diagnostics"
-  fi
+  echo; echo "VM_Conf_Dir=$VM_Conf_Dir   VM_Conf_File=$VM_Conf_File   VM_InstanceName=$VM_InstanceName"
+  echo "pwd: $(pwd)   Current_VM_Folder=$Current_VM_Folder"
+  echo "BootStyle=$BootStyle   BootStyleMsg=$BootStyleMsg    BootStyle_Default=$BootStyle_Default   BootStyleMsg_Default=$BootStyleMsg_Default"
+  echo "ram=$ram   cpu_cores=$cpu_cores  mouse=$mouse  keyboard=$keyboard  boot=$boot"
+  echo "SelectArrayError=$SelectArrayError  DefaultFolderError=$DefaultFolderError  ExtraFolderError=$ExtraFolderError"
+  echo "VM_Selection=$VM_Selection  VM_Selection_Overide=$VM_Selection_Overide"
+  echo "ByPass_VM_Array_Loader=$ByPass_VM_Array_Loader  ByPass_VM_Array_Selector=$ByPass_VM_Array_Selector  MSR_DistrosFound=$MSR_DistrosFound"
+  echo "NewFileTuneUp_JustDone=$NewFileTuneUp_JustDone  QemuErrorLog=$QemuErrorLog"
+  echo "MainDrive=$MainDrive disk_img=$disk_img IsoImg=$IsoImg"
+  echo "SharedDrive=$SharedDrive SharedDrive_Conf=$SharedDrive_Conf SharedDrive_Mount=$SharedDrive_Mount"
+  echo "QE Source=$FreePath"
+  echo "QE_495_Script=$QE_495_Script  QE_496_Script=$QE_496_Script    CodingHotSwap=$CodingHotSwap  CodingHotSwapShow=$CodingHotSwapShow"
+  [[ $Loop_Diagnostics ]] && sleep "$Loop_Diagnostics"
 }
 
 function path_diagnostics {
-  if [[ $PathDiagnostics ]]; then
-    echo; echo; echo "DevStart=$DevStart  - pwd: $(pwd) - System_qqX_Path: $System_qqX_Path"
-    echo; echo "OriginalPATH=$OriginalPATH"
-    echo; echo "Export PATH=$PATH"
-    echo; echo "qqX_MainFolder: $qqX_MainFolder"
-    echo "qqX_BuiltinsFolder: $qqX_BuiltinsFolder"
-    echo "qqX_LibraryFolder: $qqX_LibraryFolder"
-    echo "qqX_CustomFolder: $qqX_CustomFolder"
-    echo "XDG_GUI_desktop_Folder: $XDG_GUI_desktop_Folder"
-    echo; echo "FreePath=$FreePath"
-    echo "QE_495_Script=$QE_495_Script  QE_496_Script=$QE_496_Script  CodingHotSwap=$CodingHotSwap  CodingHotSwapShow=$CodingHotSwapShow"
-    echo "QE_SourceVersion: $QE_SourceVersion"
-    echo "QE_SourcePath: $QE_SourcePath  QE_VerNumber: $QE_VerNumber"
-    echo "QG_SourcePath: $QG_SourcePath  QG_VerNumber: $QG_VerNumber"
-    echo
-    [[ $1 == "pause" ]] && read -rp "[enter] to continue " && echo
-  fi
+  echo; echo; echo "DevStart=$DevStart  - pwd: $(pwd) - System_qqX_Path: $System_qqX_Path"
+  echo; echo "OriginalPATH=$OriginalPATH"
+  echo; echo "Export PATH=$PATH"
+  echo; echo "qqX_MainFolder: $qqX_MainFolder"
+  echo "qqX_BuiltinsFolder: $qqX_BuiltinsFolder"
+  echo "qqX_LibraryFolder: $qqX_LibraryFolder"
+  echo "qqX_CustomFolder: $qqX_CustomFolder"
+  echo "XDG_GUI_desktop_Folder: $XDG_GUI_desktop_Folder"
+  echo; echo "FreePath=$FreePath"
+  echo "QE_495_Script=$QE_495_Script  QE_496_Script=$QE_496_Script  CodingHotSwap=$CodingHotSwap  CodingHotSwapShow=$CodingHotSwapShow"
+  echo "QE_SourceVersion: $QE_SourceVersion"
+  echo "QE_SourcePath: $QE_SourcePath  QE_VerNumber: $QE_VerNumber"
+  echo "QG_SourcePath: $QG_SourcePath  QG_VerNumber: $QG_VerNumber"
+  echo
+  [[ $1 == "pause" ]] && read -rp "[enter] to continue " && echo
 }
 
 [[ $Loop_Diagnostics ]] && printf "\n\n Pre-initialize :" &&  main_loop_diagnostics  && printf "\n\n"
+
+[[ $PathDiagnostics ]] && path_diagnostics
 
 ##############################################################################################################################
 
@@ -138,6 +136,10 @@ qqX_CustomFolder="$(dirname "$qqX_MainFolder")""/qqX.custom"
 # qqF standalone  > CL launched running of qcow2 file management utility (using main qqX to refresh the nbd vars)
 # early launch following the location of 'qqX_MainFolder' (and guessed filemanager)
 if [[ $1 == "--qqf" ]]; then
+  if [[ $Trace_InputVars ]]; then
+    printf "\n\n Starting 'qqX_filemanage_qcow_drive' via '\$1 --qqf' call: \n\n[enter]\n\n"
+    read -rp "  >  "
+  fi
   { printf "\n qqX_MainFolder=\"%s\"" "$qqX_MainFolder"
     printf "\n qqX_CustomFolder=\"%s\"" "$qqX_CustomFolder"
     printf "\n FileManager=\"%s\"" "xdg-open"
@@ -175,7 +177,8 @@ source "$qqX_MainFolder/qqX_main_translation"
 [[ $Loop_Diagnostics ]] && printf "\n\n QE_SourcePath = %s \n\n QG_SourcePath = %s \n"  "$QE_SourcePath" "$QG_SourcePath"
 
 # Don't load up code until checked for other instances, as the defaults could overwrite hot-swapped source files on the other instance
-multi_instance_checks
+# With exception of $1 starts, which would lead to a branch decider of Main or QF
+[[ ! $Initial_Input ]] && multi_instance_checks
 
 source "$qqX_MainFolder/qqX_MSR_functions"
 source "$qqX_MainFolder/qqX_wrap_quickemu"
@@ -228,6 +231,8 @@ fi
 
 #  The '$1' check for any MOUSE CLICK or COMMAND LINE parameters will read and set flags during 'qqX_initialize'
 #  General format is  --vm  "path/folder/file.conf", including .desktop starts which will have originally had 'XDG' as $1
+#  BUT $1 / Initial Input may also be a '.qcow' disk, and that disk may or may not be bootable,
+#  so different menu paths may be taken > initial input could go either to Main or to QF:
 
 [[ $Initial_Input ]] && source "$qqX_MainFolder/qqX_input_and_mouse_tidyup" &&  multi_instance_checks
 
@@ -236,7 +241,7 @@ fi
 # If selection has now been made via api or mouse:
 [[ $VM_InstanceName ]] && ByPass_VM_Array_Selector=1
 
-path_diagnostics pause
+[[ $PathDiagnostics ]] && path_diagnostics pause
 
 ## MAIN LOOP ###########################
 

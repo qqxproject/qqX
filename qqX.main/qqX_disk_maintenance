@@ -692,7 +692,7 @@ qcow2_filemanagement_launcher () {
   local qqf_Input=
   local qqf_Input_Drivepath=
 
-  if [[ $Trace_InputVars ]]; then echo; echo "Args: $*"  ; echo  ;  read -rp "  [enter] to continue  >  "; echo
+  if [[ $Trace_InputVars ]]; then echo; echo "Args: $*"  ; echo; sleep "$Trace_InputVars"
   fi
 
   if [[ $1 == "qqf-info" ]]; then qqf_StandaloneInfo=1 ; shift
@@ -702,7 +702,7 @@ qcow2_filemanagement_launcher () {
   [[ $1 ]] && qqf_Input_Drivepath="$(realpath "$1")" && shift
   [[ ! -e "$qqf_Input_Drivepath" ]] && qqf_Input_Drivepath=
 
-  if [[ $Trace_InputVars ]]; then echo; echo "qqf_Input_Drivepath: $qqf_Input_Drivepath"  ; echo  ;  read -rp "  [enter] to continue  >  "; echo
+  if [[ $Trace_InputVars ]]; then echo; echo "qqf_Input_Drivepath: $qqf_Input_Drivepath"  ; echo; sleep "$Trace_InputVars"
   fi
 
   if [[ ! -e "$XDG_GUI_desktop_Folder/qqX.desktop" ]]; then
@@ -772,7 +772,7 @@ qcow2_filemanagement_launcher () {
     } > "/tmp/qqX_nbd_vars"
   fi
 
-  if [[ $Trace_InputVars ]]; then echo; cat "/tmp/qqX_nbd_vars"  ; echo  ; sleep "$Trace_InputVars" ; fi
+  if [[ $Trace_InputVars ]]; then printf "\n\n NBD transfer Vars: \n"; cat "/tmp/qqX_nbd_vars"; echo; fi
 
   if [[ $qqf_StandaloneInfo ]]; then
     if [[ $Trace_InputVars ]]; then echo " returning via: qqf_StandaloneInfo"  ; echo  ;  read -rp "  [enter] to continue  >  "; echo; fi
@@ -783,7 +783,9 @@ qcow2_filemanagement_launcher () {
     return
 
   elif [[ $qqf_Input_Drivepath ]]; then
-    if [[ $Trace_InputVars ]]; then echo " using: qqf_Input_Drivepath methods"  ; echo  ;  read -rp "  [enter] to continue  >  "; echo; fi
+      printf "\n\n  Opening a new SUB-PROCESS terminal using qqf_Input_Drivepath methods - This one stays open ...\n\n"
+      read -rp "  [enter] to continue  >  "
+      printf "\n"
     if [[ -e "$qqX_CustomFolder/custom_filemanage_qcow_drive" ]]; then
       eval "$Terminal_Start" "$qqX_CustomFolder/custom_filemanage_qcow_drive  $qqf_Input_Drivepath"  >/dev/null 2>&1 &
     else
@@ -792,7 +794,6 @@ qcow2_filemanagement_launcher () {
     wait "$!"
 
   else
-    if [[ $Trace_InputVars ]]; then echo " using standard methods"  ; echo  ;  read -rp "  [enter] to continue  >  "; echo; fi
     if [[ -e "$qqX_CustomFolder/custom_filemanage_qcow_drive" ]]; then
       eval "$Terminal_Start" "$qqX_CustomFolder/custom_filemanage_qcow_drive" >/dev/null 2>&1 &
     else
@@ -800,7 +801,9 @@ qcow2_filemanagement_launcher () {
     fi
   fi
 
-  if [[ $Trace_InputVars ]]; then echo; echo " End of qcow2_filemanagement_launcher sequence ..."  ; echo  ;  read -rp "  [enter] to continue  >  "; echo; fi
+  if [[ $Trace_InputVars ]]; then
+    echo; echo " End of THIS qcow2_filemanagement_launcher sequence ..."
+  fi
 
 }
 

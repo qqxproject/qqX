@@ -333,7 +333,7 @@ function qemu_version_check {
 
 qemu_version_check
 
-path_diagnostics  pause
+[[ $PathDiagnostics ]] && path_diagnostics pause
 
 # How the Tiano BIOS/UEFI loads up:
 
