@@ -320,7 +320,7 @@ function multi_instance_checks {
 
   # NOTE use 'ps' here as pgrep can cause problems
   # shellcheck disable=SC2009
-  AnotherQQ="$(ps -ef | grep -e'/qqX' | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v grep  2>/dev/null)"
+  AnotherQQ="$(ps -ef | grep -e '/qqx' -e '/qqX' | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v '_install' | grep -v grep  2>/dev/null)"
 
   # If loading up the qcow menu, but then not choosing the qf option,
   # then the currrent qcow ceases to be a duplicate, and we need the VM selector interface, not the main selected one
@@ -361,13 +361,11 @@ function multi_instance_checks {
     mapfile -t AnotherQQ_Arr <<< "$AnotherQQ"
     for QQ in "${AnotherQQ_Arr[@]}"; do
       [[ "$QQ" == *"$CurrentQQ"* ]] || [[ "$QQ" == *"$CurrentQQ_Parent"* ]] && continue
-      [[ "$QQ" == *'/usr/share/'* ]] && [[ "$QQ" != *'/usr/share/qqX'* ]] && continue
+      [[ "$QQ" == *'/usr/'* ]] && [[ "$QQ" != *'/usr/share/qqX'* ]] && [[ "$QQ" != *'/usr/bin/qqX'* ]] && continue
       if [[ "$QQ" == *'--qqf'* ]] || [[ "$QQ" == *'qqX_filemanage'* ]]; then
         OtherQQ_qqF_Arr+=("$(awk '{print $2}' <<< "$QQ")")
-      elif [[ $QF_exit_to_Main ]] && [[ "$QQ" != *'qqX_copy_over'* ]]; then
-        QF_exit_to_Main=
-        OtherQQ_MainArr+=("$(awk '{print $2}' <<< "$QQ")")
       elif [[ "$QQ" != *'qqX_copy_over'* ]]; then
+        [[ $QF_exit_to_Main ]] && QF_exit_to_Main=
         OtherQQ_MainArr+=("$(awk '{print $2}' <<< "$QQ")")
       fi
     done
@@ -390,8 +388,9 @@ function multi_instance_checks {
 
     qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running "
     printf "\n"
-    printf "\n\n  QEMU will lock protect key files and will prevent VM's being run simultaneously ..."
-    printf "\n\n  Simple usage can be possible but be aware that minor cross-linking problems could occur"
+    printf "\n\n  QEMU will lock protect key files and will prevent VM's being run simultaneously"
+    printf "\n\n  but be aware that minor cross-linking problems can occur, even if simple multi-instance usage is still possible "
+    printf "\n\n  OR, this may just be a false alarm ..."
     printf "\n\n\n  [enter] to continue with all   [k] kill other instances and continue with just this one "
     printColor "\n\n  [q] to quit \n\n"
     read -rp "  >  "   MultiQuit
@@ -405,7 +404,7 @@ function multi_instance_checks {
         printf "\n\n  CLI instances will terminate but the windows will remain open ..."
         printColor "\n\n\n  Killing other qqX instances ... "
       fi
-      printf "\n\n  [k] yes, kill  [enter] to continue with all  [q] to quit \n\n"
+      printf "\n\n  [k] yes, kill   [enter] continue with all   [q] to quit \n\n"
       read -rp "  >  "  KillQQ
       if [[ $KillQQ == "k" ]]; then
         for QQ in "${OtherQQ_MainArr[@]}"; do
