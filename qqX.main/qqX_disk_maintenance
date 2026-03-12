@@ -726,14 +726,34 @@ qcow2_filemanagement_launcher () {
     fi
   fi
 
-  # resize qqf terminal a tad, if possible, to make it easier to see that there are two terms open
-  Terminal_Start="${Terminal_Start/150/170}"
-  Terminal_Start="${Terminal_Start/145/170}"
-  Terminal_Start="${Terminal_Start/x55/x45}"
-  Terminal_Start="${Terminal_Start/x50/x45}"
-
+  # gets grepped for multi-instance checks by the qqX_filemanage script (using the sourced vars)
   local UserTerm=
   UserTerm="$(cut -d' ' -f1 <<< "$Terminal_Start")"
+
+  # resize qqf terminal a tad, if possible, to make it easier to see that there are two terms open:
+  if [[ $UserTerm == "xxqterminal" ]] && [[ -e "$HOME/.config/qterminal.org/qterminal.ini" ]]; then
+    TermConf_User="$HOME/.config/qterminal.org/qterminal.ini"
+    # see https://github.com/lxqt/qterminal/issues/488
+    # and setup and install script
+    # REVIEW outputs correctly but all location/name combos fail, tested on qterminal versions 1.4 & 2.3
+    TermConf_Tmp="/tmp/qq-qterminal.ini"
+    # sed -i is not always present, use grep.
+    # But not 'grep -i' as lower case 'size=@' is separate from other camelCase entries with *Size=@
+    qterminalCurrentSize="$(grep 'size=@' "$TermConf_User" | cut -d'(' -f2 | tr -d ')')"
+    qterminalCurrentWidth="$(cut -d' ' -f1 <<< "$qterminalCurrentSize")"
+    qterminalCurrentHeight="$(cut -d' ' -f2 <<< "$qterminalCurrentSize")"
+    qterminalQFwidth=$((qterminalCurrentWidth+200))
+    qterminalQFheight=$((qterminalCurrentHeight-100))
+    grep -B 500 'size=@' "$TermConf_User" | head -n -1 > "$TermConf_Tmp"
+    echo "size=@Size($qterminalQFwidth $qterminalQFheight)" >> "$TermConf_Tmp"
+    grep -A 500 'size=@' "$TermConf_User" | tail -n +2 >> "$TermConf_Tmp"
+    Terminal_Start="qterminal -p $TermConf_Tmp -e"
+  else
+    Terminal_Start="${Terminal_Start/150/170}"
+    Terminal_Start="${Terminal_Start/145/170}"
+    Terminal_Start="${Terminal_Start/x55/x45}"
+    Terminal_Start="${Terminal_Start/x50/x45}"
+  fi
 
   if [[ $qqf_StandaloneInfo ]]; then
   printColor "\n\n  This option will set/reset the necessary VM variables of a QF instance."

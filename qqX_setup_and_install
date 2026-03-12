@@ -136,15 +136,17 @@ elif [ "$UserTerm" = "mate-terminal" ]; then
 elif [ "$UserTerm" = "xfce4-terminal" ]; then
   "$UserTerm" --geometry=145x50 --hide-menubar --hide-toolbar  -e "./qqX.system/qqX_system_install"
 
-elif [ "$UserTerm" = "qterminal" ]; then
-  # create profile for geometry
+elif [ "$UserTerm" = "xxqterminal" ]; then
+  # create profile for geometry REVIEW
+  # see https://github.com/lxqt/qterminal/issues/488
+  # and QF 'qcow2_filemanagement_launcher'
   if [ -e "$HOME/.config/qterminal.org/qterminal.ini" ]; then
     TermConf_User="$HOME/.config/qterminal.org/qterminal.ini"
     TermConf_Tmp="/tmp/qq-qterminal.ini"
     # sed -i is not always present, use grep.
     # But not 'grep -i' as lower case 'size=@' is separate from other camelCase entries with *Size=@
     grep -B 500 'size=@' "$TermConf_User" | head -n -1 > "$TermConf_Tmp"
-    echo "size=@(1200 600)" >> "$TermConf_Tmp"
+    echo "size=@Size(1200 600)" >> "$TermConf_Tmp"
     grep -A 500 'size=@' "$TermConf_User" | tail -n +2 >> "$TermConf_Tmp"
     "$UserTerm" -p "$TermConf_Tmp" -e "./qqX.system/qqX_system_install"
   else
