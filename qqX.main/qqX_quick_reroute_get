@@ -593,7 +593,7 @@ function_quick_get_wrap ()  {
   show_QWG_header
   QGW_List_NumSelected=
   GT_Exit=
-  main_loop_diagnostics ; [[ $Loop_Diagnostics ]] && echo
+  [[ $Loop_Diagnostics ]] && main_loop_diagnostics && echo
   clear_main_gt_start_vars
 
   # Forced internet check/re-check when starting 'gt' menu (see $VM_Selection == "gt")
@@ -857,7 +857,6 @@ function_quick_get_wrap ()  {
       fi
 
       [[ $Loop_Diagnostics ]] && printf "\n\n End of Quickget first loop, stage 1:" &&  main_loop_diagnostics
-
 
       if [[ $CodingHotSwapShow || $GT_Help ]]; then
         show_QWG_header ; show_hot_swap_line

@@ -100,10 +100,9 @@ function quickemu {
 
       # Make sure quickemu doesn't run the vm boot sequence after running an 'action' unless flagged to do so
       # load extracted standard quickemu code that gives the okay to run main function 'vm_boot' (in this case, the modded one)
-
       Mounted_ISO_Return=
-
       [[ $Loop_Diagnostics ]] && printf "\n\n pre drives_and_snapshots :" &&  main_loop_diagnostics
+
       if [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
         printColor "  LIVE BOOT ERROR  %s  \n\n  [enter] to return files in the VM folder \n\n"
         read -rp "  >  "
