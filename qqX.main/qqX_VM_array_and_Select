@@ -72,6 +72,11 @@ VM_loader_selector_and_menu () {
 
       if [[ $Run_GT ]]; then  Run_GT= ; VM_Selection="gt"
 
+      elif [[ $DiskStorageChanges ]]; then
+
+        DiskStorageChanges= ; VM_Selection="r"
+        printColor "\n\n  Refreshing storage .... \n\n"
+
       else
         printf "\033c"
         show_qqX_title_bar
@@ -154,11 +159,6 @@ VM_loader_selector_and_menu () {
         [[ $PathDiagnostics ]] && path_diagnostics
         IgnoreConfigErrors=
         FD_Phrase= ; FD_Start= ; FD_Found=
-
-        if [[ $DiskStorageChanges ]]; then
-          DiskStorageChanges=
-          VM_Selection_Overide="r"
-        fi
 
         if [[ $VM_Selection_Overide ]];then
           VM_Selection="$VM_Selection_Overide"

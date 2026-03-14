@@ -262,7 +262,7 @@ else
       fi
       if [[ $RtvUpd ]]; then
         if [[ $RtvArm ]]; then
-            printColor "\n\n  [rtv]  OVMF updates may be available > Last checked 120 days ago ..."
+            printColor "\n\n  [rtv]  OVMF updates may be available > Last checked over 120 days ago ..."
         elif [[ "$VM_InstanceName" == *macos* ]] && [[ ! $RtvMacos_Upd_Off ]]; then
             printf "\n\n  BootLoader Security Updates and Improvements .....  "
             refresh_tiano_vars &

@@ -226,12 +226,17 @@ check_disk_is_okay () {
       DiskChkEpochTime="$(date +%s)"
       LastSnapDate="$("$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | tail -n 1 | awk '{print $5}')"
       LastSnapEpochTime="$(date -d "$LastSnapDate" +%s)"
+      LastSnapDistance="$((DiskChkEpochTime-LastSnapEpochTime))"
       # where 1209600 = 14 days
-      [[ $((DiskChkEpochTime-LastSnapEpochTime)) -gt 1209600 ]] && DiskChkAddSnap=1
+      [[ $LastSnapDistance -gt 1209600 ]] && DiskChkAddSnap=1
     fi
     if [[ $DiskChkAddSnap ]] ; then
+      printColor "\n\n  Taking Main Drive Auto-Snapshot >  Last snapshot was %d days ago ... \n\n" "$((LastSnapDistance/86400))"
       SnapTitle="$(date +%b.%d.%H:%M)"
       "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
+      # DiskStorageChanges=1  unlikely to cause changes, unless a VM is run and updating creates data ....  REVIEW
+      read -t 4 -rp "  [enter] to refresh and continue > "
+      echo ; MainMenuChoicePreset="rq"
     fi
   fi
 }
