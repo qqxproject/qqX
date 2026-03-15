@@ -51,10 +51,26 @@ function is_firmware_qcow2() {
     if grep -qs "QFI" <<< "$(head -c 4 "$1" | tr -cd '[:graph:]')" ; then echo "true" ; fi
 }
 
-## TIDY pinning function and make sure Vars are local where needed
+## TIDY 4.99 pinning function and make sure Vars are local where needed, and add notes
+# PLUS add error handling for Intel PE setup, which the upstream code doesn't seem to deal with:
+# eg this https://www.intel.com/content/www/us/en/products/sku/226253/intel-core-i71280p-processor-24m-cache-up-to-4-80-ghz/specifications.html
+# which has 14 cores and 20 threads ...  REVIEW and consider if a better implementation is possible
+
 function configure_cpu_pinning() {
 
     [[ ! $CORE_MAPPING ]] && return
+
+    # qqX > add a double check for possible PE mixed thread count designs ...
+    local CoreCheck Sockets CoresPS ThreadsPC CoreTheoretical
+    CoreCheck="$(lscpu | grep -m1 'CPU(s):' | awk '{print $NF}')"
+    Sockets="$(lscpu | grep 'Socket(s):' | awk '{print $NF}')"
+    CoresPS="$(lscpu | grep 'Core(s) per socket:' | awk '{print $NF}')"
+    ThreadsPC="$(lscpu | grep 'Thread(s) per core' | awk '{print $NF}')"
+    CoreTheoretical=$((Sockets*CoresPS*ThreadsPC))
+    if [[ $ThreadsPC != "$GUEST_CPU_THREADS" ]] || [[ $CoreCheck != "$CoreTheoretical" ]]; then
+        echo " - ERROR!  Current Quickemu pinning code needs the number of host threads per core to be consistent"
+        exit 1
+    fi
 
     local tid tid_dir name core_idx host_cpu
     local GUEST_CPUS idx=0
@@ -63,15 +79,20 @@ function configure_cpu_pinning() {
         tid=$(basename "$tid_dir")
         name=$(cat "$tid_dir/comm")
         if [[ "$name" == CPU* ]]; then
-            # Map per core, if threads are specified pin them to the same core
+            # Map per core, if threads are specified pin them to the same core (upstream method)
+            # qqX > the float gets dropped when using bash builtin math functions,
+            # so if threads are 1 then does simple count, if 2 then does a double count eg. 0,0,1,1,2,2 etc,
+            # as in "for idx in {0..11}; do echo $((idx/2)); done" for 6 core, 2 thread
             core_idx=$(( idx / GUEST_CPU_THREADS ))
             host_cpu=${CORE_MAPPING[$core_idx]}
+            # Display message:
             if (( idx % GUEST_CPU_THREADS == 0 )); then
                 [[ "$GUEST_CPUS" ]] && GUEST_CPUS+=","
                 GUEST_CPUS+="$core_idx"
             fi
+            # Host setting:
             taskset -cp "$host_cpu" "$tid" &>/dev/null
-            idx=$((idx + 1))
+            ((idx += 1))
         fi
     done
     echo " - CPU Pinning: Bind guest cores to host cores (${GUEST_CPUS} -> ${CPU_PINNING})"
