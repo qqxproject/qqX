@@ -29,22 +29,52 @@
 #  However, 2 space is the normal qqX tabbing. Try to keep the tabbing consistent within sections, where possible.
 #  QuickGet and qqX house styles may be mixed, WHICHEVER IS EASIEST. See notes at end for qqX coding style.
 
+##########################################
+
 #  This script is sourced when running a QuickEmu builtin and is suitable for smaller functions.
 
-#  UNLIKE the QuickGet Mods script, which remains variable isolated from running instances of qqX,
+#  NB: UNLIKE the QuickGet Mods script, which remains variable isolated from running instances of qqX,
 #  the QuickEmu functions get sourced by qqX and can inherit qqX globals.
+#  AS most of the quickemu function are quite long, a different approach is needed:
 #  See the script qqX_wrap_quickemu > 'find_quickemu_source_functions_and_vars'
 #  Take care to maintain QuickEmu variable name continuity where needed.
 
 ##########################################
 
-QE_ModsNumber="v2.1"
+QE_ModsNumber="v2.2"  # For 4.99 @ jan to mar 2026
 
-## FIX null bytes error BUT keep awkward true flag method, for now, to maintain 'vm_boot' upstream compatibility
+## FIX null bytes error BUT instead of using a simple grep -q return status,
+# keep (echo) true flag method, for now, to maintain 'vm_boot' upstream compatibility
 function is_firmware_qcow2() {
     # Check for the magic bytes that indicate the firmware is in qcow2 format,
     # otherwise default to assuming firmware files are in raw format
     if grep -qs "QFI" <<< "$(head -c 4 "$1" | tr -cd '[:graph:]')" ; then echo "true" ; fi
+}
+
+## TIDY pinning function and make sure Vars are local where needed
+function configure_cpu_pinning() {
+
+    [[ ! $CORE_MAPPING ]] && return
+
+    local tid tid_dir name core_idx host_cpu
+    local GUEST_CPUS idx=0
+
+    for tid_dir in /proc/"${VM_PID}"/task/*; do
+        tid=$(basename "$tid_dir")
+        name=$(cat "$tid_dir/comm")
+        if [[ "$name" == CPU* ]]; then
+            # Map per core, if threads are specified pin them to the same core
+            core_idx=$(( idx / GUEST_CPU_THREADS ))
+            host_cpu=${CORE_MAPPING[$core_idx]}
+            if (( idx % GUEST_CPU_THREADS == 0 )); then
+                [[ "$GUEST_CPUS" ]] && GUEST_CPUS+=","
+                GUEST_CPUS+="$core_idx"
+            fi
+            taskset -cp "$host_cpu" "$tid" &>/dev/null
+            idx=$((idx + 1))
+        fi
+    done
+    echo " - CPU Pinning: Bind guest cores to host cores (${GUEST_CPUS} -> ${CPU_PINNING})"
 }
 
 ## FIX ovmfs array parse BUT @ feb 2026 suspend due to upstream changes 4.9.9 REVIEW
