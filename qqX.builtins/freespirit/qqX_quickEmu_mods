@@ -52,7 +52,7 @@ function is_firmware_qcow2() {
 }
 
 ## TIDY 4.99 PINNING FUNCTION and make sure Vars are local where needed, and add notes
-# PLUS add error handling for Intel PE setup, which the upstream code doesn't seem to deal with:
+# PLUS add handling for Intel PE setup, which the upstream code doesn't seem to deal with:
 # eg this https://www.intel.com/content/www/us/en/products/sku/226253/intel-core-i71280p-processor-24m-cache-up-to-4-80-ghz/specifications.html
 # which has 14 cores and 20 threads ...
 
@@ -62,8 +62,14 @@ function configure_cpu_pinning() {
     # and $CPU_PINNING is the actual raw $2  >>  for qqX, bypass the standard CLI and read from the VM .conf file, and
     # using '$cpu_pins' (global) to avoid future conflicts with .conf lowercase 'cpu_pinning' being added upstream ...
 
+    # qqX implementation with P/E core capabilities:
+    # See file 'qqX_configuration_tune_up' for HostCoresArr
+
     # Validate input of the cpu_pins, pinning is not supported on macOS (moved here, with fix for count test, from 'vm_boot', for qqX)
     if [[ $cpu_pins ]]; then
+
+        [[ ! ${HostCoresArr[0]} ]] && cpu_core_layout_probe
+
         if [ "${OS_KERNEL}" != "Linux" ]; then
             echo " - ERROR!  Only Linux OS Kernels have support for CPU Pinning operations" ; return
         fi
@@ -73,6 +79,10 @@ function configure_cpu_pinning() {
         if ! [[ "${cpu_pins}" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
             echo " - ERROR!  Couldn't parse CPU pinning: '${cpu_pins}', only comma-separated list is supported" ; return
         fi
+
+        # CAUTION: Using BADLY NAMED UPSTREAM variables  >> where eg. 'CPU_CORES' means 'ProcessThreads' or 'cpus' as in 'cores x threads per core'
+        # See '-smp' at https://qemu.readthedocs.io/en/master/system/invocation.html  and  lscpu --extended=core,cpu,maxmhz
+
         IFS=',' read -r -a CORE_MAPPING <<< "$cpu_pins"
         NUM_CORE_MAPPING=${#CORE_MAPPING[@]}
         if [ "$NUM_CORE_MAPPING" -ne "$GUEST_CPU_CORES" ]; then
@@ -81,26 +91,14 @@ function configure_cpu_pinning() {
     else return
     fi
 
-    # qqX implementation with P/E core capabilities:
-    # mapfile -t CoreArr <<< $(lscpu --extended=core | tail -n +2 | tr -d ' ')
-    # Intel 11400 6 core, 2 thread:  note separated 6 x 6 mapping
-    # declare -a CoreArr=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5" [6]="0" [7]="1" [8]="2" [9]="3" [10]="4" [11]="5")
-    # Intel (PE) 12900K: where last Array element is '23', the CPU count (plus 1, = 24), but core count is '15' (plus 1, = 16)
-    # declare -a PE_CoresArr=([0]="0" [1]="0" [2]="1" [3]="1" [4]="2" [5]="2" [6]="3" [7]="3"
-    # [8]="4" [9]="4" [10]="5" [11]="5" [12]="6" [13]="6" [14]="7" [15]="7"  # two threads on each P core, listed core by core
-    # 16]="8" [17]="9" [18]="10" [19]="11" [20]="12" [21]="13" [22]="14" [23]="15")  # pattern changes here to one thread per E core
-    # See https://stackoverflow.com/questions/71122837/how-to-detect-e-cores-and-p-cores-in-linux-alder-lake-system#71282744
-
     local tid tid_dir name core_idx host_cpu
     local GUEST_CPUS idx=0
-
-    mapfile -t CoreArr <<< "$(lscpu --extended=core | tail -n +2 | tr -d ' ')"
 
     for tid_dir in /proc/"${InstancePID}"/task/*; do
         tid=$(basename "$tid_dir")
         name=$(cat "$tid_dir/comm")
         if [[ "$name" == CPU* ]]; then
-            core_idx="${CoreArr[$idx]}"
+            core_idx="${HostCoresArr[$idx]}"
             host_cpu="${CORE_MAPPING[$core_idx]}"
             # Display message:
             [[ "$GUEST_CPUS" ]] && GUEST_CPUS+=","
@@ -117,6 +115,10 @@ function configure_cpu_pinning() {
 }
 
 function configure_cpu() {
+
+    # CAUTION: Using BADLY NAMED UPSTREAM variables  >> where eg. 'CPU_CORES' means 'ProcessThreads' or 'cpus' as in 'cores x threads per core'
+    # See '-smp' at https://qemu.readthedocs.io/en/master/system/invocation.html  and  lscpu --extended=core,cpu,maxmhz
+
     HOST_CPU_CORES=$(get_nproc) # upstream method using nproc - to REVIEW with PE cpus
     HOST_CPU_MODEL=$(get_cpu_info '^Model name:')
     HOST_CPU_SOCKETS=$(get_cpu_info 'Socket')
@@ -554,6 +556,7 @@ function configure_cpu() {
     }
 
     ## MOD ## Qemu uses the '-smp' arg to ONLY SIMULATE a machine spec ....
+    # see -smp at https://qemu.readthedocs.io/en/master/system/invocation.html
 
     if [[ $GUEST_CPU_CORES == 1 ]]; then GUEST_CPU_THREADS=1 ; GUEST_CPU_LOGICAL_CORES=1
     else GUEST_CPU_THREADS=2 ; GUEST_CPU_LOGICAL_CORES="$((GUEST_CPU_CORES/2))"

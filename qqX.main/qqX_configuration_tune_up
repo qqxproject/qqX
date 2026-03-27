@@ -15,35 +15,55 @@
 
 #  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154
 
+## Check HOST CPU for cores and threading layout
+
+function cpu_core_layout_probe {
+
+  # qqX implementation with P/E core capabilities:
+
+  # run once, is sufficient:
+  [[ ${HostCoresArr[0]} ]] && return
+
+  # Intel 11400 6 core, 2 thread:  note separated 6 x 6 mapping
+  # declare -a HostCoresArr=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5" [6]="0" [7]="1" [8]="2" [9]="3" [10]="4" [11]="5")
+  # Intel (PE) 12900K: where last Array element is '23', the CPU count (plus 1, = 24), but core count is '15' (plus 1, = 16)
+  # declare -a HostCoresArr=([0]="0" [1]="0" [2]="1" [3]="1" [4]="2" [5]="2" [6]="3" [7]="3"
+  # [8]="4" [9]="4" [10]="5" [11]="5" [12]="6" [13]="6" [14]="7" [15]="7"  # two threads on each P core, listed core by core
+  # 16]="8" [17]="9" [18]="10" [19]="11" [20]="12" [21]="13" [22]="14" [23]="15")  # pattern changes here to one thread per E core
+  # See https://stackoverflow.com/questions/71122837/how-to-detect-e-cores-and-p-cores-in-linux-alder-lake-system#71282744
+
+  mapfile -t HostCoresArr <<< "$(lscpu --extended=core | tail -n +2 | tr -d ' ')"
+  HostThreadsAvailable="${#HostCoresArr[@]}"
+
+  mapfile -t HostSpeedArr <<< "$(lscpu --extended=maxmhz | tail -n +2 | tr -d ' ' | cut -d'.' -f1)"
+  ListOfHostCpuSpeeds="$(printf "%s\n" "${HostSpeedArr[@]}" | sort -ru)"
+  NumberOfHostCpuSpeeds="$(wc -l <<< "$ListOfHostCpuSpeeds")"
+}
 
 function_config_tune_up ()  {
 
   # $1 should be the full path/filename.conf
-
   TuneUpTargetFile="$1"
+  TuneUpDate="$(date +%b.%d.%H:%M)"
 
   if [[ "$(dirname "$TuneUpTargetFile")" == '.' ]]; then
     printColor "\n\n  Internal ERROR  tune up .conf file not found or missing path \n\n  %s \n\n"
     sleep 100
   fi
 
-  TuneUp_InstanceName="$(basename "$TuneUpTargetFile" .conf)"
-  TuneUpDate="$(date +%b.%d.%H:%M)"
-
-  # Should be in the group folder but make sure we are.
+  # We should be in the group folder but make sure we are.
   # Could happen if tune up follows a download that was started in a different folder to the target new one.
   TuneUp_Conf_Dir="$(dirname "$TuneUpTargetFile")"
-
   if [[ ! -d $TuneUp_Conf_Dir ]]; then
     printColor "\n\n  Internal ERROR  tune up Group Folder not found \n\n  %s \n\n"
     sleep 100
   fi
-
   cd "$TuneUp_Conf_Dir" || printColor "\n\n  ERROR changing to Tuning Group Folder "
 
-  # standard procedure is to makes this match the .conf
+  # standard procedure is to make VM name match the .conf
+  TuneUp_InstanceName="$(basename "$TuneUpTargetFile" .conf)"
   if [[ ! -d $TuneUp_InstanceName ]]; then
-    printColor "\n\n  Internal ERROR  tune up Distro Name Folder not found \n\n  %s \n\n"
+    printColor "\n\n  Internal ERROR:  Conf file / Distro Name Folder MISMATCH \n\n  %s \n\n"
     sleep 100
   fi
 
@@ -256,39 +276,41 @@ function_config_tune_up ()  {
 
   # cpu cores menu:
 
-  if [[ $(type -p lscpu) ]]; then  # TODO  rewrite   # plus add test and feedback request for nproc vs lscpu
+  [[ ! ${HostCoresArr[0]} ]] && cpu_core_layout_probe
 
-    CoresAvail=$(lscpu | grep "Core(s) per socket:" | tr -cd "[:digit:]")
-    SocketsAvail=$(lscpu | grep "Socket(s):" | tr -cd "[:digit:]")   #  REVIEW  for dual cpu mobo (untested)
-    CoresAvail=$((SocketsAvail*CoresAvail))
-    ThreadsPerCoreAvail=$(lscpu | grep "Thread(s) per core:" | tr -cd "[:digit:]")      #  REVIEW
-    ThreadsAvailable=$((ThreadsPerCoreAvail*CoresAvail))
-    ThreadsSuggested=$(bc <<< "scale=0; ((($ThreadsAvailable*3)/4)+0.5)/1" 2>/dev/null)
+  GuestThreadsSuggested=$(bc <<< "scale=0; ((($HostThreadsAvailable*3)/4)+0.5)/1" 2>/dev/null)
+  #  Use 'modulo' to detect odd/even   See: https://stackoverflow.com/a/15660039
+  [[ "$(( GuestThreadsSuggested % 2 ))" == "1" ]] && (( GuestThreadsSuggested +=1 ))
+  GuestThreadsSuggest_Lower=$(bc <<< "scale=0; ((($HostThreadsAvailable*2)/3)+0.5)/1" 2>/dev/null)
+  [[ "$(( GuestThreadsSuggest_Lower % 2 ))" == "1" ]] && (( GuestThreadsSuggest_Lower +=1 ))
+  GuestThreadsSuggest_Pinning="$((HostThreadsAvailable/2))"
+  [[ "$(( GuestThreadsSuggest_Pinning % 2 ))" == "1" ]] && (( GuestThreadsSuggest_Pinning +=1 ))
 
-    #  Use 'modulo' to detect odd/even   See: https://stackoverflow.com/a/15660039
-    [[ "$(( ThreadsSuggested % 2 ))" == "1" ]] && (( ThreadsSuggested +=1 ))
-    ThreadsSuggestLower=$(bc <<< "scale=0; ((($ThreadsAvailable*2)/3)+0.5)/1" 2>/dev/null)
-    [[ "$(( ThreadsSuggestLower % 2 ))" == "1" ]] && (( ThreadsSuggestLower +=1 ))
+  printColor "\n\n  You have %s 'cores' available  (actual cores, or cores x threads) " "$HostThreadsAvailable"
 
+  printf "\n\n  Normally, the guest setting should be around 2/3 to 3/4 of the host's"
+
+  if [[ $NumberOfHostCpuSpeeds -gt 1 ]] && [[ $(uname -s) == "Linux" ]]; then
+    printf "\n\n  However,  %s different core speeds are present on your Host CPU:  %s" "$NumberOfHostCpuSpeeds" "$(paste -s -d' ' <<< "$ListOfHostCpuSpeeds")"
+    printf "\n\n  The processor controller should theoretically allocate the workload appropriately"
+    printf "\n  BUT you may wish to experiment with CPU pinning to adjust the speed and capability allocations:"
+  else
+    printf "\n  BUT these are VIRTUAL cores, so more than physically available may also be set, if needed."
   fi
 
-  [[ $ThreadsAvailable ]] && printColor "\n\n  You have %s 'cores' available  (actual cores, or cores x threads) " "$ThreadsAvailable"
-
-  printf "\n\n  Normal guest setting should be around 2/3 to 3/4 of the host's."
-  printf "\n\n  All available 'cores x threads' can be allocated, esp. if running the VM full screen"
-  printf "\n\n  These are VIRTUAL cores. So more than physically available may also be used too."
-
-  printf "\n\n\n  Possibly, if using 'big LITTLE'  CPU's you *may* choose to use a lower figure."
-  printf "\n\n  Quickemu defaults to half the physical count. But be generous as less will actually be used."
-  printf "\n\n  And the host CPU virtualizing units will always protect things ...."
+  if [[ $(uname -s) == "Linux" ]]; then
+    printf "\n\n  For pinning, select an even-numbered and lower \"cpu's\" count, possibly around 1/2 to 2/3 of the number available."
+    printf "\n  More instructions will be given towards the end of the tune-up menu."
+  fi
 
   if [[ $guest_os == "macos" ]]; then
     printColor "\n\n\n  MacOS: This should be cpu_cores=8 =16 or =32  Other values will not boot."
     printf "\n\n  Where value creates a simulated CPU based on the threads available, eg 4 physical cores x 2 threads per core = 8"
-    ThreadsSuggested=8
-    ThreadsSuggestLower=8
+    if [[ "$HostThreadsAvailable" -gt 24 ]]; then GuestThreadsSuggested=16 ; GuestThreadsSuggest_Lower=16
+    else GuestThreadsSuggested=8 ; GuestThreadsSuggest_Lower=8
+    fi
   else
-    [[ $ThreadsSuggested ]] && printColor "\n\n  Suggested setting:  cpu_cores=\"%s\"  or  cpu_cores=\"%s\"" "$ThreadsSuggested"  "$ThreadsSuggestLower"
+    printColor "\n\n  Suggested setting:  cpu_cores=\"%s\"  or  =\"%s\"  =\"%s\" " "$GuestThreadsSuggested"  "$GuestThreadsSuggest_Lower" "$GuestThreadsSuggest_Pinning"
   fi
   CoresSetNumber=
   ConfLine="$(grep -s 'cpu_cores' "$TuneUpTmpCopy")"
@@ -296,10 +318,10 @@ function_config_tune_up ()  {
   if [[ $ConfLine ]]; then
     printf "\n\n  CURRENT setting:  %s" "$ConfLine"
     CurrentCores="$(tr -cd "[:digit:]" <<< "$ConfLine")"
-    [[ $CurrentCores != "$ThreadsSuggestLower"  ]] && printColor "   [c] to use current  "
+    [[ $CurrentCores != "$GuestThreadsSuggest_Lower"  ]] && printColor "   [c] to use current  "
   fi
 
-  if [[ $ThreadsSuggestLower ]]; then printColor "\n\n  [enter] use %s " "$ThreadsSuggestLower"; else  printf "\n\n" ; fi
+  if [[ $GuestThreadsSuggest_Lower ]]; then printColor "\n\n  [enter] use %s " "$GuestThreadsSuggest_Lower"; else  printf "\n\n" ; fi
 
   printColor "  [integer] choose (even numbers are usual)  "
   printColor "[d] use quickemu defaults   [q] quit tune-up \n\n"
@@ -312,9 +334,9 @@ function_config_tune_up ()  {
   elif [[ $CoresSetNumber == "c" ]]; then  printf "%s\n" "$ConfLine" >> "$TuneUpTargetDraft"
   elif [[ $CoresSetNumber == "d" ]]; then  true
   else
-    if [[ $ThreadsSuggestLower ]]; then
-      printf "cpu_cores=\"%s\"\n"  "$ThreadsSuggestLower"  >> "$TuneUpTargetDraft"
-      printf "\n\n  Max cores set to %s " "$ThreadsSuggestLower"
+    if [[ $GuestThreadsSuggest_Lower ]]; then
+      printf "cpu_cores=\"%s\"\n"  "$GuestThreadsSuggest_Lower"  >> "$TuneUpTargetDraft"
+      printf "\n\n  Max cores set to %s " "$GuestThreadsSuggest_Lower"
     fi
   fi
 
@@ -471,27 +493,23 @@ function_config_tune_up ()  {
     TuneUpConfConfirm=
 
     if [[ $guest_os == "macos" ]]; then
-
       ConfLine="$(grep -s 'macos_release=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
         printColor "\n\n  MacOS WARNING: A line macos_release=\"catalina\" or similar should be present"
         printf "\n\n  This instructs Quickemu how to optimise & should be added manually.\n"
       fi
-
       ConfLine="$(grep -s 'mouse=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
         printColor "\n\n  MacOS Note: A line mouse=\"virtio\" or similar is recommended,"
         printColor "\n\n  especially with newer releases. Older ones may need =\"usb\" .... "
         printf "\n\n  This has been added but will need to be tested & optimised manually.\n"
       fi
-
       ConfLine="$(grep -s 'keyboard=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
         printColor "\n\n  MacOS Note: A line keyboard=\"usb\" or similar is recommended,"
         printColor "\n\n  some newer releases may need =\"virtio\" .... "
         printf "\n\n  This has been added but will need to be tested & optimised manually.\n"
       fi
-
       ConfLine="$(grep -s 'MacScreenRes=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
         printColor "\n\n  MacOS Note: A line MacScreenRes=\"2560x1440\" or similar may be used"
@@ -499,7 +517,15 @@ function_config_tune_up ()  {
         printf "\n\n  Standard Stock sizes: 2560x1440  1920x1080  1280x720 to be added & optimised manually."
         printf "\n\n  Requires scripts from June 17 2024 onwards. Default is 1280x720.\n"
       fi
+    fi
 
+    if [[ $(uname -s) == "Linux" ]]; then
+      printf "\n"
+      CoresSetNumber="$(grep -e 'cpu_cores' "$TuneUpTargetDraft" | cut -d'"' -f2)"
+      [[ $NumberOfHostCpuSpeeds -gt 1 ]] && declare -p HostSpeedArr | cut -d'=' -f2-
+      printColor "\n  If you wish to experiment with CPU pinning, select 'edit'"
+      printColor "\n  and add a line cpu_pins=\"0,1,6,7,11,15\" etc, adding %s elements, to match the 'cpu_cores' count:"  "$CoresSetNumber"
+      #printf "\n"
     fi
 
     if [[ "$guest_os" != *windows* && "$guest_os" != *macos* ]]; then
@@ -508,6 +534,7 @@ function_config_tune_up ()  {
       printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
       printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
     fi
+
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
       printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
@@ -516,6 +543,7 @@ function_config_tune_up ()  {
       printf "\n\n  Setting up a qqX 'shared drive' can also help with sharing between distros"
       printf "\n  See the notes in the general settings file for installation"
     fi
+
     printColor "\n\n\n  [enter] all good, continue    [r] revert back to the old config"
     printf "\n\n  [e]  edit the config file in more detail   "
 
@@ -535,7 +563,7 @@ function_config_tune_up ()  {
       printColor "\n\n  Undoing changes to config file \n\n"
       cat "$TuneUpTargetFile"
       printf "\n\n"
-      read -rp "  [enter] to continue  >  "
+      read -rp "  [enter] to return  >  "
       break
 
     elif [[ $NewFileTuneUp ]] && [[ $TuneUpConfConfirm == "d" ]]; then

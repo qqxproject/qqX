@@ -197,23 +197,6 @@ source "$qqX_MainFolder/qqX_main_menu_actions"
 
 [[ $Loop_Diagnostics ]] && printf "\n\n Source files done:" &&  main_loop_diagnostics
 
-function main_menu {
-  while true ; do
-    MainMenuChoice= ; SnapTitle= ; SnapNumber= ; SnapName=
-    show_main_menu_header
-    if [[ $KillPID_Menu_Exited ]] ; then
-      KillPID_Menu_Exited=  ;  UseCustomBootArgs=
-      if [[ $InstancePID ]] && [[ $( ps -p "$InstancePID" --no-headers ) ]] && [[ $(cat "${VMDIR}/${VMNAME}.pid" 2> /dev/null) ]]; then
-        printf "\n\n  %s is still running ..." "$VM_InstanceName" ; vm_pid_kill_menu ; continue
-      else  InstancePID= ;  printf "\n    %s   >   is now shut down  >  select restart or manage \n" "$VM_InstanceName"
-      fi
-    fi
-    main_menu_interface
-    main_menu_actions
-    [[ $VM_Renamed ]] || [[ ! $VM_InstanceName ]] && return
-  done
-}
-
 tput civis
 printf "\033c"
 show_qqX_title_bar
@@ -236,12 +219,30 @@ fi
 
 [[ $Initial_Input ]] && source "$qqX_MainFolder/qqX_input_and_mouse_tidyup" &&  multi_instance_checks
 
+# If 'Initial_Input' routed to the QF menu but then re-routed to Main:
 [[ $QF_exit_to_Main ]] && printf "\033c"  &&  multi_instance_checks
 
-# If selection has now been made via api or mouse:
+# If 'Initial_Input' has already made a VM selection:
 [[ $VM_InstanceName ]] && ByPass_VM_Array_Selector=1
 
 [[ $PathDiagnostics ]] && path_diagnostics pause
+
+function main_menu {
+  while true ; do
+    MainMenuChoice= ; SnapTitle= ; SnapNumber= ; SnapName=
+    show_main_menu_header
+    if [[ $KillPID_Menu_Exited ]] ; then
+      KillPID_Menu_Exited=  ;  UseCustomBootArgs=
+      if [[ $InstancePID ]] && [[ $( ps -p "$InstancePID" --no-headers ) ]] && [[ $(cat "${VMDIR}/${VMNAME}.pid" 2> /dev/null) ]]; then
+        printf "\n\n  %s is still running ..." "$VM_InstanceName" ; vm_pid_kill_menu ; continue
+      else  InstancePID= ;  printf "\n    %s   >   is now shut down  >  select restart or manage \n" "$VM_InstanceName"
+      fi
+    fi
+    main_menu_interface
+    main_menu_actions
+    [[ $VM_Renamed ]] || [[ ! $VM_InstanceName ]] && return
+  done
+}
 
 ## MAIN LOOP ###########################
 
