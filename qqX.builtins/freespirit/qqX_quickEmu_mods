@@ -51,52 +51,524 @@ function is_firmware_qcow2() {
     if grep -qs "QFI" <<< "$(head -c 4 "$1" | tr -cd '[:graph:]')" ; then echo "true" ; fi
 }
 
-## TIDY 4.99 pinning function and make sure Vars are local where needed, and add notes
+## TIDY 4.99 PINNING FUNCTION and make sure Vars are local where needed, and add notes
 # PLUS add error handling for Intel PE setup, which the upstream code doesn't seem to deal with:
 # eg this https://www.intel.com/content/www/us/en/products/sku/226253/intel-core-i71280p-processor-24m-cache-up-to-4-80-ghz/specifications.html
-# which has 14 cores and 20 threads ...  REVIEW and consider if a better implementation is possible
+# which has 14 cores and 20 threads ...
 
 function configure_cpu_pinning() {
 
-    [[ ! $CORE_MAPPING ]] && return
+    # The upstream on/off, where ${CORE_MAPPING[@]} is an array from the comma separated $2 arg for --cpu-pinning
+    # and $CPU_PINNING is the actual raw $2  >>  for qqX, bypass the standard CLI and read from the VM .conf file, and
+    # using '$cpu_pins' (global) to avoid future conflicts with .conf lowercase 'cpu_pinning' being added upstream ...
 
-    # qqX > add a double check for possible PE mixed thread count designs ...
-    local CoreCheck Sockets CoresPS ThreadsPC CoreTheoretical
-    CoreCheck="$(lscpu | grep -m1 'CPU(s):' | awk '{print $NF}')"
-    Sockets="$(lscpu | grep 'Socket(s):' | awk '{print $NF}')"
-    CoresPS="$(lscpu | grep 'Core(s) per socket:' | awk '{print $NF}')"
-    ThreadsPC="$(lscpu | grep 'Thread(s) per core' | awk '{print $NF}')"
-    CoreTheoretical=$((Sockets*CoresPS*ThreadsPC))
-    if [[ $ThreadsPC != "$GUEST_CPU_THREADS" ]] || [[ $CoreCheck != "$CoreTheoretical" ]]; then
-        echo " - ERROR!  Current Quickemu pinning code needs the number of host threads per core to be consistent"
-        exit 1
+    # Validate input of the cpu_pins, pinning is not supported on macOS (moved here, with fix for count test, from 'vm_boot', for qqX)
+    if [[ $cpu_pins ]]; then
+        if [ "${OS_KERNEL}" != "Linux" ]; then
+            echo " - ERROR!  Only Linux OS Kernels have support for CPU Pinning operations" ; return
+        fi
+        if [[ ! $(type -p taskset) ]]; then
+            echo " - ERROR!  'taskset' is a normally present 'util-linux' component which is needed for CPU Pinning operations" ; return
+        fi
+        if ! [[ "${cpu_pins}" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
+            echo " - ERROR!  Couldn't parse CPU pinning: '${cpu_pins}', only comma-separated list is supported" ; return
+        fi
+        IFS=',' read -r -a CORE_MAPPING <<< "$cpu_pins"
+        NUM_CORE_MAPPING=${#CORE_MAPPING[@]}
+        if [ "$NUM_CORE_MAPPING" -ne "$GUEST_CPU_CORES" ]; then
+            echo " - ERROR!  Number of host cores for pinning should be equal to VM core count ($NUM_CORE_MAPPING != $GUEST_CPU_CORES)" ; return
+        fi
+    else return
     fi
+
+    # qqX implementation with P/E core capabilities:
+    # mapfile -t CoreArr <<< $(lscpu --extended=core | tail -n +2 | tr -d ' ')
+    # Intel 11400 6 core, 2 thread:  note separated 6 x 6 mapping
+    # declare -a CoreArr=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5" [6]="0" [7]="1" [8]="2" [9]="3" [10]="4" [11]="5")
+    # Intel (PE) 12900K: where last Array element is '23', the CPU count (plus 1, = 24), but core count is '15' (plus 1, = 16)
+    # declare -a PE_CoresArr=([0]="0" [1]="0" [2]="1" [3]="1" [4]="2" [5]="2" [6]="3" [7]="3"
+    # [8]="4" [9]="4" [10]="5" [11]="5" [12]="6" [13]="6" [14]="7" [15]="7"  # two threads on each P core, listed core by core
+    # 16]="8" [17]="9" [18]="10" [19]="11" [20]="12" [21]="13" [22]="14" [23]="15")  # pattern changes here to one thread per E core
+    # See https://stackoverflow.com/questions/71122837/how-to-detect-e-cores-and-p-cores-in-linux-alder-lake-system#71282744
 
     local tid tid_dir name core_idx host_cpu
     local GUEST_CPUS idx=0
 
-    for tid_dir in /proc/"${VM_PID}"/task/*; do
+    mapfile -t CoreArr <<< "$(lscpu --extended=core | tail -n +2 | tr -d ' ')"
+
+    for tid_dir in /proc/"${InstancePID}"/task/*; do
         tid=$(basename "$tid_dir")
         name=$(cat "$tid_dir/comm")
         if [[ "$name" == CPU* ]]; then
-            # Map per core, if threads are specified pin them to the same core (upstream method)
-            # qqX > the float gets dropped when using bash builtin math functions,
-            # so if threads are 1 then does simple count, if 2 then does a double count eg. 0,0,1,1,2,2 etc,
-            # as in "for idx in {0..11}; do echo $((idx/2)); done" for 6 core, 2 thread
-            core_idx=$(( idx / GUEST_CPU_THREADS ))
-            host_cpu=${CORE_MAPPING[$core_idx]}
+            core_idx="${CoreArr[$idx]}"
+            host_cpu="${CORE_MAPPING[$core_idx]}"
             # Display message:
-            if (( idx % GUEST_CPU_THREADS == 0 )); then
-                [[ "$GUEST_CPUS" ]] && GUEST_CPUS+=","
-                GUEST_CPUS+="$core_idx"
-            fi
+            [[ "$GUEST_CPUS" ]] && GUEST_CPUS+=","
+            GUEST_CPUS+="$core_idx"
             # Host setting:
-            taskset -cp "$host_cpu" "$tid" &>/dev/null
+            if [[ $VerboseArgs ]]; then taskset -cp "$host_cpu" "$tid"
+            else taskset -cp "$host_cpu" "$tid" 1>/dev/null
+            fi
             ((idx += 1))
         fi
     done
-    echo " - CPU Pinning: Bind guest cores to host cores (${GUEST_CPUS} -> ${CPU_PINNING})"
+    [[ $VerboseArgs ]] && printf "\n\n"
+    echo " - Pinning:  Bind guest cores to host cores (${GUEST_CPUS} -> ${cpu_pins})"
 }
+
+function configure_cpu() {
+    HOST_CPU_CORES=$(get_nproc) # upstream method using nproc - to REVIEW with PE cpus
+    HOST_CPU_MODEL=$(get_cpu_info '^Model name:')
+    HOST_CPU_SOCKETS=$(get_cpu_info 'Socket')
+    if [ "${OS_KERNEL}" == "Darwin" ]; then
+        HOST_CPU_VENDOR=$(get_cpu_info 'Vendor')
+    else
+        HOST_CPU_VENDOR=$(get_cpu_info '^Vendor ID')
+    fi
+
+    if [ "${HOST_CPU_SOCKETS}" = "-" ]; then
+        HOST_CPU_SOCKETS=1
+    fi
+
+    CPU_MODEL="host"
+    QEMU_ACCEL="tcg"
+    # Configure appropriately for the host platform
+    if [ "${OS_KERNEL}" == "Darwin" ]; then
+        MANUFACTURER=$(ioreg -l | grep -e Manufacturer | grep -v iMan | cut -d'"' -f4 | sort -u)
+        CPU_KVM_UNHALT=""
+        QEMU_ACCEL="hvf"
+        # QEMU for macOS from Homebrew does not support SMM
+        SMM="off"
+    else
+        if [ -r /sys/class/dmi/id/sys_vendor ]; then
+            MANUFACTURER=$(head -n 1 /sys/class/dmi/id/sys_vendor)
+        fi
+        CPU_KVM_UNHALT=",kvm_pv_unhalt"
+        GUEST_TWEAKS+=" -global kvm-pit.lost_tick_policy=discard"
+        QEMU_ACCEL="kvm"
+    fi
+
+
+    if [ "${ARCH_VM}" == "aarch64" ]; then
+        # ARM64 guest support
+        # https://qemu-project.gitlab.io/qemu/system/arm/virt.html
+        # highmem=on allows aarch64 guests on the "virt" machine type to access guest RAM
+        # above the 4GB boundary. This is required for VMs configured with >3GB RAM and is
+        # generally more compatible on modern aarch64 systems.
+        # pflash0/pflash1 reference the blockdev nodes for AAVMF firmware
+        MACHINE_TYPE="virt,highmem=on,pflash0=rom,pflash1=efivars"
+        case ${ARCH_HOST} in
+            arm64|aarch64)
+                # Native ARM64 host running ARM64 guest - use hardware acceleration
+                CPU_MODEL="max";;
+            *)
+                # Cross-architecture emulation (e.g., x86_64 host running ARM64 guest)
+                CPU_MODEL="max"
+                QEMU_ACCEL="tcg";;
+        esac
+    elif [ "${ARCH_VM}" != "${ARCH_HOST}" ]; then
+        # If the architecture of the VM is different from the host, disable acceleration
+        # and use TCG (Tiny Code Generator) software emulation. TCG emulates the target
+        # architecture in software, allowing cross-architecture virtualisation (e.g.,
+        # running x86_64 VMs on ARM hosts).
+        #
+        # Users can manually force TCG mode by adding this to their VM .conf file:
+        #   cpu_model="qemu64"
+        #   extra_args="-accel tcg"
+        # or by exporting QEMU_ACCEL in the shell environment:
+        #   export QEMU_ACCEL="tcg"
+        #
+        # TCG is useful for:
+        # - Cross-architecture virtualisation (x86 on ARM, ARM on x86)
+        # - Testing VMs on hosts without hardware virtualisation support
+        # - Emulating CPU features in software (e.g., running macOS x86_64 VMs on ARM Macs)
+        CPU_MODEL="qemu64"
+        CPU_KVM_UNHALT=""
+        QEMU_ACCEL="tcg"
+    fi
+
+    # Detect if running inside a VM based on manufacturer detection
+    # Note: Checking CPU flags (vmx/svm) indicates hardware virtualisation SUPPORT,
+    # not whether we're inside a VM. Nested virtualisation may expose these flags.
+    case ${MANUFACTURER,,} in
+        qemu|virtualbox) CPU_MODEL="qemu64"
+                         QEMU_ACCEL="tcg"
+                         HYPERVISOR="${MANUFACTURER,,}";;
+        *) HYPERVISOR="";;
+    esac
+
+
+    if [ -z "${HYPERVISOR}" ]; then
+        # A CPU with Intel VT-x / AMD SVM support is required
+        if [ "${HOST_CPU_VENDOR}" == "GenuineIntel" ]; then
+            if ! check_cpu_flag vmx; then
+                echo "ERROR! Intel VT-x support is required."
+                exit 1
+            fi
+        elif [ "${HOST_CPU_VENDOR}" == "AuthenticAMD" ] || [ "${HOST_CPU_VENDOR}" == "HygonGenuine" ]; then
+            # HygonGenuine is Chinese AMD-compatible CPUs (Hygon Dhyana)
+            if ! check_cpu_flag svm; then
+                echo "ERROR! AMD SVM support is required."
+                exit 1
+            fi
+        elif [ "${ARCH_HOST}" == "aarch64" ] || [ "${ARCH_HOST}" == "arm64" ]; then
+            # ARM hosts running native ARM guests with hardware acceleration (HVF on macOS, KVM on Linux)
+            # ARM processors don't have x86-specific virtualisation flags (VT-x/SVM) to check.
+            # We use architecture detection here instead of vendor detection (used for x86)
+            # because ARM CPUs don't have standardised vendor strings like x86 (GenuineIntel/AuthenticAMD).
+            # Cross-architecture guests (x86 on ARM) use TCG and skip this validation block entirely.
+            # No validation needed here - ARM virtualisation support is handled by the hypervisor
+            true
+        else
+            # Unknown CPU vendor - could be future/custom CPUs
+            echo "WARNING! Unknown CPU vendor '${HOST_CPU_VENDOR}' - cannot verify virtualisation support."
+            echo "         If virtualisation fails, check your CPU supports hardware virtualisation and it's enabled in firmware."
+        fi
+    fi
+
+    CPU="-cpu ${CPU_MODEL}"
+    reset_cpu_flags
+
+    # Make any OS specific adjustments
+    if [ "${guest_os}" == "freedos" ] || [ "${guest_os}" == "windows" ] || [ "${guest_os}" == "windows-server" ]; then
+        # SMM is not available on QEMU for macOS via Homebrew
+        if [ "${OS_KERNEL}" == "Linux" ]; then
+            SMM="on"
+        fi
+    fi
+
+    # SMM is also required for Linux guests when Secure Boot is enabled
+    if [ "${secureboot}" == "on" ]; then
+        if [ "${guest_os}" == "linux" ]; then
+        # SMM is not available on QEMU for macOS via Homebrew
+            if [ "${OS_KERNEL}" == "Linux" ]; then
+                SMM="on"
+            fi
+        fi
+    fi
+
+    case ${guest_os} in
+        batocera|freedos|haiku|solaris) MACHINE_TYPE="pc";;
+        kolibrios|reactos)
+            CPU="-cpu qemu32"
+            reset_cpu_flags
+            MACHINE_TYPE="pc";;
+
+        macos)
+            # A CPU with SSE4.1 support is required for >= macOS Sierra
+            # A CPU with SSE4.2 support is required for >= macOS Catalina
+            # A CPU with AVX2 support is required for >= macOS Ventura
+
+            # qqX mod based on
+            # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2115516935
+            # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
+            # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
+
+            # Skylake-Server-v3 should be default
+            # See https://en.wikipedia.org/wiki/IMac_Pro#Technical_specifications
+            # Also retains IBRS spectre mitigation
+            # Tests suggest edit of .conf file to cpu_cores="8"  ie 4 core x 2 threads for MacOS to recognise Xeon
+            # Will work both with cpu_cores="16" and ="32" but 'About' will show Cpu as unrecognised, only sysctl will show the CPU name ...
+            # Other Xeon oddballs like 14 or 28 don't boot, even when forced.
+            # CascadeLake is Mac Pro 2019 but is practically identical to Skylake
+            # Whilst switching from Sky to Cascade still leaves 'About' displaying iMacPro 2017 ...
+
+            #CPU_MODEL="Haswell-v2"
+            CPU_MODEL="Skylake-Server-v3"
+            #CPU_MODEL="Cascadelake-Server-v3"
+
+            # A CPU with fma is required for Mac Graphics 'Metal' support (@flexiondotorg) # REVIEW add darwin hardware test ?
+
+            # Default Use Subtractive method: Set =1 or blank  Allow Qemu to add all, unless not present in host.
+            # Use "sysctl -a | grep machdep.cpu" at terminal in MacOS to see flags
+            # On initial tests, outperforms +ve method.
+            UseSubtractiveCPU=1
+
+            # Dev overwrite, for testing only
+            UseHostOverWrite=
+
+            if [[ $UseSubtractiveCPU ]]; then
+
+                CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
+
+                case ${macos_release} in
+                    ventura|sonoma|sequoia|tahoe)
+                        # A CPU with AVX2 support is required for >= macOS Ventura
+                        if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
+                            echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
+                            echo "       Try macOS Monterey or Big Sur."
+                            exit 1
+                        fi ;;
+                    catalina|big-sur|monterey)
+                        # A CPU with SSE4.2 support is required for >= macOS Catalina
+                        if ! check_cpu_flag sse4_2; then
+                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
+                            exit 1
+                        fi ;;
+                    *)
+                        # A CPU with SSE4.1 support is required for >= macOS Sierra
+                        if ! check_cpu_flag sse4_1; then
+                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.1 support."
+                            exit 1
+                        fi ;;
+                esac
+
+                # rdtscp and invtsc, tsc, tsc_adjust, as neutral, neither on nor off
+                # ditto pcid for AMD and fp87 for Intel
+
+                for FLAG in abm aes apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
+                            erms f16c fma fsgsbase fxsr invpcid lahf_lm lm \
+                            mca mce mmx movbe mpx msr mtrr nx pae pat pge pse popcnt pse36 \
+                            rdrand sep smep syscall vaes vpclmulqdq \
+                            x2apic xgetbv1 xsave xsaveopt; do
+                        if  ! check_cpu_flag "$FLAG"; then
+                            QEMU_CPU_FLAG="${FLAG//_/-}"
+                            CPU+=",${QEMU_CPU_FLAG}=off"
+                        fi
+                done
+
+            else
+
+                # If the host has an Intel CPU, passes the host CPU model features, model, stepping, exactly to the guest.
+                # Disable huge pages (,-pdpe1gb) on macOS to prevent crashes
+                # - https://stackoverflow.com/questions/60231203/qemu-qcow2-mmu-gva-to-gpa-crash-in-mac-os-x
+                # vmware-cpuid-freq=on enables VMware TSC frequency reporting for macOS timing
+                if [ "${HOST_CPU_VENDOR}" == "GenuineIntel" ] && [ -z "${HYPERVISOR}" ]; then
+                    CPU_MODEL="host"
+                    CPU="-cpu ${CPU_MODEL},-pdpe1gb,+hypervisor,vmware-cpuid-freq=on"
+                    reset_cpu_flags
+                else
+                    CPU_MODEL="Haswell-v2"
+                    CPU="-cpu ${CPU_MODEL},vendor=GenuineIntel,-pdpe1gb,+avx,+sse,+sse2,+ssse3,vmware-cpuid-freq=on"
+                    reset_cpu_flags
+                fi
+
+                # A CPU with fma is required for Metal support
+                # A CPU with invtsc is required for macOS to boot
+                # Skip CPU feature checks when using TCG emulation (cross-architecture)
+                # as TCG will emulate the required x86 features in software. This enables
+                # running macOS x86_64 VMs on ARM Macs through software emulation.
+                if [ "${QEMU_ACCEL}" != "tcg" ]; then
+                    case ${macos_release} in
+                        ventura|sonoma|sequoia|tahoe)
+                            # A CPU with AVX2 support is required for >= macOS Ventura
+                            if check_cpu_flag sse4_2 && check_cpu_flag avx2; then
+                                if [ "${HOST_CPU_VENDOR}" != "GenuineIntel" ] && [ -z "${HYPERVISOR}" ]; then
+                                    add_cpu_flag "+avx2"
+                                    add_cpu_flag "+sse4.2"
+                                fi
+                            else
+                                echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 and AVX2 support."
+                                echo "       Try macOS Monterey or Big Sur."
+                                exit 1
+                            fi;;
+                        catalina|big-sur|monterey)
+                            # A CPU with SSE4.2 support is required for >= macOS Catalina
+                            if check_cpu_flag sse4_2; then
+                                if [ "${HOST_CPU_VENDOR}" != "GenuineIntel" ] && [ -z "${HYPERVISOR}" ]; then
+                                    add_cpu_flag "+sse4.2"
+                                fi
+                            else
+                                echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
+                                exit 1
+                            fi;;
+                        *)
+                            # A CPU with SSE4.1 support is required for >= macOS Sierra
+                            if check_cpu_flag sse4_1; then
+                                if [ "${HOST_CPU_VENDOR}" != "GenuineIntel" ] && [ -z "${HYPERVISOR}" ]; then
+                                    add_cpu_flag "+sse4.1"
+                                fi
+                            else
+                                echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.1 support."
+                                exit 1
+                            fi;;
+                    esac
+
+                    if [ "${HOST_CPU_VENDOR}" != "GenuineIntel" ] && [ -z "${HYPERVISOR}" ]; then
+                        for FLAG in abm adx aes amd-ssbd apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
+                                    eist erms f16c fma fp87 fsgsbase fxsr invpcid invtsc lahf_lm lm \
+                                    mca mce mmx movbe mpx msr mtrr nx pae pat pcid pge pse popcnt pse36 \
+                                    rdrand rdtscp sep smep syscall tsc tsc_adjust vaes vbmi2 vmx vpclmulqdq \
+                                    x2apic xgetbv1 xsave xsaveopt; do
+                            local cpu_flag
+                            cpu_flag=$(configure_cpu_flag "${FLAG}")
+                            [[ -n "${cpu_flag}" ]] && add_cpu_flag "${cpu_flag#,}"
+                        done
+                        # AMD CPUs with constant_tsc need explicit TSC flags for macOS stability
+                        # constant_tsc is AMD's equivalent of Intel's invtsc
+                        if [ "${HOST_CPU_VENDOR}" == "AuthenticAMD" ] && check_cpu_flag invtsc; then
+                            add_cpu_flag "+tsc"
+                            add_cpu_flag "+tsc-deadline"
+                        fi
+                    fi
+                fi
+            fi
+
+            # Not many host CPU's will have AVX 512
+            if [[ "$CPU_MODEL" == 'Skylake-Server'* ]] || [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
+                for FLAG in clwb adx smap avx512f avx512dq avx512bw avx512cd avx512vl ; do
+                    if ! check_cpu_flag "$FLAG"; then
+                        QEMU_CPU_FLAG="${FLAG//_/-}"
+                        CPU+=",${QEMU_CPU_FLAG}=off"
+                    fi
+                done
+            fi
+            # Only diff to Skylake is = PKU  AVX512VNNI  SPEC_CTRL  SPEC_CTRL_SSBD
+            # plus the VMX which is to be ignored, unless Host = Intel ?? REVIEW
+            # But Qemu doesn't allow spec ctrl for V3, at least
+            # And avx512_vnni has underscore in lscpu but not hyphenated in qemu, so:
+            if [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
+                if ! check_cpu_flag "pku"; then CPU+=",pku=off" ; fi
+                if ! check_cpu_flag "avx512_vnni"; then CPU+=",avx512vnni=off" ; fi
+            fi
+
+            [[ $UseHostOverWrite ]] && CPU="-cpu host,kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
+
+            # Disable S3 support in the VM to prevent macOS suspending during install
+            # Disable ACPI PCI hotplug to prevent issues with macOS (required for QEMU 6.1+)
+            GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1 -global ICH9-LPC.acpi-pci-hotplug-with-bridge-support=off -device isa-applesmc,osk=$(echo "bheuneqjbexolgurfrjbeqfthneqrqcyrnfrqbagfgrny(p)NccyrPbzchgreVap" | tr 'A-Za-z' 'N-ZA-Mn-za-m')"
+
+            # Disable High Precision Timer
+            if [ "${QEMU_VER_SHORT}" -ge 70 ]; then [[ "$MACHINE_TYPE" != *hpet* ]] && MACHINE_TYPE+=",hpet=off"
+            else [[ "$GUEST_TWEAKS" != *hpet* ]] && GUEST_TWEAKS+=" -no-hpet"
+            fi
+        ;;
+
+        windows|windows-server)
+
+            # OLD 4.98  - note qqX removed 'invtsc'  REVIEW
+            # CPU="-cpu ${CPU_MODEL},+hypervisor,l3-cache=on,migratable=no,hv_passthrough"
+
+            # NEW 4.99
+            # Base CPU flags that work with all accelerators (KVM, HVF, TCG)
+            CPU="-cpu ${CPU_MODEL},+hypervisor,+invtsc,l3-cache=on"
+            reset_cpu_flags
+            # KVM-specific flags: migratable and Hyper-V enlightenments
+            if [ "${QEMU_ACCEL}" == "kvm" ]; then
+                if [ "${QEMU_VER_SHORT}" -gt 60 ]; then
+                    add_cpu_flag "migratable=no"
+                    add_cpu_flag "hv_passthrough"
+                else
+                    add_cpu_flag "migratable=no"
+                    add_cpu_flag "hv_frequencies"
+                    [[ -n "${CPU_KVM_UNHALT}" ]] && add_cpu_flag "${CPU_KVM_UNHALT#,}"
+                    add_cpu_flag "hv_reenlightenment"
+                    add_cpu_flag "hv_relaxed"
+                    add_cpu_flag "hv_spinlocks=8191"
+                    add_cpu_flag "hv_stimer"
+                    add_cpu_flag "hv_synic"
+                    add_cpu_flag "hv_time"
+                    add_cpu_flag "hv_vapic"
+                    add_cpu_flag "hv_vendor_id=1234567890ab"
+                    add_cpu_flag "hv_vpindex"
+                fi
+            fi
+            # Disable S3 support in the VM to ensure Windows can boot with SecureBoot enabled
+            #  - https://wiki.archlinux.org/title/QEMU#VM_does_not_boot_when_using_a_Secure_Boot_enabled_OVMF
+            GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1"
+
+            # Disable High Precision Timer
+            if [ "${QEMU_VER_SHORT}" -ge 70 ]; then [[ "$MACHINE_TYPE" != *hpet* ]] && MACHINE_TYPE+=",hpet=off"
+            else [[ "$GUEST_TWEAKS" != *hpet* ]] && GUEST_TWEAKS+=" -no-hpet"
+            fi
+            ;;
+    esac
+
+    ##### END of CASES #####
+
+    if [ "${HOST_CPU_VENDOR}" == "AuthenticAMD" ] && [ "${guest_os}" != "macos" ] && [ "${ARCH_VM}" == "x86_64" ]; then
+        add_cpu_flag "topoext"
+    fi
+
+    if [ -z "${cpu_cores}" ]; then
+        # only if not ...
+        if [ "${HOST_CPU_CORES}" -ge 32 ]; then
+            GUEST_CPU_CORES="16"
+        elif [ "${HOST_CPU_CORES}" -ge 16 ]; then
+            GUEST_CPU_CORES="8"
+        elif [ "${HOST_CPU_CORES}" -ge 8 ]; then
+            GUEST_CPU_CORES="4"
+        elif [ "${HOST_CPU_CORES}" -ge 4 ]; then
+            GUEST_CPU_CORES="2"
+        else
+            GUEST_CPU_CORES="1"
+        fi
+    else
+        GUEST_CPU_CORES="${cpu_cores}"
+        ## MOD ##  Using 'modulo' to detect odd/even   See: https://stackoverflow.com/a/15660039
+        if [[ $GUEST_CPU_CORES -gt 1 ]] && [[ $((GUEST_CPU_CORES%2)) == 1 ]]; then
+            ((GUEST_CPU_CORES-=1))
+             echo " - CPU:      Adjusting CPU cores to ${GUEST_CPU_CORES} to enable simulated multithreading (div by 2) ..."
+        fi
+    fi
+
+    # Windows 11 requires a minimum of 2 CPU cores to install
+    # https://github.com/quickemu-project/quickemu/issues/1423
+    if [ "${guest_os}" == "windows" ] && [[ "${VMNAME}" == *"windows-11"* || "${VMNAME}" == *"win11"* ]]; then
+        if [ "${GUEST_CPU_CORES}" -lt 2 ]; then
+            echo " - CPU:      Adjusting CPU cores from ${GUEST_CPU_CORES} to 2 (Windows 11 minimum requirement)"
+            GUEST_CPU_CORES="2"
+        fi
+    fi
+
+    # macOS guests cannot boot with most core counts not powers of 2.
+    # Find the nearest but lowest power of 2 using a predefined table
+    if [ "${guest_os}" == "macos" ]; then
+        local POWERS=(1 2 4 8 16 32 64 128 256 512 1024)
+        for (( i=${#POWERS[@]}-1; i>=0; i-- )); do
+            if [ "${POWERS[i]}" -le "${GUEST_CPU_CORES}" ]; then
+                GUEST_CPU_CORES="${POWERS[i]}"
+                break
+            fi
+        done
+    fi
+
+    #shellcheck disable=SC2329
+    remove_as_irrelevant() { ## MOD ##
+        if [ "${OS_KERNEL}" == "Darwin" ]; then
+            # Get the number of physical cores
+            physicalcpu=$(sysctl -n hw.physicalcpu)
+            # Get the number of logical processors
+            logicalcpu=$(sysctl -n hw.logicalcpu)
+            # Check if Hyper-Threading is enabled
+            if [ "${logicalcpu}" -gt "${physicalcpu}" ]; then
+                HOST_CPU_SMT="on"
+            else
+                HOST_CPU_SMT="off"
+            fi
+        elif [ -e /sys/devices/system/cpu/smt/control ]; then
+            HOST_CPU_SMT=$(cat /sys/devices/system/cpu/smt/control)
+        fi
+        # Account for Hyperthreading/SMT. ## MOD ##
+        if [ "${GUEST_CPU_CORES}" -ge 2 ]; then
+            case ${HOST_CPU_SMT} in
+                on) GUEST_CPU_THREADS=2
+                    GUEST_CPU_LOGICAL_CORES=$(( GUEST_CPU_CORES / GUEST_CPU_THREADS ));;
+                *)  GUEST_CPU_THREADS=1
+                    GUEST_CPU_LOGICAL_CORES=${GUEST_CPU_CORES};;
+            esac
+        else
+            GUEST_CPU_THREADS=1
+            GUEST_CPU_LOGICAL_CORES=${GUEST_CPU_CORES}
+        fi
+    }
+
+    ## MOD ## Qemu uses the '-smp' arg to ONLY SIMULATE a machine spec ....
+
+    if [[ $GUEST_CPU_CORES == 1 ]]; then GUEST_CPU_THREADS=1 ; GUEST_CPU_LOGICAL_CORES=1
+    else GUEST_CPU_THREADS=2 ; GUEST_CPU_LOGICAL_CORES="$((GUEST_CPU_CORES/2))"
+    fi  # Already rounded (down) via earlier mod at end of cases section
+
+    SMP="-smp cores=${GUEST_CPU_LOGICAL_CORES},threads=${GUEST_CPU_THREADS},sockets=1"
+    echo " - CPU:      ${HOST_CPU_MODEL}"
+    echo " - CPU VM:   ${CPU_MODEL%%,*}, ${HOST_CPU_SOCKETS} Socket(s), ${GUEST_CPU_LOGICAL_CORES} Core(s), ${GUEST_CPU_THREADS} Thread(s)"
+
+    if [ "${guest_os}" == "macos" ] || [ "${guest_os}" == "windows" ] || [ "${guest_os}" == "windows-server" ]; then
+        # Display MSRs alert if the guest is macOS or windows
+        ignore_msrs_alert
+    fi
+}
+
 
 ## FIX ovmfs array parse BUT @ feb 2026 suspend due to upstream changes 4.9.9 REVIEW
 function xxconfigure_bios() {

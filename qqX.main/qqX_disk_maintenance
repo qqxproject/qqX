@@ -749,8 +749,10 @@ qcow2_filemanagement_launcher () {
     grep -A 500 'size=@' "$TermConf_User" | tail -n +2 >> "$TermConf_Tmp"
     Terminal_Start="qterminal -p $TermConf_Tmp -e"
   else
+    Terminal_Start="${Terminal_Start/160/175}"
     Terminal_Start="${Terminal_Start/150/170}"
     Terminal_Start="${Terminal_Start/145/170}"
+    Terminal_Start="${Terminal_Start/x60/x50}"
     Terminal_Start="${Terminal_Start/x55/x45}"
     Terminal_Start="${Terminal_Start/x50/x45}"
   fi

@@ -50,6 +50,7 @@ vm_pid_kill_menu() {
     # if instance didn't boot but Spicy did, then close the Spicy connect dialog window
     [[ $SpicyPID ]]  && kill "$SpicyPID" 2>/dev/null &
   else
+    configure_cpu_pinning
     [[ $UseCustomBootArgs ]] && printColor "  STARTING CUSTOM BOOT SEQUENCE:  \n"
     sleep  "$P_Kill_WaitSecs"
     printColor "\n  Quickemu instance %s on PID:  %s  %s"  "$VM_InstanceName"  "$InstancePID"  "$BootAlert"

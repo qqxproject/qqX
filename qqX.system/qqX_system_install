@@ -405,7 +405,7 @@ function print_terminal_notes {
   so the terminal window size will usually alter when the font size is changed.
 
   Some terminals do not have a -geometry parameter and must be pre-set in the actual terminal.
-  For 'qterminal' which uses PIXELS,  try 1500 x 1000.
+  For 'qterminal' which uses PIXELS,  try 1600 x 1000.
 
 Notes
 }
@@ -415,16 +415,16 @@ Notes
 # Changes made here, to height and width values, will be one-time only.
 # Also to UserTerm.
 
-Term_Width=150
+Term_Width=160
 Term_Height=50
-Term_Taller=55
+Term_Taller=60
 
 UserTerm=
 
 # EDIT HERE to either set or to rewrite 'qqX_term.conf' (in the settings folder)
 
 # Add UserTerm and the required profile, with the required sizes being stated as numbers or variables.
-# eg.  CustomTerminalProfile=" --geometry=145x50 --hide-menubar --title=qqX  -e "
+# eg.  CustomTerminalProfile=" --geometry=160x50 --hide-menubar --title=qqX  -e "
 # or   CustomTerminalProfile="" --geometry=${Term_Width}x${Term_Taller} --hide-menubar --title=qqX  -- "
 
 # NB: the CUSTOM Profile should finish with ' -e ' or ' -- ' or any specific execute command variant that the terminal requires
@@ -868,7 +868,7 @@ if [[ ! $SkipMkLauncher ]]; then
 
       printf "\n\n  The system's terminal size will apply when starting qqX directly from the command line."
 
-      printf "\n\n  If your terminal uses PIXELS, for example 'qterminal', try 1500 x 1000 in the settings."
+      printf "\n\n  If your terminal uses PIXELS, for example 'qterminal', try 1600 x 1000 in the settings."
 
       printf "\n\n  For TILING Window Managers, the size may be auto-regulated. "
 

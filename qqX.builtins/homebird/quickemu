@@ -1,26 +1,9 @@
 #!/usr/bin/env bash
 
-# For qqX use with C.UTF-8 locale, not:  export LC_ALL=C
-# This section enables testing via './quickget --check distroname' from a terminal opened in the built-ins folder:
-if [[ -e "$(pwd)/qqX_quickGet_mods" ]]; then
-    if [[ $(pgrep -aAi qqX 2>/dev/null) ]] ; then
-        printf "\n  qqX running elsewhere ... \n\n" ; exit 1
-    else
-        OriginalPATH="$PATH"
-        CurrentFolder="$(pwd)"
-        if [[ -e "/usr/share/qqX/qqX.lib/fv" ]]; then qqX_LibraryFolder="/usr/share/qqX/qqX.lib"
-        else printf "\n  qqX libraries not found .... \n\n" ; exit 1
-        fi
-        export PATH="$CurrentFolder:${qqX_LibraryFolder}:${OriginalPATH}"
-        if  grep -sqi 'C.utf8' <<< "$(locale -a)"; then export "LC_NUMERIC=C.UTF-8" ; export "LC_COLLATE=C.UTF-8"
-        else export "LC_NUMERIC=C" ; export "LC_COLLATE=C"
-        fi
-    fi
-elif [[ "$PATH" != *'qqX'* ]]; then
-    printf "\n  This individual code branch is intended to be run as a qqX built-in."
-    printf "\n\n  qqX mod files and libraries have not been found ... ?"
-    printf "\n\n  If running from a cloned Quickemu fork, you need to switch branches"
-    printf "\n  or need to download qqX and run from a terminal opened in the FreeSpirit folder. \n\n"
+if [[ ! $QE_Modpath ]]; then
+    printf "\n  qqX versioned quickEmu cannot be run directly from the qqX built-ins folder command line:"
+    printf "\n\n  Unlike quickget, which can be run, the modding process is much more complex for this script ...."
+    printf "\n\n  For mod testings or development, run qqX itself from a terminal opened in the MAIN folder \n\n"
     exit 1
 fi
 

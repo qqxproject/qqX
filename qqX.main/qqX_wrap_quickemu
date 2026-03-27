@@ -267,6 +267,11 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
     if [[ $BootStyle == "slow" ]]; then BootStyleCmd=" -boot menu=on " ; else BootStyleCmd=" -boot menu=off " ; fi
     printf "\n\n %s " "$BootStyleCmd" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
 
+    if [[ $cpu_pins ]]; then
+      printf "\n\n  CPU Pinning: '%s'" "$cpu_pins" >> "$QemuArgsFile"
+      printf "\n\n  # CPU Pinning: '%s'" "$cpu_pins"  >> "$QemuArgsShortFile"
+    fi
+
     if [[ $secureboot == "on" ]]; then
       printf "\n\n  Secure Boot:  Set \n\n\n" >> "$QemuArgsFile"
       printf "\n\n  # Secure Boot:  Set \n\n\n" >> "$QemuArgsShortFile"
@@ -274,7 +279,6 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
       printf "\n\n  Secure Boot:  Not Set \n\n\n" >> "$QemuArgsFile"
       printf "\n\n  # Secure Boot:  Not Set \n\n\n" >> "$QemuArgsShortFile"
     fi
-
 
     if [[ $VerboseArgs ]]; then
       # hold the launch till we have checked the config

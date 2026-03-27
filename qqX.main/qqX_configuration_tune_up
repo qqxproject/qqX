@@ -254,9 +254,9 @@ function_config_tune_up ()  {
 
   fi
 
-  # add cores menu  (using code from ffX project ...)
+  # cpu cores menu:
 
-  if [[ $(type -p lscpu) ]]; then
+  if [[ $(type -p lscpu) ]]; then  # TODO  rewrite   # plus add test and feedback request for nproc vs lscpu
 
     CoresAvail=$(lscpu | grep "Core(s) per socket:" | tr -cd "[:digit:]")
     SocketsAvail=$(lscpu | grep "Socket(s):" | tr -cd "[:digit:]")   #  REVIEW  for dual cpu mobo (untested)
@@ -284,7 +284,7 @@ function_config_tune_up ()  {
 
   if [[ $guest_os == "macos" ]]; then
     printColor "\n\n\n  MacOS: This should be cpu_cores=8 =16 or =32  Other values will not boot."
-    printf "\n\n  Where value based on the CPU threads available, eg 4 physical cores x 2 threads per core = 8"
+    printf "\n\n  Where value creates a simulated CPU based on the threads available, eg 4 physical cores x 2 threads per core = 8"
     ThreadsSuggested=8
     ThreadsSuggestLower=8
   else
@@ -317,6 +317,8 @@ function_config_tune_up ()  {
       printf "\n\n  Max cores set to %s " "$ThreadsSuggestLower"
     fi
   fi
+
+ # ram menu:
 
   SharedRAM_NotFound=
   RAM_Available=

@@ -115,8 +115,8 @@ if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
   exit
 fi
 
-DefWidth=150
-DefHeight=45
+DefWidth=160
+DefHeight=50
 
 if [ "$UserTerm" = "kgx" ]; then
   "$UserTerm" --wait -- "./qqX.system/qqX_system_install"
@@ -128,13 +128,13 @@ elif [ "$UserTerm" = "gnome-terminal" ]; then
     "$UserTerm" --wait -- "./qqX.system/qqX_system_install"
   fi
 elif [ "$UserTerm" = "konsole" ]; then
-  "$UserTerm" --hide-menubar --hide-tabbar --notransparency -p TerminalColumns=145 -p TerminalRows=50  -e  "./qqX.system/qqX_system_install"
+  "$UserTerm" --hide-menubar --hide-tabbar --notransparency -p TerminalColumns=160 -p TerminalRows=50  -e  "./qqX.system/qqX_system_install"
 
 elif [ "$UserTerm" = "mate-terminal" ]; then
-  "$UserTerm" --geometry=145x50 --hide-menubar -e "./qqX.system/qqX_system_install"
+  "$UserTerm" --geometry=160x50 --hide-menubar -e "./qqX.system/qqX_system_install"
 
 elif [ "$UserTerm" = "xfce4-terminal" ]; then
-  "$UserTerm" --geometry=145x50 --hide-menubar --hide-toolbar  -e "./qqX.system/qqX_system_install"
+  "$UserTerm" --geometry=160x50 --hide-menubar --hide-toolbar  -e "./qqX.system/qqX_system_install"
 
 elif [ "$UserTerm" = "xxqterminal" ]; then
   # create profile for geometry REVIEW
@@ -160,7 +160,7 @@ elif [ "$UserTerm" = "alacritty" ]; then
     TermConf_Tmp="/tmp/qq-alacritty.toml"
     # sed -i is not always present, use grep.
     grep -B 500 'window.dimensions' "$TermConf_User" > "$TermConf_Tmp"
-    { echo "columns = 150" ; echo "lines = 45"; } >> "$TermConf_Tmp"
+    { echo "columns = 160" ; echo "lines = 50"; } >> "$TermConf_Tmp"
     grep -A 500 'window.dimensions' "$TermConf_User" | tail -n +4 >> "$TermConf_Tmp"
     "$UserTerm" --config-file "$TermConf_Tmp" -e "./qqX.system/qqX_system_install"
   else
@@ -168,13 +168,13 @@ elif [ "$UserTerm" = "alacritty" ]; then
   fi
 
 elif [ "$UserTerm" = "lxterminal" ] || [ "$UserTerm" = "roxterm" ]; then
-  "$UserTerm" --geometry=145x50 -e "./qqX.system/qqX_system_install"
+  "$UserTerm" --geometry=160x50 -e "./qqX.system/qqX_system_install"
 
 elif [ "$UserTerm" = "urxvt" ]; then
   "$UserTerm" -e "./qqX.system/qqX_system_install"
 
 elif [ "$UserTerm" = "uxterm" ] || [ "$UserTerm" = "xterm" ]; then
-  "$UserTerm" -geometry 145x50 -fa truetype -fs 12 -fg white -bg black -e "./qqX.system/qqX_system_install"
+  "$UserTerm" -geometry 160x50 -fa truetype -fs 12 -fg white -bg black -e "./qqX.system/qqX_system_install"
 
 # A popular (and cross-platform) choice for lightweight Wayland is Alacritty, which is higher up the 'set' list.
 
