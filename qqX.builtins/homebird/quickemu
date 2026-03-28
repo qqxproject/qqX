@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ ! $QE_Modpath ]]; then
+if [[ ! $QE_Modpath ]] && [[ $1 != "--version" ]]; then
     printf "\n  qqX versioned quickEmu cannot be run directly from the qqX built-ins folder command line:"
     printf "\n\n  Unlike quickget, which can be run, the modding process is much more complex for this script ...."
     printf "\n\n  For mod testings or development, run qqX itself from a terminal opened in the MAIN folder \n\n"

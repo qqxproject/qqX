@@ -443,6 +443,11 @@ else
     check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
     [[ $ConfTypo ]] && printColor "\n\n  ERROR(s) detected in the Config file ...\n\n"
 
+    if [[ $cpu_pins ]] && ! grep -qs "configure_cpu_pinning" "$QE_Modpath"; then
+      # check for actual code presence as new code functions may remain loaded in memory if they are not present in an older version
+      printColor "\n\n  CPU PINNING: Function not found. Requires qqX builtin 4.99, or later \n\n"
+    fi
+
     if ps -ef | grep nbd | grep -qi "$VM_InstanceName" ; then
       printf "\n\n  A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
     fi

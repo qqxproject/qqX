@@ -300,7 +300,7 @@ function_config_tune_up ()  {
 
   if [[ $(uname -s) == "Linux" ]]; then
     printf "\n\n  For pinning, select an even-numbered and lower \"cpu's\" count, possibly around 1/2 to 2/3 of the number available."
-    printf "\n  More instructions will be given towards the end of the tune-up menu."
+    printf "\n  Requires qqX builtin 4.99, or later. More instructions will be given towards the end of the tune-up menu."
   fi
 
   if [[ $guest_os == "macos" ]]; then

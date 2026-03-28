@@ -149,7 +149,16 @@ VM_loader_selector_and_menu () {
 
           if [[ $MenuStylePreviewed ]] && [[ ! $SettingsFileAdjusted ]] && [[ ! $VM_Selection_Overide ]]; then
             printColor "\n\n  Preview only - use [set] for menu permanency, [r] to return to default " ; MenuStylePreviewed=
-          elif [[ $SettingsFileAdjusted ]]; then printColor "\n\n  ARRAYS have been RELOADED and settings REFRESHED ...."; SettingsFileAdjusted=
+          elif [[ $SettingsFileAdjusted ]]; then
+            printColor "\n\n  ARRAYS have been RELOADED and settings REFRESHED ...."
+            SettingsFileAdjusted=
+            if [[ $CodingHotSwap ]]; then
+              # Dev note. There is a theoretical risk that a code function present in one version could remain in memory
+              # when not present in another version. But the chances are very small and probably nothing would happen anyway,
+              # as the other code wouldn't probably even know of the other function. Just make sure that we grep for a given function's
+              # actual code presence and don't use 'type -t' function tests which only check if the function is loaded:
+              printf "\n\n HotSwaps should be problem free and full reboot not required"
+            fi
           fi
 
         fi

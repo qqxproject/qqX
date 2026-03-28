@@ -223,12 +223,10 @@ show_qqX_title_bar() {
 function show_qqX_general_help {
 
   HelpSelect=
-
   while true; do
 
     if [[ $1 ]]; then  HelpSelect="$1" ; shift
     fi
-
     printf "\033c"
     printColor "\n\n  GENERAL HELP:"
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"

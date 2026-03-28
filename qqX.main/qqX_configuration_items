@@ -473,7 +473,7 @@ qqX_edit_settings() {
         read -rp "  >  "
         exit directly
       else
-        printColor "\n  refreshing sources and arrays .... \n\n"
+        printColor "\n  Refreshing Sources and Arrays .... \n\n"
         # time that file needs to save and close properly has been added into the refresh routine
         SettingsFileAdjusted=1
         refresh_sources_and_load_VM_arrays
