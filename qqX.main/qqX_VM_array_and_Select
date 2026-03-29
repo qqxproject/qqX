@@ -152,15 +152,18 @@ VM_loader_selector_and_menu () {
           elif [[ $SettingsFileAdjusted ]]; then
             printColor "\n\n  ARRAYS have been RELOADED and settings REFRESHED ...."
             SettingsFileAdjusted=
-            if [[ $CodingHotSwap ]]; then
-              # Dev note. There is a theoretical risk that a code function present in one version could remain in memory
-              # when not present in another version. But the chances are very small and probably nothing would happen anyway,
-              # as the other code wouldn't probably even know of the other function. Just make sure that we grep for a given function's
-              # actual code presence and don't use 'type -t' function tests which only check if the function is loaded:
-              printf "\n\n HotSwaps should be problem free and full reboot not required"
-            fi
           fi
-
+          if [[ $CodingHotSwapShow ]]; then
+            # DEV NOTE - With quickemu and EMU mods, because the code becomes integrated into qqX, unlike quickGET,
+            # there is a theoretical risk that a code function present in one version could remain in memory
+            # when not present in another version:
+            # While quickGET uses a lot of 'type -t' function tests, which only check if the function is loaded into memory,
+            # all of these functions will auto-extinguish as they only exist in transitory background threads, so this is safe.
+            # For quickEMU, we need to mitigate by grepping for the actual script presence of any new or discontinued functions
+            # in '$QE_SourcePath' and in '$QE_ModPath' before getting qqX to make any critical calls.
+            printf "\n\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file."
+            CodingHotSwapShow=
+          fi
         fi
 
         [[ $FD_Phrase || $FD_Start ]] && [[ ! $FD_Found ]] && printColor "\n\n  NOT FOUND  %s/ %s" "Contains: $FD_Phrase " "Starts: $FD_Start"

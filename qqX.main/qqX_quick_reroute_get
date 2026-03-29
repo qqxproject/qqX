@@ -434,12 +434,14 @@ function show_hot_swap_line {
     printColor "               Using %s:  " "$QE_SourceVersion"
     printf "[FS] FreeSpirit  [FB] FreeBird  [HB]  [Cust]  [Dev]"
     printf "  [HF] help on different versions\n"
-  if [[ $CodingHotSwap && $CodingHotSwapShow ]] || [[ $DevStart ]]; then
+  if [[ $DevStart ]]; then
     printf "\n               Code Source: %s " "$QE_SourcePath"
-    [[ $CodingHotSwap ]] && CodingHotSwapShow=
+  elif [[ $CodingHotSwap && $CodingHotSwapShow ]]; then
+    printf "\n               HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file."
   elif [[ $QE_SourceVersion != "FreeSpirit" ]]; then
     printf "\n               FreeSpirit usually has the latest fixes and additions ...."
   fi
+  [[ $CodingHotSwap ]] && CodingHotSwapShow= && SettingsFileAdjusted=
   printf "\n\n"
 }
 

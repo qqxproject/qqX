@@ -193,7 +193,7 @@ show_qqX_title_bar() {
   fi
   printf "quickemu %s (mods %s) &  quickget %s (mods %s) '%s'"  "$QE_VerNumber" "$QE_ModsNumber" "$QG_VerNumber" "$QG_ModsNumber" "$QE_SourceVersion"
 
-  if [[ $CodingHotSwap && $CodingHotSwapShow ]] || [[ $DevStart ]]; then
+  if [[ $DevStart ]]; then
     printf "\n\n  Using Code: %s " "$QE_SourcePath"
     [[ $CodingHotSwap ]] && CodingHotSwapShow=
   fi
@@ -254,12 +254,16 @@ function show_qqX_general_help {
     elif [[ $HelpSelect == "f" ]]; then
       printf "\n  Hot-Swappable from all main menus:  [FS] FreeSpirit  [FB] FreeBird  [HB]  [Cust]  [Dev] \n\n"
       grep -m 1 -A 100  'named as follows' "$qqX_SettingsFile" | grep -m 1 -B 100 '# FreeBird or FreeSpirit are recommended'| tr '#' ' '
+
+      printf "\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file."
+
       if [[ -e "$Default_VM_Folder/qqX.custom/QE.Custom/quickemu" ]]; then
         printf "\n\n  Custom =   Default_VM_Folder > qqX.custom  > %s " "$("$Default_VM_Folder/qqX.custom/QE.Custom/quickemu" --version)"
       fi
       if [[ -e "$QE_DevPath/quickemu" ]]; then
         printf "\n\n  Dev =   %s  > %s " "$QE_DevPath"  "$("$QE_DevPath/quickemu" --version)"
       fi
+
       printf "\n\n  [enter] to return \n\n"
       read -rp  "  >  " HelpSelect
 

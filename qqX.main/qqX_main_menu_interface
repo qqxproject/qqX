@@ -494,6 +494,18 @@ else
       fi
     fi
 
+    if [[ $CodingHotSwapShow ]]; then
+      # DEV NOTE - With quickemu and EMU mods, because the code becomes integrated into qqX, unlike quickGET,
+      # there is a theoretical risk that a code function present in one version could remain in memory
+      # when not present in another version:
+      # While quickGET uses a lot of 'type -t' function tests, which only check if the function is loaded into memory,
+      # all of these functions will auto-extinguish as they only exist in transitory background threads, so this is safe.
+      # For quickEMU, we need to mitigate by grepping for the actual script presence of any new or discontinued functions
+      # in '$QE_SourcePath' and in '$QE_ModPath' before getting qqX to make any critical calls.
+      CodingHotSwapShow=
+      printf "\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file. \n\n"
+    fi
+
     printColor  "  [enter] refresh   "
     if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
     else printf "(no distro webpage listed)  "
