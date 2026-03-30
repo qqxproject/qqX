@@ -40,7 +40,7 @@ CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 > After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
 
-Fully compatible with existing Quickemu builds
+See discussion [announcements](https://github.com/qqxproject/qqX/discussions/categories/announcements) for the latest news
 
 -----
 
