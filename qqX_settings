@@ -31,6 +31,7 @@
 
   #   SHARED or SECOND DRIVES
   #   SNAPSHOTS
+  #   TUNE UP
   #   ERROR HANDLING
   #   QEMU VERSIONING
 
@@ -326,9 +327,19 @@ VM_SelectorStyle="A"
 ##   SNAPSHOTS
 
 # Point at which the Main Menu highlights an potentially excessive number of snapshots
-  # SnapCountAlertPoint=
+  # SnapCountAlertPoint=  current setting default = '15'
 
-# This and other settings to be added later: Current setting for ver 1.14 = '15'
+# This and other settings to be added later ...
+
+#  -------------------------------------------------------------------------------------------------------------------
+
+##   TUNE UP
+
+# Personal free-text reminder that will show at the end of any tune up sequence, when requested to check or edit
+# May contain new-line '\n' and any other standard printf notation. Internal quotes should be escaped ie =\"value\"
+# Ideal for long CPU pinning entries eg.TuneUpNotes="  cpu_cores=\"8\" \n  cpu_pins=\"0,1,2,3,11,12,13,14\" "
+# Pinning is experimental. See https://github.com/qqxproject/qqX/discussions/21
+TuneUpNotes=""
 
 #  -------------------------------------------------------------------------------------------------------------------
 

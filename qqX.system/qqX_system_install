@@ -405,7 +405,7 @@ function print_terminal_notes {
   so the terminal window size will usually alter when the font size is changed.
 
   Some terminals do not have a -geometry parameter and must be pre-set in the actual terminal.
-  For 'qterminal' which uses PIXELS,  try 1600 x 1000.
+  For PIXELS, try 1600 x 1000
 
 Notes
 }
@@ -726,6 +726,8 @@ if [[ -e  "$XDG_GUI_desktop_PathName" ]] ; then
   #  ver 1.11 removes need for XDG trigger parameter
   if grep -qs 'XDG' "$XDG_GUI_desktop_PathName" ; then ForceReconfigure=1
   fi
+  # ver 1.16 needs more terminal width
+  [[ $(cut -d'.' -f1 <<< "$New_qqX_Version") == 1 ]] && [[ $(cut -d'.' -f2 <<< "$New_qqX_Version") -lt 16 ]] && ForceReconfigure=1
 
   if [[ $ForceReconfigure ]]; then
     printf "\n\n  BUT... to enable new qqX features, we need to take a few seconds to reconfigure the launcher"

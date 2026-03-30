@@ -488,7 +488,7 @@ function_config_tune_up ()  {
 
   while true; do
 
-    printColor "\n\n  CHECK ME: \n\n"
+    printColor "\n  CHECK ME: \n\n"
     cat "$TuneUpTargetDraft"
     TuneUpConfConfirm=
 
@@ -525,7 +525,11 @@ function_config_tune_up ()  {
       [[ $NumberOfHostCpuSpeeds -gt 1 ]] && declare -p HostSpeedArr | cut -d'=' -f2-
       printColor "\n  If you wish to experiment with CPU pinning, select 'edit'"
       printColor "\n  and add a line cpu_pins=\"0,1,6,7,11,15\" etc, adding %s elements, to match the 'cpu_cores' count:"  "$CoresSetNumber"
-      #printf "\n"
+    fi
+
+    if [[ $TuneUpNotes ]]; then
+      printf "\n\n  Tune Up notes: \n\n"
+      printf "%b\n" "$TuneUpNotes"
     fi
 
     if [[ "$guest_os" != *windows* && "$guest_os" != *macos* ]]; then
@@ -552,6 +556,7 @@ function_config_tune_up ()  {
     printf "\n\n"
     read -rp "  >  "   TuneUpConfConfirm
 
+    printf "\n"
 
     if [[ $TuneUpConfConfirm == "e" ]]; then
 
