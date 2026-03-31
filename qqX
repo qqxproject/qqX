@@ -65,7 +65,7 @@ if [[ "$(basename "$0")" == "qqX" ]] || [[ "$(basename "$0")" == "qqx" ]]; then 
 
 # DEV Start is used as a flag to show which source is being used. Checks if it is starting qqX directly from a source folder
 # i.e one containing all the setup files etc, and not from /usr/bin etc where they wouldn't be present (normally leave this alone ...)
-if [[ -d "./qqX.system" ]]; then DevStart=1 ; else DevStart= ; fi
+if [[ -d "./qqX.system" ]]; then DevStart= ; else DevStart= ; fi
 
 # DEV FAULT TRACING: set vars as =0, or set =int/float for pauses; eg =1 to pause 1 sec, "0.2" etc for less,
 # where timed pauses are given. Some diagnostics require enter key to continue ...

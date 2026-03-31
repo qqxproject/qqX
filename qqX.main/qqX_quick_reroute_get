@@ -93,7 +93,7 @@ print_quickget_and_folder_choices () {
 
   declare -n  QGW_List_ArrName="$1"
   [[ $ShowQGetLists ]] && { printf "\n print choices transfer arr: "; printf "\n %s" "${QGW_List_ArrName[@]}"; printf "\n\n"; }
-  QGW_List_Arr_ItemLength=14
+  QGW_List_Arr_ItemLength=16
   local HighLightNumber=
 
   if [[ $2 == "HL" ]]; then shift; HighLightNumber="$2"; shift
@@ -409,7 +409,7 @@ function show_QWG_header {
   printf "\033c"
   qqX_logo_printf_title "$qqX_Version"
   if [[ $QG_Modpath && $QG_ModsNumber ]]; then
-    printColor "  wrapping %s with mods %s  " "$QG_VerNumber" "$QG_ModsNumber"
+    printColor "  wrapping QUICKGET %s with mods %s  " "$QG_VerNumber" "$QG_ModsNumber"
   else
     printColor "  wrapping QUICKGET version %s  " "$QG_VerNumber"
   fi
@@ -643,9 +643,9 @@ function_quick_get_wrap ()  {
     while true ; do
 
       if [[ $QG_Modpath ]]; then
-        printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] go back  [Q] quit"
+        printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] back to main menus   [Q] quit"
       else
-        printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH   [B] go back  [Q] quit"
+        printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH  [B] back to main menus   [Q] quit"
       fi
       printf "\n\n"
 

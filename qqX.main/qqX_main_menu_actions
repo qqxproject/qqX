@@ -185,7 +185,7 @@ function  main_menu_actions {
     # but run the selector
     ByPass_VM_Array_Selector=
     # signal to run the VM selection initializer with absent VM_InstanceName and return to qqX main loop
-    VM_InstanceName=
+    VM_InstanceName= ; VM_Conf_Dir= ; VM_Conf_File=
     # run the clearance sections but signal to go straight to the downloads menu, no need to load the selector one.
     Run_GT=1
     return

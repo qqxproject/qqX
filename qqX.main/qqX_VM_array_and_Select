@@ -83,10 +83,6 @@ VM_loader_selector_and_menu () {
 
         if ! type -t "print_selector_array_${VM_SelectorStyle}_style" 1>/dev/null ; then VM_SelectorStyle="$Default_VM_SelectorStyle" ; fi
 
-        for Style in {A..Z} ; do
-          if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then LastSelectStyleAvailable="$Style" ; else break; fi
-        done
-
         printf "\n  Total Storage:  Drives %s (%s)  ISO's %s (%s)" "${TotalQcow2_Sizes}G" "$TotalQcow2_SizesCount" "${Total_ISO_Sizes}G" "$Total_ISO_SizesCount"
         [[ $BackUpQcowPresent ]] && printf "  Backups (%s)"  "$BackUpQcowPresent"
         printf "  [r] refresh  [sz] show size details"
@@ -116,7 +112,23 @@ VM_loader_selector_and_menu () {
           if [[ $VM_ElementCount -ge "$ShowFindPoint" ]]; then  printf "   [fd] find distro   [set] edit settings"
           else printf "   [set] view or edit settings file"
           fi
-          printf "   [A-%s] change menu style %s"  "$LastSelectStyleAvailable"  "$VM_SelectorStyle"
+
+          LastSelectStyleAvailable="?"
+          for Style in {A..Z} ; do
+            if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then LastSelectStyleAvailable="$Style" ; else break; fi
+          done
+          CustomStyleList=
+          for Style in {A..Z} ; do
+            if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then CustomStyleList+="$Style " ; fi
+          done
+          printf "   [A-%s] "  "$LastSelectStyleAvailable"
+          if [[ $CustomStyleList ]]; then
+            CustomStyleList="$(cut -d"$LastSelectStyleAvailable" -f2- <<< "$CustomStyleList")"
+            CustomStyleList="${CustomStyleList:1:-1}"
+            CustomStyleList="${CustomStyleList// /,}"
+            printf "[%s] "  "$CustomStyleList"
+          fi
+          printf " change menu style %s" "$VM_SelectorStyle"
 
           if [[ $ZsyncDistrosFound || $LiveDistrosFound ]]; then
             printf "   ("

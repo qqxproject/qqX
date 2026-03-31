@@ -43,7 +43,7 @@ function_vm_folder_item_text () {
   [[ "$ArrayConf_Item_Listing" == 'windows'* ]] || [[ "$ArrayConf_Item_Listing" == 'macos'* ]] && MSR_DistrosFound=1
 
   # item max display length
-  [[ ${#ArrayConf_Item_Listing} -gt "22" ]] &&  ArrayConf_Item_Listing="${ArrayConf_Item_Listing:0:22}"
+  [[ ${#ArrayConf_Item_Listing} -gt "24" ]] &&  ArrayConf_Item_Listing="${ArrayConf_Item_Listing:0:24}"
 
   ## Decide on suffix (if needed)
   QcowTarget=
@@ -113,9 +113,9 @@ print_selector_array_A_style () {
       if [[ $i -gt 9 ]]; then printf "[%d]  " "$i" ; else printf " [%d]  " "$i" ; fi
     fi
     if [[ $FD_Highlight ]]; then
-      printf "%-29s" "${ArrayConf_Item_Listing^^}"
+      printf "%-31s" "${ArrayConf_Item_Listing^^}"
     else
-      printColor "%-29s" "$ArrayConf_Item_Listing"
+      printColor "%-31s" "$ArrayConf_Item_Listing"
     fi
     ((VM_List_LineItemCount+=1))
 
@@ -140,7 +140,7 @@ print_selector_array_B_style () {
   ListTitleFolder="${VM_Array[0,0]}"
 
   vm_selector_init_common
-  [[ ! $VM_Select_Items_style_B_PerLine ]] && VM_Select_Items_style_B_PerLine="1"
+  [[ ! $VM_Select_Items_style_B_PerLine ]] && VM_Select_Items_style_B_PerLine="2"
   printf "\n  "
 
   while [[ ${VM_Array[$i,0]} ]] ; do
@@ -153,9 +153,9 @@ print_selector_array_B_style () {
       if [[ $i -gt 9 ]]; then printf "[%d] " "$i" ; else printf "[%d]  " "$i" ; fi
     fi
     if [[ $FD_Highlight ]]; then
-      printf "%-30s" "${ArrayConf_Item_Listing^^}"
+      printf "%-32s" "${ArrayConf_Item_Listing^^}"
     else
-      printColor "%-30s" "$ArrayConf_Item_Listing"
+      printColor "%-32s" "$ArrayConf_Item_Listing"
     fi
 
     # Move to new line when number of items per line reached  (default 4, see main settings)
@@ -169,7 +169,7 @@ print_selector_array_B_style () {
       if [[ $VM_List_LineItemCount == "0" ]]; then Spaces=0
       else Spaces="$(((VM_Select_Items_style_B_PerLine+1)-VM_List_LineItemCount))"
       fi
-      Spacer="                                   "   # 35
+      Spacer="                                     "   # 37
       while [[ $Spaces -gt 0 ]]; do  printf "%s" "$Spacer" ; ((Spaces-=1)) ; done
       printf " >>  %s\n"  "$ListTitleFolder"
       [[ $i != "$VM_PairsCount" ]] && printf "\n  "
@@ -209,8 +209,8 @@ print_selector_array_C_style () {
 
       [[ $ListTitleFolderOld ]] && printf "\n"
 
-      if [[ $InvertStyleColors ]]; then printColor "\n\n  %-35s"  "$ListTitleFolderDisplay"
-      else printf "\n\n  %-35s"  "$ListTitleFolderDisplay"
+      if [[ $InvertStyleColors ]]; then printColor "\n\n  %-37s"  "$ListTitleFolderDisplay"
+      else printf "\n\n  %-37s"  "$ListTitleFolderDisplay"
       fi
       VM_List_LineItemCount=1
 
@@ -226,24 +226,24 @@ print_selector_array_C_style () {
     if [[ $InvertStyleColors ]]; then
 
       if [[ $FD_Highlight ]]; then
-        if [[ $i -le 9 ]]; then printColor "{%d}  " "$i" ; printColor "%-30s" "${ArrayConf_Item_Listing^^}"
-        else printColor "{%d} " "$i" ;  printColor "%-30s" "${ArrayConf_Item_Listing^^}"
+        if [[ $i -le 9 ]]; then printColor "{%d}  " "$i" ; printColor "%-32s" "${ArrayConf_Item_Listing^^}"
+        else printColor "{%d} " "$i" ;  printColor "%-32s" "${ArrayConf_Item_Listing^^}"
         fi
       else
-        if [[ $i -le 9 ]]; then printf "[%d]  " "$i" ; printf "%-30s" "$ArrayConf_Item_Listing"
-        else printf "[%d] " "$i" ;  printf "%-30s" "$ArrayConf_Item_Listing"
+        if [[ $i -le 9 ]]; then printf "[%d]  " "$i" ; printf "%-32s" "$ArrayConf_Item_Listing"
+        else printf "[%d] " "$i" ;  printf "%-32s" "$ArrayConf_Item_Listing"
         fi
       fi
 
     else
 
       if [[ $FD_Highlight ]]; then
-        if [[ $i -le 9 ]]; then printf "{%d}  " "$i" ; printf "%-30s" "${ArrayConf_Item_Listing^^}"
-        else printf "{%d} " "$i" ;  printf "%-30s" "${ArrayConf_Item_Listing^^}"
+        if [[ $i -le 9 ]]; then printf "{%d}  " "$i" ; printf "%-32s" "${ArrayConf_Item_Listing^^}"
+        else printf "{%d} " "$i" ;  printf "%-32s" "${ArrayConf_Item_Listing^^}"
         fi
       else
-        if [[ $i -le 9 ]]; then printf "[%d]  " "$i" ; printColor "%-30s" "$ArrayConf_Item_Listing"
-        else printf "[%d] " "$i" ;  printColor "%-30s" "$ArrayConf_Item_Listing"
+        if [[ $i -le 9 ]]; then printf "[%d]  " "$i" ; printColor "%-32s" "$ArrayConf_Item_Listing"
+        else printf "[%d] " "$i" ;  printColor "%-32s" "$ArrayConf_Item_Listing"
         fi
       fi
 
@@ -269,6 +269,8 @@ print_selector_array_E_style () {
   ListTitleFolderDisplay=
 
   vm_selector_init_common
+  [[ $1 == "username" ]] && printf "\n  Hello %s \n" "${USER^^}"
+
   [[ ! $VM_Select_Items_style_E_PerLine ]] && VM_Select_Items_style_E_PerLine="2"
 
   while [[ ${VM_Array[$i,0]} ]] ; do
@@ -277,7 +279,6 @@ print_selector_array_E_style () {
     ListTitleFolder="${VM_Array[$i,0]}"
 
     if [[ $ListTitleFolder != "$ListTitleFolderOld" ]]; then
-
       # sneak in the new folder name & nudge up the line item count before printing the VM item
       if [[ ${#ListTitleFolder} -gt 28 ]]; then
         ListTitleFolderDisplay="${ListTitleFolder:(-28)}"
@@ -285,17 +286,10 @@ print_selector_array_E_style () {
         [[ "$ListTitleFolderDisplay" != '/'* ]] && ListTitleFolderDisplay="/$ListTitleFolderDisplay"
       else  ListTitleFolderDisplay="$ListTitleFolder"
       fi
-
       [[ $ListTitleFolderOld ]] && printf "\n"
-      if [[ $FD_Highlight ]]; then
-        printf "\n  %-35s"  "${ListTitleFolderDisplay^^}"
-      else
-        printColor "\n  %-35s"  "$ListTitleFolderDisplay"
-      fi
+      printColor "\n  %-35s"  "$ListTitleFolderDisplay"
       VM_List_LineItemCount=1
-
     else
-
       # print the item, but move to new line first if needed
       if [[ $VM_List_LineItemCount == "$VM_Select_Items_style_E_PerLine" ]]; then
         if [[ $FD_Highlight ]]; then  printColor "\n  %-35s" " "
@@ -304,16 +298,15 @@ print_selector_array_E_style () {
         VM_List_LineItemCount=1
       else  ((VM_List_LineItemCount+=1))
       fi
-
     fi
 
     if [[ $FD_Highlight ]]; then
-      if [[ $i -le 9 ]]; then printf "{%d}  " "$i" ; printColor "%-30s" "${ArrayConf_Item_Listing^^}"
-      else printf "{%d} " "$i" ;  printColor "%-30s" "${ArrayConf_Item_Listing^^}"
+      if [[ $i -le 9 ]]; then printf "{%d}  " "$i" ; printColor "%-32s" "${ArrayConf_Item_Listing^^}"
+      else printf "{%d} " "$i" ;  printColor "%-32s" "${ArrayConf_Item_Listing^^}"
       fi
     else
-      if [[ $i -le 9 ]]; then printf "[%d]  " "$i" ; printf "%-30s" "$ArrayConf_Item_Listing"
-      else printf "[%d] " "$i" ;  printf "%-30s" "$ArrayConf_Item_Listing"
+      if [[ $i -le 9 ]]; then printf "[%d]  " "$i" ; printf "%-32s" "$ArrayConf_Item_Listing"
+      else printf "[%d] " "$i" ;  printf "%-32s" "$ArrayConf_Item_Listing"
       fi
     fi
     ListTitleFolderOld="${VM_Array[$i,0]}"
@@ -321,8 +314,10 @@ print_selector_array_E_style () {
 
   done
   printf "\n"
-
 }
+
+print_selector_array_F_style () { print_selector_array_E_style  username ; }
+
 
 ##  Custom styles
 
