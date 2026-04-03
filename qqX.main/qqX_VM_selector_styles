@@ -18,8 +18,8 @@
 
 
 ## Variant styles of VM display & their common function units
-
-# For notes on custom vm menus see "Custom styles" at the end of this script
+#  NB: CONTIGIOUS A TO Q ONLY
+#  For notes on custom vm menus see "Custom styles" at the end of this script
 
 vm_selector_init_common () {
 
@@ -318,16 +318,28 @@ print_selector_array_E_style () {
 
 print_selector_array_F_style () { print_selector_array_E_style  username ; }
 
+# qqX styles, find last value from (contigious) list
+LastSelectStyleAvailable="?"
+for Style in {A..Q} ; do
+  if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then LastSelectStyleAvailable="$Style" ; else break; fi
+done
 
-##  Custom styles
+# Custom styles, source and make list if styles are present
+CustomStyleList=
+if [[ -e "$Default_VM_Folder/qqX.custom/custom_vm_selectors" ]]; then
+  source "$Default_VM_Folder/qqX.custom/custom_vm_selectors"
+  for Style in {R..Z} ; do
+    if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then
+      [[ ! $CustomStyleList ]] && CustomStyleList+="$Style" || CustomStyleList+=",$Style"
+    fi
+  done
+fi
 
-if [[ -e "$Default_VM_Folder/qqX.custom/custom_vm_selectors" ]]; then source "$Default_VM_Folder/qqX.custom/custom_vm_selectors" ; fi
-
-# Method:
+# Custom Styles Method:
 # Create plain text folder & file 'custom_vm_selectors' as above. Add "#!/usr/bin/env bash" to line 1.
 # Use an existing style to create a template. This is the easiest way.
 # Copy and paste any of the style functions into the new file.
 # Only the needed style function has to be copied but more than one function may be added.
-# Use style letters from end of alphabet eg R to Z   Letters must be CAPS but sequence may be non-contiguous.
+# Use style letters from end of alphabet eg R to Z only. Letters must be CAPS but sequence may be non-contiguous.
 
 

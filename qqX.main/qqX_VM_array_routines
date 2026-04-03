@@ -385,11 +385,12 @@ refresh_sources_and_load_VM_arrays() {
   cd "$Default_VM_Folder" || printf "\n\n  ERROR changing to Default_VM_Folder to rebase the refresh"
   Current_VM_Folder="$Default_VM_Folder"
 
-  # clear any previously declared settings-based arrays
+  # clear any previously declared settings-based arrays and variables
   Extra_VM_Folder=()
   VM_Array=()
   QemuErrorFilter=()
   clear_boot_style_vars
+  VM_SelectorStyle=
 
   # clear possible flags
   VM_SettingsError=
@@ -407,6 +408,8 @@ refresh_sources_and_load_VM_arrays() {
   # make sure any settings edits have finished writing, see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
   while grep -qs "$qqX_SettingsFile" <<< "$(ps aux)" ; do sleep 1 ; done
   source "$qqX_SettingsFile"
+
+  refresh_selector_styles
 
   # only need to run once on boot, otherwise run on refresh
   if [[ $findSysLangBoot ]]; then findSysLangBoot=

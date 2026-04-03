@@ -81,13 +81,12 @@ VM_loader_selector_and_menu () {
         printf "\033c"
         show_qqX_title_bar
 
-        if ! type -t "print_selector_array_${VM_SelectorStyle}_style" 1>/dev/null ; then VM_SelectorStyle="$Default_VM_SelectorStyle" ; fi
-
         printf "\n  Total Storage:  Drives %s (%s)  ISO's %s (%s)" "${TotalQcow2_Sizes}G" "$TotalQcow2_SizesCount" "${Total_ISO_Sizes}G" "$Total_ISO_SizesCount"
         [[ $BackUpQcowPresent ]] && printf "  Backups (%s)"  "$BackUpQcowPresent"
         printf "  [r] refresh  [sz] show size details"
         printf "\n"
 
+        # print the array of installed VMs to select which one, and in the required style:
         [[ ! $SelectArrayError ]] && print_selector_array_"$VM_SelectorStyle"_style
 
         if [[ $New_VM_Conf_File ]] && [[ ! $Current_VM_Folder_Recognised ]] && [[ -f "$(pwd)/$New_VM_Conf_File" ]]; then
@@ -113,21 +112,8 @@ VM_loader_selector_and_menu () {
           else printf "   [set] view or edit settings file"
           fi
 
-          LastSelectStyleAvailable="?"
-          for Style in {A..Z} ; do
-            if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then LastSelectStyleAvailable="$Style" ; else break; fi
-          done
-          CustomStyleList=
-          for Style in {A..Z} ; do
-            if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then CustomStyleList+="$Style " ; fi
-          done
           printf "   [A-%s] "  "$LastSelectStyleAvailable"
-          if [[ $CustomStyleList ]]; then
-            CustomStyleList="$(cut -d"$LastSelectStyleAvailable" -f2- <<< "$CustomStyleList")"
-            CustomStyleList="${CustomStyleList:1:-1}"
-            CustomStyleList="${CustomStyleList// /,}"
-            printf "[%s] "  "$CustomStyleList"
-          fi
+          [[ $CustomStyleList ]] && printf "[%s] "  "$CustomStyleList"
           printf " change menu style %s" "$VM_SelectorStyle"
 
           if [[ $ZsyncDistrosFound || $LiveDistrosFound ]]; then
@@ -164,7 +150,10 @@ VM_loader_selector_and_menu () {
           elif [[ $SettingsFileAdjusted ]]; then
             printColor "\n\n  ARRAYS have been RELOADED and settings REFRESHED ...."
             SettingsFileAdjusted=
+          elif [[ $StylesSettingError ]]; then
+            printColor "\n\n  Set Selector STYLE NOT FOUND: Using defaults ...."
           fi
+
           if [[ $CodingHotSwapShow ]]; then
             # DEV NOTE - With quickemu and EMU mods, because the code becomes integrated into qqX, unlike quickGET,
             # there is a theoretical risk that a code function present in one version could remain in memory
@@ -214,15 +203,24 @@ VM_loader_selector_and_menu () {
       elif [[ "$VM_Selection" == [A-Z] ]]; then
 
         # NB: different to VM_selector_menu_refresh
-        VM_SelectorStyle="$VM_Selection"
-        ByPass_VM_Array_Loader=1
-        MenuStylePreviewed=1
-        ListTitleFolderOld=
-        InvertStyleColors=
-        VM_Conf_Dir=
-        VM_Conf_File=
-        VM_InstanceName=
-        VM_Selection=
+        refresh_selector_styles
+        if type -t "print_selector_array_${VM_Selection}_style" &>/dev/null ; then
+          VM_SelectorStyle="$VM_Selection"
+          ByPass_VM_Array_Loader=1
+          MenuStylePreviewed=1
+          ListTitleFolderOld=
+          InvertStyleColors=
+          VM_Conf_Dir=
+          VM_Conf_File=
+          VM_InstanceName=
+          VM_Selection=
+        else
+          printColor "\n\n  Style '%s' Not Available \n\n"  "$VM_Selection"
+          sleep 1.5
+          # clear any pressing of the enter key occuring during error message pause
+          read -r -t 0.1
+          read -r -t 0.1
+        fi
 
       # Note, for this script, 'refresh_sources_and_load_VM_arrays' gets run at start of loop on return
 

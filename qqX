@@ -41,7 +41,7 @@
 # Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
 # Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
 # but minor numbers remain padded to 2dp
-  qqX_Version="1.16.00-dev.01"
+  qqX_Version="1.16.00-dev.02"
 
 # Allow Posix sub-shell checks (without -t 1) eg. qqX_Version="$(./qqX --version 2>/dev/null)"
 if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit ; fi
@@ -65,7 +65,7 @@ if [[ "$(basename "$0")" == "qqX" ]] || [[ "$(basename "$0")" == "qqx" ]]; then 
 
 # DEV Start is used as a flag to show which source is being used. Checks if it is starting qqX directly from a source folder
 # i.e one containing all the setup files etc, and not from /usr/bin etc where they wouldn't be present (normally leave this alone ...)
-if [[ -d "./qqX.system" ]]; then DevStart= ; else DevStart= ; fi
+if [[ -d "./qqX.system" ]]; then DevStart=1 ; else DevStart= ; fi
 
 # DEV FAULT TRACING: set vars as =0, or set =int/float for pauses; eg =1 to pause 1 sec, "0.2" etc for less,
 # where timed pauses are given. Some diagnostics require enter key to continue ...

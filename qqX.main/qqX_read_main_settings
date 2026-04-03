@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 ##  qqX component to be located in folder 'qqX.main'
+#   Sorts out main settings and defaults from the previously sourced 'qqX_SettingsFile' (qqX_Initialize)
+#   Creates sub-functions that can be re-run to refresh the scripts when changes have been made via 'qqX_edit_settings'
+#   and which runs the main function 'refresh_sources_and_load_VM_arrays' located in script 'qqX_VM_array_routines'
+#   Also run by function 'VM_loader_selector_and_menu' which is in the root qqX main loop
 
 ##  Copyright (c)  Alex Genovese   https://github.com/qqxproject
 #   SMALL CODE SNIPPETS eg the function printColor MAY BE USED
@@ -17,7 +21,21 @@
 
 ## VM selector style
 Default_VM_SelectorStyle="A"
-[[ ! $VM_SelectorStyle ]]  &&  VM_SelectorStyle="$Default_VM_SelectorStyle"
+
+refresh_selector_styles() {
+  # should have picked up a style when the settings file was sourced, but if it had been set blank ...
+  [[ ! $VM_SelectorStyle ]]  &&  VM_SelectorStyle="$Default_VM_SelectorStyle"
+
+  for Style in {A..Z} ; do
+    if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then unset -f "print_selector_array_${Style}_style"; fi
+  done
+  source "$qqX_MainFolder/qqX_VM_selector_styles"
+
+  if ! type -t "print_selector_array_${VM_SelectorStyle}_style" 1>/dev/null ; then
+    VM_SelectorStyle="$Default_VM_SelectorStyle"; StylesSettingError=1
+  else StylesSettingError=
+  fi
+}
 
 function_create_VM_folderList() {
 

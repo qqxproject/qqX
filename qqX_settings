@@ -89,31 +89,25 @@ Extra_VM_Folder+=("")
 
 ## VM SELECTOR:
 
-#  Normally the first opening menu, used to select VM's. Default style A.
-#  Style may be previewed in the menu.  Suggest E or B as numbers of distros increases.
+#  Normally the first opening menu, used to select VM's. Styles may be live previewed from the selector menu.
+#  Default is style A but E,F or B are recommended when the number of distros increases.
+#  For custom vm selector styles, see notes at the end of "qqX.main/qqX_VM_selector_styles" and in the qqX webpages.
 
 VM_SelectorStyle="A"
 
-# OPTIONAL: select VM's to show AT THE TOP of the list
+# OPTIONAL:
 
-# Where [n,0] is the full path general folder / sub-folder  &  [n,1] is the .conf file
-
+# To select VM's to show at the TOP OF THE LIST
+# where [n,0] is the full path general folder / sub-folder  &  [n,1] is the .conf file
 # eg:
-
 # VM_Array[0,0]="$Default_VM_Folder" ; VM_Array[0,1]="windows-11.conf"
-
 # VM_Array[1,0]="$Default_VM_Folder/MAC" ; VM_Array[1,1]="macos-catalina.conf"
-
 # VM_Array[2,0]="/media/xxx/Storage/VMQs" ; VM_Array[2,1]="windows-insider.conf"
 
-
-# ADD here. Make sure to remove the '#' in order to activate the line.
-
-# VM_Array[0,0]="$Default_VM_Folder" ; VM_Array[0,1]=""
-
-# VM_Array[1,0]="$Default_VM_Folder" ; VM_Array[1,1]=""
-
-# VM_Array[2,0]= ; VM_Array[2,1]=
+# ADD HERE, making sure to remove the '#' in order to activate the line:
+# VM_Array[0,0]="" ; VM_Array[0,1]=""
+# VM_Array[1,0]="" ; VM_Array[1,1]=""
+# VM_Array[2,0]="" ; VM_Array[2,1]=""
 
 # MUST BE set as CONTIGIUOUS, non-sparse, no numeric sequence gaps
 # ie:  0, 1, 2, 3 ...  when counting the first number of the first pair, on each line
@@ -132,20 +126,16 @@ VM_SelectorStyle="A"
 # Style C & D setting, default ="3"
   VM_Select_Items_style_C_PerLine=
 
-# Style E setting, default ="2"
+# Style E & F setting, default ="2"
   VM_Select_Items_style_E_PerLine=
 
 # Default is set internally at ="7"  but certain internal functions may temporarily reduce this to as low as 2 or 3
 # Use with caution.  Suggest 5 or 6 as lowest setting.  Normally leave blank.
   Force_GetList_NewLinePoint=
 
-# For custom vm selector styles:  see notes in the file "qqX_VM_array_and_Select", in the folder qqX.main
-# For custom main menu: see file "qqX_main_menu_interface"
-# Also see qqX wiki.
-
 # FIND DISTRO:
 # Set number of distros showing before find option shows on menu. Useful for large collections.
-# Set value at 2x actual. Suggest around 15 or 20 distros, eg set @ 30 or 40, default = 32
+# Set value at 2x actual. Suggest at around 15 or 20 distros, eg set @ 30 or 40, default = 32
   ShowFindPoint="32"
 
 # FILTERS:
