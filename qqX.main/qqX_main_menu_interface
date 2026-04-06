@@ -429,7 +429,7 @@ else
 
     read_update_check_file
     check_beta_alert_count
-    check_disk_is_okay
+    check_disk_is_okay  main_and_snaps
     check_if_disk_needs_a_cleanup
 
     if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
@@ -513,25 +513,30 @@ else
       printf "\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file. \n\n"
     fi
 
-    printColor  "  [enter] refresh   "
-    if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
-    else printf "(no distro webpage listed)  "
-    fi
-    printf " [h] show help & info  [b] go back  [q] quit "
+    if [[ $MainMenuChoicePreset ]]; then
 
-    if [[ $LiveBoot && $DistroLogin ]]; then
-      printColor "\n\n  Login:Password"
-      printf "  %s" "$DistroLogin"
+      [[ $MainMenuChoicePreset != "rq" ]] && printf "  >  %s \n" "$MainMenuChoicePreset"
+      MainMenuChoice="$MainMenuChoicePreset"
+      MainMenuChoicePreset=
+
+    else
+
+      printColor  "  [enter] refresh   "
+      if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
+      else printf "(no distro webpage listed)  "
+      fi
+      printf " [h] show help & info  [b] go back  [q] quit "
+
+      if [[ $LiveBoot && $DistroLogin ]]; then
+        printColor "\n\n  Login:Password"
+        printf "  %s" "$DistroLogin"
+      fi
+      printf "\n\n"
+
     fi
-    printf "\n\n"
 
     [[ $PathDiagnostics ]] && path_diagnostics
 
-    if [[ $MainMenuChoicePreset ]]; then
-      printf "  >  %s \n" "$MainMenuChoicePreset"
-      MainMenuChoice="$MainMenuChoicePreset"
-      MainMenuChoicePreset=
-    fi
     [[ ! $MainMenuChoice ]] &&  read -rp "  >  "  MainMenuChoice
 
   }

@@ -376,7 +376,7 @@ function qqX_snapshot_delete {
   done
 
   SnapListArrTotal=$((i-1))
-  printColor "\n Enter ARRAY number [0] to [%s], either for individual snapshot, or for the start of snapshot range"  "$SnapListArrTotal"
+  printColor "\n Enter ARRAY number [0] to [%s], either for individual SNAPSHOT, or for the START of snapshot range"  "$SnapListArrTotal"
   printf "\n\n or [full individual name] for difficult names only showing correctly in the FULL listing"
   printf "\n\n or [enter] to return to main menu "
 
@@ -396,7 +396,8 @@ function qqX_snapshot_delete {
       SpecialSnapName="$SnapDeleteStart"
       printf "\n  Snap to delete: \"%s\"" "$SpecialSnapName"
     else
-      printColor "\n [enter] for an individual snapshot or to correct an error \n\n Or ARRAY [number] for end of range (inclusive) \n\n"
+      printColor "\n [enter] for an INDIVIDUAL SNAPSHOT, to cancel, or to correct an error "
+      printf "\n\n Or ARRAY [number] to select the END of range (inclusive) \n\n"
       read -rp " >  "  SnapDeleteEnd
       if [[ $SnapDeleteEnd ]]; then
         SnapDeleteEnd="$(tr -cd "[:digit:]" <<< "$SnapDeleteEnd")"
@@ -462,9 +463,10 @@ function qqX_snapshot_delete {
 
     fi
     sdReturn=
-    printf "\n\n [enter] to return to menu   [sc] create new snap \n\n "
+    printf "\n\n [enter] to return to menu   [sd] delete again   [sc] create new snap \n\n "
     read -rp " >  "  sdReturn
-      if [[ $sdReturn ]]; then MainMenuChoicePreset="sc" ; Selected_DrivePreset=1
+      if [[ $sdReturn == "sd" ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset=1
+      elif [[ $sdReturn == "sc" ]]; then MainMenuChoicePreset="sc" ; Selected_DrivePreset=1
       else MainMenuChoicePreset= ; Selected_DrivePreset=
       fi
 

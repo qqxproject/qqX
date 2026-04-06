@@ -186,10 +186,15 @@ show_main_menu_header () {
 
 check_disk_is_okay () {
 
-  local PrintErrors=
+  local PrintErrors= ; RunSnapChk= ; DiskChkAddSnap=
   for CheckArg in "$@" ; do
     if [[ $CheckArg == "PrintErrors" ]]; then PrintErrors=1 ; shift ; fi
   done
+
+  if [[ $1 == "main_and_snaps" ]]; then
+    # reserved for main menu, where the main drive gets health checked but snapshot status is also assessed
+    shift "$#" ; RunSnapChk=1
+  fi
 
   if [[ $1 ]] && [[ ! $2 ]]; then
     DiskCheckFolderName="$(dirname "$1")"
@@ -199,7 +204,7 @@ check_disk_is_okay () {
     if [[ $2 ]]; then DiskCheck_Disk="$2" ; else DiskCheck_Disk="disk.qcow2"; fi
   fi
 
-  DiskChkExitCode= ;  DiskChkStatus=  ; DiskChkAddSnap=
+  DiskChkExitCode= ;  DiskChkStatus=
   local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
   if [[ -e "$Selected_ChkDrive" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
@@ -220,24 +225,35 @@ check_disk_is_okay () {
      63) DiskChkStatus="Checks are not supported by the image format -- not qcow2 ??" ;;
     esac
   fi
-  if [[ $DiskChkStatus == "Okay" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+
+  if [[ $RunSnapChk ]] && [[ $DiskChkStatus == "Okay" ]]; then
     # at least one recent snap should be present (if disk is of sufficient size)
     if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
     else
       DiskChkEpochTime="$(date +%s)"
       LastSnapDate="$("$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | tail -n 1 | awk '{print $5}')"
-      LastSnapEpochTime="$(date -d "$LastSnapDate" +%s)"
-      LastSnapDistance="$((DiskChkEpochTime-LastSnapEpochTime))"
-      # where 1209600 = 14 days
-      [[ $LastSnapDistance -gt 1209600 ]] && DiskChkAddSnap=1
+      # eg: 13        Apr.06.15:22          0 B 2026-04-06 15:22:14 00:00:00.000
+      # where $5 is the 2026-04-06 bit of the last line in the list of snaps
+      LastSnapEpochTime="$(date -d "$LastSnapDate" +%s 2>/dev/null)"
+      # check that grepped data was sane, where 10 digits, as epoch time, is good for more than 200 years ...
+      DiskChkEpochTime="$(tr -cd '[:digit:]' <<< "$DiskChkEpochTime")"
+      LastSnapEpochTime="$(tr -cd '[:digit:]' <<< "$LastSnapEpochTime")"
+      if [[ ${#DiskChkEpochTime} == 10 ]] && [[ ${#LastSnapEpochTime} == 10 ]]; then
+        LastSnapDistance="$((DiskChkEpochTime-LastSnapEpochTime))"
+        # where 1209600 = 14 days
+        [[ $LastSnapDistance -gt 1209600 ]] && DiskChkAddSnap=1
+      fi
     fi
     if [[ $DiskChkAddSnap ]] ; then
-      printColor "\n\n  Taking Main Drive Auto-Snapshot >  Last snapshot was %d days ago ... \n\n" "$((LastSnapDistance/86400))"
+      printColor "\n\n  Taking Main Drive Auto-Snapshot >  Last snapshot was %d days ago" "$((LastSnapDistance/86400))"
+      printf "\n\n  Drive is in good health \n\n"
       SnapTitle="$(date +%b.%d.%H:%M)"
-      "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
+      "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive" &
+      SnapPid="$!"
       # DiskStorageChanges=1  unlikely to cause changes, unless a VM is run and updating creates data ....  REVIEW
-      read -t 4 -rp "  [enter] to refresh and continue > "
-      echo ; MainMenuChoicePreset="rq"
+      read -t 3 -rp "  Couple of secs ... "
+      wait "$SnapPid"
+      printf "\n\n" ; MainMenuChoicePreset="rq" ; Selected_DrivePreset=
     fi
   fi
 }
