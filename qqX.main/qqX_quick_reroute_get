@@ -406,7 +406,7 @@ function check_new_vm_folder_name {
 ## MAIN WRAPPING (QWG Quick Wrap Get)
 
 function show_QWG_header {
-  printf "\033c"
+  tput clear
   qqX_logo_printf_title "$qqX_Version"
   if [[ $QG_Modpath && $QG_ModsNumber ]]; then
     printColor "  wrapping QUICKGET %s with mods %s  " "$QG_VerNumber" "$QG_ModsNumber"

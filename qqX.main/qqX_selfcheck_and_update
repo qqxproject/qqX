@@ -223,234 +223,235 @@ function find_latest_qemu_version {
 }
 
 function download_new_release {
-    printf "\033c \n\n"
-    qqX_logo_printf_title  "$qqX_Version updater"
-    printf "\n\n\n  https://github.com/qqxproject/qqX/releases"
-    local UpdRechk= ; local ShowRelsPages= ; qqX_NewTagAlert=
-    while true ; do
-      # check that update checks are all done and that transfer file has been sourced
-      if [[ ! $qqX_Newest_Tag ]]; then
-        [[ ! $UpdRechk ]] && printf "\n\n"
-        printf "  Update Checking still in progress ...."
-      elif [[ $qqX_Newest_Tag ]]; then
-        [[ ! $UpdRechk ]] && printf "\n\n"
-        printf "  Update Checking has been completed "
+  tput clear
+  printf "\n\n"
+  qqX_logo_printf_title  "$qqX_Version updater"
+  printf "\n\n\n  https://github.com/qqxproject/qqX/releases"
+  local UpdRechk= ; local ShowRelsPages= ; qqX_NewTagAlert=
+  while true ; do
+    # check that update checks are all done and that transfer file has been sourced
+    if [[ ! $qqX_Newest_Tag ]]; then
+      [[ ! $UpdRechk ]] && printf "\n\n"
+      printf "  Update Checking still in progress ...."
+    elif [[ $qqX_Newest_Tag ]]; then
+      [[ ! $UpdRechk ]] && printf "\n\n"
+      printf "  Update Checking has been completed "
+    fi
+    if [[ $Muted_BetaAlertPoint ]]; then
+      if [[ $UpdRechk == "once" ]]; then UpdRechk="done"
+      else printf "\n\n"
       fi
-      if [[ $Muted_BetaAlertPoint ]]; then
-        if [[ $UpdRechk == "once" ]]; then UpdRechk="done"
-        else printf "\n\n"
-        fi
-        printColor "  Pre-Release %s .... " "$qqX_Newest_PreRelease"
-        printColor "\n\n  See source releases and commits for more details"
-        printf "\n\n  Pre-releases are generally stable and will have had some testing."
-        printf "\n\n  They offer new features and bug-fixes but may be a little rough on the edges ...."
-        printf "\n\n  Using the Beta Channel is on a per release-series basis. It may mean more frequent updates."
-        printf "\n\n  Installing a standard release, either older or upcoming, will revert qqX to using standard releases."
-        printf "\n\n"
-        if floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Newest_PreRelease" ; then
-          printf "\n  Further add-on pre-release tweaks can be found at https://github.com/qqxproject/qqX/tags"
-          printf "\n\n"
-        fi
-      fi
-      if [[ ! $qqX_UpdateAvail ]] ; then
-        [[ ! $UpdRechk ]] && printf "\n\n"
-        if [[ $qqX_Current_ReleaseType == "beta" ]] && floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Version" ; then
-          printf "  No new release found ...."
-          printf "\n\n  However an "
-          printColor "ADD-ON %s" "$qqX_Newest_Tag"
-          printf " is available at https://github.com/qqxproject/qqX/tags"
-          [[ $qqX_Newest_TagText ]] && printf "\n\n  >  %s" "$qqX_Newest_TagText"
-          UpdRechk="once" ; qqX_NewTagAlert=1
-        else
-          printColor "  No new release found ...."
-        fi
-        printf "\n\n"
-      elif [[ ! $Muted_BetaAlertPoint ]]; then
-        if [[ ! $qqX_Latest_SecureTarBall_Addr ]]; then
-          printf "\n\n  HTTPS download:\n"
-        else printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
-        fi
-        # if version can handle new format, otherwise leave notes as blank
-        if floatversion -Q --gt "$qqX_Version  1.14.01" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
-          AboutWidth="$(tput cols)"
-          printf "\n  %s\n\n" "$qqX_Latest_ReleaseNumber"
-          #shellcheck disable=SC2059
-          printf -v BodyTxt "$(grep -s body "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4)"
-          mapfile -t AboutReleaseArray  <<< "$BodyTxt"
-          for Line in "${AboutReleaseArray[@]}" ; do
-            if [[ "$Line" != *'+1'* ]] ; then printColor "  %s\n" "$(fmt -uw "$AboutWidth" <<< "$Line")" ; fi
-          done
-          if [[ $qqX_Current_ReleaseType == "release" ]] && [[ $qqX_Latest_ReleaseType == "beta" ]]; then
-            if [[ "$qqX_Latest_ReleaseNumber" == *'-rc'* ]]; then
-              printf  "\n\n  RELEASE CANDIDATE CODE will have been extensively checked before being placed in the standard release channel"
-              printf  "\n\n  People who able to assist with Community pre-testing should give the new features a try"
-              printf  "\n\n  A full release update will be provided later ....\n"
-            else
-              printf  "\n\n  Beta code is normally placed in the pre-release channel:"
-              printf  "\n\n  On this occasion, it is being standard highlighted as it has EXCITING NEW FEATURES"
-              printf    "\n  or IMPORTANT NEW FIXES that initial tests have shown as stable and unlikely to cause any problems."
-              printf  "\n\n  Installing beta code will place you in the pre-release channel but this can be reverted"
-              printf    "\n  when later updating with the full release, or at any point by re-installing with any standard version.\n"
-            fi
-          fi
-        elif [[ $Muted_BetaAlertPoint ]]; then
-          printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Newest_PreRelease"
-          qqX_UpdateAvail=
-        else
-          printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Latest_ReleaseNumber"
-          ShowRelsPages=1
-        fi
-      fi
-      printf "\n"
-      if [[ $qqX_UpdateAvail ]] && [[ ! $Muted_BetaAlertPoint && ! $qqX_NewTagAlert ]] ; then
-        if [[ $qqX_Latest_ReleaseType == "release" ]]; then
-          printf "  Neatly download the release into its own sub-folder at: "
-        else
-          printf "  Neatly download the code into its own sub-folder at: "
-        fi
-        [[ $Specified_Updates_Location ]] && printf "\n\n  [s] Specified folder:  %s"  "$Specified_Updates_Location"
-        [[ -d "$HOME/Downloads" ]] && printf "\n\n  [d] Downloads folder:  %s"  "$HOME/Downloads"
-
-        if [[ $(pwd) == "$Default_VM_Folder" ]]; then
-          printColor "\n\n  [enter] Current/Default folder:"
-          printf "  %s "  "$Default_VM_Folder"
-        else
-          # not to confuse with '$Current_VM_Folder'
-          printf "\n\n  [c] Current folder:    %s "  "$(pwd)"
-          printColor "\n\n  [enter] Default VM folder:"
-          printf "  %s"  "$Default_VM_Folder"
-        fi
+      printColor "  Pre-Release %s .... " "$qqX_Newest_PreRelease"
+      printColor "\n\n  See source releases and commits for more details"
+      printf "\n\n  Pre-releases are generally stable and will have had some testing."
+      printf "\n\n  They offer new features and bug-fixes but may be a little rough on the edges ...."
+      printf "\n\n  Using the Beta Channel is on a per release-series basis. It may mean more frequent updates."
+      printf "\n\n  Installing a standard release, either older or upcoming, will revert qqX to using standard releases."
+      printf "\n\n"
+      if floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Newest_PreRelease" ; then
+        printf "\n  Further add-on pre-release tweaks can be found at https://github.com/qqxproject/qqX/tags"
         printf "\n\n"
       fi
-      printf "  [r] to recheck"
-      if [[ $WebBrowser ]]; then
-        if [[ $Muted_BetaAlertPoint || $ShowRelsPages ]]; then  printf "   [w] popup qqX RELEASE pages with browser"
-        elif [[ $qqX_NewTagAlert ]]; then  printf "   [w] popup qqX TAG pages with browser"
-        else printf "   [w] popup qqX web pages with browser"
-        fi
-      fi
-      printf "  or  [b] to go back \n\n"
-      read -rp "  >  "  qqX_LatestTarBall_Folder
-
-     [[ ! $qqX_UpdateAvail ]] || [[ $UpdRechk ]] && printf "\n\n"
-
-      if [[ $qqX_LatestTarBall_Folder == "s" ]]; then  qqX_LatestTarBall_Folder="$Specified_Updates_Location" ; break
-      elif [[ $qqX_LatestTarBall_Folder == "d" ]]; then  qqX_LatestTarBall_Folder="$HOME/Downloads" ; break
-      elif [[ $qqX_LatestTarBall_Folder == "c" ]]; then  qqX_LatestTarBall_Folder="$(pwd)" ; break
-      elif [[ $qqX_LatestTarBall_Folder == "w" ]]; then
-        printf "  Opening Browser ... \n\n"
-        if [[ $Muted_BetaAlertPoint || $ShowRelsPages ]]; then
-          (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/releases" & ) || web_browser_not_found_message
-        elif [[ $qqX_NewTagAlert ]]; then
-          (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/tags" & ) || web_browser_not_found_message
-        else (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX" & ) || web_browser_not_found_message
-        fi
-        sleep 1
-      elif [[ $qqX_LatestTarBall_Folder == "b" ]]; then
-        qqX_LatestTarBall_Folder= ; qqX_NoReleaseDL=1 ; qqX_UpdateAvail= ; ((Muted_BetaAlert_Count+=1)) ; break
-      elif [[ $qqX_LatestTarBall_Folder == "r" ]]; then
-        qqX_LatestTarBall_Folder= ; [[ ! $UpdRechk ]] && UpdRechk="once" ; read_update_check_file
-      else qqX_LatestTarBall_Folder="$Default_VM_Folder" ; break
-      fi
-    done
-
-    if [[ $qqX_NoReleaseDL ]]; then  qqX_NoReleaseDL=
-    else
-      # each release to its own FOLDER makes things tidier
-      qqX_LatestTarBall_Folder="$qqX_LatestTarBall_Folder/qqX.releases/$qqX_Latest_ReleaseNumber"
-      # make sure each DOWNLOAD is clean
-      [[ -d "$qqX_LatestTarBall_Folder" ]] && rm -r "$qqX_LatestTarBall_Folder" 2>/dev/null
-      sleep 0.5; mkdir -p "$qqX_LatestTarBall_Folder" ; sleep 0.5
-      # record where to come back to, when done and not to confuse with '$Current_VM_Folder'
-      ReturnFolder="$(pwd)"
-      # MOVE to download folder and keep things contained
-      cd "$qqX_LatestTarBall_Folder"  || printColor "\n\n  ERROR  making or changing to qqX.releases folder ??"
-
-      if [[ $(pwd) != "$qqX_LatestTarBall_Folder" ]]; then
-        # if we are not in the right folder, we need to exit
-        printf "\n\n  [enter] to return \n\n"
-        read -rp "  >  "
+    fi
+    if [[ ! $qqX_UpdateAvail ]] ; then
+      [[ ! $UpdRechk ]] && printf "\n\n"
+      if [[ $qqX_Current_ReleaseType == "beta" ]] && floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Version" ; then
+        printf "  No new release found ...."
+        printf "\n\n  However an "
+        printColor "ADD-ON %s" "$qqX_Newest_Tag"
+        printf " is available at https://github.com/qqxproject/qqX/tags"
+        [[ $qqX_Newest_TagText ]] && printf "\n\n  >  %s" "$qqX_Newest_TagText"
+        UpdRechk="once" ; qqX_NewTagAlert=1
       else
-        if [[ $qqX_Latest_SecureTarBall_Addr ]]; then
-          dlCount="1"
-          while [[ $dlCount -le "3" ]]; do
-            eval curl --disable -Lf -m 20 -o "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz"  "$qqX_Latest_SecureTarBall_Addr"
-            echo
-            eval curl --disable -Lf -m 20 -o "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz.sha256"  "$qqX_Latest_SecureTarSha_Addr"
-            echo
-            SHA_Check="$(sha256sum -c "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz.sha256")"
-            printColor "\n  SHA256 Check: %s "  "$SHA_Check"
-            if [[ "$SHA_Check" != *'OK' ]]; then
-              rm -r ./*  2>/dev/null
-              printf "\n\n  ERROR  - RETRYING  DOWNLOAD \n\n"
-            else printf "\n\n" ; break
-            fi
-            ((dlCount++))
-          done
+        printColor "  No new release found ...."
+      fi
+      printf "\n\n"
+    elif [[ ! $Muted_BetaAlertPoint ]]; then
+      if [[ ! $qqX_Latest_SecureTarBall_Addr ]]; then
+        printf "\n\n  HTTPS download:\n"
+      else printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
+      fi
+      # if version can handle new format, otherwise leave notes as blank
+      if floatversion -Q --gt "$qqX_Version  1.14.01" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
+        AboutWidth="$(tput cols)"
+        printf "\n  %s\n\n" "$qqX_Latest_ReleaseNumber"
+        #shellcheck disable=SC2059
+        printf -v BodyTxt "$(grep -s body "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4)"
+        mapfile -t AboutReleaseArray  <<< "$BodyTxt"
+        for Line in "${AboutReleaseArray[@]}" ; do
+          if [[ "$Line" != *'+1'* ]] ; then printColor "  %s\n" "$(fmt -uw "$AboutWidth" <<< "$Line")" ; fi
+        done
+        if [[ $qqX_Current_ReleaseType == "release" ]] && [[ $qqX_Latest_ReleaseType == "beta" ]]; then
+          if [[ "$qqX_Latest_ReleaseNumber" == *'-rc'* ]]; then
+            printf  "\n\n  RELEASE CANDIDATE CODE will have been extensively checked before being placed in the standard release channel"
+            printf  "\n\n  People who able to assist with Community pre-testing should give the new features a try"
+            printf  "\n\n  A full release update will be provided later ....\n"
+          else
+            printf  "\n\n  Beta code is normally placed in the pre-release channel:"
+            printf  "\n\n  On this occasion, it is being standard highlighted as it has EXCITING NEW FEATURES"
+            printf    "\n  or IMPORTANT NEW FIXES that initial tests have shown as stable and unlikely to cause any problems."
+            printf  "\n\n  Installing beta code will place you in the pre-release channel but this can be reverted"
+            printf    "\n  when later updating with the full release, or at any point by re-installing with any standard version.\n"
+          fi
         fi
-        # Drop to non-sha, if assets not available
-        if [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
-          rm -r ./*  2>/dev/null
-          printColor "\n\n  HTTPS non-sha256 checked download:\n\n"
-          dlCount="1"
-          while [[ $dlCount -le "3" ]]; do
-            qqX_Latest_NonSecure_TarBall="https://github.com/qqxproject/qqX/archive/refs/tags/${qqX_Latest_ReleaseNumber}.tar.gz"
-            eval curl --disable -Lf -m 20 -o "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz" "$qqX_Latest_NonSecure_TarBall"
-            echo
-            if [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
-              rm -r ./*  2>/dev/null
-              printf "\n\n  ERROR  - RETRYING  DOWNLOAD \n\n"
-            else printf "\n\n" ; break
-            fi
-            ((dlCount++))
-          done
+      elif [[ $Muted_BetaAlertPoint ]]; then
+        printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Newest_PreRelease"
+        qqX_UpdateAvail=
+      else
+        printf "\n\n  %s   >>   %s\n\n"  "$qqX_Version"  "$qqX_Latest_ReleaseNumber"
+        ShowRelsPages=1
+      fi
+    fi
+    printf "\n"
+    if [[ $qqX_UpdateAvail ]] && [[ ! $Muted_BetaAlertPoint && ! $qqX_NewTagAlert ]] ; then
+      if [[ $qqX_Latest_ReleaseType == "release" ]]; then
+        printf "  Neatly download the release into its own sub-folder at: "
+      else
+        printf "  Neatly download the code into its own sub-folder at: "
+      fi
+      [[ $Specified_Updates_Location ]] && printf "\n\n  [s] Specified folder:  %s"  "$Specified_Updates_Location"
+      [[ -d "$HOME/Downloads" ]] && printf "\n\n  [d] Downloads folder:  %s"  "$HOME/Downloads"
+
+      if [[ $(pwd) == "$Default_VM_Folder" ]]; then
+        printColor "\n\n  [enter] Current/Default folder:"
+        printf "  %s "  "$Default_VM_Folder"
+      else
+        # not to confuse with '$Current_VM_Folder'
+        printf "\n\n  [c] Current folder:    %s "  "$(pwd)"
+        printColor "\n\n  [enter] Default VM folder:"
+        printf "  %s"  "$Default_VM_Folder"
+      fi
+      printf "\n\n"
+    fi
+    printf "  [r] to recheck"
+    if [[ $WebBrowser ]]; then
+      if [[ $Muted_BetaAlertPoint || $ShowRelsPages ]]; then  printf "   [w] popup qqX RELEASE pages with browser"
+      elif [[ $qqX_NewTagAlert ]]; then  printf "   [w] popup qqX TAG pages with browser"
+      else printf "   [w] popup qqX web pages with browser"
+      fi
+    fi
+    printf "  or  [b] to go back \n\n"
+    read -rp "  >  "  qqX_LatestTarBall_Folder
+
+    [[ ! $qqX_UpdateAvail ]] || [[ $UpdRechk ]] && printf "\n\n"
+
+    if [[ $qqX_LatestTarBall_Folder == "s" ]]; then  qqX_LatestTarBall_Folder="$Specified_Updates_Location" ; break
+    elif [[ $qqX_LatestTarBall_Folder == "d" ]]; then  qqX_LatestTarBall_Folder="$HOME/Downloads" ; break
+    elif [[ $qqX_LatestTarBall_Folder == "c" ]]; then  qqX_LatestTarBall_Folder="$(pwd)" ; break
+    elif [[ $qqX_LatestTarBall_Folder == "w" ]]; then
+      printf "  Opening Browser ... \n\n"
+      if [[ $Muted_BetaAlertPoint || $ShowRelsPages ]]; then
+        (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/releases" & ) || web_browser_not_found_message
+      elif [[ $qqX_NewTagAlert ]]; then
+        (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX/tags" & ) || web_browser_not_found_message
+      else (nohup &> /dev/null  "$WebBrowser"  "https://github.com/qqxproject/qqX" & ) || web_browser_not_found_message
+      fi
+      sleep 1
+    elif [[ $qqX_LatestTarBall_Folder == "b" ]]; then
+      qqX_LatestTarBall_Folder= ; qqX_NoReleaseDL=1 ; qqX_UpdateAvail= ; ((Muted_BetaAlert_Count+=1)) ; break
+    elif [[ $qqX_LatestTarBall_Folder == "r" ]]; then
+      qqX_LatestTarBall_Folder= ; [[ ! $UpdRechk ]] && UpdRechk="once" ; read_update_check_file
+    else qqX_LatestTarBall_Folder="$Default_VM_Folder" ; break
+    fi
+  done
+
+  if [[ $qqX_NoReleaseDL ]]; then  qqX_NoReleaseDL=
+  else
+    # each release to its own FOLDER makes things tidier
+    qqX_LatestTarBall_Folder="$qqX_LatestTarBall_Folder/qqX.releases/$qqX_Latest_ReleaseNumber"
+    # make sure each DOWNLOAD is clean
+    [[ -d "$qqX_LatestTarBall_Folder" ]] && rm -r "$qqX_LatestTarBall_Folder" 2>/dev/null
+    sleep 0.5; mkdir -p "$qqX_LatestTarBall_Folder" ; sleep 0.5
+    # record where to come back to, when done and not to confuse with '$Current_VM_Folder'
+    ReturnFolder="$(pwd)"
+    # MOVE to download folder and keep things contained
+    cd "$qqX_LatestTarBall_Folder"  || printColor "\n\n  ERROR  making or changing to qqX.releases folder ??"
+
+    if [[ $(pwd) != "$qqX_LatestTarBall_Folder" ]]; then
+      # if we are not in the right folder, we need to exit
+      printf "\n\n  [enter] to return \n\n"
+      read -rp "  >  "
+    else
+      if [[ $qqX_Latest_SecureTarBall_Addr ]]; then
+        dlCount="1"
+        while [[ $dlCount -le "3" ]]; do
+          eval curl --disable -Lf -m 20 -o "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz"  "$qqX_Latest_SecureTarBall_Addr"
+          echo
+          eval curl --disable -Lf -m 20 -o "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz.sha256"  "$qqX_Latest_SecureTarSha_Addr"
+          echo
+          SHA_Check="$(sha256sum -c "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz.sha256")"
+          printColor "\n  SHA256 Check: %s "  "$SHA_Check"
+          if [[ "$SHA_Check" != *'OK' ]]; then
+            rm -r ./*  2>/dev/null
+            printf "\n\n  ERROR  - RETRYING  DOWNLOAD \n\n"
+          else printf "\n\n" ; break
+          fi
+          ((dlCount++))
+        done
+      fi
+      # Drop to non-sha, if assets not available
+      if [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
+        rm -r ./*  2>/dev/null
+        printColor "\n\n  HTTPS non-sha256 checked download:\n\n"
+        dlCount="1"
+        while [[ $dlCount -le "3" ]]; do
+          qqX_Latest_NonSecure_TarBall="https://github.com/qqxproject/qqX/archive/refs/tags/${qqX_Latest_ReleaseNumber}.tar.gz"
+          eval curl --disable -Lf -m 20 -o "$qqX_LatestTarBall_Folder/qqX-${qqX_Latest_ReleaseNumber}.tar.gz" "$qqX_Latest_NonSecure_TarBall"
+          echo
+          if [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
+            rm -r ./*  2>/dev/null
+            printf "\n\n  ERROR  - RETRYING  DOWNLOAD \n\n"
+          else printf "\n\n" ; break
+          fi
+          ((dlCount++))
+        done
+      fi
+
+      if [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
+        printf "  Problem auto-downloading Tarball"
+        printColor "\n\n  Download file '%s not found \n\n" "qqX-${qqX_Latest_ReleaseNumber}.tar.gz"
+      fi
+
+      printColor "  File download target %s"  "$qqX_LatestTarBall_Folder"
+
+      printf "\n\n  Use the installer script to quickly refresh and add new features to your settings file."
+      printf "\n\n  All option settings, locations and preferences will be kept."
+      printf "\n\n\n  "
+      [[ -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]] && printf "[enter] to run the installer script   "
+      printf "[r] to return to main menu \n\n"
+      read -rp "  >  "  qqX_UpdateExit
+
+      if [[ $qqX_UpdateExit != "r" ]] && [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
+        printColor "\n\n  ERROR: Download folder/file not found ??"
+        printf "\n\n  [enter] to close and retry \n\n"
+        read -rp "  >  "
+        qqX_UpdateExit="r"
+      else
+        # https://stackoverflow.com/questions/651018/opening-a-tar-gz-file-with-a-single-command
+        tar xfz "qqX-${qqX_Latest_ReleaseNumber}.tar.gz"
+        sleep 0.5
+        if [[ -d "qqX-${qqX_Latest_ReleaseNumber}" ]]; then
+          # is using fall-back mode
+          cp -r "qqX-${qqX_Latest_ReleaseNumber}"/* .
         fi
-
-        if [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
-          printf "  Problem auto-downloading Tarball"
-          printColor "\n\n  Download file '%s not found \n\n" "qqX-${qqX_Latest_ReleaseNumber}.tar.gz"
-        fi
-
-        printColor "  File download target %s"  "$qqX_LatestTarBall_Folder"
-
-        printf "\n\n  Use the installer script to quickly refresh and add new features to your settings file."
-        printf "\n\n  All option settings, locations and preferences will be kept."
-        printf "\n\n\n  "
-        [[ -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]] && printf "[enter] to run the installer script   "
-        printf "[r] to return to main menu \n\n"
-        read -rp "  >  "  qqX_UpdateExit
-
-        if [[ $qqX_UpdateExit != "r" ]] && [[ ! -e "qqX-${qqX_Latest_ReleaseNumber}.tar.gz" ]]; then
-          printColor "\n\n  ERROR: Download folder/file not found ??"
+        sleep 0.5
+        if [[ ! -e "qqX_setup_and_install" ]] ; then
+          printColor "\n\n  ERROR extracting the download files ??"
           printf "\n\n  [enter] to close and retry \n\n"
           read -rp "  >  "
           qqX_UpdateExit="r"
-        else
-          # https://stackoverflow.com/questions/651018/opening-a-tar-gz-file-with-a-single-command
-          tar xfz "qqX-${qqX_Latest_ReleaseNumber}.tar.gz"
-          sleep 0.5
-          if [[ -d "qqX-${qqX_Latest_ReleaseNumber}" ]]; then
-            # is using fall-back mode
-            cp -r "qqX-${qqX_Latest_ReleaseNumber}"/* .
-          fi
-          sleep 0.5
-          if [[ ! -e "qqX_setup_and_install" ]] ; then
-            printColor "\n\n  ERROR extracting the download files ??"
-            printf "\n\n  [enter] to close and retry \n\n"
-            read -rp "  >  "
-            qqX_UpdateExit="r"
-          fi
-        fi
-        if [[ $qqX_UpdateExit != "r" ]]; then
-          # start the SYSTEM installer (use the posix installer for initial or manual installs)
-          exec  bash -c "$qqX_LatestTarBall_Folder/qqX.system/qqX_system_install  Upgrade"
         fi
       fi
-
-      sleep 0.5
-      cd "$ReturnFolder"  || printColor "\n\n  ERROR  returning from qqX.releases folder"
-
+      if [[ $qqX_UpdateExit != "r" ]]; then
+        # start the SYSTEM installer (use the posix installer for initial or manual installs)
+        exec  bash -c "$qqX_LatestTarBall_Folder/qqX.system/qqX_system_install  Upgrade"
+      fi
     fi
+
+    sleep 0.5
+    cd "$ReturnFolder"  || printColor "\n\n  ERROR  returning from qqX.releases folder"
+
+  fi
 }
 
 

@@ -31,7 +31,7 @@
 ##  Older code from 'ffX project' (c)  Alex Genovese  Refactored @ 03/2024
 
 
-printf "\033c"
+tput clear
 printColor "\n\n  To create shortcut launchers, the name of a Linux Terminal Emulator is needed \n\n"
 
 # 'UserTerm' may be supplied by a calling script or setup installer settings
@@ -281,7 +281,8 @@ while [[ ! $UserTerm_Found ]]; do
     if [[ $REPLY == "n" ]]; then UserTerm= ; UserTerm_Found= ; else  UserTerm_Found=1 ; fi
   fi
 
-  if [[ ! $UserTerm ]]; then printf "\033c"; echo; echo ; fi
+  if [[ ! $UserTerm ]]; then tput clear ; echo ; echo
+  fi
   ProbTerm=
 
 done

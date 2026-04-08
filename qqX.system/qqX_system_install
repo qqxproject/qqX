@@ -146,6 +146,7 @@ fi
 
 while true ; do
 
+  # until 'tput' has been validated, clear here using 'printf'
   printf "\033c"
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
   InstallationAlert=
@@ -470,7 +471,7 @@ KonsoleTerminalProfile_HostSize=" --title $KonsoleTitle --hide-menubar --hide-ta
 
 ## START
 
-printf "\033c"
+tput clear
 
 if [[ "$(whoami)" == root ]]; then
   UserLand_Name="$(users)"
@@ -497,7 +498,7 @@ if [[ -d "/mnt/c/Windows" ]]; then WSL_Install=1 ; else WSL_Install= ; fi
 
 # INITIAL MENU:
 
-printf "\033c"
+tput clear
 echo
 qqX_logo_title  "quickemu quickget X terminal project - setup, install, uninstall & update script for qqX $New_qqX_Version "
 
@@ -842,7 +843,7 @@ if [[ ! $SkipMkLauncher ]]; then
   ## HOW THE INTERFACE WILL LOOK
 
   while true ; do
-    printf "\033c"
+    tput clear
     echo
     qqX_logo_title  "Setting up the desktop:"
 

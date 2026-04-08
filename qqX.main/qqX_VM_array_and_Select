@@ -78,7 +78,7 @@ VM_loader_selector_and_menu () {
         printColor "\n\n  Refreshing storage .... \n\n"
 
       else
-        printf "\033c"
+        tput clear
         show_qqX_title_bar
 
         printf "\n  Total Storage:  Drives %s (%s)  ISO's %s (%s)" "${TotalQcow2_Sizes}G" "$TotalQcow2_SizesCount" "${Total_ISO_Sizes}G" "$Total_ISO_SizesCount"

@@ -54,7 +54,7 @@ Counter=0
 while true ; do
 
 	if [[ $Counter == 0 ]] && [[ ! $DevSetUpdArrOutputScrn ]]; then
-		printf "\033c"
+		tput clear
 		printf "\n From %s" "$SourceFolder"
 		printColor "\n\n COPY the qqX script to usr/bin"
 		printColor "\n\n COPY all qqX.main scripts to /usr/share/qqX \n"

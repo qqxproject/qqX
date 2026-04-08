@@ -108,7 +108,7 @@ show_main_menu_header () {
 
   [[ $InstancePID ]] && [[ ! $(cat "${VMDIR}/${VMNAME}.pid" 2>/dev/null) ]] && InstancePID=
 
-  printf "\033c"
+  tput clear
   show_qqX_title_bar
   printf "\n"
   printColor "    %s " "$VM_InstanceName"
@@ -470,7 +470,7 @@ list_current_folder_instance_names () {
 
 move_rename_Selected_VM () {
 
-  printf "\033c"
+  tput clear
   show_qqX_title_bar
 
   if [[ ! $1 ]] && [[ ! $2 ]]; then

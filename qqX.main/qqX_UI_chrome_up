@@ -227,7 +227,7 @@ function show_qqX_general_help {
 
     if [[ $1 ]]; then  HelpSelect="$1" ; shift
     fi
-    printf "\033c"
+    tput clear
     printColor "\n\n  GENERAL HELP:"
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"
     printf "\n  [s] open general settings file for notes on the  SETTINGS, user modes, screen sizes etc"

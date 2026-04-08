@@ -198,7 +198,7 @@ source "$qqX_MainFolder/qqX_main_menu_actions"
 [[ $Loop_Diagnostics ]] && printf "\n\n Source files done:" &&  main_loop_diagnostics
 
 tput civis
-printf "\033c"
+tput clear
 show_qqX_title_bar
 printf "\n  Running initial checks .... \n"
 
@@ -220,7 +220,7 @@ fi
 [[ $Initial_Input ]] && source "$qqX_MainFolder/qqX_input_and_mouse_tidyup" &&  multi_instance_checks
 
 # If 'Initial_Input' routed to the QF menu but then re-routed to Main:
-[[ $QF_exit_to_Main ]] && printf "\033c"  &&  multi_instance_checks
+[[ $QF_exit_to_Main ]] && tput clear  &&  multi_instance_checks
 
 # If 'Initial_Input' has already made a VM selection:
 [[ $VM_InstanceName ]] && ByPass_VM_Array_Selector=1

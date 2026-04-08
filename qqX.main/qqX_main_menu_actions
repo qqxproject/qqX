@@ -55,7 +55,7 @@ function  main_menu_actions {
 
     if [[ -e "$QemuArgsFile" ]]; then
 
-      printf "\033c"
+      tput clear
       if [[ -e "$QemuVirtHardwareRecord" ]]; then printf "\n\n  Existing Record: \n\n"; cat "$QemuVirtHardwareRecord"; fi
       printf "\n\n  Current Args / Qemu Virtual Hardware \n\n"
       cat "$QemuArgsFile"
@@ -485,7 +485,8 @@ function  main_menu_actions {
     else  printColor "\n\n  NOT changed \n\n" ; sleep 1.5
     fi
 
-    printf "\033c\n\n"
+    tput clear
+    printf "\n\n"
 
   else
 
