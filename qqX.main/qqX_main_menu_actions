@@ -374,6 +374,8 @@ function  main_menu_actions {
 
     drives_and_snapshots select  snaps
 
+    [[ $MainMenuChoicePreset == "disk" ]] && sleep 2 && return
+
     printColor "\n\n  [enter] Create snap with date.time title "
     printf "  [text input] Create with text descriptor   [b] back to main menu "
     SnapTitle= ; scReturn=

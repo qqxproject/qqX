@@ -130,6 +130,10 @@ drives_and_snapshots() {
     read -rp "  >  "   Selected_Drive
 
     case "$Selected_Drive" in
+      disk)   Selected_Drive=
+              MainMenuChoicePreset="disk"
+              printf "\n\n  Returning to Main menu and DISK REPAIR utils ....\n\n"
+      ;;
       2)  Selected_Drive="$SecondDrive"
           Selected_DriveName="Second Drive"
       ;;
