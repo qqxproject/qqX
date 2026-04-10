@@ -38,14 +38,18 @@ else
       fi
       printf  "  [u] show UTILS & technical"
       printf "   [bm] > "
-      if [[ $BootStyle == "fast" ]]; then
+      if [[ $BiosMode == "fast" ]]; then
         printf " fastboot"
-        if [[ $Mounted_ISO ]]; then printf "  (toggle to enable boot management menu)"
+        if [[ $Mounted_ISO ]]; then printf "  (toggle for ISO management)"
         else printf "  (toggle)"
         fi
       else
         printColor " boot menu enabled"
         printf "  (toggle)"
+      fi
+
+      if [[ $ControlledRestart == "on" ]]; then printf "   [crs] controlled restart = on  (toggle)"
+      else printf "   [crs] controlled restart = OFF  (toggle)"
       fi
 
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
@@ -114,12 +118,15 @@ else
 
       printColor "\n\n  ----------------------------------------------------------------------------"
       if [[ $Mounted_ISO ]]; then
-        printf "\n\n  [iso] unmount iso from guest, boot from main drive"
-      else
-        [[ ${#IsoList[*]} -gt 1 ]] && printf "\n\n  [iso] mount iso to guest, allow boot or read from iso"
+        printf "\n\n  [iso] unmount iso from guest, boot from main drive "
+      elif [[ ${#IsoList[*]} -gt 1 ]]; then printf "\n\n  [iso] mount iso to guest, allow boot or read from iso "
+      else printf "\n\n"
       fi
-      if [[ $BootStyle == "fast" ]]; then printf "   [bm] enable boot management menu"
-      else printf "   [fb] use fast boot menu "
+      if [[ $BiosMode == "fast" ]]; then printf "  [bm] enable boot management menu"
+      else printf "  [fb] use fast boot menu"
+      fi
+      if [[ $ControlledRestart == "on" ]]; then printf "   [crs] controlled restart = on  (toggle)"
+      else printf "   [crs] controlled restart = OFF  (toggle)"
       fi
       printf  "\n\n  [tune] config tune-up wizard   [disk]  resize or repair existing drives   [rtv] reset Tiano VMF Vars"
 
@@ -181,7 +188,6 @@ else
         [[ $ForceCustomBootStyle == "show" ]] && ShowCustomBootStyle=1 && ShowDefault_Hybrid=
         [[ $PreferHybridCustomMenus ]] && [[ ! $ForceCustomBootStyle ]] && ShowDefault_Hybrid=1 && ShowCustomBootStyle=
       else
-        #[[ $ShowCustomBootStyle || $ShowDefault_Hybrid ]] &&  printColor "\n\n  Warning:  Custom boot file removed or name has changed?  Re/Select [vm] to refresh \n"
         if [[ $ShowCustomBootStyle || $ShowDefault_Hybrid ]]; then
           SettingsFileAdjusted=1
           refresh_sources_and_load_VM_arrays

@@ -148,8 +148,8 @@ show_main_menu_header () {
 
   if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
     printf "\n  Designated Live Boot: %s \n" "$(basename "$IsoImg")"
-    [[ $BootStyle == "slow" ]] && printColor "\n  [iso] select an ISO to be mounted and made additionally accessible\n"
-  elif [[ $BootStyle == "slow" ]]; then
+    [[ $BiosMode == "slow" ]] && printColor "\n  [iso] select an ISO to be mounted and made additionally accessible\n"
+  elif [[ $BiosMode == "slow" ]]; then
     printf "\n  Designated Boot: Main Drive \n"
     if [[ ! $Mounted_ISO ]]; then
       if [[ ${#IsoList[*]} -ge 1 ]]; then printColor "\n  [iso] select an ISO to be mounted and made accessible\n"
@@ -160,7 +160,7 @@ show_main_menu_header () {
 
   if [[ $Mounted_ISO ]]; then
     printf "\n  Additional "
-    if [[ $BootStyle == "slow" ]]; then printColor "(mounted & boot selectable)"
+    if [[ $BiosMode == "slow" ]]; then printColor "(mounted & boot selectable)"
     else printf "(mounted, not bootable)"
     fi
     printf " ISO: %s \n" "$Mounted_ISO_DisplayName"
@@ -998,7 +998,7 @@ iso_select_mount_and_boot () {
 
   printf "\n\n\n  The boot manager is enabled separately, via the main menu"
   printf "\n\n  Current status:"
-  if [[ $BootStyle == "fast" ]]; then printf "  (fastboot > boot manager NOT enabled)"
+  if [[ $BiosMode == "fast" ]]; then printf "  (fastboot > boot manager NOT enabled)"
   else  printf "  (boot manager enabled)"
   fi
   printf "\n"

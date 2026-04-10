@@ -264,8 +264,13 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
       } | tee -a "$QemuArgsFile" &> /dev/null
     fi
 
-    if [[ $BootStyle == "slow" ]]; then BootStyleCmd=" -boot menu=on " ; else BootStyleCmd=" -boot menu=off " ; fi
-    printf "\n\n %s " "$BootStyleCmd" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
+    if [[ $BiosMode == "slow" ]]; then BiosModeCmd=" -boot menu=on " ; else BiosModeCmd=" -boot menu=off "
+    fi
+
+    if [[ $ControlledRestart == "on" ]]; then BiosModeCmd+=" -no-reboot " ; else true
+    fi
+
+    printf "\n\n %s " "$BiosModeCmd" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
 
     if [[ $cpu_pins ]]; then
       printf "\n\n  CPU Pinning: '%s'" "$cpu_pins" >> "$QemuArgsFile"
@@ -328,7 +333,7 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
 
       ## call QEMU  (with any extras, if present)
       # https://qemu.readthedocs.io/en/latest/system/invocation.html  '-D'  for errors is problematic, use log file
-      eval "$QEMU"  "${args[*]}" "$BootStyleCmd" "$ExtraArgs"  "$SharedDriveArgs"  "$SecondDriveArgs" 2> "$QemuErrorLog" &
+      eval "$QEMU"  "${args[*]}" "$BiosModeCmd" "$ExtraArgs"  "$SharedDriveArgs"  "$SecondDriveArgs" 2> "$QemuErrorLog" &
 
     fi
 

@@ -18,14 +18,14 @@
 ##    SETTINGS SECTIONS AVAILABLE:
 
   #   DEFAULT VM FOLDER
-  #   GENERAL COLOR & THEMING
+  #   GENERAL COLOR and THEMING
   #   LANGUAGE
   #   VM SELECTOR INTERFACE
 
   #   FREEBIRD and BUILT-INS
   #   QUICKGET and DISTRO DOWNLOADS
   #   qqX UPDATES
-  #   EDITOR & BROWSER PROGRAMS
+  #   EDITOR and BROWSER PROGRAMS
   #   BOOT DEFAULTS, MSR, LOCALE, SCREENS and SIZES
   #   NETWORK and INTERNET
 
@@ -35,8 +35,8 @@
   #   ERROR HANDLING
   #   QEMU VERSIONING
 
-  #   qqX CUSTOM BOOTING & EXTRA ARGS
-  #   TIANO BIOS
+  #   qqX CUSTOM BOOTING and EXTRA ARGS
+  #   TIANO BIOS and START CONTROL
   #   CUSTOM SETTINGS & DEVELOPMENT
 
 #  -------------------------------------------------------------------------------------------------------------------
@@ -290,6 +290,32 @@ VM_SelectorStyle="A"
 
 #  -------------------------------------------------------------------------------------------------------------------
 
+##    SETTINGS SECTIONS AVAILABLE:
+
+  #   DEFAULT VM FOLDER
+  #   GENERAL COLOR and THEMING
+  #   LANGUAGE
+  #   VM SELECTOR INTERFACE
+
+  #   FREEBIRD and BUILT-INS
+  #   QUICKGET and DISTRO DOWNLOADS
+  #   qqX UPDATES
+  #   EDITOR and BROWSER PROGRAMS
+  #   BOOT DEFAULTS, MSR, LOCALE, SCREENS and SIZES
+  #   NETWORK and INTERNET
+
+  #   SHARED or SECOND DRIVES
+  #   SNAPSHOTS
+  #   TUNE UP
+  #   ERROR HANDLING
+  #   QEMU VERSIONING
+
+  #   qqX CUSTOM BOOTING and EXTRA ARGS
+  #   TIANO BIOS and START CONTROL
+  #   CUSTOM SETTINGS & DEVELOPMENT
+
+#  -------------------------------------------------------------------------------------------------------------------
+
 ##  SHARED or SECOND DRIVES:
 
 # The Shared drive is a useful when in SDL mode & available to all VMs while a Second drive is a quick way to expand
@@ -432,14 +458,50 @@ TuneUpNotes=""
 # The Tiano core provides a 3 second window to access the BIOS via the escape key.
 # This allows you to select a boot from ISO option and can also be useful for Windows updates.
 # Instance Session overides can be toggled from the Utilities menu, or individually by placing
-# 'BootStyle' either as ="fast" or ="slow" in the .conf file
+# 'BiosMode' either as ="fast" or ="slow" in the .conf file
 # Default ="fast" as this will slightly speed up the normal boot sequence:
-  BootStyle="fast"
+  BiosMode="fast"
 
 # Set ="fast"  to skip the ISO boot checks and instructions.
-# Default ="slow" as this only shows if BootStyle has been specifically set to slow
-# Also use 'BootStyleMsg' for individual overides in the .conf if wished.
-  BootStyleMsg="slow"
+# Default ="slow" as this only shows if BiosMode has been specifically set to slow
+# Also use 'BiosModeMsg' for individual overides in the .conf if wished.
+  BiosModeMsg="slow"
+
+# VM RESTART CONTROL
+# Useful in cases of multi-stage updates or when VM update servers or VM update processes are very slow
+# Helps avoid repeat downloads and repeat exit sequences
+# Default = "on" but may be toggled from VM start menu if several restarts are expected
+# Allows easy between stage snapshots and removes the need to exit at the end of a lengthy process
+# to re-snapshot before making experimental changes.
+# Controlled Qemu shutdown design still allows the 'Do not turn off your computer' to function
+# without conflict. However, set ="off" if a load-up of auto-restart is preferred.
+  VM_ControlledRestart_Default="on"
+
+#  -------------------------------------------------------------------------------------------------------------------
+
+##    SETTINGS SECTIONS AVAILABLE:
+
+  #   DEFAULT VM FOLDER
+  #   GENERAL COLOR and THEMING
+  #   LANGUAGE
+  #   VM SELECTOR INTERFACE
+
+  #   FREEBIRD and BUILT-INS
+  #   QUICKGET and DISTRO DOWNLOADS
+  #   qqX UPDATES
+  #   EDITOR and BROWSER PROGRAMS
+  #   BOOT DEFAULTS, MSR, LOCALE, SCREENS and SIZES
+  #   NETWORK and INTERNET
+
+  #   SHARED or SECOND DRIVES
+  #   SNAPSHOTS
+  #   TUNE UP
+  #   ERROR HANDLING
+  #   QEMU VERSIONING
+
+  #   qqX CUSTOM BOOTING and EXTRA ARGS
+  #   TIANO BIOS and START CONTROL
+  #   CUSTOM SETTINGS & DEVELOPMENT
 
 #  -------------------------------------------------------------------------------------------------------------------
 

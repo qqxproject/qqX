@@ -363,22 +363,35 @@ qemu_version_check
 
 # How the Tiano BIOS/UEFI loads up:
 
-function store_boot_style_defaults {
-  [[ ! $BootStyle ]] && BootStyle="fast"
-  [[ ! $BootStyleMsg ]] && BootStyleMsg="slow"
-  BootStyle_Default="$BootStyle"
-  BootStyleMsg_Default="$BootStyleMsg"
+function store_bios_mode_defaults {
+  [[ ! $BiosMode ]] && BiosMode="fast"
+  [[ ! $BiosModeMsg ]] && BiosModeMsg="slow"
+  BiosMode_Default="$BiosMode"
+  BiosModeMsg_Default="$BiosModeMsg"
+  [[ ! $VM_ControlledRestart_Default ]] && VM_ControlledRestart_Default="on"
+  case "$VM_ControlledRestart_Default" in
+    on) ControlledRestart="on" ;;
+    off) ControlledRestart="off" ;;
+    *) VM_ControlledRestart_Default="on" ; ControlledRestart="on" ;;
+  esac
 }
 
-function reload_boot_style_defaults {
-  BootStyle="$BootStyle_Default"
-  BootStyleMsg="$BootStyleMsg_Default"
+function load_bios_mode_defaults {
+  BiosMode="$BiosMode_Default"
+  BiosModeMsg="$BiosModeMsg_Default"
+  [[ ! $VM_ControlledRestart_Default ]] && VM_ControlledRestart_Default="on"
+  case "$VM_ControlledRestart_Default" in
+    on) ControlledRestart="on" ;;
+    off) ControlledRestart="off" ;;
+    *) VM_ControlledRestart_Default="on" ; ControlledRestart="on" ;;
+  esac
 }
 
-function clear_boot_style_vars {
-  BootStyle= ; BootStyle_Default=
-  BootStyleMsg= ; BootStyleMsg_Default=
+function clear_bios_mode_vars {
+  BiosMode= ; BiosMode_Default=
+  BiosModeMsg= ; BiosModeMsg_Default=
+  VM_ControlledRestart_Default= ; ControlledRestart=
 }
 
-store_boot_style_defaults
+store_bios_mode_defaults
 

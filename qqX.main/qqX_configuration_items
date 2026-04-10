@@ -589,7 +589,7 @@ function refresh_conf_vars_and_values {
     source  "/tmp/qmod-qe-rw-vars-temp"
 
 
-    # reload_boot_style_defaults  # REVIEW
+    # load_bios_mode_defaults  # REVIEW
     # left off as if active then utils menu bm function reverts to defaults after booting once ...
     # at ver 1.12.01 has been placed into qqX main loop so switching vm is clean
 

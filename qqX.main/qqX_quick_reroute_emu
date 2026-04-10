@@ -130,12 +130,12 @@ function quickemu {
           printf "  For SPICE copy, paste and file transfer, install 'spice-vdagent' and 'spice-webdavd' INSIDE Linux GUEST VM's"
           printf "\n\n\n"
         fi
-        if [[ $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
+        if [[ $Mounted_ISO && $BiosMode == "slow" && $BiosModeMsg == "slow" ]]; then
           printColor "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS or boot an ISO"
           printf "\n\n  Mounted ISO: Select 'Boot manager' and select 'QEMU DVD-ROM' from the list. "
           [[ ! $LiveBoot ]] && printf "\n\n  A 'live boot' ISO such as from https://gparted.org/download.php is normally required for disk management."
           if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printColor "\n\n  Currently Designated Live Boot: %s" "$(basename "$IsoImg")"
-          elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Currently Designated Boot: Main Drive"
+          elif [[ $BiosMode == "slow" ]]; then printf "\n\n  Currently Designated Boot: Main Drive"
           fi
           if [[ $LiveBoot ]]; then printf "\n\n  Additionally mounted ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
           else printColor "\n\n  Additionally mounted ISO/DVD: '%s'" "$Mounted_ISO_DisplayName"
@@ -144,7 +144,7 @@ function quickemu {
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
           read -rp "  >  "  Mounted_ISO_Return
 
-        elif [[ ! $Mounted_ISO && $BootStyle == "slow" && $BootStyleMsg == "slow" ]]; then
+        elif [[ ! $Mounted_ISO && $BiosMode == "slow" && $BiosModeMsg == "slow" ]]; then
           printf "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS"
           if [[ $img ]]; then
             printf "\n\n  A 'live boot' ISO may be usable for disk management"
@@ -158,7 +158,7 @@ function quickemu {
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
           read -rp "  >  "  Mounted_ISO_Return
 
-        elif [[ $BootStyle == "fast" ]]; then
+        elif [[ $BiosMode == "fast" ]]; then
           printColor "  qqX Boot Manager may be session enabled in utils, if required ..."
           if [[ $LiveBoot ]]; then
             printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
@@ -167,13 +167,13 @@ function quickemu {
           elif [[ $Mounted_ISO ]]; then
             printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection"
             if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then printf "\n\n  Currently Designated Live Boot: %s" "$(basename "$IsoImg")"
-            elif [[ $BootStyle == "slow" ]]; then printf "\n\n  Currently Designated Boot: Main Drive"
+            elif [[ $BiosMode == "slow" ]]; then printf "\n\n  Currently Designated Boot: Main Drive"
             fi
             printf "\n\n  Additionally mounted ISO is '%s' \n\n\n" "$Mounted_ISO_DisplayName"
           else
             printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection \n\n\n"
           fi
-        elif [[ $BootStyle == "slow" ]]; then
+        elif [[ $BiosMode == "slow" ]]; then
           printColor "  Press 'esc' once, to access BIOS Boot Manager, when 'Start boot Option' appears"
           if [[ $LiveBoot ]]; then
             printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
@@ -186,7 +186,7 @@ function quickemu {
       fi
 
       # qqX 1.14 removes need for detailed disk scrutiny, so xx this for windows but leave in case needed later
-      if [[ $BootStyle == "fast" ]] && [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *xx-windows* ]]; then
+      if [[ $BiosMode == "fast" ]] && [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *xx-windows* ]]; then
         printf "  [enter] to continue  [b] to go back \n\n"
         read -rp "  >  " LiveDoubleCheck
         [[ $LiveDoubleCheck ]] && return

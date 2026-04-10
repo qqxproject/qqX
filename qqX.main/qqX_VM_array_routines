@@ -389,7 +389,7 @@ refresh_sources_and_load_VM_arrays() {
   Extra_VM_Folder=()
   VM_Array=()
   QemuErrorFilter=()
-  clear_boot_style_vars
+  clear_bios_mode_vars
   VM_SelectorStyle=
 
   # clear possible flags
@@ -426,7 +426,7 @@ refresh_sources_and_load_VM_arrays() {
 
   [[ $CodingHotSwap ]] && QE_SourceVersion="$CodingHotSwap"
   refresh_and_load_quickemu_sources
-  store_boot_style_defaults
+  store_bios_mode_defaults
   find_file_manager_browser
   find_texteditor
 

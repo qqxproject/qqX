@@ -157,9 +157,21 @@ function  main_menu_actions {
 
   elif [[ $MainMenuChoice == "fb" || $MainMenuChoice == "bm" ]] ; then
 
-    if [[ $BootStyle == "fast" ]]; then  BootStyle="slow" ; BootStyleMsg="slow"
-    elif [[ $BootStyle == "slow" ]]; then  BootStyle="fast" ; BootStyleMsg="fast"
+    if [[ $BiosMode == "fast" ]]; then  BiosMode="slow" ; BiosModeMsg="slow"
+    elif [[ $BiosMode == "slow" ]]; then  BiosMode="fast" ; BiosModeMsg="fast"
     fi
+
+  elif [[ $MainMenuChoice == "crs" ]] ; then
+    [[ $ControlledRestart == "on" ]] && ControlledRestart="off" || ControlledRestart="on"
+    printf "\n
+    # Allows easy between stage snapshots before making experimental changes
+    # or at the end of lengthy processes, helps avoid repeat downloads and repeat exit sequences
+
+    # Any 'Do not turn off your computer' restarts will still work
+
+    # Set =\"off\" in main settings, if auto-restart is normally preferred
+    \n\n"
+    read -rp "  [enter] to continue >  "
 
   elif [[ $MainMenuChoice == "qd" ]] ; then
     printf "\n  Opening Browser ... \n\n"
