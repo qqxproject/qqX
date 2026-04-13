@@ -175,6 +175,7 @@ function distro_release_notes {
     local RelNotes=
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
+        antix)            RelNotes="Also available in 32 bit and 'core' versions: [w] see website";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
         alma)             RelNotes="Compare to Rocky/Oracle/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
@@ -319,6 +320,22 @@ function get_anduinos {
     | cut -d':' -f2 | tr -cd '[:graph:]')"
     echo "$AnduinIso $AnduinHash"
     printf "%s" "$EDITION" > "$GetDataLog"
+}
+
+## Re-ADD upstream deletion
+function releases_antix() {
+    echo latest
+}
+
+[[ $(declare -F editions_antix) ]] && unset -f editions_antix
+
+function get_antix() {
+    local HASH= ; ISO= ; ReadMe=
+    local BaseUrl="https://sourceforge.net/projects/antix-linux/files"
+    ISO="$(web_pipe "https://sourceforge.net/projects/antix-linux/files/Final" | grep -s released | tr '"' '\n' | grep iso | cut -d':' -f1)"
+    ReadMe="$BaseUrl""$(dirname "$ISO")""/README.txt"
+    HASH=$(web_pipe "$ReadMe" | grep 'x64-full' | tail -n 1 | cut -d' ' -f1)
+    echo "${BaseUrl}${ISO} ${HASH}"
 }
 
 ## FIX Arch - Pre-emptively for PR  https://github.com/quickemu-project/quickemu/pull/1709
