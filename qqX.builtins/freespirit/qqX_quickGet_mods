@@ -1551,16 +1551,20 @@ function validate_release() {
 # Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get')
 function web_pipe {
     local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
-    if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 "${Args[@]}"; then
-        curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted  --max-time 30 "${Args[@]}"
+    #if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 "${Args[@]}"; then
+    if ! curl -qsLf --location-trusted "${Args[@]}"; then
+        #curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6 --location-trusted --max-time 30 "${Args[@]}"
+        curl -qsLf --retry 6 --retry-max-time 6 --connect-timeout 6 --location-trusted --keepalive-time 2 --max-time 30 "${Args[@]}"
     fi
 }
 
 # Download a JSON file from the web and pipe it to stdout
 function web_pipe_json {
     local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
-    if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 --header "Accept: application/json" "${Args[@]}"; then
-        curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted --max-time 30 --header "Accept: application/json" "${Args[@]}"
+    #if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 --header "Accept: application/json" "${Args[@]}"; then
+    if ! curl -qsLf --location-trusted --header "Accept: application/json" "${Args[@]}"; then
+        #curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted --max-time 30 --header "Accept: application/json" "${Args[@]}"
+        curl -qsLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted --keepalive-time 2 --max-time 30 --header "Accept: application/json" "${Args[@]}"
     fi
 }
 
@@ -1575,10 +1579,12 @@ function check_pipe {
         fi
         return 1
     fi
-    curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2  --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+    #curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2  --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+    curl -qsLf --head --location-trusted "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
     if ! grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
         printf "" > "/tmp/qGet_check_pipe.txt"
-        curl --disable -sLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+        #curl --disable -sLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+        curl -qsLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
     fi
     if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1 ; fi
 }
