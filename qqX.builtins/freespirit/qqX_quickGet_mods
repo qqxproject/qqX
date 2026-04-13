@@ -181,7 +181,7 @@ function distro_release_notes {
         batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
         elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
-        fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
+        fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
@@ -485,7 +485,7 @@ function get_elementary() {
 function get_fedora() {
     local HASH="" ; local ISO="" ; local JSON="" ; local URL="" ; local VARIANT=""
     case ${EDITION} in
-        KDE) if [[ $RELEASE -ge 42 ]]; then VARIANT="${EDITION}"; else VARIANT="Spins"; fi ;;
+        KDE) if [[ "${RELEASE}" == *"_Beta" ]] || [[ $RELEASE -ge 42 ]]; then VARIANT="${EDITION}"; else VARIANT="Spins"; fi ;;
         Server|Kinoite|Onyx|Silverblue|Sericea|Workstation|COSMIC-Atomic) VARIANT="${EDITION}";;
         *) VARIANT="Spins";;
     esac
@@ -497,6 +497,11 @@ function get_fedora() {
     URL=$(echo "${JSON}" | jq -r '.link' | head -n1)
     HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n1)
     echo "${URL} ${HASH}"
+}
+
+## FIX beta server variants are too problematic
+function releases_fedora() {
+    web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
 }
 
 ## FIX & UPDATE to new mirrors
