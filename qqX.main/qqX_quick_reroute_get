@@ -721,7 +721,7 @@ function_quick_get_wrap ()  {
         fi
 
         if [[ $QGW_List_NumSelected == "m" ]]; then
-          printf "\n\n  and ...%-${QGW_List_Arr_ItemLength}s" " "
+          printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
           i=1 ; M=
           for M in "${QGW_OS_Array[@]}" ; do
             if [[ "$M" == *"linuxmint"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$M" ; fi
@@ -732,7 +732,7 @@ function_quick_get_wrap ()  {
         i= ; M=
 
         if [[ $QGW_List_NumSelected == "s" ]]; then
-          printf "\n\n  and ...%-${QGW_List_Arr_ItemLength}s" " "
+          printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
           i=1 ; S=
           for S in "${QGW_OS_Array[@]}" ; do
             if [[ "$S" == *"opensuse"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$S" ; fi
