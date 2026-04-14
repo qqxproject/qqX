@@ -75,7 +75,7 @@ VM_loader_selector_and_menu () {
       elif [[ $DiskStorageChanges ]]; then
 
         DiskStorageChanges= ; VM_Selection="r"
-        printColor "\n\n  Refreshing storage .... \n\n"
+        printColor "\n\n  Refreshing storage data.... \n\n"
 
       else
         tput clear

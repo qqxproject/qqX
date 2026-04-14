@@ -88,10 +88,14 @@ drives_and_snapshots() {
 
   fi
 
-  if [[ $SharedDrive_Conf == "no-shared" ]]; then printColor "\n  Shared Drive:"; printf "\n\n  Disabled (see .conf file) \n\n"
+  if [[ $SharedDrive_Conf == "no-shared" ]]; then printColor "\n  Shared Drive:"
+    if [[ $LiveBoot ]]; then  printf "  Disabled (for simplification of Live Boot)"
+    else printf "\n\n  Disabled (see .conf file) \n\n"
+    fi
   fi
 
-  if [[ ! -e $MainDrive ]]; then  printColor "\n\n  NO MAIN DRIVE  (yet) \n\n"
+  if [[ $LiveBoot ]]; then  printColor "\n\n  Main Drive:"; printf "  Yet to be set up\n\n"
+  elif [[ ! -e $MainDrive ]]; then  printColor "\n\n  NO MAIN DRIVE  (yet) \n\n"
   else
 
     if [[ $SharedDriveArgs || $SecondDriveArgs ]]; then printColor "\n  Main Drive: \n\n"
