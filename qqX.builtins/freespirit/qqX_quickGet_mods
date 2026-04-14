@@ -187,7 +187,7 @@ function distro_release_notes {
         macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
-        opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
+        opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus. [w] check website for Leap and other developments.";;
         oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         parrotsec)        RelNotes="Home is the Non-Security version. From v7.0 KDE becomes the default desktop but MATE spins may still be available > See Website.";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
@@ -711,7 +711,7 @@ function get_openindiana() {
 ## FIX and UPDATE to new folder styles and names
 function releases_opensuse() {
     #echo "leap leap-micro slowroll tumbleweed"  @ 11/2025 leap has become inconsistent and/or absent
-    echo "leap-micro slowroll tumbleweed"
+    echo "slowroll tumbleweed"
 }
 function editions_opensuse() {
     if [[ ! $RELEASE ]]; then echo "DVD Gnome KDE XFCE Rescue"
