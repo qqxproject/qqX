@@ -1011,7 +1011,7 @@ function get_ubuntu-server() {
     esac
     if web_check "${URL}/SHA256SUMS"; then
         RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso  | grep "$RelMax")
         ISO=$(cut -d'*' -f2 <<<"${DATA}")
         HASH=$(cut -d' ' -f1 <<<"${DATA}")
     else
@@ -1029,6 +1029,14 @@ function get_ubuntu-server() {
         make_vm_config "${ISO}"
     fi
 }
+## FIX remove beta from stable
+function releases_ubuntu-server() {
+    local ALL_VERSIONS=
+    ALL_VERSIONS="$(web_pipe http://releases.ubuntu.com/streams/v1/com.ubuntu.releases:ubuntu-server.json | jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="live-server") | .version' \
+    | sort -rV | paste -d' ' -s)"
+    echo daily-live "${ALL_VERSIONS}"
+}
+
 function get_ubuntu() {
     local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
     if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
