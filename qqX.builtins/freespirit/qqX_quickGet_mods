@@ -1771,8 +1771,9 @@ function test_all {
         else printf "\nOS > %s:\n\n" "${OS^^}"
         fi
         } | tee -a "$ChkLog"
+    else printf "\nTest All - Internal ERROR: Check Log not found\n\n"
     fi
-    [[ ! $OS ]] && return
+    [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" && return
 
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
     [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"

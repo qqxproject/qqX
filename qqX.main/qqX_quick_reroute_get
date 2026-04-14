@@ -576,8 +576,8 @@ run_distro_tests_UI () {
         printColor "\n  All Tests Successfully Passed"
         qGet_TestSynopis="All Tests Successfully Passed"
       fi
-      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.$(date +%s | tail -c 7).$(date +%b.%d).txt"
-      else qGet_TestSynopis_File="/tmp/qGet-test.ALL.$(date +%s | tail -c 7).$(date +%b.%d).txt"
+      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.e$(date +%s).$(date +%b.%d).txt"
+      else qGet_TestSynopis_File="/tmp/qGet-test.ALL.e$(date +%s).$(date +%b.%d).txt"
       fi
       printf "\n\n%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  > "$qGet_TestSynopis_File"
       [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
