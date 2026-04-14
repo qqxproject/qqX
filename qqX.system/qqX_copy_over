@@ -61,7 +61,7 @@ while true ; do
 	fi
 
 	printf "\n\n Terminal may be kept open. Sudo will stay usable for a while ..."
-	printColor "\n\n COPY > [enter] for qqX scripts" ; printf "    [s] qqX SETTINGS update    [b] copy /qqX.builtins to /usr/share/qqX \n\n"
+	printColor "\n\n COPY > [enter] for qqX scripts" ; printf "    [s] qqX SETTINGS update    [b] copy /qqX.builtins and Mods to /usr/share/qqX \n\n"
 	read -rp " >  "  UpdSets
 
 	if [[ $UpdSets ]]; then
