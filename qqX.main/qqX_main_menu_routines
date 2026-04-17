@@ -228,7 +228,8 @@ check_disk_is_okay () {
 
   if [[ $RunSnapChk ]] && [[ $DiskChkStatus == "Okay" ]]; then
     # at least one recent snap should be present (if disk is of sufficient size)
-    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
+    local NoSnapsYet=
+    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1; NoSnapsYet=1
     else
       DiskChkEpochTime="$(date +%s)"
       LastSnapDate="$("$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | tail -n 1 | awk '{print $5}')"
@@ -245,7 +246,9 @@ check_disk_is_okay () {
       fi
     fi
     if [[ $DiskChkAddSnap ]] ; then
-      printColor "\n\n  Taking Main Drive Auto-Snapshot >  Last snapshot was %d days ago" "$((LastSnapDistance/86400))"
+      if [[ $NoSnapsYet ]]; then  printColor "\n\n  Taking an Initial Main Drive Snapshot"
+      else printColor "\n\n  Taking Main Drive Auto-Snapshot >  Last snapshot was %d days ago" "$((LastSnapDistance/86400))"
+      fi
       printf "\n\n  Drive is in good health \n\n"
       SnapTitle="$(date +%b.%d.%H:%M)"
       "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive" &

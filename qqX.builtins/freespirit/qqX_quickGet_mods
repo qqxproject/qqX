@@ -1487,6 +1487,8 @@ EOF
   # Spice downloads are difficult to enable dynamically as they are infrequent and differ in format.
   # However, a qqX based version notifier is possible:
 
+  # TODO https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/virtio-win-pkg-scripts-input/virtio-win-0.1.285-1/spice-vdagent-x64-0.10.0-5.msi
+
   LatestSpiceAgent="$(web_pipe "https://www.spice-space.org/download/windows/vdagent" | tr '"' '\n' | grep -s vdagent | fv -Q -M)"
   if fv -qg "$LatestSpiceAgent 0.10.0" ; then
     echo; echo "A NEWER Spice agent has been found at https://www.spice-space.org/download/windows/vdagent"

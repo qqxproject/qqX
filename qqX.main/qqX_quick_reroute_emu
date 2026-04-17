@@ -191,17 +191,39 @@ function quickemu {
         fi
       fi
 
-      # qqX 1.14 removes need for detailed disk scrutiny, so xx this for windows but leave in case needed later
-      if [[ $BiosMode == "fast" ]] && [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *xx-windows* ]]; then
-        printf "  [enter] to continue  [b] to go back \n\n"
-        read -rp "  >  " LiveDoubleCheck
-        [[ $LiveDoubleCheck ]] && return
-      fi
-
-      # But add qqX 1.14 onwards credentials display
+      # Add qqX 1.14 onwards credentials display
       if [[ "${VM_InstanceName,,}" == *windows* ]] && [[ $(cat "$VM_Conf_Dir/$VM_InstanceName/Credentials.txt" 2>/dev/null) ]] ; then
         printColor "  Password Reminder:"
         printf "  %s (system isolated) \n\n\n" "$(head -n 1 "$VM_Conf_Dir/$VM_InstanceName/Credentials.txt")"
+      fi
+
+      # For 1.16 windows tweaks and with the addition of controlled restarts, needed to ensure refinds of boot ISO's
+      if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]] && [[ $secureboot == "on" || $ControlledRestart == "on" ]]; then
+        local SecureBootStatus="$secureboot"
+        [[ ! $SecureBootStatus ]] && secureboot="off" && SecureBootStatus="off"
+        printf "  CONTROLLED RESTARTS are best DISABLED for Windows Live ISO combos, so the various drive refs can be maintained"
+        printf "\n\n  Whilst tests have shown SECURE BOOT to be BEST AS INITIALLY OFF but set to 'on' in the .conf file"
+        printf "\n\n  Situations can change ..."
+        printf "\n\n  Currently  "" CRS: '%s'  SB: '%s'" "$ControlledRestart" "$SecureBootStatus"
+        printColor "\n\n  [enter] to continue with both off  "; printf " [c] to continue with current settings  [b] to go back \n\n\n"
+        read -rp "  >  "  LiveBootControlOptions
+        if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
+        elif [[ $LiveBootControlOptions != "c" ]]; then
+          secureboot="off"; ControlledRestart="off"
+          printf "\n  Set CRS: '%s'  SB: '%s' \n\n" "$ControlledRestart" "$SecureBootStatus"
+        fi
+      fi
+      if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" != *windows* ]] && [[ $ControlledRestart == "on" ]]; then
+        printf "  For standard single iso, single stage installations, crs 'on' can usually be fine"
+        printf "\n  Conversely, for LIVE ISO COMBOS, controlled restarts are best DISABLED, so the various drive refs can be maintained"
+        printf "\n\n  Currently  "" CRS: '%s'" "$ControlledRestart"
+        printColor "\n\n  [enter] to continue with CRS off  "; printf " [c] to continue with current settings (allows between stage snapshots)  [b] to go back \n\n\n"
+        read -rp "  >  "  LiveBootControlOptions
+        if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
+        elif [[ $LiveBootControlOptions != "c" ]]; then
+          ControlledRestart="off"
+          printf "\n  Set CRS: '%s' \n\n" "$ControlledRestart"
+        fi
       fi
 
       if [[ $Mounted_ISO_Return ]]; then  return
