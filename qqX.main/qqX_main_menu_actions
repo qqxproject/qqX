@@ -162,16 +162,23 @@ function  main_menu_actions {
     fi
 
   elif [[ $MainMenuChoice == "crs" ]] ; then
-    [[ $ControlledRestart == "on" ]] && ControlledRestart="off" || ControlledRestart="on"
-    printf "\n
+    printf "
     # Allows easy between stage snapshots before making experimental changes
     # or at the end of lengthy processes, helps avoid repeat downloads and repeat exit sequences
 
-    # Any 'Do not turn off your computer' restarts will still work
+    # Standard 'Do not turn off your computer' restarts will still work
 
-    # Set =\"off\" in main settings, if auto-restart is normally preferred
-    \n\n"
-    read -rp "  [enter] to continue >  "
+    # Set =\"off\" in main settings, if auto-restart is normally preferred"
+    printf "\n\n  "
+    if [[ $ControlledRestart == "on" ]]; then printf "[enter] for 'off'  "; printColor "[c] to continue as is \n\n"
+    else printColor "[enter] for 'on'  "; printf "[c] to continue as is \n\n"
+    fi
+    read -rp "  >  "  ControlledRestartSelect
+
+    if [[ ! $ControlledRestartSelect ]]; then
+      if [[ $ControlledRestart == "on" ]]; then ControlledRestart="off"; else  ControlledRestart="on"
+      fi
+    fi
 
   elif [[ $MainMenuChoice == "qd" ]] ; then
     printf "\n  Opening Browser ... \n\n"
