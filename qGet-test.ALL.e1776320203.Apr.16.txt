@@ -1,6 +1,6 @@
 
 
-FreeSpirit  Thu Feb  5 13:20:59 CET 2026
+FreeSpirit  Thu Apr 16 08:16:43 CEST 2026
 
 All Tests Successfully Passed
 
@@ -72,14 +72,7 @@ Checksum: PASS   Iso: PASS   anduinos-Standard-zh_TW
 
 OS > ANTIX:
 
-Checksum: PASS   Iso: PASS   antix-23.2-net-sysv
-Checksum: PASS   Iso: PASS   antix-23.2-core-sysv
-Checksum: PASS   Iso: PASS   antix-23.2-base-sysv
-Checksum: PASS   Iso: PASS   antix-23.2-full-sysv
-Checksum: PASS   Iso: PASS   antix-23.2-net-runit
-Checksum: PASS   Iso: PASS   antix-23.2-core-runit
-Checksum: PASS   Iso: PASS   antix-23.2-base-runit
-Checksum: PASS   Iso: PASS   antix-23.2-full-runit
+Checksum: PASS   Iso: PASS   antix-latest
 
 OS > ARCHCRAFT:
 
@@ -91,41 +84,39 @@ Checksum: PASS   Iso: PASS   archlinux-latest
 
 OS > ARTIXLINUX:
 
-Checksum: PASS   Iso: PASS   artixlinux-20250407-base-dinit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-base-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-base-runit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-base-s6
-Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-dinit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-runit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-cinnamon-s6
-Checksum: PASS   Iso: PASS   artixlinux-20250407-community-gtk-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-community-qt-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-dinit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-runit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxde-s6
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-dinit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-runit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-lxqt-s6
-Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-dinit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-runit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-mate-s6
-Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-dinit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-runit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-plasma-s6
-Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-dinit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-openrc
-Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-runit
-Checksum: PASS   Iso: PASS   artixlinux-20250407-xfce-s6
+Checksum: PASS   Iso: PASS   artixlinux-20260402-base-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20260402-base-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20260402-base-runit
+Checksum: PASS   Iso: PASS   artixlinux-20260402-base-s6
+Checksum: n/a    Iso: PASS   artixlinux-20260402-cinnamon-dinit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-cinnamon-openrc
+Checksum: n/a    Iso: PASS   artixlinux-20260402-cinnamon-runit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-cinnamon-s6
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxde-dinit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxde-openrc
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxde-runit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxde-s6
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxqt-dinit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxqt-openrc
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxqt-runit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-lxqt-s6
+Checksum: n/a    Iso: PASS   artixlinux-20260402-mate-dinit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-mate-openrc
+Checksum: n/a    Iso: PASS   artixlinux-20260402-mate-runit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-mate-s6
+Checksum: PASS   Iso: PASS   artixlinux-20260402-plasma-dinit
+Checksum: PASS   Iso: PASS   artixlinux-20260402-plasma-openrc
+Checksum: PASS   Iso: PASS   artixlinux-20260402-plasma-runit
+Checksum: PASS   Iso: PASS   artixlinux-20260402-plasma-s6
+Checksum: n/a    Iso: PASS   artixlinux-20260402-xfce-dinit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-xfce-openrc
+Checksum: n/a    Iso: PASS   artixlinux-20260402-xfce-runit
+Checksum: n/a    Iso: PASS   artixlinux-20260402-xfce-s6
 
 OS > ATHENAOS:
 
+Checksum: PASS   Iso: PASS   athenaos-26.03
 Checksum: PASS   Iso: PASS   athenaos-25.11
-Checksum: n/a    Iso: PASS   athenaos-23.11
 
 OS > AZURELINUX:
 
@@ -148,9 +139,9 @@ Checksum: PASS   Iso: PASS   bazzite-latest-deck-plasma
 
 OS > BIGLINUX:
 
-Checksum: PASS   Iso: PASS   biglinux-2026-01-31-k618
-Checksum: PASS   Iso: PASS   biglinux-2026-01-31-k612
-Checksum: PASS   Iso: PASS   biglinux-2026-01-31-k66
+Checksum: PASS   Iso: PASS   biglinux-2026-04-04-k619
+Checksum: PASS   Iso: PASS   biglinux-2026-04-04-k618
+Checksum: PASS   Iso: PASS   biglinux-2026-04-04-k612
 
 OS > BLENDOS:
 
@@ -200,15 +191,15 @@ Checksum: n/a    Iso: PASS   crunchbang++-9.0
 
 OS > DEBIAN:
 
-Checksum: PASS   Iso: PASS   debian-13.3.0-standard
-Checksum: PASS   Iso: PASS   debian-13.3.0-cinnamon
-Checksum: PASS   Iso: PASS   debian-13.3.0-gnome
-Checksum: PASS   Iso: PASS   debian-13.3.0-kde
-Checksum: PASS   Iso: PASS   debian-13.3.0-lxde
-Checksum: PASS   Iso: PASS   debian-13.3.0-lxqt
-Checksum: PASS   Iso: PASS   debian-13.3.0-mate
-Checksum: PASS   Iso: PASS   debian-13.3.0-xfce
-Checksum: PASS   Iso: PASS   debian-13.3.0-netinst
+Checksum: PASS   Iso: PASS   debian-13.4.0-standard
+Checksum: PASS   Iso: PASS   debian-13.4.0-cinnamon
+Checksum: PASS   Iso: PASS   debian-13.4.0-gnome
+Checksum: PASS   Iso: PASS   debian-13.4.0-kde
+Checksum: PASS   Iso: PASS   debian-13.4.0-lxde
+Checksum: PASS   Iso: PASS   debian-13.4.0-lxqt
+Checksum: PASS   Iso: PASS   debian-13.4.0-mate
+Checksum: PASS   Iso: PASS   debian-13.4.0-xfce
+Checksum: PASS   Iso: PASS   debian-13.4.0-netinst
 Checksum: PASS   Iso: PASS   debian-12.13.0-standard
 Checksum: PASS   Iso: PASS   debian-12.13.0-cinnamon
 Checksum: PASS   Iso: PASS   debian-12.13.0-gnome
@@ -230,6 +221,7 @@ Checksum: PASS   Iso: PASS   debian-11.11.0-netinst
 
 OS > DEEPIN:
 
+Checksum: PASS   Iso: PASS   deepin-25.1.0
 Checksum: PASS   Iso: PASS   deepin-25.0.10
 Checksum: PASS   Iso: PASS   deepin-25.0.1
 Checksum: PASS   Iso: PASS   deepin-23.1
@@ -266,10 +258,10 @@ Checksum: PASS   Iso: PASS   elementary-latest
 
 OS > ENDEAVOUROS:
 
+Checksum: n/a    Iso: PASS   endeavouros-2026.03.06
 Checksum: PASS   Iso: PASS   endeavouros-2026.01.12
 Checksum: PASS   Iso: PASS   endeavouros-2025.11.24
 Checksum: PASS   Iso: PASS   endeavouros-2025.03.19
-Checksum: PASS   Iso: PASS   endeavouros-2025.02.08
 
 OS > ENDLESS:
 
@@ -319,28 +311,13 @@ Checksum: PASS   Iso: PASS   fedora-42-Sway
 Checksum: PASS   Iso: PASS   fedora-42-Workstation
 Checksum: PASS   Iso: PASS   fedora-42-Xfce
 Checksum: PASS   Iso: PASS   fedora-42-i3
-Checksum: PASS   Iso: PASS   fedora-41-Budgie
-Checksum: PASS   Iso: PASS   fedora-41-Cinnamon
-Checksum: PASS   Iso: PASS   fedora-41-KDE
-Checksum: PASS   Iso: PASS   fedora-41-KDE_Mobile
-Checksum: PASS   Iso: PASS   fedora-41-Kinoite
-Checksum: PASS   Iso: PASS   fedora-41-LXDE
-Checksum: PASS   Iso: PASS   fedora-41-LXQt
-Checksum: PASS   Iso: PASS   fedora-41-Mate
-Checksum: PASS   Iso: PASS   fedora-41-MiracleWM
-Checksum: PASS   Iso: PASS   fedora-41-Onyx
-Checksum: PASS   Iso: PASS   fedora-41-Sericea
-Checksum: PASS   Iso: PASS   fedora-41-Server
-Checksum: PASS   Iso: PASS   fedora-41-Silverblue
-Checksum: PASS   Iso: PASS   fedora-41-Sway
-Checksum: PASS   Iso: PASS   fedora-41-Workstation
-Checksum: PASS   Iso: PASS   fedora-41-Xfce
-Checksum: PASS   Iso: PASS   fedora-41-i3
 
 OS > FREEBSD:
 
 Checksum: PASS   Iso: PASS   freebsd-15.0-disc1
 Checksum: PASS   Iso: PASS   freebsd-15.0-dvd1
+Checksum: PASS   Iso: PASS   freebsd-14.4-disc1
+Checksum: PASS   Iso: PASS   freebsd-14.4-dvd1
 Checksum: PASS   Iso: PASS   freebsd-14.3-disc1
 Checksum: PASS   Iso: PASS   freebsd-14.3-dvd1
 Checksum: PASS   Iso: PASS   freebsd-13.5-disc1
@@ -381,6 +358,10 @@ Checksum: PASS   Iso: PASS   ghostbsd-24.10.1-xfce
 
 OS > GNOMEOS:
 
+Checksum: n/a    Iso: PASS   gnomeos-50.0-release
+Checksum: n/a    Iso: PASS   gnomeos-50.0-rc
+Checksum: n/a    Iso: PASS   gnomeos-50.0-beta
+Checksum: n/a    Iso: PASS   gnomeos-50.0-alpha
 Checksum: n/a    Iso: PASS   gnomeos-49.0-release
 Checksum: n/a    Iso: PASS   gnomeos-49.0-rc
 Checksum: n/a    Iso: PASS   gnomeos-49.0-beta
@@ -388,10 +369,6 @@ Checksum: n/a    Iso: PASS   gnomeos-48.0-release
 Checksum: n/a    Iso: PASS   gnomeos-48.0-rc
 Checksum: n/a    Iso: PASS   gnomeos-48.0-beta
 Checksum: n/a    Iso: PASS   gnomeos-48.0-alpha
-Checksum: n/a    Iso: PASS   gnomeos-47.0-release
-Checksum: n/a    Iso: PASS   gnomeos-47.0-rc
-Checksum: n/a    Iso: PASS   gnomeos-47.0-beta
-Checksum: n/a    Iso: PASS   gnomeos-47.0-alpha
 
 OS > GUIX:
 
@@ -593,7 +570,7 @@ Checksum: PASS   Iso: PASS   openindiana-20240426-minimal
 
 OS > OPENSUSE:
 
-Checksum: PASS   Iso: PASS   opensuse-leap-micro-current
+Checksum: n/a    Iso: PASS   opensuse-leap-micro-current
 Checksum: PASS   Iso: PASS   opensuse-slowroll-DVD
 Checksum: PASS   Iso: PASS   opensuse-tumbleweed-DVD
 Checksum: PASS   Iso: PASS   opensuse-tumbleweed-Gnome
@@ -610,10 +587,8 @@ Checksum: PASS   Iso: PASS   oraclelinux-9.6
 
 OS > PARROTSEC:
 
-Checksum: PASS   Iso: PASS   parrotsec-7.0-home
-Checksum: PASS   Iso: PASS   parrotsec-7.0-security
-Checksum: PASS   Iso: PASS   parrotsec-6.4-home
-Checksum: PASS   Iso: PASS   parrotsec-6.4-security
+Checksum: PASS   Iso: PASS   parrotsec-7.1-home
+Checksum: PASS   Iso: PASS   parrotsec-7.1-security
 
 OS > PCLINUXOS:
 
@@ -769,18 +744,14 @@ Checksum: PASS   Iso: PASS   tinycore-15.x-TinyCorePure64
 
 OS > TRISQUEL:
 
+Checksum: PASS   Iso: PASS   trisquel-12.0-mate
+Checksum: PASS   Iso: PASS   trisquel-12.0-lxde
+Checksum: PASS   Iso: PASS   trisquel-12.0-kde
+Checksum: PASS   Iso: PASS   trisquel-12.0-sugar
 Checksum: PASS   Iso: PASS   trisquel-11.0.1-mate
 Checksum: PASS   Iso: PASS   trisquel-11.0.1-lxde
 Checksum: PASS   Iso: PASS   trisquel-11.0.1-kde
 Checksum: PASS   Iso: PASS   trisquel-11.0.1-sugar
-Checksum: PASS   Iso: PASS   trisquel-11.0-mate
-Checksum: PASS   Iso: PASS   trisquel-11.0-lxde
-Checksum: PASS   Iso: PASS   trisquel-11.0-kde
-Checksum: PASS   Iso: PASS   trisquel-11.0-sugar
-Checksum: PASS   Iso: PASS   trisquel-10.0.1-mate
-Checksum: PASS   Iso: PASS   trisquel-10.0.1-lxde
-Checksum: PASS   Iso: PASS   trisquel-10.0.1-kde
-Checksum: PASS   Iso: PASS   trisquel-10.0.1-sugar
 
 OS > TRUENAS-SCALE:
 
@@ -839,8 +810,8 @@ Checksum: n/a    Iso: PASS   ubuntu-mate-daily-live
 OS > UBUNTU-SERVER:
 
 Checksum: n/a    Iso: PASS   ubuntu-server-daily-live
+Checksum: PASS   Iso: PASS   ubuntu-server-26.04
 Checksum: PASS   Iso: PASS   ubuntu-server-25.10
-Checksum: PASS   Iso: PASS   ubuntu-server-25.04
 Checksum: PASS   Iso: PASS   ubuntu-server-24.04
 Checksum: PASS   Iso: PASS   ubuntu-server-22.04
 Checksum: PASS   Iso: PASS   ubuntu-server-20.04
@@ -1002,7 +973,7 @@ Checksum: PASS   Iso: PASS   zorin-16-lite64
 Checksum: PASS   Iso: PASS   zorin-16-education64
 
 
-FreeSpirit  Thu Feb  5 13:20:59 CET 2026
+FreeSpirit  Thu Apr 16 08:16:43 CEST 2026
 
 All Tests Successfully Passed
 
