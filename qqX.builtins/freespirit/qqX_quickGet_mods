@@ -1445,34 +1445,24 @@ EOF
       <RegisteredOwner>Admin</RegisteredOwner>
       <FirstLogonCommands>
         <SynchronousCommand wcm:action="add">
-          <CommandLine>msiexec /i F:\virtio-win-gt-x64.msi /passive /qn</CommandLine>
+          <CommandLine>msiexec /i E:\virtio-win-gt-x64.msi /passive /qn</CommandLine>
           <Description>Install virtio drivers</Description>
           <Order>1</Order>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
-          <CommandLine>msiexec /i E:\spice-vdagent-x64-0.10.0.msi /passive /qn</CommandLine>
+          <CommandLine>msiexec /i F:\spice-vdagent-x64-0.10.0-5.msi /passive /qn</CommandLine>
           <Description>Install spice-vdagent SPICE agent</Description>
           <Order>2</Order>
-        </SynchronousCommand>
-       <SynchronousCommand wcm:action="add">
-          <CommandLine>msiexec /i E:\spice-webdavd-x64-latest.msi /passive /qn</CommandLine>
-          <Description>Install spice-webdavd file sharing agent</Description>
-          <Order>3</Order>
-        </SynchronousCommand>
-        <SynchronousCommand wcm:action="add">
-          <CommandLine>F:\virtio-win-guest-tools.exe /quiet</CommandLine>
-          <Description>Install virtio tools</Description>
-          <Order>4</Order>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
           <CommandLine>cmd /c POWERCFG -H OFF</CommandLine>
           <Description>Disable Hibernation</Description>
-          <Order>5</Order>
+          <Order>3</Order>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
         <CommandLine>cmd /c net accounts /maxpwage:unlimited</CommandLine>
         <Description>Local account passwords never expire</Description>
-        <Order>6</Order>
+        <Order>4</Order>
       </SynchronousCommand>
       </FirstLogonCommands>
     </component>
@@ -1481,16 +1471,23 @@ EOF
 EOF
 
   echo "Downloading Spice drivers..."
-  web_get https://www.spice-space.org/download/windows/spice-webdavd/spice-webdavd-x64-latest.msi "${VM_PATH}/unattended"
-  web_get https://www.spice-space.org/download/windows/vdagent/vdagent-win-0.10.0/spice-vdagent-x64-0.10.0.msi "${VM_PATH}/unattended"
+  # web_get https://www.spice-space.org/download/windows/spice-webdavd/spice-webdavd-x64-latest.msi "${VM_PATH}/unattended"
+  # web_get https://www.spice-space.org/download/windows/vdagent/vdagent-win-0.10.0/spice-vdagent-x64-0.10.0.msi "${VM_PATH}/unattended"
 
   # Spice downloads are difficult to enable dynamically as they are infrequent and differ in format.
-  # However, a qqX based version notifier is possible:
+  # A qqX based version notifier is possible (below) but @ 04/2026 the spice space site has gone down
 
-  # TODO https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/virtio-win-pkg-scripts-input/virtio-win-0.1.285-1/spice-vdagent-x64-0.10.0-5.msi
+  # With qqX 1.16, it has been discovered both that 'spice-webdavd' is not actually needed
+  # and that the RedHat/Fedora virt version of Spice vdagent is more uptodate and better maintained, so switch to this:
 
-  LatestSpiceAgent="$(web_pipe "https://www.spice-space.org/download/windows/vdagent" | tr '"' '\n' | grep -s vdagent | fv -Q -M)"
-  if fv -qg "$LatestSpiceAgent 0.10.0" ; then
+  local SpiceLink="https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/virtio-win-pkg-scripts-input/virtio-win-0.1.285-1/spice-vdagent-x64-0.10.0-5.msi"
+  web_get "$SpiceLink" "${VM_PATH}/unattended"
+
+  # TODO add some error handling, and for the virt iso
+
+  #LatestSpiceAgent="$(web_pipe "https://www.spice-space.org/download/windows/vdagent" | tr '"' '\n' | grep -s vdagent | fv -Q -M)"
+  # if fv -qg "$LatestSpiceAgent 0.10.0" ; then
+  if [[ $IgnoreMeForNow == "spiceisbackup" ]]; then
     echo; echo "A NEWER Spice agent has been found at https://www.spice-space.org/download/windows/vdagent"
     echo "but auto adjusting downloads are difficult to enable for the Spice website:"
     echo; echo "After the installation is finished, please manually update Spice to version $LatestSpiceAgent from inside Windows"

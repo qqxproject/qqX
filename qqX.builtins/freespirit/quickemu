@@ -2102,9 +2102,9 @@ function vm_boot() {
         if [[ ! -e "${VMDIR}/disk.qcow2" ]] || [[ ! $(du -b -t 1000000 "${VMDIR}/disk.qcow2" 2>/dev/null) ]]; then
             if [ -e "${VMDIR}/unattended.iso" ] && [ -n "${fixed_iso}" ]; then
                 # shellcheck disable=SC2054
-                args+=(-drive media=cdrom,index=1,file="${VMDIR}/unattended.iso")
+                args+=(-drive media=cdrom,index=1,file="${fixed_iso}")
                 # shellcheck disable=SC2054
-                args+=(-drive media=cdrom,index=2,file="${fixed_iso}")
+                args+=(-drive media=cdrom,index=2,file="${VMDIR}/unattended.iso")
             else
                 echo; echo "ERROR!  Windows download incomplete:"
                 echo "Required ISO files 'virtio-win.iso' and 'unattended.iso' not found."
