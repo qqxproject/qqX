@@ -1773,15 +1773,25 @@ function test_result {
 function test_all {
 
     OS="${1}"
-    if [[ $ChkLog ]]; then {
-        if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
-        else printf "\nOS > %s:\n\n" "${OS^^}"
+    if [[ $QuietOps ]]; then
+        if [[ $ChkLog ]]; then {
+            if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
+            else printf "\nOS > %s:\n\n" "${OS^^}"
+            fi
+            } >> "$ChkLog"
+        else printf "\nTest All - Internal ERROR: Check Log not found\n\n" >> "$ChkLog"
         fi
-        } | tee -a "$ChkLog"
-    else printf "\nTest All - Internal ERROR: Check Log not found\n\n"
+        [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" >> "$ChkLog" && return
+    else
+        if [[ $ChkLog ]]; then {
+            if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
+            else printf "\nOS > %s:\n\n" "${OS^^}"
+            fi
+            } | tee -a "$ChkLog"
+        else printf "\nTest All - Internal ERROR: Check Log not found\n\n"
+        fi
+        [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" && return
     fi
-    [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" && return
-
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
     [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
 
@@ -1789,7 +1799,9 @@ function test_all {
         SECONDS=0
         for RELEASE in $("releases_${FUNC}"); do
             if [[ ! $RELEASE ]] && [[ $SECONDS -gt 60 ]]; then
-                printf "ERROR: %-40s  >  Releases function FAIL \n" "$OS" | tee -a "$ChkLog"
+                if [[ $QuietOps ]]; then printf "ERROR: %-40s  >  Releases function FAIL \n" "$OS" >> "$ChkLog"
+                else printf "ERROR: %-40s  >  Releases function FAIL \n" "$OS" | tee -a "$ChkLog"
+                fi
                 return 1
             fi
             SECONDS=0
@@ -1799,7 +1811,9 @@ function test_all {
                     #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
                     #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
                     if [[ ! $EDITION ]] && [[ $SECONDS -gt 60 ]]; then
-                        printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                        else printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        fi
                         return 1
                     fi
                     printf "" > "/tmp/qGet-test-all-GetLine.txt"
@@ -1809,7 +1823,9 @@ function test_all {
                         printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                     done
                     if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
-                        printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                        else printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        fi
                         return 1
                     fi
                     URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
@@ -1828,7 +1844,9 @@ function test_all {
                     SECONDS=0
                 done
                 if [[ ! $EDITION ]] && [[ $ChkLog ]] && ! grep -qs "$OS" <<< "$(grep -s 'Editions function FAIL' "$ChkLog")" ; then
-                    printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                    if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                    else printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                    fi
                 fi
             elif [[ "${OS}" == "windows"* ]]; then
                 # Caution with current Quickemu, --check windows with $2 (or/and $3) will trigger a windows download
@@ -1860,7 +1878,9 @@ function test_all {
                         printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                     done
                     if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
-                        printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                        else printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        fi
                         return 1
                     fi
                     URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
@@ -1876,11 +1896,13 @@ function test_all {
             SECONDS=0
         done
         if [[ ! $RELEASE ]] && [[ $ChkLog ]] && ! grep -qs "$OS  >  Releases function FAIL" "$ChkLog" ; then
-            printf "ERROR: %s  >  Releases function FAIL \n"  "$OS"  >> "$ChkLog"
+            if [[ $QuietOps ]]; then printf "ERROR: %s  >  Releases function FAIL \n"  "$OS" >> "$ChkLog"
+            else printf "ERROR: %s  >  Releases function FAIL \n"  "$OS" | tee -a "$ChkLog"
+            fi
         fi
     fi
     # prints at end of every distro set - a full test can take half an hour
-    printf "\n\n"
+    [[ ! $QuietOps ]] && printf "\n\n"
     [[ $SingleCheck ]] && return
     if [[ $CompactOps || $FullCheckOps ]]; then
         printf "[s] to stop/pause tests (at next distro break point)\n"
@@ -1948,7 +1970,8 @@ case "${1}" in
             [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
         elif [[ ! $2 ]]; then
-            printf "\n" ; SingleCheck=1
+            [[ ! $QuietOps ]] && printf "\n"
+            SingleCheck=1
             os_supported ; test_all "${1}"
             [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
@@ -1962,7 +1985,7 @@ case "${1}" in
         printf "\n\n  --rel-notes       Output the additional release and installation notes, if supplied"
         printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qGet_FullResult.txt\""
         printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
-        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log check image URL(s) to file \"/tmp/qGet_QuietResult.txt\""
+        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log checks to file \"/tmp/qGet_QuietResult.txt\""
         printf "\n\n  --mirrors         Add-on for the above tests, to show info on possible mirror services. Omit for more generalized testing."
         printf "\n\n  Without a specified 'OS' will run a complete 'test_all' whilst with 'OS' will test all releases and editions of that specified."
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."
