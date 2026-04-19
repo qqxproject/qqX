@@ -120,9 +120,10 @@ show_main_menu_header () {
   # quietly ignore errors if .conf lists an ISO but it has been removed
   if [[ $Mounted_ISO ]]; then [[ ! -e $Mounted_ISO ]] && Mounted_ISO= ; fi
   if [[ $Mounted_ISO ]]; then Mounted_ISO_DisplayName="${Mounted_ISO##*/}" ; fi
-
-  LiveBoot=
-  if  [[  ! -e "$MainDrive" ]] && [[ ! -e "$IsoImg" ]]; then  BootAlert="(Drives CHANGED or NOT FOUND - Reload VM?)"
+  LiveBoot= ; WindowsMissingIso=
+  if  [[  ! -e "$MainDrive" ]] && [[ ! -e "$IsoImg" ]]; then
+    BootAlert="(Drives CHANGED or NOT FOUND - Reload VM?)"
+    [[ "${VM_InstanceName,,}" == *windows* ]] && WindowsMissingIso=1
   elif  [[  ! -e "$MainDrive" ]]; then  BootAlert="(New: Std ISO Boot. Main Drive yet to be created)" ; LiveBoot=1
   elif  [[  ! $(du -b -t 1000000 "$MainDrive" 2>/dev/null) ]]; then
     if [[ ! "$IsoImg" ]] || [[ !  -e "$IsoImg" ]]; then

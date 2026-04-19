@@ -94,14 +94,19 @@ else
         printColor "\n\n\n  Live BOOT ISO NOT FOUND"
         [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
         printf "\n"
-      elif [[ "${VM_InstanceName,,}" == *windows* ]] && [[ "$Mounted_ISO" == *virtio* ]]; then
-        printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
-        # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
-        printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
-        printColor "\n\n  The Windows ISO is unlikely to be needed so may be archived."
-        printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
-        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
-        printf "\n"
+      elif [[ "${VM_InstanceName,,}" == *windows* ]]; then
+        if [[ $WindowsMissingIso ]]; then
+          printColor "\n\n\n  [wd] to manually download a Windows ISO"
+          printf "\n\n  Select 64 bit. Save the downloaded ISO to the VM folder. Update the .conf references.\n"
+        elif [[ "$Mounted_ISO" == *virtio* ]]; then
+          printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
+          # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
+          printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
+          printColor "\n\n  The Windows ISO is unlikely to be needed so may be archived."
+          printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
+          [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+          printf "\n"
+        fi
       fi
 
     else

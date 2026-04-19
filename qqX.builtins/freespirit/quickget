@@ -3535,14 +3535,12 @@ function download_windows_workstation() {
     local session_id=""
     local iso_download_page_html=""
     local product_edition_id=""
-    local language_skuid_table_cmd=""
     local language_skuid_table_json=""
     local sku_id=""
-    local iso_download_link_cmd=""
     local iso_download_link_json=""
     local iso_download_link=""
 
-    echo; echo "Downloading Windows ${RELEASE} (${I18N})"; echo
+    echo "Downloading Windows ${RELEASE} (${I18N})"
     # This function is adapted from the Mido project:
     # https://github.com/ElliotKillick/Mido
     # Download newer consumer Windows versions from behind gated Microsoft API
@@ -3555,18 +3553,8 @@ function download_windows_workstation() {
         10) url="${url}ISO";;
     esac
 
-    # Make log for dev analysis
-    { echo; date; echo; echo "$url"; echo
-    } >  "/tmp/qe_win_dl_log.txt"
-
-    { echo "I18N Lang: $I18N"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
     local user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0"
     session_id="$(uuidgen)"
-
-    { echo "$user_agent"; echo; uuidparse "$session_id"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
 
     # Get product edition ID for latest release of given Windows version
     # Product edition ID: This specifies both the Windows release (e.g. 22H2) and edition ("multi-edition" is default, either Home/Pro/Edu/etc., we select "Pro" in the answer files) in one number
@@ -3574,21 +3562,10 @@ function download_windows_workstation() {
     # Also, keeping a "$WindowsVersions" array like Fido does would be way too much of a maintenance burden
     # Remove "Accept" header that curl sends by default
     echo " - Parsing download page: ${url}"
-    iso_download_page_html="$(curl --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --user-agent "$user_agent" --header "Accept:" --max-filesize 1M --proto =https --tlsv1.2 --http1.1 -- "$url")" || {
+    iso_download_page_html="$(curl --disable --silent --user-agent "$user_agent" --header "Accept:" --max-filesize 1M --fail --proto =https --tlsv1.2 --http1.1 -- "$url")" || {
         handle_curl_error $?
         return $?
     }
-
-    # Copyright (C) 2024 GPL3 Alex Genovese
-    # https://github.com/qqxproject/qqX
-    # Slow down the 'bot' behaviour, make it seem more human, so the anti-ddos routines don't block us:
-    local RndNum=
-    RndNum="$( (tr -cd '5-8' | head -c 1) < /dev/urandom )"
-    echo " - Taking a few human seconds to appear to 'read' the download page ... " ; sleep "$RndNum"
-    echo "   ... to hopefully stop any now or future anti-ddos and anti-bot routines from blocking us"
-
-    { echo; date; echo "iso_download_page_html:"; echo; echo "$iso_download_page_html"; echo ; echo "End of Page"; echo
-    } >  "/tmp/qe_win_dl_page_html.txt"
 
     echo -n " - Getting Product edition ID: "
     # tr: Filter for only numerics to prevent HTTP parameter injection
@@ -3596,119 +3573,68 @@ function download_windows_workstation() {
     product_edition_id="$(echo "$iso_download_page_html" | grep -Eo '<option value="[0-9]+">Windows' | cut -d '"' -f 2 | head -n 1 | tr -cd '0-9' | head -c 16)"
     echo "$product_edition_id"
 
-    { echo "product_edition_id:"; echo; echo "$product_edition_id"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
     echo " - Permit Session ID: $session_id"
     # Permit Session ID
     # "org_id" is always the same value
-    curl --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - -o /dev/null --user-agent "$user_agent" --header "Accept:" --max-filesize 100K --proto =https --tlsv1.2 --http1.1 -- "https://vlscppe.microsoft.com/tags?org_id=y6jn8c31&session_id=$session_id" || {
+    curl --disable --silent --output /dev/null --user-agent "$user_agent" --header "Accept:" --max-filesize 100K --fail --proto =https --tlsv1.2 --http1.1 -- "https://vlscppe.microsoft.com/tags?org_id=y6jn8c31&session_id=$session_id" || {
         # This should only happen if there's been some change to how this API works
         handle_curl_error $?
         return $?
     }
 
-    RndNum="$( (tr -cd '6-9' | head -c 1) < /dev/urandom )"
-    echo " - A few human seconds here too ...." ; sleep "$RndNum"
-
     local profile="606624d44113"
-
-    { echo "profile:"; echo; echo "$profile"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
 
     echo -n " - Getting language SKU ID: "
     # Get language -> skuID association table
-    language_skuid_table_json="$(curl --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --max-filesize 100K --proto =https --tlsv1.2 --http1.1 "https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_edition_id}&SKU=undefined&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}")" || {
+    language_skuid_table_json="$(curl --disable -s --fail --max-filesize 100K --proto =https --tlsv1.2 --http1.1 "https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_edition_id}&SKU=undefined&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}")" || {
         handle_curl_error $?
         return $?
     }
-    # capture 'cmd' for the log file
-    language_skuid_table_cmd="$(echo --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --max-filesize 100K --proto =https --tlsv1.2 --http1.1 "https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_edition_id}&SKU=undefined&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}")"
-
-    { echo; date; echo "language_skuid_table_json - FULL "; echo; echo "$language_skuid_table_json"; echo ; echo "End of Page"; echo
-    } >  "/tmp/qe_win_dl_lang_table full.txt"
-
-    { echo "language_skuid_table_cmd:"; echo; echo "curl $language_skuid_table_cmd"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
-    { echo "language_skuid_table_json:"; echo; echo "$language_skuid_table_json"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
 
     sku_id="$(echo "${language_skuid_table_json}" | jq -r '.Skus[] | select(.LocalizedLanguage=="'"${I18N}"'" or .Language=="'"${I18N}"'").Id')"
     echo "$sku_id"
 
-    RndNum="$( (tr -cd '6-9' | head -c 1) < /dev/urandom )"
-    echo " - And a few human seconds here .... " ; sleep "$RndNum"
-
-    { echo "sku_id:"; echo; echo "$sku_id"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
     echo " - Getting ISO download link..."
-
     # Get ISO download link
     # If any request is going to be blocked by Microsoft it's always this last one (the previous requests always seem to succeed)
     # --referer: Required by Microsoft servers to allow request
-    iso_download_link_json="$(curl --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --referer "$url" "https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${sku_id}&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}")"
-    # capture 'cmd' for the log file
-    iso_download_link_cmd="$(echo --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --referer "$url" "https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${sku_id}&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}")"
-
-    RndNum="$( (tr -cd '5-8' | head -c 1) < /dev/urandom )"
-    echo " - And some more, hopefully successful, human seconds before we start .... " ; sleep "$RndNum"
-
-    { echo "iso_download_link_cmd:"; echo; echo "curl $iso_download_link_cmd"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
-    { echo "iso_download_link_json:"; echo; echo "$iso_download_link_json"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+    iso_download_link_json="$(curl --disable -s --fail --referer "$url" "https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${sku_id}&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}")"
 
     local failed=0
+
     if ! [ "$iso_download_link_json" ]; then
         # This should only happen if there's been some change to how this API works
-        echo; echo " - Microsoft servers gave us an empty response to our request for an automated download."
+        echo " - Microsoft servers gave us an empty response to our request for an automated download."
         failed=1
     fi
 
     if echo "$iso_download_link_json" | grep -q "Sentinel marked this request as rejected."; then
-        echo; echo " - UNFORTUNATELY: Microsoft blocked the download request based on your IP address."; echo
+        echo " - WARNING! Microsoft blocked the automated download request based on your IP address."
         failed=1
     fi
 
-    if echo "$iso_download_link_json" | grep -q "We encountered a problem processing your request. Please try again later."; then
-        echo; echo " - UNFORTUNATELY: Microsoft blocked the request and is saying to try again later."; echo
-        failed=1
-    fi
-
-    if [ "${failed}" -eq 1 ]; then
-        echo "   RETRY in an hour's time ...." ; echo
-        echo "   Or ... continue with the VM creation process, then:"
+    if [ ${failed} -eq 1 ]; then
         echo "   Manually download the Windows ${windows_version} ISO using a web browser from: ${url}"
         echo "   Save the downloaded ISO to: $(realpath "${VM_PATH}")"
-        echo "   Update the config file to reference the downloaded ISO"; echo
+        echo "   Update the config file to reference the downloaded ISO: ./${VM_PATH}.conf"
+        echo "   Continuing with the VM creation process..."
         return 1
     fi
 
     # Filter for 64-bit ISO download URL
     iso_download_link="$(echo "${iso_download_link_json}" | jq -r '.ProductDownloadOptions[].Uri' | grep x64)"
 
-    { echo "iso_download_link - filtered:"; echo; echo "$iso_download_link"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
     if ! [ "$iso_download_link" ]; then
         # This should only happen if there's been some change to the download endpoint web address
-        echo " - Microsoft servers gave us no download link to our request for an automated download."; echo "   Please manually download this ISO in a web browser:"; echo "   $url"
+        echo " - Microsoft servers gave us no download link to our request for an automated download. Please manually download this ISO in a web browser: $url"
         return 1
     fi
 
     echo " - URL: ${iso_download_link%%\?*}"
 
     # Download ISO
-
     FILE_NAME="$(echo "$iso_download_link" | cut -d'?' -f1 | cut -d'/' -f5)"
-    { echo "FILE_NAME"; echo; echo "$FILE_NAME"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
     web_get "${iso_download_link}" "${VM_PATH}" "${FILE_NAME}"
-
 }
 
 function get_windows() {

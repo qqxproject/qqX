@@ -188,6 +188,10 @@ function  main_menu_actions {
     printf "\n  Opening Browser ... \n\n"
     (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org"  & ) || web_browser_not_found_message
     sleep 1
+  elif [[ $MainMenuChoice == "wd" ]] ; then
+    printf "\n  Opening Browser ... \n\n"
+    (nohup &> /dev/null  "$WebBrowser"  "https://www.microsoft.com/en-us/software-download/"  & ) || web_browser_not_found_message
+    sleep 1
   elif [[ $MainMenuChoice == "qW" ]] ; then
     printf "\n  Opening Browser ... \n\n"
     (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Guides/Windows-OS"  & ) || web_browser_not_found_message

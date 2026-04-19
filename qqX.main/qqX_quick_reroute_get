@@ -844,7 +844,6 @@ function_quick_get_wrap ()  {
               elif curl --disable -sLf --retry 3 --retry-max-time 2 --retry-delay 0 --max-time 6 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working)"; QGW_OS_HomePage_Working=1
               elif curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 1 --max-time 12 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working, slowly ...)"; QGW_OS_HomePage_Working=1
               else
-                # [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && printf "\n\n  Microsoft download limiter: access appears blocked to this IP address. Try later or try router reboot ... ?"
                 printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
                 if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
                   printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the page"
@@ -1761,6 +1760,10 @@ function_quick_get_wrap ()  {
         fi
         if [[ $DL_PercentageDone ]] && [[ $DL_PercentageDone != "0" ]]; then printf "\n  %s Percent appears to be downloaded"  "$DL_PercentageDone"
         else printf "\n  Percent downloaded not known"
+        fi
+        if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]] ; then
+          printf "\n\n  If WINDOWS download failed, but the other elements succeeded,"
+          printf "\n  conclude the process and Manual Download links will given from the Main Menu \n"
         fi
         printf "\n\n  Completed (or Stopped):"
         printColor "  [c] to conclude  [r] to resume, retry or re-check \n\n"
