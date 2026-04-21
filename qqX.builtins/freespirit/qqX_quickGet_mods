@@ -414,12 +414,12 @@ function editions_bodhi() {
 ## FIX - make sure that 'live' is grepped (changes at jan 11 2026)
 function releases_debian() {
     local ARCHIVE="" ; local MAJ="" ; local CUR="" ; local NEW="" ; local OLD=""
-    NEW=$(web_pipe "https://cdimage.debian.org/debian-cd/" tr '"' '\n' | grep live | fv --full -M -Q)
+    NEW=$(web_pipe "https://cdimage.debian.org/debian-cd/" | tr '"' '\n' | grep -s live | fv --full -M -Q)
     NEW="${NEW/-live/}"
     echo -n "${NEW}"
     echo "${NEW}" > "$ReleaseDataLog"
     MAJ=$(echo "${NEW}" | cut -d'.' -f 1)
-    ARCHIVE="$(curl -qsLf "https://cdimage.debian.org/cdimage/archive/" tr '"' '\n' | grep live | fv --full -M 36)"
+    ARCHIVE="$(web_pipe "https://cdimage.debian.org/cdimage/archive/" | tr '"' '\n' | grep -s live | fv --full -Q -M 36)"
     ARCHIVE="${ARCHIVE//'-live'/}"
     ARCHIVE="$(tr ' ' '\n' <<< "$ARCHIVE")"
     for i in {1..2}; do
@@ -1749,23 +1749,19 @@ function validate_release() {
 ## TWEAK
 # A lot of these have already been modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
 
-# Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get')
+# Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get' and NOT to use on binaries)
 function web_pipe {
-    local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
-    #if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 "${Args[@]}"; then
-    if ! curl -qsLf --location-trusted "${Args[@]}"; then
-        #curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6 --location-trusted --max-time 30 "${Args[@]}"
-        curl -qsLf --retry 6 --retry-max-time 6 --connect-timeout 6 --location-trusted --keepalive-time 2 --max-time 30 "${Args[@]}"
+    [[ ! $1 ]] && return 1
+    if ! curl -qsLf --location-trusted --max-time 8 --output - "$@"; then
+        curl -qsLf --location-trusted --retry 6 --retry-max-time 2 --keepalive-time 2 --max-time 30 --output -  "$@"
     fi
 }
 
 # Download a JSON file from the web and pipe it to stdout
 function web_pipe_json {
-    local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
-    #if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 --header "Accept: application/json" "${Args[@]}"; then
-    if ! curl -qsLf --location-trusted --header "Accept: application/json" "${Args[@]}"; then
-        #curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted --max-time 30 --header "Accept: application/json" "${Args[@]}"
-        curl -qsLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted --keepalive-time 2 --max-time 30 --header "Accept: application/json" "${Args[@]}"
+    [[ ! $1 ]] && return 1
+    if ! curl -qsLf --location-trusted --max-time 8 --header "Accept: application/json" --output - "$@"; then
+        curl -qsLf --location-trusted --retry 6 --retry-max-time 2 --keepalive-time 2 --max-time 30 --header "Accept: application/json" "$@"
     fi
 }
 
@@ -1773,20 +1769,20 @@ function web_pipe_json {
 # Check the file headers. To be used for returns of 0 or 1 with pipe to log file,
 function check_pipe {
     printf "" > "/tmp/qGet_check_pipe.txt"
-    local Args=("${@}")
-    if [[ ! "${Args[*]}" ]]; then
+    if [[ ! "$1" ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'Missing Args for function check_pipe' "$ChkLog" ; then
             printf "\nERROR: Missing Args for function check_pipe\n" >> "$ChkLog"
         fi
         return 1
     fi
-    #curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2  --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
-    curl -qsLf --head --location-trusted "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+    USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+    curl -qsLf --head --location-trusted --max-time 10 --max-filesize 2M --output "/tmp/qGet_check_pipe.txt" --user-agent "${USER_AGENT}" --tlsv1.2 --http1.1 -- "$@"  &
+    wait "$!" ; sleep 0.5
     if ! grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
         printf "" > "/tmp/qGet_check_pipe.txt"
-        #curl --disable -sLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
-        curl -qsLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+        curl -qsLf --head --location-trusted --retry 6 --retry-max-time 2 --max-time 30 --max-filesize 10M "$@" --output "/tmp/qGet_check_pipe.txt" &
     fi
+    wait "$!" ; sleep 0.5
     if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1 ; fi
 }
 # where HTTP/ 200 = success (with size data etc as readable) and 404 = not found = fail
