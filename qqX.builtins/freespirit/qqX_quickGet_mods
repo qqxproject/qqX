@@ -2083,7 +2083,8 @@ function test_all {
             fi
         fi
     fi
-    # prints at end of every distro set - a full test can take half an hour
+    # Prints at end of every distro set - a full test can take half an hour
+    # Skip current test would be a nice feature but because tests run in sub-shells this appears to be a bit tricky to do (REVIEW)
     [[ ! $QuietOps ]] && printf "\n\n"
     [[ $SingleCheck ]] && return
     if [[ $CompactOps || $FullCheckOps ]]; then

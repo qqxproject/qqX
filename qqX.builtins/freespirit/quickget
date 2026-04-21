@@ -3699,26 +3699,30 @@ function create_vm() {
                 if [[ ${ISO} = *".gz"* ]]; then
                     gzip -d "${VM_PATH}/${ISO}"
                     ISO="${ISO/.gz/}"
-                fi ;;
+                fi
+                # Resize the raw image to provide space for Batocera's partition expansion
+                require_qemu_img
+                ${QEMU_IMG} resize -f raw "${VM_PATH}/${ISO}" 128G;;
             dragonflybsd)
                 #  Could be other OS iso files compressed with bzip2 or gzip
                 #  but for now we'll keep this to know cases
                 if [[ ${ISO} = *".bz2"* ]]; then
                     bzip2 -d  "${VM_PATH}/${ISO}"
                     ISO="${ISO/.bz2/}"
-                fi ;;
+                fi;;
             easyos)
                 if [[ ${ISO} = *".img"* ]]; then
+                    require_qemu_img
                     ${QEMU_IMG} convert -f raw -O qcow2 "${VM_PATH}/${ISO}" "${VM_PATH}/disk.qcow2"
                     ISO="${ISO/.img/}"
-                fi ;;
+                fi;;
             freedos)
                 if [[ ${ISO} = *".zip"* ]]; then
                     unzip -qo "${VM_PATH}/${ISO}" -d "${VM_PATH}"
                     rm -f "${VM_PATH}/${ISO}"
                     ISO="$(ls -1 "${VM_PATH}/"*.iso)"
                     ISO="$(basename "${ISO}")"
-                fi ;;
+                fi;;
             kolibrios)
                 if [[ ${ISO} = *".7z" ]]; then
                     if [ -z "$(command -v 7z)" ]; then echo "ERROR! '7zip' needs installing. Unable to extract file."
@@ -3728,14 +3732,14 @@ function create_vm() {
                         ISO="$(ls -1 "${VM_PATH}/"*.iso)"
                         ISO="$(basename "${ISO}")"
                     fi
-                fi ;;
+                fi;;
             reactos)
                 if [[ ${ISO} = *".zip"* ]]; then
                     unzip -qo "${VM_PATH}/${ISO}" -d "${VM_PATH}"
                     rm -f "${VM_PATH}/${ISO}"
                     ISO="$(ls -1 "${VM_PATH}/"*.iso)"
                     ISO="$(basename "${ISO}")"
-                fi ;;
+                fi;;
         esac
     fi
     make_vm_config "${ISO}"
