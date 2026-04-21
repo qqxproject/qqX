@@ -530,6 +530,8 @@ function_config_tune_up ()  {
     if [[ $TuneUpNotes ]]; then
       printf "\n\n  Tune Up notes: \n\n"
       printf "%b\n" "$TuneUpNotes"
+    else
+      printf "\n\n  Custom Tune Up notes and reminders (not present) may be added in the general settings \n\n"
     fi
 
     if [[ "$guest_os" != *windows* && "$guest_os" != *macos* ]]; then
