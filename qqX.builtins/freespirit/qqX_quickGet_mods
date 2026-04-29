@@ -165,8 +165,8 @@ function os_info {
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
         void)             INFO="Void Linux|anon:voidlinux|https://voidlinux.org/|Non-Systemd desktop operating system based on Runit. Software is provided in binary packages or can be built directly from sources.";;
     esac
-	[[ ! $INFO ]] && INFO="$(os_info_QG "$1")"
-    echo "$INFO"
+    # The upstream function will echo instead, if needed
+	if [[ $INFO ]]; then echo "$INFO"; else os_info_QG "$1"; fi
 }
 
 # Add release/installation notes where needed, omit if not.
@@ -189,7 +189,7 @@ function distro_release_notes {
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus. [w] check website for Leap and other developments.";;
         oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
-        parrotsec)        RelNotes="Home is the Non-Security version. From v7.0 KDE becomes the default desktop but MATE spins may still be available > See Website.";;
+        parrotsec)        RelNotes="KDE becomes the default desktop from v7.0 onwards. 'Home' is a base non-technical version. MATE spins may still be available > See Website";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install. Also see https://wiki.almalinux.org/Comparison.html";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
@@ -769,18 +769,16 @@ function get_oraclelinux() {
 
 ## FIX hashes and folders
 function releases_parrotsec() {
-  # July 2025 > only latest folder has iso's  But @ Feb 2026 content is variable, so folder grep becomes needed.
-  local Latest= ; local ReleaseList= ; local ReleasesTrue=
-  ReleaseList="$(web_pipe "https://deb.parrot.sh/parrot/iso" | grep -s href | tr '"' '\n' | grep -e ^'[[:digit:]]' | fv -qs -M 4)"
-  for ChkRel in $ReleaseList ; do
-        if web_check "https://deb.parrot.sh/parrot/iso/${ChkRel}/signed-hashes.txt" && \
-        web_check "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-home-${ChkRel}_amd64.iso" && \
-        web_check "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-security-${ChkRel}_amd64.iso" ; then
+    # July 2025 > only latest folder has iso's  But @ Feb 2026 content is variable, so folder grep becomes needed.
+    local Latest= ; local ReleaseList= ; local ReleasesTrue=
+    ReleaseList="$(web_pipe "https://deb.parrot.sh/parrot/iso" | grep -s href | tr '"' '\n' | grep -e ^'[[:digit:]]' | fv -qc -M 3)"
+    for ChkRel in $ReleaseList ; do
+        if check_pipe "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-home-${ChkRel}_amd64.iso" && \
+        check_pipe "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-security-${ChkRel}_amd64.iso" ; then
             ReleasesTrue+="$ChkRel "
         fi
-        # eg https://deb.parrot.sh/parrot/iso/6.4/signed-hashes.txt
-  done
-  echo "$ReleasesTrue"
+    done
+    echo "$ReleasesTrue"
 }
 function editions_parrotsec() {
     echo home security
@@ -1738,8 +1736,11 @@ function validate_release() {
     local DISPLAY_NAME= ; DISPLAY_NAME="$(pretty_name "${OS}")"
     local ReleaseList="$1"
     [[ "$1" == releases* ]] && ReleaseList="$($1)"
-    if ! grep -qs " ${RELEASE} " <<< " ${ReleaseList} "; then
-        echo -e "ERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
+    if [[ " ${ReleaseList} " != *" ${RELEASE} "* ]]; then
+        if [[ "$(pwd)" == *'qqX.builtins'* ]]; then
+            show_os_info "${OS}"
+        fi
+        echo -e "\nERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
         echo -n ' - Supported releases: '
         "releases_${OS}"
         exit 1
@@ -1775,15 +1776,22 @@ function check_pipe {
         fi
         return 1
     fi
-    USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
-    curl -qsLf --head --location-trusted --max-time 10 --max-filesize 2M --output "/tmp/qGet_check_pipe.txt" --user-agent "${USER_AGENT}" --tlsv1.2 --http1.1 -- "$@"  &
+    local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+    # curl -qsLf --location-trusted --max-time 10 --max-filesize 100k -w "%{response_code}" --user-agent "${USER_AGENT}" "$@" > "/tmp/qGet_check_pipe.txt" &
+    # NB -w is fast BUT --head output is used for size grep in quick_reroute script
+    # Also > indirection is more stable than curl's --output method
+    curl -qsLf --head --location-trusted --max-time 10 "$@" > "/tmp/qGet_check_pipe.txt" &
     wait "$!" ; sleep 0.5
-    if ! grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
+    if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0
+    # if grep -qs 200 "/tmp/qGet_check_pipe.txt"; then return 0
+    else
+        cp "/tmp/qGet_check_pipe.txt" "/tmp/qGet_check_pipe_fail.txt"
         printf "" > "/tmp/qGet_check_pipe.txt"
-        curl -qsLf --head --location-trusted --retry 6 --retry-max-time 2 --max-time 30 --max-filesize 10M "$@" --output "/tmp/qGet_check_pipe.txt" &
+        curl -qsLf --head --location-trusted --retry 3 --retry-max-time 2 --max-time 20  --user-agent "${USER_AGENT}" "$@" > "/tmp/qGet_check_pipe.txt" &
+        wait "$!" ; sleep 1
+        if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1
+        fi
     fi
-    wait "$!" ; sleep 0.5
-    if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1 ; fi
 }
 # where HTTP/ 200 = success (with size data etc as readable) and 404 = not found = fail
 # --location-trusted means extend secure connection to the mirror or to the CDN otherwise 302 redirects will lose https.

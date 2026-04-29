@@ -968,8 +968,12 @@ function_quick_get_wrap ()  {
         printColor "\n  QuickGet or internet ERROR, no releases found "
         printf "\n\n  Linux ISO's: Try downloading directly from the distro's Web Pages .... \n"
       elif [[ ${#QGW_Releases_Array[@]} -eq 1 ]] ; then
-        printColor "  One Release only: '%s' " "${QGW_Releases_Array[0]}"
-        printf " but Editions choice may be be possible"
+        if [[ ${QGW_Releases_Array[0]} == "latest" ]]; then
+          printColor "  The Latest Release is available"
+        else
+          printColor "  Release '%s' is available" "${QGW_Releases_Array[0]}"
+        fi
+        printf "  > an Editions choice may be be possible"
         printColor "\n\n  [enter] to continue"
       else
         print_quickget_and_folder_choices  "QGW_Releases_Array"
@@ -1121,24 +1125,24 @@ function_quick_get_wrap ()  {
           # running checks in the background (&) means that we can stop the process if it hangs (as with releases check)
           printf "" > "/tmp/quickget-editions-data.txt"
           quickget "$QGW_OS_Arr_NameSelected" "$QGW_Release_Arr_NameSelected" > "/tmp/quickget-editions-data.txt" &
-          sleep 0.5
+          sleep 0.3
           [[ $ShowQGetLists ]] && { echo "Check 1"; (pgrep -af bash | grep quickget &); echo; }
           DataPID="$(pgrep -af bash | grep quickget | head -n 1 | cut -d' ' -f1 2>/dev/null)"
           [[ $ShowQGetLists ]] && { echo; echo "DataPID: '${DataPID}'"; echo; }
           DataCount="0"; QGW_ChkLoop=
           while true; do
-            grep -qs 'not a supported' "/tmp/quickget-releases-data.txt" && QGW_EditionsError=1 && break
+            grep -qs 'not a supported' "/tmp/quickget-editions-data.txt" && QGW_EditionsError=1 && break
             if grep -qs 'ERROR! You must specify an edition' "/tmp/quickget-editions-data.txt"; then
-              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- )"
+              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- | tr -cd '[:print:]')"
               break
             fi
             [[ $ShowQGetLists ]] && { echo "Check loop Editions $DataCount"; (ps -ef | grep bash | grep quickget); echo; }
-            read -rt 0.5  QGW_ChkLoop
+            read -rt 0.3  QGW_ChkLoop
             ((DataCount+=1))
-            [[ "$DataCount" == '20' ]] && printf "  Continuing to check ...\n\n"
-            [[ "$DataCount" == '40' ]] && printf "  Servers are busy or anti-bot slow-downs may be in place ...\n\n"
-            [[ "$DataCount" == '80' ]] && printf "  Continuing to try. Some distros may sometimes take a bit longer ... \n\n  [c] cancel now and retry later? \n\n  >  "
-            [[ "$DataCount" == '150' && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
+            [[ "$DataCount" == '30' ]] && printf "  Continuing to check ...\n\n"
+            [[ "$DataCount" == '60' ]] && printf "  Servers are busy or anti-bot slow-downs may be in place ...\n\n"
+            [[ "$DataCount" == '100' ]] && printf "  Continuing to try. Some distros may sometimes take a bit longer ... \n\n  [c] cancel now and retry later? \n\n  >  "
+            [[ "$DataCount" == '200' && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
             # use posix '-n' test here or switching focus back from a dev side-terminal will trigger the read function
             [[ -n $QGW_ChkLoop && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
             [[ -n $QGW_ChkLoop ]] && break
@@ -1155,13 +1159,11 @@ function_quick_get_wrap ()  {
 
         if [[ $QGW_Editions_List ]]; then
             mapfile -t QGW_Editions_Array <<< "$QGW_Editions_List"
-
             if [[ $QG_Modpath ]]; then
               QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
               if [[ $QGW_OS_RelNotes ]]; then fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes" ; printf "\n"
               fi
             fi
-
         fi
 
         if [[ $QGW_EditionsError ]]; then

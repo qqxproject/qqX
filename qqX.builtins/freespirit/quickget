@@ -183,8 +183,7 @@ function error_specify_os() {
 }
 
 function os_supported() {
-    #if [[ ! " $(os_support) " =~ \ "${OS}"\  ]]; then
-    if ! grep -qs " ${OS} " <<< " $(os_support) "; then
+    if [[ " $(os_support) " != *" ${OS} "* ]]; then
         echo -e "ERROR! ${OS} is not a supported OS.\n"
         os_support | fmt -w 80
         exit 1
@@ -230,8 +229,7 @@ function error_specify_release() {
 }
 
 function error_not_supported_release() {
-    #if [[ ! " ${RELEASES[*]} " =~ \ "${RELEASE}"\  ]]; then
-    if ! grep -qs " ${RELEASE} " <<< " ${RELEASES[*]} "; then
+    if [[ " ${RELEASES} " != *" ${RELEASE} "* ]]; then
         echo -e "ERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
         echo -n ' - Supported releases: '
         "releases_${OS}"
@@ -4080,15 +4078,14 @@ if [ -n "${2}" ]; then
     VM_PATH="${OS}-${RELEASE}$(arch_suffix)"
     # If the OS has an editions_() function, use it.
     if [[ $(type -t "editions_${OS}") == function ]]; then
-        validate_release "releases_${OS}"
+        [[ "$(pwd)" == *'qqX.builtins'* ]] && validate_release "releases_${OS}"
+        # qqX UI will have already validated the release at this point
         EDITIONS=("$(editions_"${OS}")")
-        #if [ -n "${3}" ]; then
         if [[ $3 ]]; then
             if [[ $3 && $4 ]]; then EDITION="${3} ${4}"
             else EDITION="${3}"
             fi
-            #if [[ ! " ${EDITIONS[*]} " = \ "${EDITION}"\  ]]; then
-            if ! grep -qs " ${EDITION} " <<< " ${EDITIONS[*]} "; then
+            if [[ " ${EDITIONS[*]} " != *" ${EDITION} "* ]]; then
                 echo -e "ERROR! ${EDITION} is not a supported $(pretty_name "${OS}") edition\n"
                 echo -n ' - Supported editions: '
                 for EDITION in "${EDITIONS[@]}"; do
@@ -4098,9 +4095,10 @@ if [ -n "${2}" ]; then
                 exit 1
             fi
         else
-            show_os_info "${OS}"
-            echo -en " - Releases:\t"
-            "releases_${OS}" | fmt -w 80
+            if [[ "$(pwd)" == *'qqX.builtins'* ]]; then
+                show_os_info "${OS}"
+                echo -e " - Release:\t$RELEASE"
+            fi
             echo -e " - Editions:\t$("editions_${OS}" | fmt -w 80)"
             echo -e "\nERROR! You must specify an edition."
             exit 1
@@ -4146,7 +4144,8 @@ if [ -n "${2}" ]; then
         validate_release "releases_${OS}"
         get_windows
     else
-        validate_release "releases_${OS}"
+        [[ "$(pwd)" == *'qqX.builtins'* ]] && validate_release "releases_${OS}"
+        # qqX UI will have already validated the release at this point
         create_vm "$("get_${OS}")"
     fi
 else
