@@ -2174,6 +2174,7 @@ case "${1}" in
         printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
         printf "\n\n  --quiet-check     [os] [release] [edition] : Only log checks to file \"/tmp/qGet_QuietResult.txt\""
         printf "\n\n  --mirrors         Add-on for the above tests, to show info on possible mirror services. Omit for more generalized testing."
+        printf "\n\n  --arch            including --check-all-arch:  Arm hosts and arch checks are not currently supported"
         printf "\n\n  Without a specified 'OS' will run a complete 'test_all' whilst with 'OS' will test all releases and editions of that specified."
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."
         printf "\n\n----------------------------------------------------------------------------------\n\n"
@@ -2183,6 +2184,12 @@ case "${1}" in
 
     --curl-no-para)
         Curl_NoPara=1 ; shift
+    ;;
+
+    --arch|--check-all-arch|-arch|-check-all-arch)
+        printf   "\n  qqX:  See https://qqxproject.org/Advanced/Custom-Machine-Types for help with running Arm, Risc-V or other guests on X86 hosts."
+        printf "\n\n  Arm hosts and Arch checks are however not currently supported.\n\n"
+        exit
     ;;
 
 esac

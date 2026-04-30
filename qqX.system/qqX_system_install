@@ -489,7 +489,8 @@ LinuxMachine=$(uname -m)
 
 if [[ ! $LinuxType ]] || [[ "$LinuxType" != *Linux ]] && [[ $LinuxMachine != "x86_64" ]] ; then
   printf "\n\n  ERROR OS found: %s  %s "  "$LinuxType"  "$LinuxMachine"
-  printColor "\n\n  @ 2023 Quickemu scripts are intended for 64 bit LINUX X86 distributions only \n\n"
+  printColor "\n\n  @ 2026 qqX scripts are intended for 64 bit LINUX X86 HOST distributions only"
+  printf   " \n\n  Upstream support is available for MacOS hosts running on arm64, if needed. \n\n"
   printf   "\n  Make sure that you have read this script and the docs before continuing \n\n"
   read -rp "  Use 'ctrl-c' to exit or [enter] to continue > "
 fi
