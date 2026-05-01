@@ -603,11 +603,13 @@ function get_kdeneon() {
 
 ## FIX omit dirs only having an RC sub-folder
 function releases_linuxlite() {
-    local ReleasesList= ; local ReleasesTrue= ; i=0
-    ReleasesList="$(floatversion -M 5 -qs "$(web_pipe "https://sourceforge.net/projects/linux-lite/files/" | grep -s 'class="name')")"
+    local ReleasesList="" ReleasesTrue="" i="0" c="0"  Url=""
+    ReleasesList="$(web_pipe "https://sourceforge.net/projects/linux-lite/files/" | grep -s 'class="name' | floatversion -M 5 -qs)"
     for ChkRel in $ReleasesList; do
-        web_check "https://sourceforge.net/projects/linux-lite/files/${ChkRel}/linux-lite-${ChkRel}-64bit.iso" &&  ReleasesTrue+="$ChkRel "
-        ((i++)) ; [[ $i -gt 3 ]] && break
+        Url="https://sourceforge.net/projects/linux-lite/files/${ChkRel}/linux-lite-${ChkRel}-64bit.iso"
+        if [[ $(web_response_code "$Url") == "200" ]]; then ReleasesTrue+="$ChkRel " ; ((c++))
+        fi
+        ((i++)) ; [[ $c -eq 3 ]] && break
     done
     echo "$ReleasesTrue"
 }
@@ -1766,8 +1768,36 @@ function web_pipe_json {
     fi
 }
 
+## TWEAK
+function web_check {
+    local HEADERS=() ; local URL="${1}"
+    # Normally just a URL. Mac OS has URL as $1 then followed by repeated headers requests.
+    while (( "$#" )); do
+        if [ "${1}" == "--header" ]; then HEADERS+=("${1}" "${2}") ; shift 2
+        else shift
+        fi
+    done
+    # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
+    printf "%s" "$URL" > "/tmp/qmod-dl-url"
+    if [[ ! $URL ]]; then
+        if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
+            printf "ERROR: No URL > Possible initial lookup or server problem\n\n" >> "$ChkLog"
+        fi
+        return 1
+    elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
+        if [[ $ChkLog ]] && ! grep -qs 'Non Conformant URL' "$ChkLog" ; then
+            printf "ERROR: Non Conformant URL > Possible initial lookup or server problem \n\n" >> "$ChkLog"
+        fi
+        return 1
+    fi
+    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
+    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
+    else return 1
+    fi
+}
+
 ## ADD
-# Check the file headers. To be used for returns of 0 or 1 with pipe to log file,
+# Check the file headers. To be used for returns of 0 or 1 WITH PIPE TO LOG FILE,
 function check_pipe {
     printf "" > "/tmp/qGet_check_pipe.txt"
     if [[ ! "$1" ]]; then
@@ -1776,27 +1806,40 @@ function check_pipe {
         fi
         return 1
     fi
-    local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
-    # curl -qsLf --location-trusted --max-time 10 --max-filesize 100k -w "%{response_code}" --user-agent "${USER_AGENT}" "$@" > "/tmp/qGet_check_pipe.txt" &
-    # NB -w is fast BUT --head output is used for size grep in quick_reroute script
-    # Also > indirection is more stable than curl's --output method
+    # NB check_pipe --head output is used for size grep in quick_reroute script
+    # Also > direction output is more stable than curl's --output method
     curl -qsLf --head --location-trusted --max-time 10 "$@" > "/tmp/qGet_check_pipe.txt" &
     wait "$!" ; sleep 0.5
     if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0
-    # if grep -qs 200 "/tmp/qGet_check_pipe.txt"; then return 0
     else
         cp "/tmp/qGet_check_pipe.txt" "/tmp/qGet_check_pipe_fail.txt"
         printf "" > "/tmp/qGet_check_pipe.txt"
+        local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
         curl -qsLf --head --location-trusted --retry 3 --retry-max-time 2 --max-time 20  --user-agent "${USER_AGENT}" "$@" > "/tmp/qGet_check_pipe.txt" &
         wait "$!" ; sleep 1
         if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1
         fi
     fi
 }
-# where HTTP/ 200 = success (with size data etc as readable) and 404 = not found = fail
+
+## where HTTP/ 200 = success (with size data etc as readable) and 404 = not found = fail
 # --location-trusted means extend secure connection to the mirror or to the CDN otherwise 302 redirects will lose https.
 # --no-keepalive/--keepalive-time as we don't need much, and so we then move on cleanly and can drop any cookies, if possible
 # REVIEW  no-keepalive can possibly clash with location-trusted
+
+## ADD  (qqX mods only)
+# Check the file headers. Returns FINAL RESPONSE CODE eg. 200 all-good, 404 not-found etc
+function web_response_code {
+    if [[ ! "$1" ]]; then
+        printf "\nERROR: Missing Args for function web_response_code\n"; sleep 5; return 1
+    fi
+    local WebResponse=; WebResponse="$(curl -qsLf --location-trusted --max-time 10 --max-filesize 100k -w "%{response_code}" "$@")"
+    if [[ $WebResponse ]]; then echo "$WebResponse"
+    else
+        local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+        curl -qsLf --location-trusted --retry 3 --retry-max-time 2 --max-time 20 --max-filesize 100k -w "%{response_code}" --user-agent "${USER_AGENT}" "$@"
+    fi
+}
 
 ## TWEAK
 # Check if a URL needs to be redirected and returns the final URL mirror or CDN
@@ -1887,35 +1930,6 @@ function web_get() {
         fi
     fi
     tput cnorm ; echo
-}
-
-
-## TWEAK
-function web_check {
-    local HEADERS=() ; local URL="${1}"
-    # Normally just a URL. Mac OS has URL as $1 then followed by repeated headers requests.
-    while (( "$#" )); do
-        if [ "${1}" == "--header" ]; then HEADERS+=("${1}" "${2}") ; shift 2
-        else shift
-        fi
-    done
-    # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
-    printf "%s" "$URL" > "/tmp/qmod-dl-url"
-    if [[ ! $URL ]]; then
-        if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
-            printf "ERROR: No URL > Possible initial lookup or server problem\n\n" >> "$ChkLog"
-        fi
-        return 1
-    elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
-        if [[ $ChkLog ]] && ! grep -qs 'Non Conformant URL' "$ChkLog" ; then
-            printf "ERROR: Non Conformant URL > Possible initial lookup or server problem \n\n" >> "$ChkLog"
-        fi
-        return 1
-    fi
-    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
-    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
-    else return 1
-    fi
 }
 
 ## ADD hash check, plus some output variants
