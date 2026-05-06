@@ -2,7 +2,15 @@
 
 SPIN-OFF NEXT LEVEL QUICKEMU / QUICKGET
 
-[Adds fixes, tools and improvements to the popular Quickemu system](https://qqxproject.org/Disks-and-Resizing)
+Adds fixes, tools and improvements to the popular [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) system
+
+-----
+
+> After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
+
+-----
+
+CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 - Installable on all versions of standard Linux
 
@@ -12,47 +20,37 @@ SPIN-OFF NEXT LEVEL QUICKEMU / QUICKGET
 
 - Huge, easy build range of _installation-ready_ distros and desktops, including Windows and MacOS
 
-- Built-in [rolling-release](https://qqxproject.org/FreeBird) upstream code base
+- Improved upstream code base with [rolling-release](https://qqxproject.org/FreeBird) updates
+
+- Quickemu and Quickgui compatible
 
 -----
 
-Recent Highlights Include:
+See [qqxproject.org](https://qqxproject.org/) for full details and FAQ's
 
-- qqX automated Windows installer with improved security
+-----
+
+RECENT HIGHLIGHTS Include:
+
+- Multiplexed parallel downloads with enhanced stop/start
+
+- Main interface Extended Distro Test Suite
 
 - Extra Quickemu dependency checks
 
-- Fixes for Wayland and Gnome and Cosmic
+- Improved Windows installer with improved security
 
-- qqX multiplexed parallel downloads with enhanced stop/start
+- Extra fixes for Wayland and Gnome and Cosmic
 
-- qqX 51 language auto-translation system
+- 51 language auto-translation system
 
-2026 introduces pre-release downloading and a pre-release alert system
+- Pre-release downloading and a pre-release alert system
 
-- New version 1.15 adds a newly qqX extended DISTRO TEST SUITE to the main interface
-
-- Check out the new TEST-ALL report file to see just how many distros have been sorted and fixed ...
-
------
-
-CAREFULLY WRITTEN AND CAREFULLY CHECKED
-
-> After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
-
-See discussion [announcements](https://github.com/qqxproject/qqX/discussions/categories/announcements) for the latest news
+See announcements for the [latest news](https://github.com/qqxproject/qqX/discussions/categories/announcements)
 
 -----
 
 ![qqX-part-of-quickemu-edited3b](https://github.com/user-attachments/assets/3322789f-ed89-4b6c-90b3-630958860b2f)
-
-Any qqX built machines will still run using [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) or Quickgui
-
------
-
-[https://qqxproject.org](https://qqxproject.org/)
-
-See web pages for FAQs, full details and release notes
 
 -----
 
