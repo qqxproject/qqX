@@ -116,9 +116,11 @@ check_for_qqX_updates() {
   qqX_Newest_PreRelease="$(fv --full -Q -M <<< "$qqX_ReleasesList")"
   [[ $qqX_Newest_PreRelease != *[[:alpha:]]* ]] && qqX_Newest_PreRelease=
 
-  # All tags, released or not:
-  qqX_Newest_Tag="$(curl -qsLf  -m 180  "https://github.com/qqxproject/qqX/tags" | grep -s 's/tag' | fv -M -Q --full)"
-  qqX_Newest_TagText="$(curl -qsLf  -m 180  "https://github.com/qqxproject/qqX/tags" | grep -s -m 1 -e '<pre class="text-small color-fg-muted"' | cut -d '>' -f 2)"
+  # All TAGS, released or not. Use head -n1, not fv -M, to make sure dev tags don't take priority over beta
+  [[ -e "/tmp/qqXtags.txt"  ]] && rm "/tmp/qqXtags.txt"
+  curl -qsLf  -m 180 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqXtags.txt"
+  qqX_Newest_Tag="$(grep '/tags/' "/tmp/qqXtags.txt" | head -n1 | fv -f)"
+  qqX_Newest_TagText="$(grep -e 'text-small color-fg-muted"' "/tmp/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
 
   # ..ReleaseFiles contain the tarball addresses and other data
   # but PLAIN curl downloads won't work as the pages are javascript rendered
@@ -140,7 +142,8 @@ check_for_qqX_updates() {
       qqX_Latest_SecureTarBall_Addr="$(tr '"' '\n' < "${qqX_Latest_ReleaseFile}" | grep -s http | grep -s -m 1 '/releases/download/')"
       qqX_Latest_SecureTarSha_Addr="${qqX_Latest_SecureTarBall_Addr}.sha256"
     fi
-    # Flag up release type > allows a beta release on the standard 'latest' channel, if required
+    # Flag up RELEASE type > allows a beta release on the standard 'latest' channel, if required
+    # Note 'beta' is used nominally. This includes 'rc' and other similar.
     if [[ $qqX_Latest_ReleaseNumber == *[[:alpha:]]* ]] ; then  qqX_Latest_ReleaseType="beta"
     else qqX_Latest_ReleaseType="release"
     fi
