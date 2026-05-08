@@ -41,7 +41,7 @@
 # Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
 # Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
 # but minor numbers remain padded to 2dp
-  qqX_Version="1.16.00-dev.04"
+  qqX_Version="1.16.00-dev.05"
 
 # Allow Posix sub-shell checks (without -t 1) eg. qqX_Version="$(./qqX --version 2>/dev/null)"
 if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit ; fi
@@ -249,6 +249,8 @@ function main_menu {
 tput civis
 while true ; do
   [[ $Loop_Diagnostics ]] && printf "\n\n Main Loop, start:" &&  main_loop_diagnostics
+
+  EpochDateNow="$(date +%s)"
 
   # Where 'ByPass_VM_Array_Selector' implies run the loader section only
   # eg. for XDG and .conf clicked starts where we already have made the name decision and selection ...

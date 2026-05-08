@@ -88,6 +88,8 @@ if [[ ! $qqX_SelfChk_Run ]]; then
   qqX_Latest_SecureTarBall_Addr=
   qqX_Latest_SecureTarSha_Addr=
   qqX_Newest_PreRelease=
+  qqX_LatestNewsTitle=
+  qqX_LatestNewsDate=
   qqX_Newest_Tag= ; qqX_Newest_TagText=
   qqX_UpdateAvail=
   qqX_Upd_VarsTmpFile="/tmp/qqX.upd.chk.txt"
@@ -172,8 +174,14 @@ check_for_qqX_updates() {
   # All TAGS, released or not. Use head -n1, not fv -M, to make sure dev tags don't take priority over beta  (dev NOT to be used for pre-release)
   [[ -e "/tmp/qqXtags.txt"  ]] && rm "/tmp/qqXtags.txt"
   curl -qsLf  -m 180 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqXtags.txt"
-  qqX_Newest_Tag="$(grep '/tags/' "/tmp/qqXtags.txt" | head -n1 | fv -f)"
-  qqX_Newest_TagText="$(grep -e 'text-small color-fg-muted"' "/tmp/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
+  qqX_Newest_Tag="$(grep -s '/tags/' "/tmp/qqXtags.txt" | head -n1 | fv -f -M -Q)"
+  qqX_Newest_TagText="$(grep -s -e 'text-small color-fg-muted"' "/tmp/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
+
+  # qqX announcements
+  [[ -e "/tmp/qqXnews.txt"  ]] && rm "/tmp/qqXnews.txt"
+  curl -qsLf  -m 180  "https://github.com/qqxproject/qqX/discussions/categories/announcements" > "/tmp/qqXnews.txt"
+  qqX_LatestNewsTitle="$(grep -s -e '/discussions/[[:digit:]]' "/tmp/qqXnews.txt" | grep -m 1 hovercard | tr '"' '\n' | grep '>' | cut -d'<' -f1 | cut -d'>' -f2)"
+  qqX_LatestNewsDate="$(grep -s 'relative-time' "/tmp/qqXnews.txt"  | tr '"' '\n' | grep -e '/relative' | cut -d'<' -f1 | cut -d'>' -f2)"
 
 
   # Inherits Vars from qqX nesting but IF A NEW UPDATE IS FOUND
@@ -189,6 +197,9 @@ check_for_qqX_updates() {
     printf "\n\n qqX_Latest_SecureTarSha_Addr=\"%s\""  "$qqX_Latest_SecureTarSha_Addr"
 
     printf "\n\n qqX_Newest_PreRelease=\"%s\""  "$qqX_Newest_PreRelease"
+    printf "\n\n qqX_LatestNewsTitle=\"%s\""  "$qqX_LatestNewsTitle"
+    printf "\n\n qqX_LatestNewsDate=\"%s\""  "$qqX_LatestNewsDate"
+
     printf "\n\n qqX_Newest_TagText=\"%s\""  "$qqX_Newest_TagText"
     printf "\n\n qqX_Newest_Tag=\"%s\""  "$qqX_Newest_Tag"
 

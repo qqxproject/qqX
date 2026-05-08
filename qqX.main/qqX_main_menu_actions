@@ -196,6 +196,14 @@ function  main_menu_actions {
     printf "\n  Opening Browser ... \n\n"
     (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Guides/Windows-OS"  & ) || web_browser_not_found_message
     sleep 1
+  elif [[ $MainMenuChoice == "news" ]] ; then
+    printf "\n  Opening Browser ... \n\n"
+    (nohup &> /dev/null  "$WebBrowser" "https://github.com/qqxproject/qqX/discussions/categories/announcements" & ) || web_browser_not_found_message
+    sleep 1
+  elif [[ $MainMenuChoice == "tags" ]] ; then
+    printf "\n  Opening Browser ... \n\n"
+    (nohup &> /dev/null  "$WebBrowser" "https://github.com/qqxproject/qqX/tags" & ) || web_browser_not_found_message
+    sleep 1
 
   elif [[ $MainMenuChoice == "tune" ]] ; then function_config_tune_up "$VM_Conf_Dir/$VM_Conf_File"
 
