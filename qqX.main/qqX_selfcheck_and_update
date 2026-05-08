@@ -93,9 +93,7 @@ if [[ ! $qqX_SelfChk_Run ]]; then
   qqX_Upd_VarsTmpFile="/tmp/qqX.upd.chk.txt"
   printf ""  > "$qqX_Upd_VarsTmpFile"
   qqX_Latest_ReleaseFile="/tmp/latest-qqX"
-  qqX_Latest_PreReleaseFile="/tmp/latest-pre-release-qqX"
   [[ -e $qqX_Latest_ReleaseFile ]] && rm "$qqX_Latest_ReleaseFile" 2>/dev/null
-  [[ -e $qqX_Latest_PreReleaseFile ]] && rm "$qqX_Latest_PreReleaseFile" 2>/dev/null
   qqX_SelfChk_Run=1
 fi
 
@@ -110,31 +108,34 @@ check_for_qqX_updates() {
   qqX_ReleasesList="$(curl -qsLf  -m 180 "https://github.com/qqxproject/qqX/releases" | tr ' ' '\n' | grep -s tree | fv --full -Q)"
   [[ ! $qqX_ReleasesList ]] && return 1
 
-  qqX_Latest_ReleaseNumber="$(fv -Q -M <<< "$qqX_ReleasesList")"
-  [[ ! $qqX_Latest_ReleaseNumber ]] && return 1
-
   qqX_Newest_PreRelease="$(fv --full -Q -M <<< "$qqX_ReleasesList")"
   [[ $qqX_Newest_PreRelease != *[[:alpha:]]* ]] && qqX_Newest_PreRelease=
-
-  # All TAGS, released or not. Use head -n1, not fv -M, to make sure dev tags don't take priority over beta
-  [[ -e "/tmp/qqXtags.txt"  ]] && rm "/tmp/qqXtags.txt"
-  curl -qsLf  -m 180 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqXtags.txt"
-  qqX_Newest_Tag="$(grep '/tags/' "/tmp/qqXtags.txt" | head -n1 | fv -f)"
-  qqX_Newest_TagText="$(grep -e 'text-small color-fg-muted"' "/tmp/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
 
   # ..ReleaseFiles contain the tarball addresses and other data
   # but PLAIN curl downloads won't work as the pages are javascript rendered
   # So, use Github's API (no access-token needed, works on any repo) BUT it only works with github's 'latest' routing algo ...
   local ApiTarget=
   ApiTarget="https://api.github.com/repos/qqxproject/qqX/releases/latest"
-  curl -qsLf -m 180 -H "X-GitHub-Api-Version:2022-11-28" "$ApiTarget" -o "$qqX_Latest_ReleaseFile"
+  curl -qsLf -m 180 -H "X-GitHub-Api-Version:2022-11-28" "$ApiTarget" > "$qqX_Latest_ReleaseFile"
   sleep 1
   [[ ! -e  "$qqX_Latest_ReleaseFile" ]] && return 1
 
+  # A release should exist BUT beta might be possible as 'latest' in unusual circumstances, so use the API for 'latest'
+  # qqX_Latest_ReleaseNumber="$(fv -Q -M <<< "$qqX_ReleasesList")" is numbers only ...
+  qqX_Latest_ReleaseNumber="$(grep -e 'releases/tag/' "$qqX_Latest_ReleaseFile" | fv -f -Q)"
+  [[ ! $qqX_Latest_ReleaseNumber ]] && return 1
+  [[ $qqX_Latest_ReleaseNumber == "$qqX_Newest_PreRelease" ]] && qqX_Newest_PreRelease=
+
   # Versioning, normally as x.x.xx-suffix > major.minor.point and with optional suffix as -beta.01 etc
   # where --gt check eg "1.12.02-beta.01  1.12.01" is true (remembering that fv --gt also implies --full)
+  # BUT where --gt check eg "1.12.01-beta.01  1.12.01" would be false
+  # and noting that actual release and pre-release --gt comparisons are treated differently
 
   if floatversion --gt -Q "$qqX_Latest_ReleaseNumber  $qqX_Version"; then
+    # Test the standard release channel first, before checking the CurrentType flag,
+    # for people who have not been using qqX for a bit and haven't had a chance to update maybe ...
+    # eg people with 1.14.00-beta.07 get offered 1.14.00 or 1.14.01 before they get offered 1.15.00-beta.10
+
     qqX_UpdateAvail="$qqX_Latest_ReleaseNumber"
     # see if GitHub is listing a tarball download address
     # eg. "https://github.com/qqxproject/qqX/releases/download/$qqX_Latest_ReleaseNumber/qqX-$qqX_Latest_ReleaseNumber.tar.gz"
@@ -143,17 +144,15 @@ check_for_qqX_updates() {
       qqX_Latest_SecureTarSha_Addr="${qqX_Latest_SecureTarBall_Addr}.sha256"
     fi
     # Flag up RELEASE type > allows a beta release on the standard 'latest' channel, if required
-    # Note 'beta' is used nominally. This includes 'rc' and other similar.
+    # Note 'beta' is used nominally. This includes 'rc' and other similar, although 'dev' should be restricted to tags only.
     if [[ $qqX_Latest_ReleaseNumber == *[[:alpha:]]* ]] ; then  qqX_Latest_ReleaseType="beta"
     else qqX_Latest_ReleaseType="release"
     fi
     # Change upd flag for beta or rc in the latest channel
     [[ $qqX_Latest_ReleaseType == "beta" ]] && qqX_UpdateAvail=
+
   elif [[ $qqX_Current_ReleaseType == "beta" ]]; then
-    # Then give a flag and easy download to people who are on the pre-release beta channel
-    # Although, offering a return to the standard release channel first,
-    # for people who have not been using qqX for a bit and haven't had a chance to update maybe ...
-    # eg people with 1.14.00-beta.07 get offered 1.14.00 or 1.14.01 before they get offered 1.15.00-beta.10
+    # (via initialization flag from 'read_main_settings' script) gives an easy download to people who are on the pre-release beta channel
     if floatversion --gt -Q "$qqX_Newest_PreRelease  $qqX_Version"; then
       qqX_Latest_ReleaseType="beta"
       qqX_Latest_ReleaseNumber="$qqX_Newest_PreRelease"
@@ -170,8 +169,16 @@ check_for_qqX_updates() {
     fi
   fi
 
+  # All TAGS, released or not. Use head -n1, not fv -M, to make sure dev tags don't take priority over beta  (dev NOT to be used for pre-release)
+  [[ -e "/tmp/qqXtags.txt"  ]] && rm "/tmp/qqXtags.txt"
+  curl -qsLf  -m 180 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqXtags.txt"
+  qqX_Newest_Tag="$(grep '/tags/' "/tmp/qqXtags.txt" | head -n1 | fv -f)"
+  qqX_Newest_TagText="$(grep -e 'text-small color-fg-muted"' "/tmp/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
+
+
   # Inherits Vars from qqX nesting but IF A NEW UPDATE IS FOUND
-  # but needs to populate an OUTPUT TRANSFER FILE, as check runs in background ...
+  # needs to populate an OUTPUT TRANSFER FILE, as check runs in background ...
+
   # Note 'qqX_Newest_Tag' is used by d/l function to check that update checks are all done and that transfer file has been sourced
   { printf "\n # %s" "$(date)"
     printf "\n\n qqX_UpdateAvail=\"%s\"" "$qqX_UpdateAvail"
@@ -275,7 +282,7 @@ function download_new_release {
       else printf "\n\n  %s \n"  "$qqX_Latest_SecureTarBall_Addr"
       fi
       # if version can handle new format, otherwise leave notes as blank
-      if floatversion -Q --gt "$qqX_Version  1.14.01" && [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]]; then
+      if [[ $qqX_Latest_ReleaseNumber != "$qqX_Newest_PreRelease" ]] && floatversion -Q --gt "$qqX_Version  1.14.01" ; then
         AboutWidth="$(tput cols)"
         printf "\n  %s\n\n" "$qqX_Latest_ReleaseNumber"
         #shellcheck disable=SC2059
