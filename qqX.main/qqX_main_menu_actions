@@ -198,6 +198,7 @@ function  main_menu_actions {
     sleep 1
   elif [[ $MainMenuChoice == "news" ]] ; then
     printf "\n  Opening Browser ... \n\n"
+    printf "\n%s\n" "$EpochDateNow" > "$HOME/.qqX/qqXnewsreader.log"
     (nohup &> /dev/null  "$WebBrowser" "https://github.com/qqxproject/qqX/discussions/categories/announcements" & ) || web_browser_not_found_message
     sleep 1
   elif [[ $MainMenuChoice == "tags" ]] ; then
