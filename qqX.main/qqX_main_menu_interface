@@ -267,16 +267,16 @@ else
     RtvUpd= ; RtvArm=
     if  [[ -f "$VM_InstanceName/rtv.date.txt" ]]; then
       if [[ "$VM_InstanceName" == *macos* ]]; then
-        SyncDateNow="1771316058"
-        # @ feb 2026 (QE 4.9.9) upstream problems appeared from using Kholia's Mac repo > Change to using fixed sync dates
-        # '1771316058' = Feb 17th  (built-ins to be later implemented, if workable) REVIEW
-        SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
-        [[ $SyncDateNow -gt $SyncDateOld ]] && RtvUpd=1
+        # @ feb 2026 (QE 4.9.9) upstream problems appeared from using Kholia's Mac repo
+        # suspend AUTO update
+        # SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
+        # [[ $SyncDateNow -gt $SyncDateOld ]] && RtvUpd=1
+        true
       fi
       if [[ $(ls "$VM_Conf_Dir/$VM_InstanceName/AAVMF"* 2>/dev/null) ]]; then
-        RtvArm=1 ; SyncDateNow="$(date +%s)"
-          SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
-        (( (SyncDateNow - SyncDateOld) > 2592000 ))&& RtvUpd=1
+        RtvArm=1
+          # SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
+        # (( (SyncDateNow - SyncDateOld) > 2592000 ))&& RtvUpd=1
       fi
       if [[ $RtvUpd ]]; then
         if [[ $RtvArm ]]; then
@@ -369,9 +369,8 @@ else
 
       #  Live VMs where zsync updates the iso file.
       if [[ "$(tr -cd '[:digit:]' 2>/dev/null < "$VM_InstanceName/zsync.date.txt")" ]]; then
-        SyncDateNow="$(date +%s)"
         SyncDateOld="$(tr -cd '[:digit:]' 2>/dev/null < "$VM_InstanceName/zsync.date.txt")"
-        LastZsync="$((SyncDateNow - SyncDateOld))"
+        LastZsync="$((EpochDateNow - SyncDateOld))"
         printf "\n\n"
         if [[ $LastZsync -gt 259200 ]]; then  printf "  [z]   daily-live - last zsync over %d hrs ago"  "$((LastZsync/3600))"
         else  printf "  [z]   daily-live - last zsync %d hrs ago"  "$((LastZsync/3600))"
@@ -444,7 +443,7 @@ else
     check_if_disk_needs_a_cleanup
 
     if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
-      printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils "  "$DiskChkStatus"
+      printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils \n\n"  "$DiskChkStatus"
     elif [[ $DiskDisparity -ge "4" ]]; then  printColor "  DISK.QCOW2 could benefit from a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "3" ]]; then  printColor "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
     elif [[ $DiskDisparity -ge "2" ]]; then  printf "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"

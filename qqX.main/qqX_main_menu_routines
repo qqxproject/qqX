@@ -748,7 +748,8 @@ refresh_tiano_vars () {
       printf "\n\n  Backups will be made, in case you need to revert, as *.fd.old etc \n\n  Your *VMF_VARS.fd file(s) will be reinstalled."
       if [[ "$VM_InstanceName" == *macos* ]]; then
         printf "\n\n  MacOS refreshes require an internet connection. The small boot drive 'OpenCore.qcow2' is also needed."
-        printf "\n\n  For security reasons, these Mac specific files should generally be updated at regular intervals...."
+        printf "\n\n  These Mac specific files should theoretically be updated at regular intervals to reflect upstream changes"
+        printf "\n\n  but since feb 2026 an older 'last known good version' is now in use.  See qqX issue #9 if problems persist."
       fi
       if [[ $RtvArm ]]; then
         if [[ ! $RtvArmFolder ]]; then
@@ -760,7 +761,7 @@ refresh_tiano_vars () {
       fi
       printColor  "\n\n  [enter] to continue"
     fi
-    printf  "  [b] to go back "
+    printf  "  [b] to go back \n\n"
     read -rp "  >  "  RtvBack
   fi
 
@@ -785,8 +786,8 @@ refresh_tiano_vars () {
     elif [[ "$VM_InstanceName" == *macos* ]]; then
 
       RtvMacGet="Okay"; local MvDate; MvDate="$(date +%d.%b-%Y-%k.%M.%S)"
-      [[ ! $SyncDateNow ]] && SyncDateNow="$(date +%s)"
-
+      # @ feb 2026 (QE 4.9.9) upstream problems appeared from using Kholia's Mac repo > Change to using forced sync dates
+      # '1771316058' = Feb 17th  (built-ins to be later implemented, if workable) REVIEW
       [[ ! -d  "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old" ]] &&  mkdir "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old"
 
       mkdir "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate"
@@ -861,7 +862,7 @@ refresh_tiano_vars () {
     fi
 
     # @ feb 2026 (QE 4.9.9) Changed to using fixed sync dates for MacOS, set in main menu interface, from where this function is called.
-    echo "$SyncDateNow" > "$VM_InstanceName/rtv.date.txt"
+    echo "$EpochDateNow" > "$VM_InstanceName/rtv.date.txt"
 
     if [[ $RtvText ]]; then
       printf "\n\n  [enter] to return \n\n "
