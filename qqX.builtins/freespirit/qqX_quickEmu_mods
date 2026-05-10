@@ -573,8 +573,8 @@ function configure_cpu() {
 }
 
 
-## FIX ovmfs array parse BUT @ feb 2026 suspend due to upstream changes 4.9.9 REVIEW
-function xxconfigure_bios() {
+## Fix ovmfs array parse but @ feb 2026 SUSPEND due to upstream changes 4.9.9 REVIEW
+function xxconfigure_xxbios() {
 
     # Always Boot macOS using EFI
     if [ "${guest_os}" == "macos" ]; then
@@ -664,6 +664,8 @@ function xxconfigure_bios() {
             esac
             # qqX: note these arrays get grepped by 'read_x86_tiano_vars_list' in main menu routines
             # and the function's -A nn may need adjusting if adding lines
+            # Note: 'read_x86_tiano_vars_list' will work with either the modded arrays or the upstream ones
+            # and it will list all files and all vars, from both secure and from non-secure
 
             # Attempt each EFI_CODE file one by one, selecting the corresponding code and vars
             # when an existing file is found.
