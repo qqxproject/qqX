@@ -831,6 +831,12 @@ function_quick_get_wrap ()  {
 
           if [[ "$QGW_OS_Arr_NameSelected" == "macos"* ]]; then
             printColor "\n  [W] A Mac OS installation walk-thru is available via the qqX wiki \n"
+            # Check for recurrent Ryzen problems, using GPU test from 'quickreport'
+            # Taken from report output in quickEmu Mac issue #1742
+            if [[ "$(lspci | grep -i vga | cut -d':' -f3)" == *'Ryzen 4000/5000 Mobile Series'* ]]; then
+              printColor "\n  WARNING  Ryzen 4000/5000 Mobile Series have been reported as unable to run MacOS (may affect this computer)"
+              printf "\n\n  See upstream quickemu issue archives for more details ... \n\n"
+            fi
           fi
 
           QGW_OS_HomePage_Working=
