@@ -837,6 +837,15 @@ function_quick_get_wrap ()  {
               printColor "\n  WARNING  Ryzen 4000/5000 Mobile Series have been reported as unable to run MacOS (may affect this computer)"
               printf "\n\n  See upstream quickemu issue archives for more details ... \n\n"
             fi
+            if ! check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
+              if ! check_cpu_flag sse4_1 ; then
+                printColor "\n\n\n  INSTALLATION NOT POSSIBLE: MacOS requires a CPU with at least SSE 4.1 support \n\n"
+              elif check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
+                printColor "\n\n  Try MacOS MONTEREY or BIG SUR, newer versions require at least AVX2\n\n"
+              elif check_cpu_flag sse4_1 ; then
+                printColor "\n\n  If downloadable, MacOS MOJAVE may still be possible ?\n\n"
+              fi
+            fi
           fi
 
           QGW_OS_HomePage_Working=
