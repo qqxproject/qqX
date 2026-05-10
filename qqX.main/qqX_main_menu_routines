@@ -793,6 +793,10 @@ refresh_tiano_vars () {
       # '1771316058' = Feb 17th  (built-ins to be later implemented, if workable) REVIEW
       [[ ! -d  "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old" ]] &&  mkdir "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old"
 
+      if [[ -d "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate" ]]; then
+        # avoid rapid refresh race conflict
+        sleep 2 ; MvDate="$(date +%d.%b-%Y-%k.%M.%S)"
+      fi
       mkdir "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate"
 
       [[ -e "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" ]] &&  \
