@@ -1719,15 +1719,13 @@ function_quick_get_wrap ()  {
       done
 
       # tidy up other possible background processes started by quickget ...
-      if [[ $(pgrep aria2) || $(pgrep curl) || $(pgrep wget) || $(pgrep zsync) ]]; then
-        # The use of aria2 and wget has been dropped since april 2024 (?) REVIEW
+      if [[  $(pgrep curl) || $(pgrep zsync) ]]; then
+        # The use of aria2 and wget has been dropped from quickget since april 2024
         while true; do
-          pkill aria2  2>/dev/null
           pkill curl   2>/dev/null
-          pkill wget   2>/dev/null
           pkill zsync  2>/dev/null
           sleep 1
-          if [[ ! $(pgrep aria2) ]] && [[ ! $(pgrep curl) ]] && [[ ! $(pgrep wget) ]] && [[ ! $(pgrep zsync) ]]; then
+          if [[ ! $(pgrep curl) ]] && [[ ! $(pgrep zsync) ]]; then
             QGW_DownloadStopped=1
             sleep 1 ; break
           fi
