@@ -495,7 +495,7 @@ function_config_tune_up ()  {
     if [[ $guest_os == "macos" ]]; then
       ConfLine="$(grep -s 'macos_release=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
-        printColor "\n\n  MacOS WARNING: A line macos_release=\"catalina\" or similar should be present"
+        printColor "\n\n  MacOS WARNING: A line macos_release=\"ventura\" or similar should be present"
         printf "\n\n  This instructs Quickemu how to optimise & should be added manually.\n"
       fi
       ConfLine="$(grep -s 'mouse=' "$TuneUpTmpCopy")"
@@ -513,7 +513,7 @@ function_config_tune_up ()  {
       ConfLine="$(grep -s 'MacScreenRes=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then
         printColor "\n\n  MacOS Note: A line MacScreenRes=\"2560x1440\" or similar may be used"
-        printColor "\n\n  or needed in order to control the screen size when using FreeSpirit "
+        printColor "\n\n  or needed in order to control the screen size when using qqX"
         printf "\n\n  Standard Stock sizes: 2560x1440  1920x1080  1280x720 to be added & optimised manually."
         printf "\n\n  Requires scripts from June 17 2024 onwards. Default is 1280x720.\n"
       fi

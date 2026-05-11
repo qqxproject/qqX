@@ -22,42 +22,45 @@ custom_conf_notes () {
 
   printf "
 
-    #!/usr/bin/qqX --vm                (for qqX direct start)
+    '#!/usr/bin/qqX --vm'               (unquoted)  for qqX direct start
 
+    qqX only:
     Custom_SDL_ScreenPercent=\"xx\"      (integer from 25 to 99)
-    Custom_SDL_ScreenSize=\"WxH\"        (qe 4.95+ eg 2560x1440)
+    Custom_SDL_ScreenSize=\"WxH\"        (eg 2560x1440)
     HeadlessDisplay=\"true\"
-
     SecondDrive=\"My_Folder/My_VM/disk2.qcow2\"
     SharedDrive_Conf=\"no-shared\"
-    MacLegacyDrive=\"true\"
+    cpu_pins=\"x,x\"      give pairs of host cpu numbers, and where total number of elements match number of 'cpu_cores'
 
     Other:
-    disk_size=\"xxG\"   (integer, used once, for first build)
-    cpu_cores=\"x\"     (even integer)
-    cpu_pins=\"x,x\"    qqX only, give pairs of host cpu numbers, and where total number of elements match number of 'cpu_cores'
-    ram=\"xG\"          (integer)
-    keyboard=           'usb' (default), 'ps2', 'virtio'
-    keyboard_layout=    'en-us' (default)
-    mouse=              'tablet' (default), 'ps2', 'usb', 'virtio'
-    network=             blank loads default drivers, or use 'none' (no drivers), 'restrict' (drivers but NO I/O)
-                         or 'bridge' (see general settings)
-    usb_controller=     'ehci' (default), 'xhci', 'none'
-    sound_card=         'intel-hda' (default), 'ich9-intel-hda' 'ac97', 'es1370', 'sb16', 'usb-audio', 'none'
-    sound_duplex=        for intel: 'hda-micro' (default: speaker/mic), 'hda-duplex' (line-in/line-out), 'hda-output' (output-only)
+    disk_size=\"xxxG\"    (integer) used once only, for first build, may be later discarded
+    cpu_cores=\"x\"       (even integer)  = number of guest processor virtual *threads*
+    ram=\"xG\"            (integer)  odd or even numbers allowed
+    keyboard=            'usb' (default), 'ps2', 'virtio'
+    keyboard_layout=     'en-us' (default)
+    mouse=               'tablet' (default), 'ps2', 'usb', 'virtio'
+    network=              blank loads default drivers, or use 'none' (no drivers), 'restrict' (drivers but NO I/O)
+                          or 'bridge' (see general settings)
+    usb_controller=      'ehci' (default), 'xhci', 'none'
+    sound_card=          'intel-hda' (default), 'ich9-intel-hda' 'ac97', 'es1370', 'sb16', 'usb-audio', 'none'
+    sound_duplex=         for intel: 'hda-micro' (default: speaker/mic), 'hda-duplex' (line-in/line-out), 'hda-output' (output-only)
 
-    boot=\"legacy\"     (use bios, not UEFI) default: =\"efi\"
+    boot=\"legacy\"       (use bios, not UEFI) default: =\"efi\"
 
     Windows:
-    tpm=\"on\"          secureboot=\"on\"
-    gl=\"off\"          (scaleable SDL, easier restarts) (?)
+    tpm=\"on\"            secureboot=\"on\"
+    gl=\"off\"           (scaleable SDL, easier restarts) (?)
 
     Older Windows releases were better with Secure Boot set to \"off\"
     but tests on 25H2 are now showing better outcomes when set to \"on\"
 
+    For MacOS, newer versions may need 'virtio' devices and older may be better with 'usb'
+    A line macos_release=\"ventura\" or similar should be present.   Set cpu_cores=\"8\" \"16\" or \"32\"
+    qqX only: MacLegacyDrive=\"true\"  MacScreenRes=\"2560x1440\"  \"1920x1080\"  \"1280x720\"
+
     Difficult booting:
-    Use QemuErrorFilter+=("")  NB \'+=\' with any new values as double quoted and space separated to supress nuisance errors
-    'cpu_pins' is an experimental new feature which may help, or may cause conflicts, with host cpu runtime microcode (?)
+    Use QemuErrorFilter+=("") to supress nuisance errors  NB \'+=\' and any new values as double quoted and space separated
+    The 'cpu_pins' is an experimental new feature which may help, or may cause conflicts, with host cpu runtime microcode (?)
     boot=\"legacy\"  and  gl=\"off\"  may help too ...
 
     highlight then shift-ctrl-c  to copy ...
@@ -432,10 +435,10 @@ qqX_edit_settings() {
       printf "\n\n"
 
       while true ; do
-        printColor "\n  [enter] to edit   [n] conf notes  [d] conf defaults list   [t] config tune-up wizard   [b] go back"
+        printColor "\n  [enter] to edit   [n] CONF NOTES   [d] upstream defaults list   [t] config tune-up wizard   [b] go back"
         printf "\n\n"
         read -rp "  >  "   ConfEdit_Select
-        if [[ $ConfEdit_Select == "n" ]] ; then  custom_conf_notes
+        if [[ $ConfEdit_Select == "n" ]] || [[ $ConfEdit_Select == "N" ]] ; then  custom_conf_notes
         elif [[ $ConfEdit_Select == "d" ]] ; then
           printColor "\n\n  Standard Quickemu hard-coded defaults: \n"
           grep -s -B 200 ACCESS "/tmp/qmod-qe-all-vars-temp" | grep -v -e ACCESS -e MAIN -e Lowercase
