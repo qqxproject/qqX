@@ -571,6 +571,116 @@ function configure_cpu() {
 }
 
 
+## USE OLD 4.98 to FIX MacOS regressions (hopefully without introducing any new general ones)
+# Something is broken in 4.99, somewhere ... REVIEW
+function configure_display() {
+    # Determine which audio driver use between Pulseaudio or ALSA
+    local AUDIO_DRIVER="pa"
+    if pidof pipewire >/dev/null 2>&1; then
+        # QEMU's pipewire audio backend was added in version 8.1
+        if [ "${QEMU_VER_SHORT}" -ge 81 ]; then
+            AUDIO_DRIVER="pipewire"
+        fi
+    elif ! pidof pulseaudio >/dev/null 2>&1; then
+        AUDIO_DRIVER="alsa"
+    fi
+
+    # Setup the appropriate audio device based on the display output
+    # https://www.kraxel.org/blog/2020/01/qemu-sound-audiodev/
+    case ${display} in
+        cocoa) AUDIO_DEV="coreaudio,id=audio0";;
+        none|spice|spice-app) AUDIO_DEV="spice,id=audio0";;
+        *) AUDIO_DEV="${AUDIO_DRIVER},id=audio0";;
+    esac
+
+    # Determine a sane resolution for Linux guests.
+    local X_RES="1280"
+    local Y_RES="800"
+    if [ -n "${width}" ] && [ -n "${height}" ]; then
+        local X_RES="${width}"
+        local Y_RES="${height}"
+    fi
+
+    # https://www.kraxel.org/blog/2019/09/display-devices-in-qemu/
+    case ${guest_os} in
+        *bsd) DISPLAY_DEVICE="VGA";;
+        linux_old|solaris) DISPLAY_DEVICE="vmware-svga";;
+        linux)
+            case ${display} in
+                none|spice|spice-app) DISPLAY_DEVICE="virtio-gpu";;
+                *) DISPLAY_DEVICE="virtio-vga";;
+            esac;;
+        macos)
+            # qxl-vga and VGA supports seamless mouse and sane resolutions if only
+            # one scanout is used. '-vga none' is added to the QEMU command line
+            # to avoid having two scanouts.
+            DISPLAY_DEVICE="VGA";;
+        windows|windows-server)
+            # virtio-gpu "works" with gtk but is limited to 1024x1024 and exhibits other issues
+            # https://kevinlocke.name/bits/2021/12/10/windows-11-guest-virtio-libvirt/#video
+            case ${display} in
+                gtk|none|spice) DISPLAY_DEVICE="qxl-vga";;
+                cocoa|sdl|spice-app)  DISPLAY_DEVICE="virtio-vga";;
+            esac;;
+        *) DISPLAY_DEVICE="qxl-vga";;
+    esac
+
+    # Map Quickemu $display to QEMU -display
+    case ${display} in
+        gtk)        DISPLAY_RENDER="${display},grab-on-hover=on,zoom-to-fit=off,gl=${gl}";;
+        none|spice) DISPLAY_RENDER="none";;
+        sdl)        DISPLAY_RENDER="${display},gl=${gl}";;
+        spice-app)  DISPLAY_RENDER="${display},gl=${gl}";;
+        *)          DISPLAY_RENDER="${display}";;
+    esac
+
+    # https://www.kraxel.org/blog/2021/05/virtio-gpu-qemu-graphics-update/
+    if [ "${gl}" == "on" ] && [ "${DISPLAY_DEVICE}" == "virtio-vga" ]; then
+        if [ "${QEMU_VER_SHORT}" -ge 61 ]; then
+            DISPLAY_DEVICE="${DISPLAY_DEVICE}-gl"
+        else
+            DISPLAY_DEVICE="${DISPLAY_DEVICE},virgl=on"
+        fi
+        echo -n " - Display:  ${display^^}, ${DISPLAY_DEVICE}, GL (${gl}), VirGL (on)"
+    else
+        echo -n " - Display:  ${display^^}, ${DISPLAY_DEVICE}, GL (${gl}), VirGL (off)"
+    fi
+
+    # Build the video configuration
+    VIDEO="-device ${DISPLAY_DEVICE}"
+
+    # Try and coerce the display resolution for Linux guests only.
+    if [ "${DISPLAY_DEVICE}" != "vmware-svga" ]; then
+        VIDEO="${VIDEO},xres=${X_RES},yres=${Y_RES}"
+        echo " @ (${X_RES} x ${Y_RES})"
+    else
+        echo " "
+    fi
+
+    # Allocate VRAM to VGA devices
+    case ${DISPLAY_DEVICE} in
+        bochs-display) VIDEO="${VIDEO},vgamem=67108864";;
+        qxl|qxl-vga) VIDEO="${VIDEO},ram_size=65536,vram_size=65536,vgamem_mb=64";;
+        ati-vga|cirrus-vga|VGA|vmware-svga) VIDEO="${VIDEO},vgamem_mb=256";;
+    esac
+
+    # Configure multiscreen if max_outputs was provided in the .conf file
+    if [ -n "${max_outputs}" ]; then
+        VIDEO="${VIDEO},max_outputs=${max_outputs}"
+    fi
+
+    # Run QEMU with '-vga none' to avoid having two scanouts, one for VGA and
+    # another for virtio-vga-gl. This works around a GTK assertion failure and
+    # allows seamless mouse in macOS when using the qxl-vga device.
+    # https://www.collabora.com/news-and-blog/blog/2021/11/26/venus-on-qemu-enabling-new-virtual-vulkan-driver/
+    # https://github.com/quickemu-project/quickemu/issues/222
+    # VGA="-vga none"
+
+    # Add fullscreen options
+    # VIDEO="${VGA} ${VIDEO} ${FULLSCREEN}"
+    VIDEO="-vga none ${VIDEO} ${FULLSCREEN}"
+}
+
 ## Fix ovmfs array parse but @ feb 2026 SUSPEND due to upstream changes 4.9.9 REVIEW
 function xxconfigure_xxbios() {
 
