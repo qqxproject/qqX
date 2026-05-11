@@ -130,9 +130,9 @@ function quickemu {
           printf "  Most Linux distros will automatically install 'spice-vdagent' and 'spice-webdavd' INSIDE Linux GUEST VM's"
           printf "\n  for SPICE copy, paste and file transfer."
           if [[ -e "$SharedDrive" ]]; then
-            printf " Using the qqX Shared Drive and 'QF' file management will help with SDL"
+            printf "\n\n  Use the qqX Shared Drive and 'QF' file management for SDL"
           else
-            printf " Setting up a qqX Shared Drive will help with SDL > See Utils menu"
+            printf "\n\n  Setting up a qqX Shared Drive will help with SDL > See Utils menu"
           fi
           printf "\n\n"
         fi
@@ -165,10 +165,10 @@ function quickemu {
           read -rp "  >  "  Mounted_ISO_Return
 
         elif [[ $BiosMode == "fast" ]]; then
-          printColor "  qqX Boot Manager may be session enabled in utils, if required ..."
+          printColor "\n  qqX Boot Manager may be session enabled in utils, if required"
           if [[ $LiveBoot ]]; then
-            printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
-            [[ $img || $iso ]] && printf "\n\n  Booting from: %s  %s" "$(basename "$img")" "$(basename "$iso")"
+            [[ $iso || $img ]] && printf "\n\n  Booting from: %s  %s" "$(basename "$iso")" "$(basename "$img")"
+            printf "\n\n  This is a non-installed distro and the standard live boot should normally load"
             printf "\n\n\n"
           elif [[ $Mounted_ISO ]]; then
             printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection"
@@ -179,11 +179,12 @@ function quickemu {
           else
             printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection \n\n\n"
           fi
+
         elif [[ $BiosMode == "slow" ]]; then
-          printColor "  Press 'esc' once, to access BIOS Boot Manager, when 'Start boot Option' appears"
+          printColor "\n  Press 'esc' once, to access BIOS Boot Manager, when 'Start boot Option' appears"
           if [[ $LiveBoot ]]; then
-            printf "\n\n  This is a non-installed distro. The standard Live Boot should normally load."
-            [[ $img || $iso ]] && printf "\n\n  Booting from: %s  %s" "$(basename "$img")" "$(basename "$iso")"
+            [[ $iso || $img ]] && printf "\n\n  Booting from: %s  %s" "$(basename "$iso")" "$(basename "$img")"
+            printf "\n\n  This is a non-installed distro and the standard live boot should normally load"
           elif [[ $Mounted_ISO ]]; then printf "\n\n  Currently mounted ISO is '%s' \n\n" "$Mounted_ISO_DisplayName"
           else printf "\n\n  NO ISO/DVD has been specifically mounted ... "
           fi
@@ -195,6 +196,14 @@ function quickemu {
       if [[ "${VM_InstanceName,,}" == *windows* ]] && [[ $(cat "$VM_Conf_Dir/$VM_InstanceName/Credentials.txt" 2>/dev/null) ]] ; then
         printColor "  Password Reminder:"
         printf "  %s (system isolated) \n\n\n" "$(head -n 1 "$VM_Conf_Dir/$VM_InstanceName/Credentials.txt")"
+      fi
+
+      if [[ $LiveBoot && $iso ]] && [[ "${VM_InstanceName,,}" != *windows* ]]; then
+        printf "  IF INSTALLING: \n\n  Between stage snaps can sometimes help with problems,"
+        printf "\n  otherwise a fresh re-installion will require removing the 'disk.qcow2' file \n\n"
+      elif [[ $LiveBoot && $img ]] && [[ "${VM_InstanceName,,}" != *windows* ]]; then
+        printf "  IF INSTALLING: \n"
+        printf "\n  In case of problems, a fresh re-installion can be achieved by removing the 'disk.qcow2' file \n\n"
       fi
 
       # For 1.16 windows tweaks and with the addition of controlled restarts, needed to ensure refinds of boot ISO's
@@ -212,16 +221,35 @@ function quickemu {
           secureboot="off"; ControlledRestart="off"
           printf "\n  Set CRS: '%s'  SB: '%s' \n\n" "$ControlledRestart" "$SecureBootStatus"
         fi
-      fi
-      if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" != *windows* ]] && [[ $ControlledRestart == "on" ]]; then
-        printf "  For standard single iso, single stage installations, crs 'on' can usually be fine"
-        printf "\n  Conversely, for LIVE ISO COMBOS, controlled restarts are best DISABLED, so the various drive refs can be maintained"
+      elif [[ $LiveBoot && $img ]] && [[ $ControlledRestart == "on" ]]; then
+        printf "  This installation is being carried out from a '.img' file and usually indicates a combination boot setup"
+        printf "\n  For LIVE BOOT COMBOS, controlled restarts are best DISABLED, so the various drive refs can be maintained"
         printf "\n\n  Currently  "" CRS: '%s'" "$ControlledRestart"
         printColor "\n\n  [enter] to continue with CRS off  "; printf " [c] to continue with current settings (allows between stage snapshots)  [b] to go back \n\n\n"
         read -rp "  >  "  LiveBootControlOptions
         if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
         elif [[ $LiveBootControlOptions != "c" ]]; then
           ControlledRestart="off"
+          printf "\n  Set CRS: '%s' \n\n" "$ControlledRestart"
+        fi
+      elif [[ $LiveBoot ]] && [[ $ControlledRestart == "on" ]]; then
+        printf "  This appears to be a standard single iso/single stage installation"
+        printf "\n\n  CRS is currently set to 'on' which is the default and generally recommended"
+        printColor "\n\n  [enter] to continue with current settings (allows between stage snapshots)  "; printf " [c] to continue with CRS off  [b] to go back \n\n\n"
+        read -rp "  >  "  LiveBootControlOptions
+        if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
+        elif [[ $LiveBootControlOptions == "c" ]]; then
+          ControlledRestart="off"
+          printf "\n  Set CRS: '%s' \n\n" "$ControlledRestart"
+        fi
+      elif [[ $LiveBoot ]] && [[ $ControlledRestart == "off" ]]; then
+        printf "  This appears to be a standard single iso/single stage installation"
+        printf "\n\n  CRS is currently set to 'off' and doesn't allow between stage snapshots"
+        printColor "\n\n  [enter] to continue with CRS off  "; printf " [c] to set CRS to 'on' ()  [b] to go back \n\n\n"
+        read -rp "  >  "  LiveBootControlOptions
+        if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
+        elif [[ $LiveBootControlOptions == "c" ]]; then
+          ControlledRestart="on"
           printf "\n  Set CRS: '%s' \n\n" "$ControlledRestart"
         fi
       fi
