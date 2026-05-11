@@ -443,113 +443,80 @@ else
     check_disk_is_okay  main_and_snaps
     check_if_disk_needs_a_cleanup
 
-    if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
-      printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils \n\n"  "$DiskChkStatus"
-    elif [[ $DiskDisparity -ge "4" ]]; then  printColor "  DISK.QCOW2 could benefit from a clean up  > [disk] repair utils \n\n"
-    elif [[ $DiskDisparity -ge "3" ]]; then  printColor "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
-    elif [[ $DiskDisparity -ge "2" ]]; then  printf "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
-    elif [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then
-      # beta release on the 'latest' channel takes priority over pre-releases
-      # caution \n\n differs on 'array select script'
-      if [[ $qqX_Latest_ReleaseNumber ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version" ; then
-        printColor "  [dl]  view new qqX update details: %s\n\n" "$qqX_Latest_ReleaseNumber"
-      elif [[ $qqX_Newest_PreRelease ]]; then printf "  [dl]  view new qqX update details: %s\n\n" "$qqX_Newest_PreRelease"
+    if [[ $MainMenuChoicePreset != "rq" ]]; then
+
+      if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
+        printColor "  DISK.QCOW2 ERROR  %s  \n\n  [disk] repair utils \n\n"  "$DiskChkStatus"
+      elif [[ $DiskDisparity -ge "4" ]]; then  printColor "  DISK.QCOW2 could benefit from a clean up  > [disk] repair utils \n\n"
+      elif [[ $DiskDisparity -ge "3" ]]; then  printColor "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
+      elif [[ $DiskDisparity -ge "2" ]]; then  printf "  DISK.QCOW2 may need a clean up  > [disk] repair utils \n\n"
+      elif [[ $Muted_BetaAlertPoint ]] && [[ ! $Hide_qqX_BetaUpdates ]]; then
+        # beta release on the 'latest' channel takes priority over pre-releases
+        # caution \n\n differs on 'array select script'
+        if [[ $qqX_Latest_ReleaseNumber ]] && floatversion -Q --gt "$qqX_Latest_ReleaseNumber  $qqX_Version" ; then
+          printColor "  [dl]  view new qqX update details: %s\n\n" "$qqX_Latest_ReleaseNumber"
+        elif [[ $qqX_Newest_PreRelease ]]; then printf "  [dl]  view new qqX update details: %s\n\n" "$qqX_Newest_PreRelease"
+        fi
+      elif [[ $qqX_UpdateAvail ]]; then printColor "  [dl]  view new qqX update details: %s \n\n" "$qqX_Latest_ReleaseNumber"
       fi
-    elif [[ $qqX_UpdateAvail ]]; then printColor "  [dl]  view new qqX update details: %s \n\n" "$qqX_Latest_ReleaseNumber"
-    fi
 
-    check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
-    [[ $ConfTypo ]] && printColor "\n\n  ERROR(s) detected in the Config file ...\n\n"
+      check_conf_file_for_typos "$VM_Conf_Dir/$VM_Conf_File"
+      [[ $ConfTypo ]] && printColor "\n\n  ERROR(s) detected in the Config file ...\n\n"
 
-    if [[ $cpu_pins ]] && ! grep -qs "configure_cpu_pinning" "$QE_Modpath"; then
-      # check for actual code presence as new code functions may remain loaded in memory if they are not present in an older version
-      printColor "\n\n  CPU PINNING: Function not found. Requires qqX builtin 4.99, or later \n\n"
-    fi
-
-    if ps -ef | grep nbd | grep -qi "$VM_InstanceName" ; then
-      printf "\n\n  A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
-    fi
-
-    ## Resolve the original distro OS name so a quickget look up can be made:
-    # qget 4.9.2 onwards - use recorded name as VM can get renamed
-    if [[ $(cat "$VM_InstanceName/qe_new_vm_name.txt" 2>/dev/null) ]]; then
-      source "$VM_InstanceName/qe_new_vm_name.txt"
-      VM_RecordedName="$New_VM_InstanceName"
-    elif [[ $(cat "$VM_InstanceName/QemuVirtHardwareRecord.txt" 2>/dev/null) ]]; then
-      VM_RecordedName="$(grep -sm1 -e '-name' "$VM_InstanceName/QemuVirtHardwareRecord.txt" | cut -d'=' -f2)"
-    else  VM_RecordedName="$VM_InstanceName"
-    fi
-    VM_RecordedName="${VM_RecordedName,,}"
-    mapfile -t VM_RecordedNameArr <<< "$(tr '-' '\n' <<< "$VM_RecordedName")"
-    # note grep with space or probs like ubuntu picks (ed)ubuntu first
-    # needs to cope with ubuntu variants, for daily-live, for renamed instances, and for custom ISO installed
-    # and for qMod avoid script start, as that de-listed distros and other bits
-    if [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
-      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
-    elif [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
-      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
-    elif grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" "$QG_SourcePath" ; then
-      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
-    elif grep -qs "  ${VM_RecordedNameArr[0]})" "$QG_SourcePath" ; then
-      VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
-    else VM_RecordedName_Listed=
-    fi
-
-    ## Find Distro HomePage URL
-    DistroHomePage= ; DistroInfoLine= ; DistroListing= ; DistroLogin=
-    if [[ $VM_RecordedName_Listed ]]; then
-      [[ $QG_Modpath ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_Modpath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
-      [[ ! $DistroInfoLine ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_SourcePath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
-      if [[ $DistroInfoLine ]]; then
-        DistroListing="$(cut -d'=' -f2 <<< "$DistroInfoLine")"
-        DistroListing="${DistroListing//';;'/}"
-        DistroListing="${DistroListing//'"'/}"
-        DistroListing="$(tr '|' '\n' <<< "$DistroListing")"
-        mapfile -t DistroListing_ARR <<< "$DistroListing"
-        DistroHomePage="${DistroListing_ARR[2]}"
-        DistroLogin="${DistroListing_ARR[1]}"
-        [[ $DistroLogin == "-" ]] && DistroLogin=
+      if [[ $cpu_pins ]] && ! grep -qs "configure_cpu_pinning" "$QE_Modpath"; then
+        # check for actual code presence as new code functions may remain loaded in memory if they are not present in an older version
+        printColor "\n\n  CPU PINNING: Function not found. Requires qqX builtin 4.99, or later \n\n"
       fi
-    fi
 
-    if [[ $CodingHotSwapShow ]]; then
-
-      # DEV NOTE - With quickemu and EMU mods, because the code becomes integrated into qqX, unlike quickGET,
-      # there is a theoretical risk that a code function present in one version could remain in memory
-      # when not present in another version:
-      # While quickGET uses a lot of 'type -t' function tests, which only check if the function is loaded into memory,
-      # all of these functions will auto-extinguish as they only exist in transitory background threads, so this is safe.
-      # For quickEMU, we need to mitigate by grepping for the actual script presence of any new or discontinued functions
-      # in '$QE_SourcePath' and in '$QE_ModPath' before getting qqX to make any critical calls.
-      CodingHotSwapShow=
-      printf "\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file. \n\n"
-
-    elif [[ $qqX_LatestNewsTitle ]] ; then
-
-      local LastNewsReading="" HideNewsAlert="" MuteNewsAlert="" HighlightNewsAlert="" LatestEpochNewsDate=""
-      LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"
-      [[ -e "$HOME/.qqX/qqXnewsreader.log" ]] && LastNewsReading="$(cat "$HOME/.qqX/qqXnewsreader.log" | tr -cd '[:digit:]')"
-      (( (EpochDateNow - LatestEpochNewsDate) < 1209600 )) && HighlightNewsAlert=1
-      (( (EpochDateNow - LatestEpochNewsDate) > 3628800 )) && HideNewsAlert=1
-      if [[ $LastNewsReading ]]; then
-        (( (LastNewsReading+(3600*48)) < EpochDateNow )) && HideNewsAlert=1
-        (( (LastNewsReading+(3600*2)) < EpochDateNow )) && MuteNewsAlert=1
+      if ps -ef | grep nbd | grep -qi "$VM_InstanceName" ; then
+        printf "\n\n  A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
       fi
-      # Where 1209600 = 14 days, to highlight newness, and beyond 3628800/42days is probably stale
-      # And where NewsAlert flag will mute news after 2hrs if it has been recently read, followed by hiding it after 2days
-      if [[ $HighlightNewsAlert ]] && [[ ! $HideNewsAlert && ! $MuteNewsAlert ]]; then
-        printColor "  [news] %s" "$qqX_LatestNewsTitle"
-        [[ $qqX_Current_ReleaseType == "beta" ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
-        printf "\n\n"
-      elif [[ ! $HideNewsAlert ]]; then
-        printf "\n  [news] %s" "$qqX_LatestNewsTitle"
-        [[ $qqX_Current_ReleaseType == "beta" ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
-        printf "\n\n"
-      elif [[ $qqX_Current_ReleaseType == "beta" ]]; then
-        printf "\n  [tags] latest code %s > %s\n\n" "$qqX_Newest_Tag" "$qqX_Newest_TagText"
+
+      ## Resolve the original distro OS name so a quickget look up can be made:
+      # qget 4.9.2 onwards - use recorded name as VM can get renamed
+      if [[ $(cat "$VM_InstanceName/qe_new_vm_name.txt" 2>/dev/null) ]]; then
+        source "$VM_InstanceName/qe_new_vm_name.txt"
+        VM_RecordedName="$New_VM_InstanceName"
+      elif [[ $(cat "$VM_InstanceName/QemuVirtHardwareRecord.txt" 2>/dev/null) ]]; then
+        VM_RecordedName="$(grep -sm1 -e '-name' "$VM_InstanceName/QemuVirtHardwareRecord.txt" | cut -d'=' -f2)"
+      else  VM_RecordedName="$VM_InstanceName"
+      fi
+      VM_RecordedName="${VM_RecordedName,,}"
+      mapfile -t VM_RecordedNameArr <<< "$(tr '-' '\n' <<< "$VM_RecordedName")"
+      # note grep with space or probs like ubuntu picks (ed)ubuntu first
+      # needs to cope with ubuntu variants, for daily-live, for renamed instances, and for custom ISO installed
+      # and for qMod avoid script start, as that de-listed distros and other bits
+      if [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
+        VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
+      elif [[ $QG_Modpath ]] && grep -qs "  ${VM_RecordedNameArr[0]})" <<< "$(grep -s -A 500 -m 1 'INFO=' "$QG_Modpath")" ; then
+        VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
+      elif grep -qs "  ${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]})" "$QG_SourcePath" ; then
+        VM_RecordedName_Listed="${VM_RecordedNameArr[0]}-${VM_RecordedNameArr[1]}"
+      elif grep -qs "  ${VM_RecordedNameArr[0]})" "$QG_SourcePath" ; then
+        VM_RecordedName_Listed="${VM_RecordedNameArr[0]}"
+      else VM_RecordedName_Listed=
+      fi
+
+      ## Find Distro HomePage URL
+      DistroHomePage= ; DistroInfoLine= ; DistroListing= ; DistroLogin=
+      if [[ $VM_RecordedName_Listed ]]; then
+        [[ $QG_Modpath ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_Modpath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
+        [[ ! $DistroInfoLine ]] && DistroInfoLine="$(grep -s 'INFO=' "$QG_SourcePath" | grep -m 1 "  ${VM_RecordedName_Listed})" )"
+        if [[ $DistroInfoLine ]]; then
+          DistroListing="$(cut -d'=' -f2 <<< "$DistroInfoLine")"
+          DistroListing="${DistroListing//';;'/}"
+          DistroListing="${DistroListing//'"'/}"
+          DistroListing="$(tr '|' '\n' <<< "$DistroListing")"
+          mapfile -t DistroListing_ARR <<< "$DistroListing"
+          DistroHomePage="${DistroListing_ARR[2]}"
+          DistroLogin="${DistroListing_ARR[1]}"
+          [[ $DistroLogin == "-" ]] && DistroLogin=
+        fi
       fi
 
     fi
+
+    ## Auto snapshots will trigger an quiet page refresh (rq)
 
     if [[ $MainMenuChoicePreset ]]; then
 
@@ -558,6 +525,48 @@ else
       MainMenuChoicePreset=
 
     else
+
+      if [[ $CodingHotSwapShow ]]; then
+
+        # DEV NOTE - With quickemu and EMU mods, because the code becomes integrated into qqX, unlike quickGET,
+        # there is a theoretical risk that a code function present in one version could remain in memory
+        # when not present in another version:
+        # While quickGET uses a lot of 'type -t' function tests, which only check if the function is loaded into memory,
+        # all of these functions will auto-extinguish as they only exist in transitory background threads, so this is safe.
+        # For quickEMU, we need to mitigate by grepping for the actual script presence of any new or discontinued functions
+        # in '$QE_SourcePath' and in '$QE_ModPath' before getting qqX to make any critical calls.
+        CodingHotSwapShow=
+        printf "\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file. \n\n"
+
+      elif [[ $qqX_LatestNewsTitle ]] ; then
+
+        local LastNewsReading="" HideNewsAlert="" MuteNewsAlert="" HighlightNewsAlert="" LatestEpochNewsDate=""
+        LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"
+        [[ -e "$HOME/.qqX/qqXnewsreader.log" ]] && LastNewsReading="$(cat "$HOME/.qqX/qqXnewsreader.log" | tr -cd '[:digit:]')"
+        (( (EpochDateNow - LatestEpochNewsDate) < 1209600 )) && HighlightNewsAlert=1
+        (( (EpochDateNow - LatestEpochNewsDate) > 3628800 )) && HideNewsAlert=1
+        if [[ $LastNewsReading ]]; then
+          (( (LastNewsReading+(3600*48)) < EpochDateNow )) && HideNewsAlert=1
+          (( (LastNewsReading+(3600*2)) < EpochDateNow )) && MuteNewsAlert=1
+        fi
+        # Where 1209600 = 14 days, to highlight newness, and beyond 3628800/42days is probably stale
+        # And where NewsAlert flag will mute news after 2hrs if it has been recently read, followed by hiding it after 2days
+        if [[ $HighlightNewsAlert ]] && [[ ! $HideNewsAlert && ! $MuteNewsAlert ]]; then
+          printColor "  [news] %s" "$qqX_LatestNewsTitle"
+          [[ $qqX_Current_ReleaseType == "beta" ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
+          printf "\n\n"
+        elif [[ ! $HideNewsAlert ]]; then
+          printf "\n  [news] %s" "$qqX_LatestNewsTitle"
+          [[ $qqX_Current_ReleaseType == "beta" ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
+          printf "\n\n"
+        elif [[ $qqX_Current_ReleaseType == "beta" ]]; then
+          printf "\n  [tags] latest code %s > " "$qqX_Newest_Tag"
+          if [[ $qqX_Newest_Tag == "$qqX_Version" ]]; then  printf "up-to-date\n\n"
+          else printf "%s\n\n"  "$qqX_Newest_TagText"
+          fi
+        fi
+
+      fi
 
       printColor  "  [enter] refresh   "
       if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
