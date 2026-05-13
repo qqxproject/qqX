@@ -376,6 +376,11 @@ VM_check_and_load () {
 
 refresh_sources_and_load_VM_arrays() {
 
+  if [[ $PathDiagnostics ]]; then
+    printColor "\n\n  Start of function 'refresh_sources_and_load_VM_arrays'"
+    path_diagnostics pause
+  fi
+
   # VM folder list should be compiled from the perspective of the Default Folder.
   # If not already there, make sure this is the case.
   local RefreshCallFolder=
@@ -425,6 +430,11 @@ refresh_sources_and_load_VM_arrays() {
   }
 
   [[ $CodingHotSwap ]] && QE_SourceVersion="$CodingHotSwap"
+
+  if [[ $PathDiagnostics ]]; then
+    printColor "\n\n  Calling function 'refresh_and_load_quickemu_sources' from 'refresh_sources_and_load_VM_arrays'"
+  fi
+
   refresh_and_load_quickemu_sources
   store_bios_mode_defaults
   find_file_manager_browser

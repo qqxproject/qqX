@@ -423,6 +423,28 @@ function_conf_error () {
 
 }
 
+show_qqXmod_settings() {
+
+  DisplayConf_ModOptions="$(grep -s 'DisplayConf_Mods ==' "$QE_Modpath" | cut -d'"' -f2 | paste -d' ' -s)"
+  if [[ ! $DisplayConf_ModOptions ]]; then
+    printf "\n\n  %s:  Switch to a different 'built-in' version to see possible DisplayConf_Mods \n\n" "${QE_SourceVersion^^}"
+  else
+    [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModDefault"
+    DisplayConf_ModsPref="$(grep -s 'DisplayConf_Mods=' "$QE_Modpath" | grep \&\& | grep -v Default | cut -d'"' -f2)"
+    DisplayConf_ModsConf="$(grep -s 'DisplayConf_Mods=' "$VM_Conf_Dir/$VM_Conf_File" | cut -d'"' -f2 | paste -d' ' -s)"
+    [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModsPref"
+    DisplayConf_ModOptions+=" none"
+    DisplayConf_ModOptions="${DisplayConf_ModOptions//' '/'  '}"
+    if [[ "$DisplayConf_ModOptions" != *"$DisplayConf_Mods"* ]]; then
+      printColor "\n\n  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"
+    elif [[ $DisplayConf_ModsConf ]] && [[ "$DisplayConf_ModOptions" != *"$DisplayConf_ModsConf"* ]]; then
+      printColor "\n\n  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_ModsConf"
+    else
+      printf "\n\n  %s:  DisplayConf_Mods = %s  Default = %s  Options = %s \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"  "${DisplayConf_ModDefault:-"$DisplayConf_ModsPref"}"  "$DisplayConf_ModOptions"
+    fi
+  fi
+}
+
 qqX_edit_settings() {
 
   if [[ $TextEditor ]] && [[ ! $(type -p "$TextEditor") ]]; then texteditor_not_found_message
@@ -432,7 +454,7 @@ qqX_edit_settings() {
 
       printf "\n\n"
       cat "$VM_Conf_Dir/$VM_Conf_File"
-      printf "\n\n"
+      show_qqXmod_settings
 
       while true ; do
         printColor "\n  [enter] to edit   [n] CONF NOTES   [d] upstream defaults list   [t] config tune-up wizard   [b] go back"
@@ -555,12 +577,14 @@ function refresh_conf_vars_and_values {
     SharedDriveArgs=
     SharedDrive_Mount=
     MacLegacyDrive=
+    MacScreenRes=
     QemuError_VM_Filter=()
     Custom_SDL_ScreenSize=
     Custom_SDL_ScreenPercent=
     QemuArgsCustomFile=
     QemuErrorLog=
     cpu_pins=
+    DisplayConf_Mods=
 
     ## Make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
 
@@ -652,6 +676,9 @@ function refresh_conf_vars_and_values {
     [[ $Toggled_GL_Mode ]] && qqX_GL_Mode="$Toggled_GL_Mode"
     [[ $Toggled_NetMode ]] && qqX_NetMode="$Toggled_NetMode"
 
+    # Re-Source the Emu Mods file, so that individual distro settings that affect the selection or operations of functions
+    # get the right mod function loaded
+    [[ -e $QE_Modpath ]] && source "$QE_Modpath"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 3:" &&  main_loop_diagnostics
 

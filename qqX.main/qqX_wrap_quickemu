@@ -52,6 +52,11 @@ function find_quickemu_source_functions_and_vars {
 
   ## Load the right version of quickemu  (from settings)
 
+  if [[ $PathDiagnostics ]]; then
+    printColor "\n\n  Start of wrap_quickemu's sourcing function 'find_quickemu_source_functions_and_vars' (includes Mods)"
+    path_diagnostics
+  fi
+
   [[ $SettingsFileAdjusted || $CodingHotSwap ]] && sort_qqX_builtin_settings
 
   if [[ ! -e "$QE_SourcePath" ]] ; then
@@ -389,6 +394,10 @@ function load_quickemu_cases_and_actions {
 load_quickemu_cases_and_actions
 
 function refresh_and_load_quickemu_sources {
+  if [[ $PathDiagnostics ]]; then
+    printColor "\n\n  Start of wrap_quickemu's 'refresh_and_load_quickemu_sources'"
+    path_diagnostics pause
+  fi
   system_code_check_and_warn
   find_quickemu_source_functions_and_vars
   load_quickemu_special_vars

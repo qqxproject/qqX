@@ -24,13 +24,17 @@ VM_loader_selector_and_menu () {
 
   # LOADER
 
-  if [[ $ByPass_VM_Array_Loader ]] && [[ ${VM_Array[0,0]} ]]; then
+  if [[ $ByPass_VM_Array_Loader && ${VM_Array[0,0]} ]]; then
     # just clear the flag, may be bypassed if array present and nothing new added, or if settings not changed ...
     ByPass_VM_Array_Loader=
-    [[ $Loop_Diagnostics ]] && printf "\n\n Bypassing VM loader:" &&  main_loop_diagnostics
+    [[ $Loop_Diagnostics || $PathDiagnostics ]] && printColor "\n\n Bypassing VM loader:" &&  main_loop_diagnostics && path_diagnostics
   else
     refresh_sources_and_load_VM_arrays
-    [[ $Loop_Diagnostics ]] && printf "\n\n VM selector, post refresh_sources_and_load_VM_arrays:" &&  main_loop_diagnostics
+    if [[ $Loop_Diagnostics || $PathDiagnostics ]]; then
+      printColor "\n\n VM selector, post refresh_sources_and_load_VM_arrays: \n\n"
+      main_loop_diagnostics
+      path_diagnostics pause
+    fi
   fi
 
   # Autorun Main Menu on start up, if only one distro present, and not a mouse click start or similar, to help new users ...

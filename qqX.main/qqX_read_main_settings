@@ -195,9 +195,6 @@ function sort_qqX_builtin_settings {
   elif [[ $QE_SourceVersion == "homebird" ]]; then
     QE_SourceVersion="HomeBird"
     FreePath="$qqX_BuiltinsFolder/homebird"
-  elif [[ $QE_SourceVersion == "echo" ]]; then
-    QE_SourceVersion="Echo"
-    FreePath="$qqX_BuiltinsFolder/echo"
   elif [[ $QE_SourceVersion == "custom" ]]; then
     QE_SourceVersion="Custom"
     FreePath="$Default_VM_Folder/qqX.custom/QE.Custom"
@@ -257,26 +254,11 @@ function find_quick_version_numbers {
 
   # QuickEMU also uses an internal variable '$VERSION' but this only works after the correct script has been sourced.
   # But use grep to avoid bad original source $QEMU_VER_SHORT routines throwing errors
-  QE_VerNumber="$(grep -s 'VERSION=' "$QE_SourcePath" | cut -d'"' -f2)"
-
-  # QuickGET as @ ver 4.9.2 'official-vanilla' actually makes a call to EMU to find the number.
-  # But the 'quickget' call goes to a qqX capture function of the same name,
-  # and allows re-routes to custom versions that may work differently.
-  if [[ $QE_SourceVersion == "System" || $QE_SourceVersion == "Echo" ]]; then
-    QG_VerNumber="$QE_VerNumber"
-    QE_Modpath= ; QE_ModsNumber= ; QG_Modpath= ; QG_ModsNumber=
-  else QG_VerNumber="$("$QG_SourcePath" --version 2>/dev/null)"
-  fi
-
-  # Release Quickemu 4.9.2 was still numbered 4.9.1
-  # Use the changes to fedora releases 'echo 38 39' as a fixing flag:
-  if grep -q -s 'echo 38 39' "$QG_SourcePath" ; then
-    [[ $QG_VerNumber == "4.9.1" ]] && QG_VerNumber="4.9.2"
-    [[ $QE_VerNumber == "4.9.1" ]] && QE_VerNumber="4.9.2"
-  fi
+  QE_VerNumber="$(grep  -e 'VERSION=' "$QE_SourcePath" | cut -d'"' -f2)"
+  QG_VerNumber="$(grep  -A 6 -e '--version|-vers' "$QG_SourcePath" | grep echo | cut -d'"' -f2)"
 
   if [[ ! $QE_VerNumber ]] || [[ ! $QG_VerNumber ]]; then
-    printColor "\n\n  ERROR finding QuickEmu/Quickget Source Path or running Source Checks"
+    printf "\n\n  ERROR finding QuickEmu/Quickget Source Path or running Source Checks"
     printf "\n\n  If you have just re/installed and are running an initial start up, "
     printf "\n\n  this may be due to your Linux distro being cautious about new scripts."
     printf "\n\n\n  A close down and a standard restart of qqX should probably solve things ...."
