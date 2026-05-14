@@ -56,7 +56,7 @@ custom_conf_notes () {
 
     For MacOS, newer versions may need 'virtio' devices and older may be better with 'usb'
     A line macos_release=\"ventura\" or similar should be present.   Set cpu_cores=\"8\" \"16\" or \"32\"
-    qqX only: MacLegacyDrive=\"true\"  MacScreenRes=\"2560x1440\"  \"1920x1080\"  \"1280x720\"
+    qqX only: MacLegacyDrive=\"true\"  MacScreenRes=\"2560x1440\"  \"1920x1080\"  \"1280x720\" (deprecated - use Custom_SDL_ScreenSize instead)
 
     Difficult booting:
     Use QemuErrorFilter+=("") to supress nuisance errors  NB \'+=\' and any new values as double quoted and space separated
@@ -141,6 +141,7 @@ function check_screen_percentage_and_output {
     # MacOS REVIEW  # ? 1360 x 768  ? 1920 x 1080 (max ovmf)  ? 1280 x 720  (max default qxl)
     # The newer variable SDL_ScreenSize is functionally identical to MacScreenRes
     # but MacScreenRes has been left in place to emphasise that size options are more limited if used with Mac.
+    # MacScreenRes becomes DEPRECATED with qqX ver 1.16
     # Sonoma default is 2560 x 1440 low res. In other words 1280 x 720 at x2 Hi-DPI res.
     # Mac seems to be able to use 1280 and then takes control of the outcome itself, once set up.
     # Unless it's Sequoia where it needs to be specified in the conf file:
@@ -425,7 +426,7 @@ function_conf_error () {
 
 show_qqXmod_settings() {
 
-  DisplayConf_ModOptions="$(grep -s 'DisplayConf_Mods ==' "$QE_Modpath" | cut -d'"' -f2 | paste -d' ' -s)"
+  DisplayConf_ModOptions="$(grep -s 'DisplayConf_Mods ==' "$QE_Modpath" | cut -d'"' -f2 | sort -u | paste -d' ' -s)"
   if [[ ! $DisplayConf_ModOptions ]]; then
     printf "\n\n  %s:  Switch to a different 'built-in' version to see possible DisplayConf_Mods \n\n" "${QE_SourceVersion^^}"
   else
@@ -433,7 +434,6 @@ show_qqXmod_settings() {
     DisplayConf_ModsPref="$(grep -s 'DisplayConf_Mods=' "$QE_Modpath" | grep \&\& | grep -v Default | cut -d'"' -f2)"
     DisplayConf_ModsConf="$(grep -s 'DisplayConf_Mods=' "$VM_Conf_Dir/$VM_Conf_File" | cut -d'"' -f2 | paste -d' ' -s)"
     [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModsPref"
-    DisplayConf_ModOptions+=" none"
     DisplayConf_ModOptions="${DisplayConf_ModOptions//' '/'  '}"
     if [[ "$DisplayConf_ModOptions" != *"$DisplayConf_Mods"* ]]; then
       printColor "\n\n  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"
