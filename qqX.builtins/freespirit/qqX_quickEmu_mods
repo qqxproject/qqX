@@ -959,10 +959,10 @@ function xxconfigure_xxbios() {
                         "${SHARE_PATH}/edk2-ovmf/x64/OVMF_CODE.fd","${SHARE_PATH}/edk2-ovmf/x64/OVMF_VARS.fd" \
                     );;
             esac
-            # qqX: note these arrays get grepped by 'read_x86_tiano_vars_list' in main menu routines
+            # qqX: Note the upstream version of these arrays get grepped by 'read_x86_tiano_vars_list' in main menu routines
             # and the function's -A nn may need adjusting if adding lines
-            # Note: 'read_x86_tiano_vars_list' will work with either the modded arrays or the upstream ones
-            # and it will list all files and all vars, from both secure and from non-secure
+            # However, 'read_x86_tiano_vars_list' will work with the mods list if it is pointed to here
+            # Lists all files and all vars, from both secure and from non-secure ...
 
             # Attempt each EFI_CODE file one by one, selecting the corresponding code and vars
             # when an existing file is found.

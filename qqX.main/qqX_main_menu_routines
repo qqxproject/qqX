@@ -705,8 +705,8 @@ move_rename_Selected_VM () {
 read_x86_tiano_vars_list () {
 
   # Current source list (-A nn may need adjusting if adding to qe arrays)
-  # See quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
-  # Note: 'read_x86_tiano_vars_list' will work with either the modded arrays or the upstream ones
+  # Also see quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
+  # Listing works on the upstream script "$QE_SourcePath" not on "$QE_Modpath"
   # and it will list all files and all vars, from both secure and from non-secure
 
   local String=
