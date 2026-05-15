@@ -56,15 +56,24 @@ custom_conf_notes () {
 
     For MacOS, newer versions may need 'virtio' devices and older may be better with 'usb'
     A line macos_release=\"ventura\" or similar should be present.   Set cpu_cores=\"8\" \"16\" or \"32\"
-    qqX only: MacLegacyDrive=\"true\"  MacScreenRes=\"2560x1440\"  \"1920x1080\"  \"1280x720\" (deprecated - use Custom_SDL_ScreenSize instead)
+    Native Mac Sizes: Custom_SDL_ScreenSize=\"2560x1440\"  \"1920x1080\"  \"1280x720\"  (MacScreenRes is now deprecated)
 
-    Difficult booting:
     Use QemuErrorFilter+=("") to supress nuisance errors  NB \'+=\' and any new values as double quoted and space separated
     The 'cpu_pins' is an experimental new feature which may help, or may cause conflicts, with host cpu runtime microcode (?)
-    boot=\"legacy\"  and  gl=\"off\"  may help too ...
 
     highlight then shift-ctrl-c  to copy ...
-  \n"
+  "
+
+  printColor "\n\n   %s:\n" "${QE_SourceVersion^^}"
+  [[ $DisplayConf_ModOptions ]] &&  printf "\n   DisplayConf_Mod=  %s" "$DisplayConf_ModOptions"
+
+  if [[ $guest_os == "macos" ]]; then
+    printf "\n\n   macOS CPU tweaks: "
+    grep -qs 'IgnoreMacSSE4checks' "$QE_Modpath" && printf " IgnoreMacSSE4checks=\"true\""
+  fi
+
+  printf "\n\n"
+
 }
 
 function check_screen_percentage_and_output {
@@ -426,7 +435,7 @@ show_qqXmod_settings() {
 
   DisplayConf_ModOptions="$(grep -s 'DisplayConf_Mods ==' "$QE_Modpath" | cut -d'"' -f2 | sort -u | paste -d' ' -s)"
   if [[ ! $DisplayConf_ModOptions ]]; then
-    printf "\n\n  %s:  Switch to a different 'built-in' version to see possible DisplayConf_Mods \n\n" "${QE_SourceVersion^^}"
+    printf "  %s:  Switch to a different 'built-in' version to see possible DisplayConf_Mods \n\n" "${QE_SourceVersion^^}"
   else
     [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModDefault"
     DisplayConf_ModsPref="$(grep -s 'DisplayConf_Mods=' "$QE_Modpath" | grep \&\& | grep -v Default | cut -d'"' -f2)"
@@ -434,13 +443,14 @@ show_qqXmod_settings() {
     [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModsPref"
     DisplayConf_ModOptions="${DisplayConf_ModOptions//' '/'  '}"
     if [[ "$DisplayConf_ModOptions" != *"$DisplayConf_Mods"* ]]; then
-      printColor "\n\n  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"
+      printColor "  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"
     elif [[ $DisplayConf_ModsConf ]] && [[ "$DisplayConf_ModOptions" != *"$DisplayConf_ModsConf"* ]]; then
       printColor "\n\n  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_ModsConf"
-    else
-      printf "\n\n  %s:  DisplayConf_Mods = %s  Default = %s  Options = %s \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"  "${DisplayConf_ModDefault:-"$DisplayConf_ModsPref"}"  "$DisplayConf_ModOptions"
+    elif [[ $DisplayConf_ModsConf || $DisplayConf_ModDefault ]]; then
+      printf "  %s:  DisplayConf_Mods = %s  Default/SystemDefault = %s    Options = %s \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"  "${DisplayConf_ModDefault:-"$DisplayConf_ModsPref"}"  "$DisplayConf_ModOptions"
     fi
   fi
+
 }
 
 qqX_edit_settings() {
@@ -450,8 +460,9 @@ qqX_edit_settings() {
     # Run the editor:
     if [[ $1 == "conf" ]]; then
 
-      printf "\n\n"
-      cat "$VM_Conf_Dir/$VM_Conf_File"
+      printf "\n"
+      cat "$VM_Conf_Dir/$VM_Conf_File" | grep -s -e ^'[[:print:]]'
+      printf "\n"
       show_qqXmod_settings
 
       while true ; do

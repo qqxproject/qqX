@@ -273,6 +273,10 @@ function configure_cpu() {
             # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
             # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
 
+            # And further independent work 2026
+            # Mods: Copyright (c)  Alex Genovese   https://github.com/qqxproject
+            # Licence  GPL3   https://www.gnu.org/licenses
+
             # Skylake-Server-v3 should be default
             # See https://en.wikipedia.org/wiki/IMac_Pro#Technical_specifications
             # Also retains IBRS spectre mitigation
@@ -281,6 +285,13 @@ function configure_cpu() {
             # Other Xeon oddballs like 14 or 28 don't boot, even when forced.
             # CascadeLake is Mac Pro 2019 but is practically identical to Skylake
             # Whilst switching from Sky to Cascade still leaves 'About' displaying iMacPro 2017 ...
+
+            # Qemu options:
+            # x86 Skylake-Server-v1     Intel Xeon Processor (Skylake)
+            # x86 Skylake-Server-v2     Intel Xeon Processor (Skylake, IBRS)
+            # x86 Skylake-Server-v3     Intel Xeon Processor (Skylake, IBRS, no TSX)
+            # x86 Skylake-Server-v4     Intel Xeon Processor (Skylake, IBRS, no TSX)
+            # x86 Skylake-Server-v5     Intel Xeon Processor (Skylake, IBRS, no TSX) [IBRS, XSAVES, EPT switching, no TSX]
 
             #CPU_MODEL="Haswell-v2"
             CPU_MODEL="Skylake-Server-v3"
@@ -303,31 +314,34 @@ function configure_cpu() {
                 # https://en.wikipedia.org/wiki/MacOS_version_history
                 # https://mrmacintosh.com/how-to-fix-the-recovery-server-could-not-be-contacted-error-high-sierra-recovery-is-still-online-but-broken/
 
-                case ${macos_release} in
-                    ventura|sonoma|sequoia|tahoe)
-                        # A CPU with AVX2 support is required for >= macOS Ventura
-                        if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
-                            echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
-                            if check_cpu_flag sse4_2; then echo "       Try macOS Monterey or Big Sur."
-                            elif check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
-                            else echo "       SSE4.1 also not present, so older versions of MacOS are not possible either."
-                            fi
-                            exit 1
-                        fi ;;
-                    mojave)
-                        if ! check_cpu_flag sse4_1; then
-                            echo "ERROR! macOS installation not possible requires a CPU with at least SSE 4.1 support."
-                            exit 1
-                        fi ;;
-                    *)
-                        if ! check_cpu_flag sse4_2; then
-                            echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
-                            if check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
-                            else echo "       SSE4.1 also not present, so older versions of MacOS are not possible either."
-                            fi
-                            exit 1
-                        fi ;;
-                esac
+                if [[ ! $IgnoreMacSSE4checks ]] || [[ $IgnoreMacSSE4checks != "true" ]] ; then
+                    # IgnoreMacSSE4checks for for testing purposes, or any bsolete VMs still being run
+                    case ${macos_release} in
+                        ventura|sonoma|sequoia|tahoe)
+                            # A CPU with AVX2 support is required for >= macOS Ventura
+                            if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
+                                echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
+                                if check_cpu_flag sse4_2; then echo "       Try macOS Monterey or Big Sur."
+                                elif check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
+                                else echo "       SSE4.1 also not present, older versions may work if SSE4 checks are disabled ?"
+                                fi
+                                exit 1
+                            fi ;;
+                        mojave)
+                            if ! check_cpu_flag sse4_1; then
+                                echo "ERROR! macOS installation not possible requires a CPU with at least SSE 4.1 support."
+                                exit 1
+                            fi ;;
+                        *)
+                            if ! check_cpu_flag sse4_2; then
+                                echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
+                                if check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
+                                else echo "       SSE4.1 also not present, older versions may work if SSE4 checks are disabled ?"
+                                fi
+                                exit 1
+                            fi ;;
+                    esac
+                fi
 
                 # rdtscp and invtsc, tsc, tsc_adjust, as neutral, neither on nor off
                 # ditto pcid for AMD and fp87 for Intel
@@ -344,6 +358,17 @@ function configure_cpu() {
                 done
 
             else
+
+                ## UPSTREAM additive version with minor mods only
+
+                # original DRAFT work Alex Genovese:
+                # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2115516935
+                # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
+                # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
+
+                # Mods: Copyright (c)  Alex Genovese   https://github.com/qqxproject
+                # Licence  GPL3   https://www.gnu.org/licenses
+
 
                 # If the host has an Intel CPU, passes the host CPU model features, model, stepping, exactly to the guest.
                 # Disable huge pages (,-pdpe1gb) on macOS to prevent crashes
@@ -366,31 +391,34 @@ function configure_cpu() {
                 # running macOS x86_64 VMs on ARM Macs through software emulation.
                 if [ "${QEMU_ACCEL}" != "tcg" ]; then
 
-                    case ${macos_release} in
-                        ventura|sonoma|sequoia|tahoe)
-                            # A CPU with AVX2 support is required for >= macOS Ventura
-                            if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
-                                echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
-                                if check_cpu_flag sse4_2; then echo "       Try macOS Monterey or Big Sur."
-                                elif check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
-                                else echo "       SSE4.1 also not present, so older versions of MacOS are not possible either."
-                                fi
-                                exit 1
-                            fi ;;
-                        mojave)
-                            if ! check_cpu_flag sse4_1; then
-                                echo "ERROR! macOS installation not possible requires a CPU with at least SSE 4.1 support."
-                                exit 1
-                            fi ;;
-                        *)
-                            if ! check_cpu_flag sse4_2; then
-                                echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
-                                if check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
-                                else echo "       SSE4.1 also not present, so older versions of MacOS are not possible either."
-                                fi
-                                exit 1
-                            fi ;;
-                    esac
+                    if [[ ! $IgnoreMacSSE4checks ]] || [[ $IgnoreMacSSE4checks != "true" ]] ; then
+                        # IgnoreMacSSE4checks for for testing purposes, or any bsolete VMs still being run
+                        case ${macos_release} in
+                            ventura|sonoma|sequoia|tahoe)
+                                # A CPU with AVX2 support is required for >= macOS Ventura
+                                if ! check_cpu_flag sse4_2 || ! check_cpu_flag avx2; then
+                                    echo "ERROR! macOS ${macos_release} requires a CPU with both SSE 4.2 and AVX2 support."
+                                    if check_cpu_flag sse4_2; then echo "       Try macOS Monterey or Big Sur."
+                                    elif check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
+                                    else echo "       SSE4.1 also not present, older versions may work if SSE4 checks are disabled ?"
+                                    fi
+                                    exit 1
+                                fi ;;
+                            mojave)
+                                if ! check_cpu_flag sse4_1; then
+                                    echo "ERROR! macOS installation not possible requires a CPU with at least SSE 4.1 support."
+                                    exit 1
+                                fi ;;
+                            *)
+                                if ! check_cpu_flag sse4_2; then
+                                    echo "ERROR! macOS ${macos_release} requires a CPU with SSE 4.2 support."
+                                    if check_cpu_flag sse4_1; then echo "       If downloadable, MacOS Mojave may still be possible ?"
+                                    else echo "       SSE4.1 also not present, older versions may work if SSE4 checks are disabled ?"
+                                    fi
+                                    exit 1
+                                fi ;;
+                        esac
+                    fi
 
                     if [ "${HOST_CPU_VENDOR}" != "GenuineIntel" ] && [ -z "${HYPERVISOR}" ]; then
                         for FLAG in abm adx aes amd-ssbd apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
@@ -411,6 +439,9 @@ function configure_cpu() {
                     fi
                 fi
             fi
+
+            # Mods: Copyright (c)  Alex Genovese   https://github.com/qqxproject
+            # Licence  GPL3   https://www.gnu.org/licenses
 
             # Not many host CPU's will have AVX 512
             if [[ "$CPU_MODEL" == 'Skylake-Server'* ]] || [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
