@@ -233,8 +233,9 @@ function show_qqX_general_help {
     printf "\n  [s] open general settings file for notes on the  SETTINGS, user modes, screen sizes etc"
     printf  "\n\n  [f] see FreeBird notes  [c] command line & mouse notes"
     if [[ $WebBrowser ]]; then
-      printColor "\n\n  [w] Online: HELP PAGES, FAQs and Release Notes @ https://qqxproject.org"
-      printf "\n\n"
+      printf "\n\n\n  [w] Online HELP PAGES, FAQs and Release Notes @ qqxproject.org"
+      printColor "\n\n  [N] latest news and discussion @ qqX GitHub"
+      printf "\n\n\n"
       if [[ $ShowTxTexts ]]; then printColor  "  [tx] %s" "$MainTxOptionLine"
       else printf  "  [tx] %s" "$MainTxOptionLine"
       fi
@@ -273,7 +274,13 @@ function show_qqX_general_help {
     elif [[ $HelpSelect == "w" ]]; then
       HelpSelect=
       printf "\n  Opening Browser ... \n"
-      (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/FAQs-and-Help"  & ) || web_browser_not_found_message
+      (nohup &> /dev/null  "$WebBrowser" "https://qqxproject.org/FAQs-and-Help"  & ) || web_browser_not_found_message
+      sleep 1
+
+    elif [[ $HelpSelect == "n" ]] || [[ $HelpSelect == "N" ]]; then
+      HelpSelect=
+      printf "\n  Opening Browser ... \n"
+      (nohup &> /dev/null  "$WebBrowser" "https://github.com/qqxproject/qqX/discussions/categories/announcements"  & ) || web_browser_not_found_message
       sleep 1
 
     elif [[ $HelpSelect == "s" ]]; then
