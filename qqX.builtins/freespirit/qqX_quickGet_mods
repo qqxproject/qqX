@@ -184,7 +184,7 @@ function distro_release_notes {
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
-        macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
+        macos)            RelNotes="05/2026 Both Sequoia and Tahoe are having issues with installation and slow running. See qqX issue #9";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus. [w] check website for Leap and other developments.";;
