@@ -67,9 +67,11 @@ custom_conf_notes () {
   printColor "\n\n   %s:\n" "${QE_SourceVersion^^}"
   [[ $DisplayConf_ModOptions ]] &&  printf "\n   DisplayConf_Mod=  %s" "$DisplayConf_ModOptions"
 
-  if [[ $guest_os == "macos" ]]; then
-    printf "\n\n   macOS CPU tweaks: "
-    grep -qs 'IgnoreMacSSE4checks' "$QE_Modpath" && printf " IgnoreMacSSE4checks=\"true\""
+  if [[ $guest_os == "macos" ]] && grep -qs 'Force_UpstreamMacTimers' "$QE_Modpath" ; then
+    printf "\n\n   macOS CPU modifiers:"
+    grep -qs 'Ignore_MacSSE4checks' "$QE_Modpath" && printf "  Ignore_MacSSE4checks=\"true\""
+    grep -qs 'Force_UpstreamMacCpu' "$QE_Modpath" && printf "  Force_UpstreamMacCpu=\"true\""
+    grep -qs 'Force_UpstreamMacTimers' "$QE_Modpath" && printf "  Force_UpstreamMacTimers=\"true\""
   fi
 
   printf "\n\n"
@@ -435,7 +437,7 @@ show_qqXmod_settings() {
 
   DisplayConf_ModOptions="$(grep -s 'DisplayConf_Mods ==' "$QE_Modpath" | cut -d'"' -f2 | sort -u | paste -d' ' -s)"
   if [[ ! $DisplayConf_ModOptions ]]; then
-    printf "  %s:  Switch to a different 'built-in' version to see possible DisplayConf_Mods \n\n" "${QE_SourceVersion^^}"
+    printf "  %s:  Conf_Mods not available in the older 'built-in' versions \n\n" "${QE_SourceVersion^^}"
   else
     [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModDefault"
     DisplayConf_ModsPref="$(grep -s 'DisplayConf_Mods=' "$QE_Modpath" | grep \&\& | grep -v Default | cut -d'"' -f2)"
