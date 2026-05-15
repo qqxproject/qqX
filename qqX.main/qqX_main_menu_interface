@@ -216,7 +216,6 @@ else
         fi
         printColor  "\n\n  [d]   start with SDL display"
         if [[ $guest_os == "windows" ]]; then  printColor "   (size as set by qqX and/or by Windows)"
-        elif [[ $guest_os == "macos" ]] && [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then  printColor " (size determined by MacOS with this QE version)"
         elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > see settings)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
         elif [[ $SDL_ScreenPercent ]]; then printColor " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
         elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"

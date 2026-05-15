@@ -47,7 +47,7 @@ function system_code_check_and_warn {
   fi
 }
 
-# I have backups and I understand ....
+
 function find_quickemu_source_functions_and_vars {
 
   ## Load the right version of quickemu  (from settings)
@@ -65,9 +65,10 @@ function find_quickemu_source_functions_and_vars {
     exit  hold
   fi
 
-  QE_496_Script= ; QE_495_Script=
-  if grep -q 'LOOP in {1..' "$QE_SourcePath" ; then QE_496_Script="true"
-  elif grep -q 'configure_storage' "$QE_SourcePath" ; then QE_495_Script="true"
+  # Check for expected upstream code layout, where at 05/2026 '498' layout appears to be current and also sufficiently valid for QE 4.9.9
+  QE_498_Script=
+  if grep -qs 'LOOP in {1..' "$QE_SourcePath" && grep -qs 'fileshare_param_check' "$QE_SourcePath" ; then QE_498_Script="true"
+  else printColor "\n\n  INTERNAL ERROR  QE_498_Script Check  >  wrap quickemu > function 'find_quickemu_source_functions_and_vars' \n\n" ; sleep 1000
   fi
 
   # Ignore first bits, bash check & locale preamble etc.
@@ -371,22 +372,16 @@ function load_quickemu_cases_and_actions {
   # Quickemu normally sources in the .conf file at the start of "/tmp/qmod-actions-temp"  (see function 'quickemu')
   # BUT from qqX ver. 1.5 this happens at the end of 'VM_loader_selector_and_menu'
 
-  if [[ $QE_495_Script ]]; then
-    grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 '# Check if vm is already run' | head -n -1 > "/tmp/qmod-actions-conf-source-temp"
-  elif [[ $QE_496_Script ]]; then
+  if [[ $QE_498_Script ]]; then
     grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'LOOP in {1..' | head -n -7  > "/tmp/qmod-actions-conf-source-temp"
   else
-    grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'vm_boot' | head -n -2 > "/tmp/qmod-actions-conf-source-temp"
+    printColor "\n\n  INTERNAL ERROR  QE_498_Script Check  >  wrap quickemu > function 'load_quickemu_cases_and_actions' \n\n" ; sleep 1000
   fi
 
   grep -v 'source' "/tmp/qmod-actions-conf-source-temp" > "/tmp/qmod-actions-temp"
 
-  if [[ $QE_495_Script ]]; then
-    grep -A 200 '# Check if vm is already run' "/tmp/qmod-endof-file-temp"  > "/tmp/qmod-boot-temp"
-  elif [[ $QE_496_Script ]]; then
+  if [[ $QE_498_Script ]]; then
     grep -A 200 'fileshare_param_check' "/tmp/qmod-endof-file-temp" | tail -n +2   > "/tmp/qmod-boot-temp"
-  else
-    grep -A 200 'VM_UP} -eq 0' "/tmp/qmod-endof-file-temp" > "/tmp/qmod-boot-temp"
   fi
 
 }

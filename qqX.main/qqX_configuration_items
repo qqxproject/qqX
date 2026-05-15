@@ -91,17 +91,15 @@ function check_screen_percentage_and_output {
     [[ SDL_ScreenPercent -lt 25 ]] && SDL_ScreenPercent="25"
     [[ SDL_ScreenPercent -gt 97 ]] && SDL_ScreenPercent="97"
     if  ! grep -q -s -e 'screenpct' "/tmp/qmod-case-temp" ; then
-      if [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then
-        printColor "\n\n  WARNING:  SDL_ScreenPercent needs quickemu 4.8+ \n\n "
+        printColor "\n\n  WARNING:  SDL_ScreenPercent internal error \n\n "
         SDL_ScreenSize_Error="> not possible with this qe-version"
-      fi
     fi
   fi
 
   xRes= ; yRes= ; Mon_xRes= ; Mon_yRes= ; MonGrep=
   SDL_ScreenSize= ; MacScreenRes= ; SDL_ScreenSize_Cmd97=
 
-  if [[ $QE_495_Script || $QE_496_Script ]] && [[ $XDG_SESSION_TYPE == "x11" || $XDG_SESSION_TYPE == "wayland" ]]; then
+  if [[ ! $SDL_ScreenSize_Error ]] && [[ $XDG_SESSION_TYPE == "x11" || $XDG_SESSION_TYPE == "wayland" ]]; then
 
     if [[ $PhysicalMonitor ]]; then
       Mon_xRes="$(cut -d 'x' -f 1 <<< "$PhysicalMonitor")"
