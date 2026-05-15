@@ -762,15 +762,13 @@ refresh_tiano_vars () {
           printf  "\n\n  Using Folder '%s' >>  From variation placed in main settings" "$RtvArmFolder"
         fi
       fi
-      printColor  "\n\n  [enter] to continue"
+      printColor  "\n\n  [enter] to return"
     fi
-    printf  "  [b] to go back \n\n"
+    printf  "  [rtv] to confirm refresh \n\n"
     read -rp "  >  "  RtvBack
   fi
 
-  [[ $TianoVarsGrepError ]] && RtvBack="b"
-
-  if [[ $RtvBack ]]; then  printf "\n\n  Returning ... " ; sleep 1
+  if [[ $TianoVarsGrepError ]] || [[ $RtvBack != "rtv" ]]; then  printf "\n\n  Returning ... \n\n" ; sleep 1
 
   else
 
@@ -868,7 +866,8 @@ refresh_tiano_vars () {
 
     fi
 
-    # @ feb 2026 (QE 4.9.9) Changed to using fixed sync dates for MacOS, set in main menu interface, from where this function is called.
+    # @ feb 2026 (QE 4.9.9) Changed to using manual sync as there are problems with updates
+    # record date
     echo "$EpochDateNow" > "$VM_InstanceName/rtv.date.txt"
 
     if [[ $RtvText ]]; then

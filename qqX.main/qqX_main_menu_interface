@@ -297,8 +297,9 @@ else
       fi
     else
       # Sets rtv date log, if doesn't exist, and any QE upstream can get qqX overwritten, if needed
-      refresh_tiano_vars &
-      wait "$!"
+      # refresh_tiano_vars &
+      # wait "$!"
+      echo "$EpochDateNow" > "$VM_InstanceName/rtv.date.txt"
     fi
 
     [[ $Loop_Diagnostics ]] && main_loop_diagnostics
