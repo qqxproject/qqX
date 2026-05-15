@@ -424,7 +424,7 @@ function_conf_error () {
   else
 
     if [[ $NewSetupFlag || $FolderConfigFlag || $ConfTypo ]]; then
-      NewSetupFlag= ; FolderConfigFlag= ; ConfTypo=
+      FolderConfigFlag= ; ConfTypo=
       qqX_edit_settings  "conf"
     else  qqX_edit_settings
     fi
@@ -468,7 +468,10 @@ qqX_edit_settings() {
       show_qqXmod_settings
 
       while true ; do
-        printColor "\n  [enter] to edit   [n] CONF NOTES   [d] upstream defaults list   [t] config tune-up wizard   [b] go back"
+        printColor "\n  [enter] to edit   [n] CONF NOTES   [d] upstream defaults list   [t] config tune-up wizard   "
+        if [[ $NewSetupFlag ]]; then printColor "[b] go back to CURRENT settings" ; NewSetupFlag=
+        else printColor "[b] go back"
+        fi
         printf "\n\n"
         read -rp "  >  "   ConfEdit_Select
         if [[ $ConfEdit_Select == "n" ]] || [[ $ConfEdit_Select == "N" ]] ; then  custom_conf_notes
