@@ -65,13 +65,13 @@ custom_conf_notes () {
   "
 
   printColor "\n\n   %s:\n" "${QE_SourceVersion^^}"
-  [[ $DisplayConf_ModOptions ]] &&  printf "\n   DisplayConf_Mod=  %s" "$DisplayConf_ModOptions"
+  [[ $DisplayConf_ModOptions ]] &&  printf "\n   DisplayConf_Mod=  %s   (sys default '%s')" "$DisplayConf_ModOptions" "$DisplayConf_ModsPref"
 
-  if [[ $guest_os == "macos" ]] && grep -qs 'Force_UpstreamMacTimers' "$QE_Modpath" ; then
-    printf "\n\n   macOS CPU modifiers:"
-    grep -qs 'Ignore_MacSSE4checks' "$QE_Modpath" && printf "  Ignore_MacSSE4checks=\"true\""
-    grep -qs 'Force_UpstreamMacCpu' "$QE_Modpath" && printf "  Force_UpstreamMacCpu=\"true\""
-    grep -qs 'Force_UpstreamMacTimers' "$QE_Modpath" && printf "  Force_UpstreamMacTimers=\"true\""
+  if [[ $guest_os == "macos" ]] && grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" ; then
+    printf "\n"
+    grep -qs 'MacSSE4checks' "$QE_Modpath" &&           printf "\n   MacSSE4checks=\"ignore\"               Support for very old VMs, pre-existing or testing"
+    grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" &&  printf "\n   HighPrecisionMacTimers=\"disabled\"    Tests show High Precision runs faster. Possibly use for older VMs?"
+    grep -qs 'Upstream_MacCpu' "$QE_Modpath" &&         printf "\n   Upstream_MacCpu=\"force\"              The upstream model has problems -  YMMV ??"
   fi
 
   printf "\n\n"
@@ -468,7 +468,7 @@ qqX_edit_settings() {
       show_qqXmod_settings
 
       while true ; do
-        printColor "\n  [enter] to edit   [n] CONF NOTES   [d] upstream defaults list   [t] config tune-up wizard   "
+        printColor "\n  [enter] to edit   [n] CONF NOTES and MODS   [d] upstream defaults list   [t] config tune-up wizard   "
         if [[ $NewSetupFlag ]]; then printColor "[b] go back to CURRENT settings" ; NewSetupFlag=
         else printColor "[b] go back"
         fi

@@ -122,6 +122,11 @@ function configure_cpu_pinning() {
     echo " - Pinning:  Bind guest cores to host cores (${GUEST_CPUS} -> ${cpu_pins})"
 }
 
+# Independent and MORE RELIABLE check for CPU extension support by the host CPU (on Linux)
+function check_cpu_flag() {
+    grep 'Flags' <<< "$(lscpu)" | tr ' ' '\n' | grep -e "$1"$ | grep -e ^"$1" | grep -q "$1"
+}
+
 function configure_cpu() {
 
     # CAUTION: Using BADLY NAMED UPSTREAM variables  >> where eg. 'CPU_CORES' means 'ProcessThreads' or 'cpus' as in 'cores x threads per core'
@@ -269,6 +274,8 @@ function configure_cpu() {
             # A CPU with AVX2 support is required for >= macOS Ventura
 
             # qqX mod based on
+            # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2101368942
+            # and
             # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2115516935
             # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
             # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
@@ -277,9 +284,10 @@ function configure_cpu() {
             # Mods: Copyright (c)  Alex Genovese   https://github.com/qqxproject
             # Licence  GPL3   https://www.gnu.org/licenses
 
-            # Skylake-Server-v3 should be default
+            # SKYLAKE-Server-v3 should be default
             # See https://en.wikipedia.org/wiki/IMac_Pro#Technical_specifications
             # Also retains IBRS spectre mitigation
+
             # Tests suggest edit of .conf file to cpu_cores="8"  ie 4 core x 2 threads for MacOS to recognise Xeon
             # Will work both with cpu_cores="16" and ="32" but 'About' will show Cpu as unrecognised, only sysctl will show the CPU name ...
             # Other Xeon oddballs like 14 or 28 don't boot, even when forced.
@@ -297,17 +305,21 @@ function configure_cpu() {
             CPU_MODEL="Skylake-Server-v3"
             #CPU_MODEL="Cascadelake-Server-v3"
 
-            # A CPU with fma is required for Mac Graphics 'Metal' support (@flexiondotorg) # REVIEW add darwin hardware test ?
+            # A CPU with fma is required for Mac Graphics 'Metal' support (@flexiondotorg) # ?? REVIEW
 
             # Default Use Subtractive method: Set =1 or blank  Allow Qemu to add all, unless not present in host.
             # Use "sysctl -a | grep machdep.cpu" at terminal in MacOS to see flags
             # On initial tests, outperforms +ve method.
 
-            if [[ $Force_UpstreamMacCpu == "true" ]] ; then UseSubtractiveCPU=
+            ## Allow forcing of Upstream, pretty much as original BUT is slightly modded to give more options eg Timers
+            if [[ $Upstream_MacCpu == "force" ]] ; then UseSubtractiveCPU=
             else UseSubtractiveCPU=1
             fi
-            if [[ $Force_UpstreamMacTimers == "true" ]] ; then DisableHpeTimers=1
+            if [[ $HighPrecisionMacTimers == "disabled" ]] ; then DisableHpeTimers=1
             else DisableHpeTimers=
+            fi
+            if [[ $MacSSE4checks == "ignore" ]] ; then Ignore_MacSSE4checks=1
+            else Ignore_MacSSE4checks=
             fi
 
             # Dev overwrite, for testing only
@@ -320,11 +332,12 @@ function configure_cpu() {
 
                 CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
 
+                # pdpe1gb - see https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2117383335  ??
                 # https://en.wikipedia.org/wiki/MacOS_version_history
                 # https://mrmacintosh.com/how-to-fix-the-recovery-server-could-not-be-contacted-error-high-sierra-recovery-is-still-online-but-broken/
 
-                if [[ ! $Ignore_MacSSE4checks ]] || [[ $Ignore_MacSSE4checks != "true" ]] ; then
-                    # Ignore_MacSSE4checks for for testing purposes, or any bsolete VMs still being run
+                if [[ ! $Ignore_MacSSE4checks ]] ; then
+                    # MacSSE4checks for for testing purposes, or any bsolete VMs still being run
                     case ${macos_release} in
                         ventura|sonoma|sequoia|tahoe)
                             # A CPU with AVX2 support is required for >= macOS Ventura
@@ -352,9 +365,12 @@ function configure_cpu() {
                     esac
                 fi
 
+                ## NEUTRAL (leave as Qemu CPU internal algo) REVIEW
                 # rdtscp and invtsc, tsc, tsc_adjust, as neutral, neither on nor off
                 # ditto pcid for AMD and fp87 for Intel
 
+                ## SUBTRACTIVE
+                #  set as definitely 'off' if not found
                 for FLAG in abm aes apic arat bmi1 bmi2 clflush cmov cx8 cx16 de \
                             erms f16c fma fsgsbase fxsr invpcid lahf_lm lm \
                             mca mce mmx movbe mpx msr mtrr nx pae pat pge pse popcnt pse36 \
@@ -366,13 +382,22 @@ function configure_cpu() {
                         fi
                 done
 
+                # A couple of CPU flags are named differently in QEMU, beware. vbmi2, for example, is avx512vbmi2
+                # See https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2116765868
+                # And Liam's later rust project: https://github.com/lj3954/quickemu-rs/commit/8b1746fef423a752c253c9527349a2ce30524fd7
+
+                ## Upstream 'add_cpu_flag' and its sub-function 'reset_cpu_flags' were added in QE 4.99 but are NOT required here
+
             # -------------------------------------------------------------------------------------------------------------------
 
             else
 
-                ## UPSTREAM additive version with minor mods only
+                ## UPSTREAM additive version with minor mods only  (ex 4.99.01)
+                # Pretty much as original BUT gives options on Timers, and sse4 check bypass
 
-                # original DRAFT work Alex Genovese:
+                # original DRAFT work Alex Genovese (aka TuxVinyards):
+                # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2101368942
+                # also see:
                 # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2115516935
                 # https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2120274893
                 # https://github.com/quickemu-project/quickemu/pull/1225#issuecomment-2117555805
@@ -402,8 +427,8 @@ function configure_cpu() {
                 # running macOS x86_64 VMs on ARM Macs through software emulation.
                 if [ "${QEMU_ACCEL}" != "tcg" ]; then
 
-                    if [[ ! $Ignore_MacSSE4checks ]] || [[ $Ignore_MacSSE4checks != "true" ]] ; then
-                        # Ignore_MacSSE4checks for for testing purposes, or any bsolete VMs still being run
+                    if [[ ! $Ignore_MacSSE4checks ]] ; then
+                        # MacSSE4checks for for testing purposes, or any bsolete VMs still being run
                         case ${macos_release} in
                             ventura|sonoma|sequoia|tahoe)
                                 # A CPU with AVX2 support is required for >= macOS Ventura
@@ -456,7 +481,7 @@ function configure_cpu() {
             # Mods: Copyright (c)  Alex Genovese   https://github.com/qqxproject
             # Licence  GPL3   https://www.gnu.org/licenses
 
-            # Not many host CPU's will have AVX 512
+            # Not many host CPU's will have AVX 512  (subtract)
             if [[ "$CPU_MODEL" == 'Skylake-Server'* ]] || [[ "$CPU_MODEL" == 'Cascadelake-Server'* ]]; then
                 for FLAG in clwb adx smap avx512f avx512dq avx512bw avx512cd avx512vl ; do
                     if ! check_cpu_flag "$FLAG"; then
@@ -623,6 +648,8 @@ function configure_cpu() {
         ignore_msrs_alert
     fi
 }
+
+## End of configure_cpu
 
 ##  DISPLAY
 [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModDefault"

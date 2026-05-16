@@ -835,7 +835,7 @@ function_quick_get_wrap ()  {
             # Taken from report output in quickEmu Mac issue #1742
             if [[ "$(lspci | grep -i vga | cut -d':' -f3)" == *'Ryzen 4000/5000 Mobile Series'* ]]; then
               printColor "\n  WARNING  Ryzen 4000/5000 Mobile Series have been reported as unable to run MacOS (may affect this computer)"
-              printf "\n\n  See upstream quickemu issue archives for more details ... \n\n"
+              printf "\n\n  qqX Conf Mods may help?  See upstream quickemu issue archives for more details ... \n\n"
             fi
             if ! check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
               if ! check_cpu_flag sse4_1 ; then
