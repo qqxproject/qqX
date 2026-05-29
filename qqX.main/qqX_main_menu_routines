@@ -252,7 +252,7 @@ check_disk_is_okay () {
       fi
       printf "\n\n  Drive is in good health \n\n"
       SnapTitle="$(date +%b.%d.%H:%M)"
-      "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive" &
+      [[ -e  "$Selected_ChkDrive" ]] && "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive" &
       SnapPid="$!"
       # DiskStorageChanges=1  unlikely to cause changes, unless a VM is run and updating creates data ....  REVIEW
       read -t 3 -rp "  Couple of secs ... "

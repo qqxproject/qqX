@@ -137,6 +137,7 @@ function  main_menu_actions {
       sleep 2
       printf "\n\n  [enter] to refresh and continue \n\n"
       read -rp "  >  "
+      MainMenuChoicePreset="rq"
     fi
 
   elif [[ $MainMenuChoice == "qqf" ]] ; then  qcow2_filemanagement_launcher qqf-info
