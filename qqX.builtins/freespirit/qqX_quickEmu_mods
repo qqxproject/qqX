@@ -311,10 +311,11 @@ function configure_cpu() {
             # Use "sysctl -a | grep machdep.cpu" at terminal in MacOS to see flags
             # On initial tests, outperforms +ve method.
 
-            ## Allow forcing of Upstream, pretty much as original BUT is slightly modded to give more options eg Timers
-            if [[ $Upstream_MacCpu == "force" ]] ; then UseSubtractiveCPU=
+            ## Allow forcing of Upstream, pretty much as original ....
+            if [[ $Upstream_MacCpu == "force" ]] ; then UseSubtractiveCPU= ; HighPrecisionMacTimers="disabled"
             else UseSubtractiveCPU=1
             fi
+            # Still being used upstream, but possibly a legacy oversight from the days when Penryn was being used ?
             if [[ $HighPrecisionMacTimers == "disabled" ]] ; then DisableHpeTimers=1
             else DisableHpeTimers=
             fi
@@ -325,12 +326,22 @@ function configure_cpu() {
             # Dev overwrite, for testing only
             #UseHostOverWrite=1
             #DisableHpeTimers=1
+            #Tahoe_CpuTweaks="off"
 
             # -------------------------------------------------------------------------------------------------------------------
 
             if [[ $UseSubtractiveCPU ]]; then
 
-                CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
+                case ${macos_release} in
+                sequoia|tahoe)
+                    # Kholia implements 'hle' and 'rtm' as off, for sequioa and tahoe (seems to improve things ... )
+                    # https://github.com/kholia/OSX-KVM/commit/4c378a4b5e0b219783683012bec680325eb40719 > OpenCore-Boot.sh
+                    if [[ $Tahoe_CpuTweaks == "off" ]]; then CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off"
+                    else CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off,hle=off,rtm=off"
+                    fi ;;
+                *)
+                    CPU="-cpu ${CPU_MODEL},kvm=on,vendor=GenuineIntel,vmware-cpuid-freq=on,pdpe1gb=off" ;;
+                esac
 
                 # pdpe1gb - see https://github.com/quickemu-project/quickemu/issues/1114#issuecomment-2117383335  ??
                 # https://en.wikipedia.org/wiki/MacOS_version_history

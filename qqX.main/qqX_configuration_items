@@ -69,9 +69,10 @@ custom_conf_notes () {
 
   if [[ $guest_os == "macos" ]] && grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" ; then
     printf "\n"
-    grep -qs 'MacSSE4checks' "$QE_Modpath" &&           printf "\n   MacSSE4checks=\"ignore\"               Support for very old VMs, pre-existing or testing"
-    grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" &&  printf "\n   HighPrecisionMacTimers=\"disabled\"    Tests show High Precision runs faster. Possibly use for older VMs?"
-    grep -qs 'Upstream_MacCpu' "$QE_Modpath" &&         printf "\n   Upstream_MacCpu=\"force\"              The upstream model has problems -  YMMV ??"
+    grep -qs 'MacSSE4checks' "$QE_Modpath" &&           printf "\n   MacSSE4checks=\"ignore\"               Support for very old VMs, pre-existing or testing ..."
+    grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" &&  printf "\n   HighPrecisionMacTimers=\"disabled\"    Tests show High Precision runs faster. Possibly disable for older VMs?"
+    grep -qs 'Tahoe_CpuTweaks' "$QE_Modpath" &&         printf "\n   Tahoe_CpuTweaks=\"off\"                Seems to be needed for Tahoe and seems to help with Sequoia ..."
+    grep -qs 'Upstream_MacCpu' "$QE_Modpath" &&         printf "\n   Upstream_MacCpu=\"force\"              The upstream model has problems -  Your setup may vary ??"
   fi
 
   printf "\n\n"
