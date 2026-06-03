@@ -149,29 +149,28 @@ else
       else  printf  "  [v] show verbose boot args"
       fi
       printf  "   [xa]  view or edit extra qemu args  "
-
       [[ $ExtraArgs ]] && printf  "\n\n  Extra Args:  %s"  "$ExtraArgs"
-
       printColor "\n\n  ---------------------------------------------------------------------------- "
-
     fi
 
-    [[ -e $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
-    [[ -e $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
-    [[ -e $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
+    if [[ ! $LiveBootMissing ]]; then
+      [[ -e $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
+      [[ -e $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
+      [[ -e $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
 
-    printColor  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
-    if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
-    else [[ -e $MainDrive ]] && printf "   main (%s)" "$SnapCountMain"
-    fi
-    if [[ -e $SharedDrive ]]; then
-      if [[ $SnapCountShared -gt 15 ]]; then printColor "  shared (%s)" "$SnapCountShared"
-      else printf "  shared (%s)" "$SnapCountShared"
+      printColor  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
+      if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
+      else [[ -e $MainDrive ]] && printf "   main (%s)" "$SnapCountMain"
       fi
-    fi
-    if [[ -e $SecondDrive ]]; then
-      if [[ $SnapCountSecond -gt 15 ]]; then printColor "  second (%s)" "$SnapCountSecond"
-      else printf "  second (%s)" "$SnapCountSecond"
+      if [[ -e $SharedDrive ]]; then
+        if [[ $SnapCountShared -gt 15 ]]; then printColor "  shared (%s)" "$SnapCountShared"
+        else printf "  shared (%s)" "$SnapCountShared"
+        fi
+      fi
+      if [[ -e $SecondDrive ]]; then
+        if [[ $SnapCountSecond -gt 15 ]]; then printColor "  second (%s)" "$SnapCountSecond"
+        else printf "  second (%s)" "$SnapCountSecond"
+        fi
       fi
     fi
 
@@ -205,7 +204,7 @@ else
         printf "\n\n  [C]  toggle normal/custom menu  or  use normal:  [d] or [df] > sdl   [s] or [sf] > spice   [g] std gtk "
         printf "\n\n  [ce] edit custom args file    [qd] open Qemu docs in browser"
       elif [[ $LiveBoot && $LiveBootMissing ]]; then
-        printColor "\n\n   Hopefully, just a few a tweaks:  "
+        printColor "\n\n\n  Hopefully, just a few a tweaks:  "
         if [[ $img || $iso ]]; then  printColor "%s  %s ??" "$img" "$iso"
         else printColor "No Image or ISO listed ??"
         fi
