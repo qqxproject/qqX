@@ -60,19 +60,21 @@ FvArrFilePath=
 ##
 
 # FULL VERSION  for embedding in larger projects, has the verbose mode ready built in.
-# Named differently to enable easy separation when it is being used inside the standalone script.
-# When pasting the full version, it should be renamed to 'floatversion', the same as with the compact one.
-# Using the standard format of < floatversion --options  "quoted-input-source" > will ensure that any code call
+# Named differently to enable easy separation when it is being used inside the normal standalone script.
+# The compact version is intended for embedding, not this one, but the full one may be used if preferred:
+# If pasting the full function, float_version_from_string, it should be renamed to 'floatversion' and the compact function should be omitted.
+# NB also paste-in the other functions, show help etc ... and make sure that locale is set, as above.
+# Additionally --version checks should be run in separated code, if checks for updates are required, to avoid self recursion.
+
+# Using a standard format of < floatversion --options  "quoted-input-source" > will ensure that any code call
 # will auto-route to floatversion as a standalone dependency if the function is not present,
 # or if later switching to compact, or if wanting to re-use code elsewhere.
 
-float_version_from_string ()  {
-
-	show_help () {
-    if [[ ! $HideErrors  && ! $HideErrorHelp ]] ; then
-	  printf "
-  floatversion --options  \"quoted-input-source-or-data\"
-  OR  data | floatversion --options \"optional-additional\"
+show_help () {
+  if [[ ! $HideErrors  && ! $HideErrorHelp ]] ; then
+  printf "
+  floatversion --options  \"quoted-input-source-or-data\" (all options and values space separated)
+  OR piped stdout,  | floatversion --options \"optional-additional\"
 
   Extracts point separated numbers, or semantic version numbers with optional suffixes,
   and other common variations upon, from a given string or text-file
@@ -90,11 +92,14 @@ float_version_from_string ()  {
   -D | --delete       doesn't contain: -D  \"string  string  string\"
   -M | --max          Outputs the single highest/latest value in the list and with '-r' the lowest/earliest,
                       with integer shows top or bottom of total list eg. -M 3 is top 3 and -M 3 -r the bottom.
-  -RM [int]           Outputs the single lowest/earliest value in the list. With integer, as -M but
-                      reverses only the M filter set, not the list, eg. -M 3  > 3 2 1  -RM 3 > 1 2 3
-                      also accepts '-r' to reverse a lowest set filter ...
+  -RM [int]           Outputs the single lowest/earliest value in the list.
+                      With integer, as -M but NB reverses only the M filter set, not the whole input list
+                      eg. fv -RM 2 \"4.2  3.1  2.5  1.7\"  >  3.1  4.2
+  -R [int]            Outputs the lowest/earliest values in the list (use -r to reverse output order)
+                      eg. fv -r -R 2 \"4.2  3.1  2.5  1.7\"  >  1.7  2.5
   -g | -qg | --gt     A > B, returns true/false eg. if fv -g \"A B\"; then .. (.nums or sem-ver, implies -f)
-                      use -v for dev output, normally quiet and allows conditional testing (-qg quieter errors)
+                      use -v for dev output, normally quiet and allows conditional testing 
+                      Pre-sanitize input where possible. Use -qg to quieten the internal santizer's error output.
   -Q | --quiet        Quieten general error messages, as alternative to using '2>/dev/null'
                       Use -qc | -qs | -qg  for reduced error output on full machine tests (no help notes)
   -v | --verbose      show algorithm sequences (full version only) for problem output.
@@ -117,8 +122,8 @@ float_version_from_string ()  {
   Further Usage/Help/Details @ https://github.com/Alex-Genovese/floatversion
 
 "
-    fi
-  }
+  fi
+}
 
 bad_input () {
   printf "\n  ERROR with supplied data stream or supplied file address"
@@ -132,11 +137,15 @@ bad_cmd () {
   printf "\n\n"
 }
 
+float_version_from_string ()  {
+
   local ShowAsCol=
   local ShowAsStr=
   local SingleSpace=
   local ShowMax=
   local TopMax=
+  local LowMax=
+  local LowRev=
   local RevMax=
   local TopShow=
   local ShowAll=
@@ -172,16 +181,19 @@ bad_cmd () {
       -h|--help)
         show_help ; return 0 ;;
       -V|--version)
-        CurrentVersion="1.5.0"
+        CurrentVersion="1.6.0"
         printf "\n CurrentVersion: %s" "$CurrentVersion"
-        printf "\n\n Checking for updates....   "
-        LatestVersion="$(floatversion -M "$(curl -sf --max-time 5 "https://github.com/Alex-Genovese/floatversion/releases" | grep 's/tag')" 2>/dev/null)"
-        if [[ $LatestVersion ]]; then
-          printf "LatestVersion: %s " "$LatestVersion"
-          if floatversion --gt "$LatestVersion $CurrentVersion" 2>/dev/null; then printf " UPGRADEABLE "
-          else printf " Up-to-Date "
+        if ! grep -qs 'Checking for updates....' <<< "$(declare -f floatversion)"; then
+          # avoids self recursion, if the full version has been embedded
+          printf "\n\n Checking for updates....   "
+          LatestVersion="$(floatversion -M "$(curl -sf --max-time 5 "https://github.com/Alex-Genovese/floatversion/releases" | grep 's/tag')" 2>/dev/null)"
+          if [[ $LatestVersion ]]; then
+            printf "LatestVersion: %s " "$LatestVersion"
+            if floatversion -qg "$LatestVersion $CurrentVersion"; then printf " UPGRADEABLE "
+            else printf " Up-to-Date "
+            fi
+          else printf "connection/data not available"
           fi
-        else printf "connection/data not available"
         fi
         printf "\n\n (c) Alex Genovese  https://github.com/Alex-Genovese/floatversion \n\n"
         return 0 ;;
@@ -200,7 +212,7 @@ bad_cmd () {
         [[ $1 == "-qs" ]] && HideErrorHelp=1
         SingleSpace=1 ; shift ;;
       -r|--rev)
-        ShowRev=1 ; shift ;;
+        ShowRev=1; LowRev=1 ; shift ;;
       -a|--all)
         ShowAll=1 ; shift ;;
       -n|--num)
@@ -222,6 +234,9 @@ bad_cmd () {
       -RM)
         ShowMax=1 ; RevMax=1 ; shift
         [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]] && { TopMax="$1"; ShowMax=; shift; } ;;
+      -R)
+        ShowRev=1 ; LowMax=1 shift
+        if [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]]; then LowMax="$1"; ShowMax=; shift; else LowMax="1"; fi ;;
       -g|-qg|--gt)
         [[ $1 == "-qg" ]] && HideErrorHelp=1
         GTcompare=1; shift ;;
@@ -436,6 +451,24 @@ bad_cmd () {
         mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
         [[ $Verbose ]] && { echo "RevMax:"; declare -p fvOutputArr ; echo; }
       fi
+    elif [[ $LowMax ]]; then
+      NumArrTemp=(); i="${#fvOutputArr[@]}"
+        [[ $Verbose ]] && { echo "LowMax pre-process(1): i = $i  LowMax = $LowMax  TopShow = $TopShow"; echo; }
+      if [[ $i -gt "$LowMax" ]]; then TopShow="$((i-LowMax))"; else TopShow="$i"; fi ; ((i-=1))
+      [[ $TopShow -gt "$i" ]] && TopShow="0"
+        [[ $Verbose ]] && { echo "LowMax pre-process(2): i = $i  LowMax = $LowMax  TopShow = $TopShow"; echo; }
+      while true; do NumArrTemp+=("${fvOutputArr[i]}"); ((i-=1)); [[ $i -lt "$TopShow" ]] && break; done
+        [[ $Verbose ]] && { echo "LowMax post-process(1):"; echo "LowMax = $LowMax TopShow = $TopShow"; declare -p NumArrTemp ; echo ;}
+      mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
+        [[ $Verbose ]] && { echo "LowMax post-process(2):"; declare -p fvOutputArr ; echo; }
+      if [[ $LowRev ]]; then true
+      else
+        NumArrTemp=(); i="${#fvOutputArr[@]}"
+        ((i-=1)) # to make sure that "${fvOutputArr[0]}" gets read
+        while [[ $i -ge 0 ]]; do NumArrTemp+=("${fvOutputArr[i]}"); ((i-=1)); done
+        mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
+          [[ $Verbose ]] && { echo "Rev:"; declare -p fvOutputArr ; echo; }
+      fi
     fi
   fi
 
@@ -474,14 +507,14 @@ bad_cmd () {
 
 # COMPACT VERSION, suitable for embedding into other scripts, if preferred  (help and annotation removed)
 #  For quiet, use -Q.  Use of  -qc | -qs | -qg  reduces error output on full machine tests only (no help notes)
-# # NB make sure that locale is set in the main script. See notes at start.
+# # NB make sure that locale is set in the main script into which it is to be embedded. See notes at start.
 
 floatversion ()  {
   # floatversion --options  "quoted-input-string-or-text-file"
   # (c) Alex Genovese - version 1.4.03 (compact) - Usage/Help/Details @ https://github.com/Alex-Genovese/floatversion
   local ShowAsStr= ; local ShowAsCol= ; local ShowMax= ; local ShowRev= ; local ShowAll= ; local SortNum= ; local GrepFull= ; local HideErrors=
   local InputText= ; local Nums= ; local NumsCount= ; local FilterString= ; local StartString= ; local DeleteString= ; local GTcompare=; local GT=
-  local UseSortV= ; local NoSortVfallback= ; declare -a NumArrTemp ; declare -a NumArrSorted ; declare -a SelectArrTemp
+  local LowMax= ; local LowRev= ; local UseSortV= ; local NoSortVfallback= ; declare -a NumArrTemp ; declare -a NumArrSorted ; declare -a SelectArrTemp
   declare -a FilterArr ; declare -a StartArr ; declare -a DeleteArr ; declare -ga fvOutputArr
   while [[ "$1" ]] ; do
     case "$1" in
@@ -490,7 +523,7 @@ floatversion ()  {
       -s|-qs|--space)   SingleSpace=1 ; shift ;;
       --sort-v)         UseSortV=1 ;    shift ;;
       --no-svb)     NoSortVfallback=1 ; shift ;;
-      -r|--rev)     ShowRev=1 ;   shift ;;
+      -r|--rev)     ShowRev=1 ;  LowRev=1 ; shift ;;
       -a|--all)     ShowAll=1 ;   shift ;;
       -n|--num)     SortNum=1 ;   shift ;;
       -f|--full)    GrepFull=1 ;  shift ;;
@@ -499,6 +532,7 @@ floatversion ()  {
       -D|--delete)  [[ ! $2 || -e $2 ]] && return 1 ; GrepFull=1 ; DeleteString="$2" ;  shift 2 ;;
       -M|--max)     ShowMax=1 ; shift ; [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]] && { TopMax="$1"; ShowMax=; shift; } ;;
       -RM)          ShowMax=1 ; RevMax=1 ; shift ; [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]] && { TopMax="$1"; ShowMax=; shift; } ;;
+      -R)           ShowRev=1 ; LowMax=1 ; shift ; if [[ "$1" == [1-9] || "$1" == [1-9][0-9] ]]; then LowMax="$1"; ShowMax=; shift; else LowMax="1"; fi ;;
       -g|-qg|--gt)  GTcompare=1 ; shift ;;
       *)  if [[ "$1" == '-'* ]]; then [[ ! $HideErrors ]] && printf "\n  FloatVersion:  '%s'  not recognised \n\n" "$1" >&2 ; return 1
           elif [[ $InputText ]]; then [[ ! $HideErrors ]] && printf "\n  FloatVersion:  QUOTED Input String or Text File Name Name not found \n\n" >&2 ; return 1
@@ -565,14 +599,23 @@ floatversion ()  {
       if [[ $RevMax ]]; then NumArrTemp=(); i="${#fvOutputArr[@]}"; ((i-=1))
         while [[ $i -ge 0 ]]; do NumArrTemp+=("${fvOutputArr[i]}"); ((i-=1)); done
         mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
+      fi 
+    elif [[ $LowMax ]]; then NumArrTemp=(); i="${#fvOutputArr[@]}"
+      if [[ $i -gt "$LowMax" ]]; then TopShow="$((i-LowMax))"; else TopShow="$i"; fi ; ((i-=1)) ; [[ $TopShow -gt "$i" ]] && TopShow="0"
+      while true; do NumArrTemp+=("${fvOutputArr[i]}"); ((i-=1)); [[ $i -lt "$TopShow" ]] && break; done
+      mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
+      if [[ $LowRev ]]; then true ; else
+        NumArrTemp=(); i="${#fvOutputArr[@]}" ; ((i-=1))
+        while [[ $i -ge 0 ]]; do NumArrTemp+=("${fvOutputArr[i]}"); ((i-=1)); done
+        mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
       fi ; fi
   fi
   if [[ $GTcompare ]]; then
     if [[ $SortNum ]]; then [[ "$(bc -l <<< "${NumArrTemp[0]} > ${NumArrTemp[1]}")" == "1" ]] && GT=1
     else [[ "${NumArrTemp[0]}" == "${fvOutputArr[-1]}" ]] && [[ "${NumArrTemp[0]}" != "${NumArrTemp[1]}" ]] && GT=1 ; fi
-    if [[ $GT ]]; then  [[ $Verbose ]] && { echo "true"; echo ;} ; return 0 ; else [[ $Verbose ]] && { echo "false"; echo ;} ; return 1 ; fi
+    if [[ $GT ]]; then return 0 ; else return 1 ; fi
   elif [[ "${fvOutputArr[*]}" ]] && [[ $ShowAsStr || $ShowAll ]] && [[ ! $ShowAsCol ]]; then
-    if [[ $SingleSpace ]]; then printf "%s " "${fvOutputArr[@]}"; else printf "%s  " "${fvOutputArr[@]}"; fi
+    if [[ $SingleSpace ]]; then printf "%s " "${fvOutputArr[@]}"; else printf "%s  " "${fvOutputArr[@]}"; fi ; printf "\n"
   elif [[ "${fvOutputArr[*]}" ]] && [[ $ShowAsCol ]]; then printf "%s\n" "${fvOutputArr[@]}"
   elif [[ "${fvOutputArr[*]}" ]] && [[ $RevMax ]]; then  echo "${fvOutputArr[0]}"
   elif [[ "${fvOutputArr[*]}" ]]; then echo "${fvOutputArr[-1]}"
