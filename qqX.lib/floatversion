@@ -59,17 +59,6 @@ FvArrFilePath=
 
 ##
 
-# FULL VERSION  for embedding in larger projects, has the verbose mode ready built in.
-# Named differently to enable easy separation when it is being used inside the normal standalone script.
-# The compact version is intended for embedding, not this one, but the full one may be used if preferred:
-# If pasting the full function, float_version_from_string, it should be renamed to 'floatversion' and the compact function should be omitted.
-# NB also paste-in the other functions, show help etc ... and make sure that locale is set, as above.
-# Additionally --version checks should be run in separated code, if checks for updates are required, to avoid self recursion.
-
-# Using a standard format of < floatversion --options  "quoted-input-source" > will ensure that any code call
-# will auto-route to floatversion as a standalone dependency if the function is not present,
-# or if later switching to compact, or if wanting to re-use code elsewhere.
-
 show_help () {
   if [[ ! $HideErrors  && ! $HideErrorHelp ]] ; then
   printf "
@@ -137,7 +126,27 @@ bad_cmd () {
   printf "\n\n"
 }
 
-float_version_from_string ()  {
+
+# FULL VERSION, has the verbose mode ready built in.
+# The compact version is the generally intended default for embedding, not this one,
+# but the full one may be used if preferred, as an alternative to adding the standalone to a library.
+
+# With release 1.6.01 the full function is named as 'floatversion' which enables keeping the compact, compactly named as 'fv'
+# to run alongside, and to avoid problems with self-recursive calls.
+
+# The newer defaults mean that calls scripted either as 'fv' or as 'floatversion' will now both work,
+# and that if embedding just the compact version, this may be renamed as floatversion, as required, without problems.
+
+# Having a standard command format of < fv | floatversion --options  "quoted-input-source"
+# ensures that any code call will auto-route to floatversion as a standalone dependency
+# if later switching to this method, or if later switching to compact, or if wanting to re-use code elsewhere ...
+
+# If embedding the full function also paste-in the other sub-functions, show help etc ...
+# and (optionally) the compact 'fv' if upgrade checks are wanted.
+
+# In all cases make sure that locale is set, as above.
+
+floatversion ()  {
 
   local ShowAsCol=
   local ShowAsStr=
@@ -181,15 +190,14 @@ float_version_from_string ()  {
       -h|--help)
         show_help ; return 0 ;;
       -V|--version)
-        CurrentVersion="1.6.0"
+        CurrentVersion="1.6.01"
         printf "\n CurrentVersion: %s" "$CurrentVersion"
-        if ! grep -qs 'Checking for updates....' <<< "$(declare -f floatversion)"; then
-          # avoids self recursion, if the full version has been embedded
+        if [[ $(type -t 'fv') == "function" ]]; then
           printf "\n\n Checking for updates....   "
-          LatestVersion="$(floatversion -M "$(curl -sf --max-time 5 "https://github.com/Alex-Genovese/floatversion/releases" | grep 's/tag')" 2>/dev/null)"
+          LatestVersion="$(fv -M "$(curl -sf --max-time 5 "https://github.com/Alex-Genovese/floatversion/releases" | grep 's/tag')" 2>/dev/null)"
           if [[ $LatestVersion ]]; then
             printf "LatestVersion: %s " "$LatestVersion"
-            if floatversion -qg "$LatestVersion $CurrentVersion"; then printf " UPGRADEABLE "
+            if fv -qg "$LatestVersion $CurrentVersion"; then printf " UPGRADEABLE "
             else printf " Up-to-Date "
             fi
           else printf "connection/data not available"
@@ -506,11 +514,11 @@ float_version_from_string ()  {
 ##
 
 # COMPACT VERSION, suitable for embedding into other scripts, if preferred  (help and annotation removed)
-#  For quiet, use -Q.  Use of  -qc | -qs | -qg  reduces error output on full machine tests only (no help notes)
-# # NB make sure that locale is set in the main script into which it is to be embedded. See notes at start.
+# See full version notes: 'fv' may be renamed as 'floatversion', if required
+# Also make sure that locale is set in the main script into which it is to be embedded.
 
-floatversion ()  {
-  # floatversion --options  "quoted-input-string-or-text-file"
+fv ()  {
+  # fv | floatversion --options  "quoted-input-string-or-text-file"
   # (c) Alex Genovese - version 1.4.03 (compact) - Usage/Help/Details @ https://github.com/Alex-Genovese/floatversion
   local ShowAsStr= ; local ShowAsCol= ; local ShowMax= ; local ShowRev= ; local ShowAll= ; local SortNum= ; local GrepFull= ; local HideErrors=
   local InputText= ; local Nums= ; local NumsCount= ; local FilterString= ; local StartString= ; local DeleteString= ; local GTcompare=; local GT=
@@ -626,9 +634,9 @@ floatversion ()  {
 ##
 
 # script call, developer option
-if [[ $1 == "-C" ]] || [[ $1 == "--compact" ]]; then shift ; floatversion "$@"
-elif [[ $CompactVersion ]]; then  floatversion "$@"
-else float_version_from_string "$@"
+if [[ $1 == "-C" ]] || [[ $1 == "--compact" ]]; then shift ; fv "$@"
+elif [[ $CompactVersion ]]; then  fv "$@"
+else floatversion "$@"
 fi
 
 # https://code.visualstudio.com/
