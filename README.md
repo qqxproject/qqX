@@ -4,13 +4,15 @@ SPIN-OFF NEXT LEVEL QUICKEMU / QUICKGET
 
 Adds fixes, tools and improvements to the popular [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) system
 
+See announcements for the [latest news](https://github.com/qqxproject/qqX/discussions/categories/announcements) and updates
+
 -----
 
 > After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
 
 -----
 
-CAREFULLY WRITTEN AND CAREFULLY CHECKED
+CAREFULLY WRITTEN AND CAREFULLY CHECKED [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qqxproject/qqX)
 
 - Installable on all versions of standard Linux
 
@@ -45,8 +47,6 @@ RECENT HIGHLIGHTS Include:
 - 51 language auto-translation system
 
 - Pre-release downloading and a pre-release alert system
-
-See announcements for the [latest news](https://github.com/qqxproject/qqX/discussions/categories/announcements)
 
 -----
 
