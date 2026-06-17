@@ -213,7 +213,11 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
 
     while [[ "${args[i]}" ]]; do
 
-      # fixes for quickemu deprecated code, to be updated from time to time REVIEW
+      # Fixes for quickemu deprecated code, to be updated from time to time REVIEW
+
+      # Most of the qemu and quickemu fixes and improvements now happen in 'qqX_quickEmu_mods'
+      # And even more fixes for quickemu's companion script 'quickget' happen in 'qqX_quickGet_mods' ....
+      # See the file 'path.notes.for.floatversion.deployment.md' in 'qqX.lib' that explains more on how this all gets integrated
 
       if [[ $FixArgs_hpet ]] && [[ "${args[i]}" == '-no-hpet' ]]; then args[i]="-machine hpet=off" ; fi
 
