@@ -174,7 +174,7 @@ show_main_menu_header () {
   fi
 
   if stat "$VM_Conf_Dir/$VM_Conf_File" 2>/dev/null | grep -q "symbolic" ; then
-    printf "\n  Symbolically linked to real path %s \n" "$(realpath "$VM_Conf_Dir/$VM_InstanceName")"
+    printf "\n  SYMBOLICALLY LINKED TO REAL PATH %s \n" "$(realpath "$VM_Conf_Dir/$VM_InstanceName")"
   fi
 
   if [[ $qvWarn ]] ; then
@@ -371,8 +371,8 @@ function_delete_Selected_VM () {
     ((i+=1))
   done
 
-  printColor "\n\n  Folder: %s" "$1"
-  printColor "  &  File: %s  to be deleted?"  "$2"
+  printf "\n\n  Folder: %s" "$1"
+  printf "  &  File: %s  to be deleted?"  "$2"
 
   printColor "\n\n\n  Folder content: \n\n"
   ls "$1"
@@ -381,6 +381,8 @@ function_delete_Selected_VM () {
     printf "\n\n  TO DELETE THIS VM, removal of BOTH the above FOLDER/FILE and the CONNECTED LINKS is required."
     printf "\n\n  Deletion of the links is best done first to avoid residual files being left:"
     printColor "\n\n  Select [n] to manually DELETE LINKS FIRST using a file manager ...."
+  elif [[ $SelectedLinks ]]; then
+    printColor "\n\n  Consider [n] to MANUALLY DELETE LINKS using a file manager ...."
   else
     printf "\n\n  To delete this VM, removal of the above folder/file is sufficient."
     printf "\n\n  Select [n] to manually delete using a file manager, if there special files to keep ..."
@@ -388,11 +390,12 @@ function_delete_Selected_VM () {
 
 
   if [[ $TrashingAvailable ]]; then
-    if [[ $SelectedLinks ]]; then  printColor "\n\n  [enter] safely move the links to the recoverable trash bin"
+    if [[ $SelectedLinks ]]; then  printf "\n\n  [enter] move the links to the trash bin (may stay linked and report as taking up space)"
     elif [[ $ConnectedLinks ]]; then  printf "\n\n  [enter] move the folder & file to the recoverable trash bin"
     else printColor "\n\n  [enter] safely move the folder & file to the recoverable trash bin"
     fi
-    printf "\n\n  [n] keep    [y] yes, PERMANENTLY, I have back-ups ..."
+    printf "\n\n  [n] keep (and return)    [y] yes, PERMANENTLY, I have back-ups ..."
+    [[ $SelectedLinks ]] && printf "  including that of the original that this is linked to"
   else
     printColor "\n\n  [enter] use the file manager to move things the trash bin "
     printf "\n\n  [y] yes, PERMANENTLY, I have back-ups ..."

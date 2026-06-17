@@ -113,7 +113,7 @@ else
       printColor "\n  ----------------------------------------------------------------------------"
       printf "\n\n  File Manager: '%s'  Text Editor: '%s'  Browser: '%s' " "$FileManager" "$TextEditor" "$WebBrowser"
 
-      printf "\n\n  [del] delete selected VM   [mv] move, rename or link"
+      printf "\n\n  [del] delete selected VM   [mv] move, rename or [ln] link"
       printColor  "    [u] hide utils & technical"
 
       printf "\n\n  [2c]  create [2d] delete a second virtual hard-drive   [3c] create [3m] "
