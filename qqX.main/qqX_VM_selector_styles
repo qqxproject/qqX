@@ -267,9 +267,12 @@ print_selector_array_E_style () {
   ListTitleFolder=
   ListTitleFolderOld=
   ListTitleFolderDisplay=
+  local HideBase=
+  local DefaultBase= ; DefaultBase="$(dirname "$Default_VM_Folder")"
 
   vm_selector_init_common
-  [[ $1 == "username" ]] && printf "\n  Hello %s \n" "${USER^^}"
+  [[ $1 == "username" ]] && printf "\n  Hello %s \n" "${USER^^}" && shift
+  [[ $1 == "hidebase" ]] && HideBase=1
 
   [[ ! $VM_Select_Items_style_E_PerLine ]] && VM_Select_Items_style_E_PerLine="2"
 
@@ -280,6 +283,7 @@ print_selector_array_E_style () {
 
     if [[ $ListTitleFolder != "$ListTitleFolderOld" ]]; then
       # sneak in the new folder name & nudge up the line item count before printing the VM item
+      [[ $HideBase ]] && ListTitleFolder="${ListTitleFolder/"$DefaultBase"\//}"
       if [[ ${#ListTitleFolder} -gt 28 ]]; then
         ListTitleFolderDisplay="${ListTitleFolder:(-28)}"
         ListTitleFolderDisplay="${ListTitleFolderDisplay#*/}"
@@ -287,7 +291,9 @@ print_selector_array_E_style () {
       else  ListTitleFolderDisplay="$ListTitleFolder"
       fi
       [[ $ListTitleFolderOld ]] && printf "\n"
-      printColor "\n  %-35s"  "$ListTitleFolderDisplay"
+      if [[ $HideBase ]]; then printf "\n   -" ; printColor " %-29s   "  "$ListTitleFolderDisplay"
+      else printColor "\n  %-35s"  "$ListTitleFolderDisplay"
+      fi
       VM_List_LineItemCount=1
     else
       # print the item, but move to new line first if needed
@@ -317,6 +323,10 @@ print_selector_array_E_style () {
 }
 
 print_selector_array_F_style () { print_selector_array_E_style  username ; }
+
+print_selector_array_G_style () { print_selector_array_E_style  hidebase ; }
+
+print_selector_array_H_style () { print_selector_array_E_style  username hidebase ; }
 
 # qqX styles, find last value from (contigious) list
 LastSelectStyleAvailable="?"
