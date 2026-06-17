@@ -87,7 +87,7 @@ VM_loader_selector_and_menu () {
 
         printf "\n  Total Storage:  Drives %s (%s)  ISO's %s (%s)" "${TotalQcow2_Sizes}G" "$TotalQcow2_SizesCount" "${Total_ISO_Sizes}G" "$Total_ISO_SizesCount"
         [[ $BackUpQcowPresent ]] && printf "  Backups (%s)"  "$BackUpQcowPresent"
-        printf "  [r] refresh  [sz] show size details"
+        printf "  [r] refresh  [sz] show size details  [a] add/delete group folder"
         printf "\n"
 
         # print the array of installed VMs to select which one, and in the required style:
@@ -253,10 +253,29 @@ VM_loader_selector_and_menu () {
         qqX_edit_settings
         return
 
-      elif [[ $VM_Selection == "sz" ]];then
+      elif [[ $VM_Selection == "sz" ]];then VM_Selection= ; show_VM_Array_sizes_text
 
-        VM_Selection=
-        show_VM_Array_sizes_text
+      elif [[ $VM_Selection == "a" ]];then
+
+        printColor "\n\n  To ADD (or delete) a group folder and organise your VM collection:"
+        printf "\n\n  1. Open the file manager and create a new entry eg Misc, Other, Etc ... "
+        printf "\n\n  2. Copy the folder name and path"
+        printf "\n\n  3. Open the qqX settings editor and paste the /full/path/folder in the top section Extra_VM_Folder+="
+        printf "\n\n  For deletion, follow same route but remove ..."
+        printf "\n\n  The VM selector display will auto-update"
+        printf "\n\n\n  Switching to view VM files in File Manager in new window ...."
+        printColor "\n\n  [enter] to open File Manager  [c] to cancel \n\n"
+        read -rp "  >  "  CancelFM
+        if [[ ! $CancelFM ]]; then
+          (nohup &> /dev/null  "$FileManager"  "$Default_VM_Folder"  & ) || file_manager_not_found_message
+          sleep 1
+          printColor "\n  [enter] to open settings editor and continue  [c] to cancel \n\n"
+          read -rp "  >  " CancelFM
+          [[ ! $CancelFM ]] && qqX_edit_settings
+          VM_Selection=
+          DiskStorageChanges=1
+          return
+        fi
 
       elif [[ $VM_Selection == "h" || $VM_Selection == "f" ]];then
 
