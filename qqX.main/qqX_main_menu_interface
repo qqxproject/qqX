@@ -560,7 +560,7 @@ else
           printf "\n\n"
         elif [[ $qqX_Current_ReleaseType == "beta" ]]; then
           printf "\n  [tags] latest code %s > " "$qqX_Newest_Tag"
-          if [[ $qqX_Newest_Tag == "$qqX_Version" ]]; then  printf "up-to-date\n\n"
+          if ! fv -qg "$qqX_Newest_Tag $qqX_Version" ; then printf "up-to-date\n\n"
           else printf "%s\n\n"  "$qqX_Newest_TagText"
           fi
         fi
@@ -571,7 +571,7 @@ else
       if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
       else printf "(no distro webpage listed)  "
       fi
-      printf " [h] show help & info  [b] go back  [q] quit "
+      printf " [h] show help & info  [u] show UTILS & technical   [b] go back   [q] quit "
 
       if [[ $LiveBoot && $DistroLogin ]]; then
         printColor "\n\n  Login:Password"
