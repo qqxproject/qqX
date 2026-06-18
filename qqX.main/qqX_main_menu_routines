@@ -74,14 +74,14 @@ vm_pid_kill_menu() {
         [[ $SpicyPID ]] && kill "$SpicyPID" 2>/dev/null &
         kill "$InstancePID" 2>/dev/null &
       fi
-      sleep 3
+      sleep 3  # give time to background processes to start up, before moving on
       printf "\n\n"
       tput cnorm
       break
     elif [[ $KillPID_Menu == "r" ]]; then
       if [[ ! $(pgrep spicy) ]]; then
         eval "$SpicyReStartCmd"
-        sleep 2
+        sleep 2  # give time to background process before moving on
         SpicyPID="$(pgrep spicy)"
       fi
     else
@@ -284,6 +284,9 @@ check_if_disk_needs_a_cleanup  () {
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
+      ## DiskDisparity levels are given textual interpretation for the user
+      # in the script 'qqX_main_menu_interface' after it has called this function
+      #
       #elif [[ $VirtualSize -le 32 ]]; then
       elif [[ "$(bc -l <<< "$VirtualSize <= 32" 2>/dev/null)" == "1" ]]; then
         DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"

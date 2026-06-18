@@ -380,7 +380,7 @@ function download_new_release {
   else
     # each release to its own FOLDER makes things tidier
     qqX_LatestTarBall_Folder="$qqX_LatestTarBall_Folder/qqX.releases/$qqX_Latest_ReleaseNumber"
-    # make sure each DOWNLOAD is clean
+    # make sure each DOWNLOAD is clean > if a download already exists, it may be because it failed the sha256 check ...
     [[ -d "$qqX_LatestTarBall_Folder" ]] && rm -r "$qqX_LatestTarBall_Folder" 2>/dev/null
     sleep 0.5; mkdir -p "$qqX_LatestTarBall_Folder" ; sleep 0.5
     # record where to come back to, when done and not to confuse with '$Current_VM_Folder'
