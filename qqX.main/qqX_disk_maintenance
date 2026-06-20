@@ -38,52 +38,49 @@ drives_and_snapshots() {
   fi
 
   if [[ $SecondDriveArgs ]]; then
-
-    printColor "\n  Second Drive: \n\n"
-
-    if ! "$QEMU_IMG" snapshot -l "$SecondDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+    printColor "\n  Second Drive:"
+    if [[ ! -e "$SecondDrive" ]]; then printf "   ERROR - Drive not found"
     else
-      if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SecondDrive"; echo
-      else "$QEMU_IMG" snapshot -l "$SecondDrive"; echo
+      printf "\n\n"
+      if ! "$QEMU_IMG" snapshot -l "$SecondDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+      else
+        if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SecondDrive"; echo
+        else "$QEMU_IMG" snapshot -l "$SecondDrive"; echo
+        fi
       fi
+      if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SecondDrive" ; echo
+      else check_disk_is_okay "$SecondDrive"
+      fi
+      check_if_disk_needs_a_cleanup  "$SecondDrive"
+      printf "  Health Status:  %s"  "$DiskChkStatus"
+      if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
+      elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
+      fi
+      [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] && printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
     fi
-
-    if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SecondDrive" ; echo
-    else check_disk_is_okay "$SecondDrive"
-    fi
-
-    check_if_disk_needs_a_cleanup  "$SecondDrive"
-
-    printf "  Health Status:  %s"  "$DiskChkStatus"
-    if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
-    elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
-    fi
-    [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] && printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
     printf "\n\n"
-
   fi
 
   if [[ $SharedDriveArgs ]]; then
-
-    printColor "\n  Shared Drive: \n\n"
-
-    if ! "$QEMU_IMG" snapshot -l "$SharedDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+    printColor "\n  Shared Drive:"
+    if [[ ! -e "$SharedDrive" ]]; then printf "   ERROR - Drive not found"
     else
-      if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SharedDrive"; echo
-      else "$QEMU_IMG" snapshot -l "$SharedDrive"; echo
+      printf "\n\n"
+      if ! "$QEMU_IMG" snapshot -l "$SharedDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+      else
+        if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SharedDrive"; echo
+        else "$QEMU_IMG" snapshot -l "$SharedDrive"; echo
+        fi
       fi
+      if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SharedDrive" ; echo ; else check_disk_is_okay "$SharedDrive"
+      fi
+      check_if_disk_needs_a_cleanup  "$SharedDrive"
+      printf "  Health Status:  %s"  "$DiskChkStatus"
+      if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
+      elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
+      fi
+      [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] &&  printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
     fi
-
-    if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SharedDrive" ; echo ; else check_disk_is_okay "$SharedDrive"
-    fi
-
-    check_if_disk_needs_a_cleanup  "$SharedDrive"
-
-    printf "  Health Status:  %s"  "$DiskChkStatus"
-    if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
-    elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
-    fi
-    [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] &&  printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
     printf "\n\n"
 
   fi

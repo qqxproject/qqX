@@ -224,21 +224,15 @@ function set_drive_paths {
   #  which will have already sourced the .conf file and its variables
 
   if [[ $MacLegacyDrive == "true" ]]; then  BusType="ide-hd,bus=ahci.2"
-
   else BusType="virtio-blk-pci"; fi
 
   #  SECOND DRIVE
   #  Drive path to be individually set in the .conf file on a per VM basis.
-
   if [[ -e "$SecondDrive" ]]; then
-
     SecondDriveArgs=" -device ${BusType},drive=SecondDrive -drive id=SecondDrive,if=none,format=qcow2,file=$SecondDrive"
-
   elif [[ $SecondDrive ]]; then
-
     # whilst the conf entry exists the above test didn't find it
     DriveLocationError="ERROR SecondDrive NOT found (.conf file)"
-
   fi
 
   #  SHARED DRIVE
@@ -249,10 +243,8 @@ function set_drive_paths {
   fi
 
   if [[ $SharedDrive ]]; then
-
     # if not toggled from the main menu, then read the .conf file
     [[ ! $SharedDrive_Mount ]] && eval "$(grep -s SharedDrive_Conf "$VM_Conf_File" | grep -v '#')"
-
     if [[ $MacLegacyDrive ]] || [[ $SharedDrive_Conf ==  "no-shared" ]]; then
       SharedDriveArgs=
     elif [[ -e "$SharedDrive" ]]; then
@@ -261,11 +253,9 @@ function set_drive_paths {
     elif [[ $SharedDrive ]]; then
       DriveLocationError="ERROR SharedDrive NOT found (main settings)"
     fi
-
   fi
 
 }
-
 
 #  MAIN DRIVE & BOOT
 # 'refresh_conf_vars_and_values' from qqX ver 1.5 will source the quickemu .conf file
