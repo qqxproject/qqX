@@ -396,15 +396,19 @@ function  main_menu_actions {
     drives_and_snapshots select  snaps
 
     [[ $MainMenuChoicePreset == "disk" ]] && sleep 2 && return
-
-    printColor "\n\n  [enter] Create snap with date.time title "
-    printf "  [text input] Create with text descriptor   [b] back to main menu "
-    SnapTitle= ; scReturn=
-    printf "\n\n"
-    read -rp "  >  "  SnapTitle
-    printf "\n\n"
-    [[ ! $SnapTitle ]] && SnapTitle="$(date +%b.%d.%H:%M)"
-    if [[ $SnapTitle != "b" ]]; then
+    if [[ $Selected_DriveOption == "b" ]]; then SnapTitle="b"
+    else
+      printColor "\n\n  [enter] Create snap with date.time title "
+      printf "  [text input] Create with text descriptor   [b] back to main menu "
+      SnapTitle= ; scReturn=
+      printf "\n\n"
+      read -rp "  >  "  SnapTitle
+      printf "\n\n"
+      [[ ! $SnapTitle ]] && SnapTitle="$(date +%b.%d.%H:%M)"
+    fi
+    if [[ $SnapTitle == "b" ]]; then
+      MainMenuChoicePreset= ; Selected_DrivePreset= ; Selected_DriveNumber= ; Selected_Drive= ; Selected_DriveName=
+    else
       # remove spaces, make title dot separated, as easier to IFS
       SnapTitle="${SnapTitle// /.}"
       "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
@@ -414,8 +418,8 @@ function  main_menu_actions {
       printColor "\n\n  [enter] to return to menu"
       printf "   [sd] delete older snaps \n\n "
       read -rp "  >  "  scReturn
-      if [[ $scReturn ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset=1
-      else MainMenuChoicePreset= ; Selected_DrivePreset=
+      if [[ $scReturn ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset="$Selected_DriveNumber"
+      else MainMenuChoicePreset= ; Selected_DrivePreset= ; Selected_DriveNumber= ; Selected_Drive= ; Selected_DriveName=
       fi
     fi
 

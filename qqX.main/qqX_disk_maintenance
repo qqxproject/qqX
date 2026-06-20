@@ -28,7 +28,10 @@ drives_and_snapshots() {
   [[ $1 == "as_disk_util" ]] && printColor "\n\n  Internal ERROR: disk uitilty needs two args \n\n"  && sleep 100
 
   Selected_Drive=
+  Selected_DriveNumber=
   Selected_DriveName=
+  Selected_DriveOption=
+
   if [[ $1 == "info_current" ]]; then
     TwoTemp="$2"
     set -- "info" "$TwoTemp"
@@ -121,27 +124,37 @@ drives_and_snapshots() {
 
   fi
 
-  if [[ $1 == "select" ]] && [[ ! $Selected_DrivePreset ]] && [[ $SharedDriveArgs || $SecondDriveArgs ]]; then
+  if [[ $1 == "select" ]] && [[ $SharedDriveArgs || $SecondDriveArgs ]]; then
 
-    printColor "\n  SELECT:  [enter]  MAIN DRIVE (or back to main menu)"
-    [[ $SecondDriveArgs ]] && printColor "   [2]  Second Drive"
-    [[ $SharedDriveArgs ]] && printColor "   [3]  Shared Drive"
-    [[ $SharedDriveArgs && $SecondDriveArgs ]] && printColor "  (scroll to view)"
-    printf "\n\n"
-    read -rp "  >  "   Selected_Drive
-
-    case "$Selected_Drive" in
+    if [[ $Selected_DrivePreset ]]; then Selected_DriveOption="$Selected_DrivePreset"
+    else
+      printColor "\n  SELECT:  [enter]  MAIN DRIVE"
+      [[ $SecondDriveArgs ]] && printColor "   [2]  Second Drive"
+      [[ $SharedDriveArgs ]] && printColor "   [3]  Shared Drive"
+      [[ $SharedDriveArgs && $SecondDriveArgs ]] && printColor "  (scroll to view)"
+      printColor "    [b] to go back \n\n"
+      read -rp "  >  "   Selected_DriveOption
+    fi
+    case "$Selected_DriveOption" in
       disk)   Selected_Drive=
               MainMenuChoicePreset="disk"
               printf "\n\n  Returning to Main menu and DISK REPAIR utils ....\n\n"
       ;;
+      b)  Selected_Drive=
+          Selected_DriveNumber=
+          Selected_DriveName=
+          Selected_DrivePreset=
+      ;;
       2)  Selected_Drive="$SecondDrive"
+          Selected_DriveNumber=2
           Selected_DriveName="Second Drive"
       ;;
       3)  Selected_Drive="$SharedDrive"
+          Selected_DriveNumber=3
           Selected_DriveName="Shared Drive"
       ;;
       *)  Selected_Drive="$MainDrive"
+          Selected_DriveNumber=1
           Selected_DriveName="Main Drive"
       ;;
     esac
@@ -149,6 +162,7 @@ drives_and_snapshots() {
   else
 
     Selected_Drive="$MainDrive"
+    Selected_DriveNumber=1
     Selected_DriveName="Main Drive"
 
   fi
@@ -182,7 +196,7 @@ function manage_and_repair_disks {
     if [[ ! -e "$Selected_Drive" ]]; then printf "\n\n  [b] go back to main menu"
     else
 
-      printf "\n\n  Selected Drive is %s " "$Selected_DriveName"
+      printf "\n\n  SELECTED Drive is %s " "${Selected_DriveName^^}"
       check_disk_is_okay  "$Selected_Drive"
       if [[ $DiskChkStatus != "Okay" ]]; then printColor "\n\n  Status:  %s"  "$DiskChkStatus"
       else printf "\n\n  Status:  %s  > No errors "  "$DiskChkStatus"
@@ -360,8 +374,10 @@ function qqX_snapshot_delete {
 
   # NB: qqX prefix to avoid cross-linking with the quickemu one
 
+  [[ $Selected_DriveOption == "b" ]] && return
+
   printColor "\n\n qqX Snapshot Delete function "
-  printf "\n\n %s  (reselection & cancel prompts are given before starting)" "$Selected_DriveName"
+  printf "\n\n Selected Drive = %s  (reselection & cancel prompts are given before starting)" "${Selected_DriveName^^}"
 
   # Create range-selectable array (finds lines with a date entry)
   SnapListString="$("$QEMU_IMG" info "$Selected_Drive" | grep '[0-9][0-9]:')"
@@ -470,9 +486,9 @@ function qqX_snapshot_delete {
     sdReturn=
     printf "\n\n [enter] to return to menu   [sd] delete again   [sc] create new snap \n\n "
     read -rp " >  "  sdReturn
-      if [[ $sdReturn == "sd" ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset=1
-      elif [[ $sdReturn == "sc" ]]; then MainMenuChoicePreset="sc" ; Selected_DrivePreset=1
-      else MainMenuChoicePreset= ; Selected_DrivePreset=
+      if [[ $sdReturn == "sd" ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset="$Selected_DriveNumber"
+      elif [[ $sdReturn == "sc" ]]; then MainMenuChoicePreset="sc" ; Selected_DrivePreset="$Selected_DriveNumber"
+      else MainMenuChoicePreset= ; Selected_DrivePreset= ; Selected_DriveNumber= ; Selected_Drive= ; Selected_DriveName=
       fi
 
   fi
