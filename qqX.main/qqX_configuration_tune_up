@@ -221,7 +221,7 @@ function_config_tune_up ()  {
     ConfEdit_DiskSize=
     printColor "\n\n  Suggest adding disk_size=\"64G\" or higher if expecting to create snapshots: "
     printf "\n\n  qcow2 disks auto-compress & will normally occupy much less space"
-    printColor "\n\n  & an empty disk only takes up 196k."
+    printColor "\n\n  plus an empty disk only takes up 196k."
     printf "\n\n  It is easier make them larger now than to resize later ... "
     printf  "\n\n\n  [enter] 128G  or  [number] in Gb 32, 64, 192   "
     # from qqX 1.9.04/1.10.01 64G is auto supplied so this sub-minimal should no longer be present ... REVIEW

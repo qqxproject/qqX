@@ -234,8 +234,8 @@ function quickemu {
         fi
       elif [[ $LiveBoot ]] && [[ $ControlledRestart == "on" ]]; then
         printf "  This appears to be a standard single iso/single stage installation"
-        printf "\n\n  CRS is currently set to 'on' which is the default and generally recommended"
-        printColor "\n\n  [enter] to continue with current settings (allows between stage snapshots)  "; printf " [c] to continue with CRS off  [b] to go back \n\n\n"
+        printf "\n\n  CRS is currently set to 'on' which is the default and allows easy between stage snapshots"
+        printColor "\n\n  [enter] to continue with current settings (recommended)  "; printf " [c] to continue with CRS off  [b] to go back \n\n\n"
         read -rp "  >  "  LiveBootControlOptions
         if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
         elif [[ $LiveBootControlOptions == "c" ]]; then
