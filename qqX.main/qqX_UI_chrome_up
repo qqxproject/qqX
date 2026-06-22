@@ -232,9 +232,14 @@ function show_qqX_general_help {
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"
     printf "\n  [s] open general settings file for notes on the  SETTINGS, user modes, screen sizes etc"
     printf  "\n\n  [f] see FreeBird notes  [c] command line & mouse notes"
+
     if [[ $WebBrowser ]]; then
       printf "\n\n\n  [w] Online HELP PAGES, FAQs and Release Notes @ qqxproject.org"
       printColor "\n\n  [N] latest news and discussion @ qqX GitHub"
+      if [[ $guest_os == "windows" ]]; then
+        WinVirtDate="$(curl -qsLf -m 3 "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/" | grep 'latest-virtio' | tr '>' '\n' | grep 20 | awk '{print $1}')"
+        printf "\n\n  Latest Windows Guest drivers:  %s  https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio" "$WinVirtDate"
+      fi
       printf "\n\n\n"
       if [[ $ShowTxTexts ]]; then printColor  "  [tx] %s" "$MainTxOptionLine"
       else printf  "  [tx] %s" "$MainTxOptionLine"
