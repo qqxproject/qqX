@@ -260,7 +260,7 @@ function manage_and_repair_disks {
         [[ $(pgrep -x kvm) ]] &&  printColor "\n\n  VIRTUAL MACHINE ACTIVITY has been DETECTED \n"
       fi
 
-      printf "\n\n  Backups may be easily renamed and reused as previously using the file manager"
+      printf "\n\n  Backups may be easily renamed and reused, the same as previously, using the file manager"
       printf "\n\n  All snapshots and data will be SAFELY retained ...   [b] return to main menu "
 
     fi
@@ -352,6 +352,9 @@ function manage_and_repair_disks {
         if [[ $DiskManage == "rd" ]]; then
           SnapTitle="$(date +%b.%d.%H:%M)"
           "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
+          # All disk manage routines will get an initial snapshot added by 'qqX_main_menu' > 'qqX_main_menu_routines'
+          # > function 'check_disk_is_okay' and via the 'NoSnapsYet' flag, if they are the main VM drives, and in use
+          # Add snap here though, to enhance the before/after displayed data
         fi
         printf "\n BEFORE: \n\n"
         "$QEMU_IMG" info "$DiskBackup"
@@ -392,7 +395,7 @@ function qqX_snapshot_delete {
   # Create range-selectable array (finds lines with a date entry)
   SnapListString="$("$QEMU_IMG" info "$Selected_Drive" | grep '[0-9][0-9]:')"
 
-  # turns the multiline string into raw array with one whole line for each entry making each array element
+  # Turns the multi-line string into raw array with one whole line for each entry making each array element
   # then line by line extract the snap number and its title:
   mapfile -t SnapListArrRaw <<< "$SnapListString"
 

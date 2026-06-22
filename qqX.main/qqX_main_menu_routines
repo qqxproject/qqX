@@ -187,7 +187,7 @@ show_main_menu_header () {
 
 check_disk_is_okay () {
 
-  local PrintErrors= ; RunSnapChk= ; DiskChkAddSnap=
+  local PrintErrors=""  RunSnapChk=""  DiskChkAddSnap=""
   for CheckArg in "$@" ; do
     if [[ $CheckArg == "PrintErrors" ]]; then PrintErrors=1 ; shift ; fi
   done
