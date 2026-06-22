@@ -40,87 +40,89 @@ drives_and_snapshots() {
     refresh_conf_vars_and_values
   fi
 
-  if [[ $SecondDriveArgs ]]; then
-    printColor "\n  Second Drive:"
-    if [[ ! -e "$SecondDrive" ]]; then printf "   ERROR - Drive not found"
-    else
-      printf "\n\n"
-      if ! "$QEMU_IMG" snapshot -l "$SecondDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
-      else
-        if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SecondDrive"; echo
-        else "$QEMU_IMG" snapshot -l "$SecondDrive"; echo
-        fi
-      fi
-      if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SecondDrive" ; echo
-      else check_disk_is_okay "$SecondDrive"
-      fi
-      check_if_disk_needs_a_cleanup  "$SecondDrive"
-      printf "  Health Status:  %s"  "$DiskChkStatus"
-      if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
-      elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
-      fi
-      [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] && printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
-    fi
-    printf "\n\n"
-  fi
+  if [[ ! $Selected_Drive ]]; then
 
-  if [[ $SharedDriveArgs ]]; then
-    printColor "\n  Shared Drive:"
-    if [[ ! -e "$SharedDrive" ]]; then printf "   ERROR - Drive not found"
-    else
-      printf "\n\n"
-      if ! "$QEMU_IMG" snapshot -l "$SharedDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+    if [[ $SecondDriveArgs ]]; then
+      printColor "\n  Second Drive:"
+      if [[ ! -e "$SecondDrive" ]]; then printf "   ERROR - Drive not found"
       else
-        if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SharedDrive"; echo
-        else "$QEMU_IMG" snapshot -l "$SharedDrive"; echo
+        printf "\n\n"
+        if ! "$QEMU_IMG" snapshot -l "$SecondDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+        else
+          if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SecondDrive"; echo
+          elif [[ ! $Selected_DrivePreset ]]; then
+            "$QEMU_IMG" snapshot -l "$SecondDrive"; echo
+          fi
+        fi
+        if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SecondDrive" ; echo
+        else check_disk_is_okay "$SecondDrive"
+        fi
+        check_if_disk_needs_a_cleanup  "$SecondDrive"
+        printf "  Health Status:  %s"  "$DiskChkStatus"
+        if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
+        elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
+        fi
+        [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] && printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
+      fi
+      printf "\n\n"
+    fi
+
+    if [[ $SharedDriveArgs ]]; then
+      printColor "\n  Shared Drive:"
+      if [[ ! -e "$SharedDrive" ]]; then printf "   ERROR - Drive not found"
+      else
+        printf "\n\n"
+        if ! "$QEMU_IMG" snapshot -l "$SharedDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+        else
+          if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SharedDrive"; echo
+          elif [[ ! $Selected_DrivePreset ]]; then
+            "$QEMU_IMG" snapshot -l "$SharedDrive"; echo
+          fi
+        fi
+        if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SharedDrive" ; echo ; else check_disk_is_okay "$SharedDrive"
+        fi
+        check_if_disk_needs_a_cleanup  "$SharedDrive"
+        printf "  Health Status:  %s"  "$DiskChkStatus"
+        if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
+        elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
+        fi
+        [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] &&  printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
+      fi
+      printf "\n\n"
+    fi
+
+    if [[ $SharedDrive_Conf == "no-shared" ]]; then printColor "\n  Shared Drive:"
+      if [[ $LiveBoot ]]; then  printf "  Disabled (for simplification of Live Boot)"
+      else printf "\n\n  Disabled (see .conf file) \n\n"
+      fi
+    fi
+
+    if [[ $LiveBoot ]]; then  printColor "\n\n  Main Drive:"; printf "  Yet to be set up\n\n"
+    elif [[ ! -e $MainDrive ]]; then  printColor "\n\n  NO MAIN DRIVE  (yet) \n\n"
+    else
+
+      if [[ $SharedDriveArgs || $SecondDriveArgs ]]; then printColor "\n  Main Drive: \n\n"
+      else printColor "\n  One Main Drive: \n\n"
+      fi
+      if ! "$QEMU_IMG" snapshot -l "$MainDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+      else
+        if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$MainDrive"; echo
+        elif [[ !  $Selected_DrivePreset ]]; then
+          "$QEMU_IMG" snapshot -l "$MainDrive"; echo
         fi
       fi
-      if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SharedDrive" ; echo ; else check_disk_is_okay "$SharedDrive"
+      if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$MainDrive" ; echo
+      else check_disk_is_okay "$MainDrive"
       fi
-      check_if_disk_needs_a_cleanup  "$SharedDrive"
+      check_if_disk_needs_a_cleanup  "$MainDrive"
       printf "  Health Status:  %s"  "$DiskChkStatus"
       if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
       elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
       fi
       [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] &&  printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
+      printf "\n"
+
     fi
-    printf "\n\n"
-
-  fi
-
-  if [[ $SharedDrive_Conf == "no-shared" ]]; then printColor "\n  Shared Drive:"
-    if [[ $LiveBoot ]]; then  printf "  Disabled (for simplification of Live Boot)"
-    else printf "\n\n  Disabled (see .conf file) \n\n"
-    fi
-  fi
-
-  if [[ $LiveBoot ]]; then  printColor "\n\n  Main Drive:"; printf "  Yet to be set up\n\n"
-  elif [[ ! -e $MainDrive ]]; then  printColor "\n\n  NO MAIN DRIVE  (yet) \n\n"
-  else
-
-    if [[ $SharedDriveArgs || $SecondDriveArgs ]]; then printColor "\n  Main Drive: \n\n"
-    else printColor "\n  One Main Drive: \n\n"
-    fi
-
-    if ! "$QEMU_IMG" snapshot -l "$MainDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
-    else
-      if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$MainDrive"; echo
-      else "$QEMU_IMG" snapshot -l "$MainDrive"; echo
-      fi
-    fi
-
-    if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$MainDrive" ; echo
-    else check_disk_is_okay "$MainDrive"
-    fi
-
-    check_if_disk_needs_a_cleanup  "$MainDrive"
-
-    printf "  Health Status:  %s"  "$DiskChkStatus"
-    if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors "
-    elif [[ $2 != "as_disk_util" ]]; then printColor "\n\n  See qqX [disk] utility for repairs"
-    fi
-    [[ $DiskDisparity -ge "1" ]] && [[ $MainMenuChoice != "disk" ]] &&  printColor "\n\n  DISK may need a clean up  >  [disk] repair utils "
-    printf "\n\n"
 
   fi
 
@@ -128,6 +130,13 @@ drives_and_snapshots() {
 
     if [[ $Selected_DrivePreset ]]; then Selected_DriveOption="$Selected_DrivePreset"
     else
+      case "$MainMenuChoice" in
+        sc) printf "\n\n  Creates an image of the VM's current point in time ... \n\n" ;;
+        sa) printf "\n\n  Reverts a drive or VM to a previous point in time\n"
+            printf "  whilst leaving forward and backward snap images still available, if present ... \n\n" ;;
+        sd) printf "\n\n  Deletes an image of a particular point in time in the VM's history, \n"
+            printf "  whilst leaving forward and backward snap images still available, if present ... \n\n" ;;
+      esac
       printColor "\n  SELECT:  [enter]  MAIN DRIVE"
       [[ $SecondDriveArgs ]] && printColor "   [2]  Second Drive"
       [[ $SharedDriveArgs ]] && printColor "   [3]  Shared Drive"
@@ -135,6 +144,7 @@ drives_and_snapshots() {
       printColor "    [b] to go back \n\n"
       read -rp "  >  "   Selected_DriveOption
     fi
+
     case "$Selected_DriveOption" in
       disk)   Selected_Drive=
               MainMenuChoicePreset="disk"
@@ -169,16 +179,16 @@ drives_and_snapshots() {
 
   if [[ $1 == "select" ]] && [[ -e "$Selected_Drive" ]] ; then
 
-    printColor "\n\n Selected Drive = %s \n\n"  "$Selected_DriveName"
+    printColor "\n\n  Selected Drive = %s \n\n"  "$Selected_DriveName"
     if [[ $2 == "snaps" ]]; then  "$QEMU_IMG" snapshot -l "$Selected_Drive"
     else "$QEMU_IMG" info "$Selected_Drive"
     fi
     check_disk_is_okay "$Selected_Drive"
     Selected_DriveSize="$("$QEMU_IMG" info "$Selected_Drive" | grep -m 1 'disk size' | cut -d: -f2)"
     if [[ $2 != "as_disk_util" ]]; then
-      printf "\n\n  Health Status:  %s  (%s)"  "$DiskChkStatus"  "$Selected_DriveName"
+      printf "\n\n  Health Status:  %s   %s"  "${Selected_DriveName^^}" "$DiskChkStatus"
       if [[ $DiskChkStatus == "Okay" ]]; then  printf " > No errors " ; else printColor "\n\n  See qqX [disk] utility for repairs" ; fi
-      printf "\n\n  IMPORTANT > For disk operations, the virtual machine must *not* be running & not started elsewhere."
+      printf "\n\n  IMPORTANT > For disk operations, the virtual machine must *not* be running & not started elsewhere"
     fi
     # use pgrep with -x exact match to avoid 'kvm-cleanup' processes being detected
     [[ $(pgrep -x kvm) ]] &&  printColor "\n\n  VIRTUAL MACHINE ACTIVITY has been DETECTED \n"

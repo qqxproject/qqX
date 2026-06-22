@@ -432,20 +432,26 @@ function  main_menu_actions {
 
     drives_and_snapshots select  snaps
     SnapNumber=
-
-    printf "\n\n  Return the VM to a previously recorded postion:"
-    printColor "\n\n  ID [number] of snapshot to apply  [enter] to return to menu "
-    printf "\n\n"
-    read -rp "  >  "  SnapNumber
-    printf "\n\n"
-
-    if [[ $SnapNumber ]]; then
-
-      "$QEMU_IMG" snapshot -q -a "$SnapNumber" "$Selected_Drive"
-
-      printf "\n\n  May take a moment .... \n\n"
-      printColor "\n\n  Snapshot %s has been applied. \n\n"  "$SnapNumber "
-
+    if [[ $Selected_DriveOption != "b" ]]; then
+      printf "\n\n  Reverts the VM or drive to a previously recorded position"
+      printf "\n\n  Will take a Snap of the current state, just in case you need to return ..."
+      printColor "\n\n  ID [number] of snapshot to apply   [enter] to go back to previous menu"
+      printf "\n\n"
+      read -rp "  >  "  SnapNumber
+      printf "\n\n"
+      if [[ $SnapNumber ]]; then
+        SnapTitle="$(date +%b.%d.%H:%M)"
+        SnapTitleNumber="$("$QEMU_IMG" snapshot  -l "$Selected_Drive" | tail -n 1 | awk '{print $1}' )" ; ((SnapTitleNumber++))
+        printf "  Adding the current state as New Snapshot:  %s  %s \n\n" "$SnapTitleNumber" "$SnapTitle"
+        "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
+        sleep 1.5
+        printf "  Reverting the drive to the point in time selected"
+        printf "\n\n  May take a moment .... "
+        "$QEMU_IMG" snapshot -q -a "$SnapNumber" "$Selected_Drive"
+        printColor "\n\n  Snapshot %s has been applied to %s"  "$SnapNumber "  "$Selected_DriveName"
+        printf "\n\n  [enter] to continue \n\n"
+        read -rp "  >  "
+      fi
     fi
 
   elif [[ $MainMenuChoice == "2c" || $MainMenuChoice == "3c" ]] ; then
