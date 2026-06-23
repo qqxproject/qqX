@@ -56,16 +56,16 @@
 
 ##########################################
 
-QG_ModsNumber="v6.1"
+QG_ModsNumber="v7.0"
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
-osAddList=" anduinos bluestar "
+osAddList=" anduinos athenaos bluestar truenas-scale "
 #osAddList+=" another "
 
 # osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
-osRemoveList=" arcolinux clearlinux holoiso truenas-core vxlinux "
+osRemoveList=" android "
 #osRemoveList+=" another and-one-more "
 
 osSupported="$(os_support)"
@@ -83,7 +83,7 @@ mapfile -t -d ' ' osRemoveArr <<< "$osRemoveList"
 ## For FILTER CALLS, see/add at start of quick_REROUTE_get
 # The call will cause a defined list to be shown by triggering a controlled error state in Quickget ...
 
-osServersList=" alpine centos-stream freedos proxmox-ve "
+osServersList=" alpine azurelinux centos-stream netboot freedos proxmox-ve "
 osServersList+=" truenas-scale ubuntu-server windows-server "
 osServersList="${osServersList//'  '/' '}"
 osServersList="${osServersList//'  '/' '}"
@@ -156,15 +156,17 @@ function os_info {
         linuxlite)        INFO="Linux Lite|-|https://www.linuxliteos.com/|Lightweight XFCE distro built on Ubuntu LTS.";;
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
+        netboot)          INFO="netboot.xyz|-|https://netboot.xyz/|Bootable Iso with collection distro net-installation boots.";;
         nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
+        truenas-scale)    INFO="TrueNAS Scale|-|https://www.truenas.com/truenas-scale/|Open Source Hyperconverged Infrastructure (HCI) solution. In addition to powerful scale-out storage capabilities, SCALE adds Linux Containers and VMs (KVM) so apps run closer to data.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
         void)             INFO="Void Linux|anon:voidlinux|https://voidlinux.org/|Non-Systemd desktop operating system based on Runit. Software is provided in binary packages or can be built directly from sources.";;
     esac
-	[[ ! $INFO ]] && INFO="$(os_info_QG "$1")"
-    echo "$INFO"
+    # The upstream function will echo instead, if needed
+	if [[ $INFO ]]; then echo "$INFO"; else os_info_QG "$1"; fi
 }
 
 # Add release/installation notes where needed, omit if not.
@@ -173,20 +175,23 @@ function distro_release_notes {
     local RelNotes=
     case "$1" in
         #name)            RelNotes="mm/yyyy (as needed)  Notes on installation or problems to watch out for";;
+        antix)            RelNotes="Also available in 32 bit and 'core' versions: [w] see website";;
         artixlinux)       RelNotes="06/2025 The new online install option is still work-in-progress, users are advised to select 'Offline' when prompted.";;
+        alma)             RelNotes="Compare to Rocky/Oracle/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
         batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
         elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
-        fedora)           RelNotes="11/2025 Tested as ALL working. KDE and Workstation/Gnome are Official. Others are Spins. New unlisted Spins may exist ....";;
+        fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
-        macos)            RelNotes="06/2025 Sequoia is currently having issues with slow running. See qqX issue #9";;
+        macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
-        opensuse)         RelNotes="11/2025 Tumbleweed is the main focus. Leap has now become inconsistent and/or absent";;
-        parrotsec)        RelNotes="12/2025 Home is the Non-Security version. KDE is now default desktop.";;
+        opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus. [w] check website for Leap and other developments.";;
+        oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
+        parrotsec)        RelNotes="KDE becomes the default desktop from v7.0 onwards. 'Home' is a base non-technical version. MATE spins may still be available > See Website";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
-        rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install";;
+        rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install. Also see https://wiki.almalinux.org/Comparison.html";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is up to around 230Mb. Select Pure for 64 bit.";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
@@ -238,6 +243,10 @@ function distro_release_notes {
 
 ##########################################
 
+## UPDATE and make DYNAMIC
+function releases_alma() {
+    web_pipe "https://repo.almalinux.org/almalinux/" | grep -s -e 'href="[[:digit:]]' | grep -v "\." | cut -d'"' -f2 | tr -d '/' | sort -nr | paste -d' ' -s
+}
 
 ## FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
 function releases_alpine() {
@@ -252,6 +261,17 @@ function releases_alpine() {
         ((ArrAlpCount+=1))
     done
     echo "$RelList"
+}
+function get_alpine() {
+    local HASH="" ; local ISO="" ; local RelName="v${RELEASE}"
+    local QEMU_ARCH="x86_64"
+    [ "${ARCH}" == "arm64" ] && QEMU_ARCH="aarch64"
+    local URL="https://dl-cdn.alpinelinux.org/alpine/${RelName}/releases/${QEMU_ARCH}"
+    local VERSION=""
+    VERSION=$(web_pipe "${URL}/latest-releases.yaml" | awk '/"Xen"/{found=0} {if(found) print} /"Virtual"/{found=1}' | grep 'version:' | head -1 | awk '{print $2}')
+    ISO="alpine-virt-${VERSION}-${QEMU_ARCH}.iso"
+    HASH=$(web_pipe "${URL}/latest-releases.yaml" | awk '/"Xen"/{found=0} {if(found) print} /"Virtual"/{found=1}' | grep 'sha256:' | head -1 | awk '{print $2}')
+    echo "${URL}/${ISO} ${HASH}"
 }
 
 ## ADD
@@ -302,6 +322,22 @@ function get_anduinos {
     printf "%s" "$EDITION" > "$GetDataLog"
 }
 
+## Re-ADD upstream deletion
+function releases_antix() {
+    echo latest
+}
+
+[[ $(declare -F editions_antix) ]] && unset -f editions_antix
+
+function get_antix() {
+    local HASH= ; ISO= ; ReadMe=
+    local BaseUrl="https://sourceforge.net/projects/antix-linux/files"
+    ISO="$(web_pipe "https://sourceforge.net/projects/antix-linux/files/Final" | grep -s released | tr '"' '\n' | grep iso | cut -d':' -f1)"
+    ReadMe="$BaseUrl""$(dirname "$ISO")""/README.txt"
+    HASH=$(web_pipe "$ReadMe" | grep 'x64-full' | tail -n 1 | cut -d' ' -f1)
+    echo "${BaseUrl}${ISO} ${HASH}"
+}
+
 ## FIX Arch - Pre-emptively for PR  https://github.com/quickemu-project/quickemu/pull/1709
 function get_archlinux() {
     local HASH=""
@@ -336,6 +372,17 @@ function get_athenaos() {
     echo "${URL} ${HASH}"
 }
 
+## ADD HASH and ADJUST url fetch
+function get_azurelinux() {
+    local QEMU_ARCH="x86_64" ; local URL= ; local HASH=
+    [ "${ARCH}" == "arm64" ] && QEMU_ARCH="aarch64"
+    # see https://github.com/microsoft/azurelinux/blob/3.0/toolkit/docs/security/iso-image-verification.md
+    URL="https://aka.ms/azurelinux-${RELEASE}-${QEMU_ARCH}.iso"
+    HASH="https://aka.ms/azurelinux-${RELEASE}-${QEMU_ARCH}-iso-checksum"
+    HASH="$(web_pipe "${HASH}" | cut -d' ' -f1)"
+    echo "${URL} $HASH"
+}
+
 ## UPDATE url
 function get_blendos() {
     local HASH=""
@@ -367,12 +414,12 @@ function editions_bodhi() {
 ## FIX - make sure that 'live' is grepped (changes at jan 11 2026)
 function releases_debian() {
     local ARCHIVE="" ; local MAJ="" ; local CUR="" ; local NEW="" ; local OLD=""
-    NEW=$(web_pipe "https://cdimage.debian.org/debian-cd/" tr '"' '\n' | grep live | fv --full -M -Q)
+    NEW=$(web_pipe "https://cdimage.debian.org/debian-cd/" | tr '"' '\n' | grep -s live | fv --full -M -Q)
     NEW="${NEW/-live/}"
     echo -n "${NEW}"
     echo "${NEW}" > "$ReleaseDataLog"
     MAJ=$(echo "${NEW}" | cut -d'.' -f 1)
-    ARCHIVE="$(curl -qsLf "https://cdimage.debian.org/cdimage/archive/" tr '"' '\n' | grep live | fv --full -M 36)"
+    ARCHIVE="$(web_pipe "https://cdimage.debian.org/cdimage/archive/" | tr '"' '\n' | grep -s live | fv --full -Q -M 36)"
     ARCHIVE="${ARCHIVE//'-live'/}"
     ARCHIVE="$(tr ' ' '\n' <<< "$ARCHIVE")"
     for i in {1..2}; do
@@ -455,7 +502,7 @@ function get_elementary() {
 function get_fedora() {
     local HASH="" ; local ISO="" ; local JSON="" ; local URL="" ; local VARIANT=""
     case ${EDITION} in
-        KDE) if [[ $RELEASE -ge 42 ]]; then VARIANT="${EDITION}"; else VARIANT="Spins"; fi ;;
+        KDE) if [[ "${RELEASE}" == *"_Beta" ]] || [[ $RELEASE -ge 42 ]]; then VARIANT="${EDITION}"; else VARIANT="Spins"; fi ;;
         Server|Kinoite|Onyx|Silverblue|Sericea|Workstation|COSMIC-Atomic) VARIANT="${EDITION}";;
         *) VARIANT="Spins";;
     esac
@@ -467,6 +514,11 @@ function get_fedora() {
     URL=$(echo "${JSON}" | jq -r '.link' | head -n1)
     HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n1)
     echo "${URL} ${HASH}"
+}
+
+## FIX beta server variants are too problematic
+function releases_fedora() {
+    web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
 }
 
 ## FIX & UPDATE to new mirrors
@@ -551,11 +603,13 @@ function get_kdeneon() {
 
 ## FIX omit dirs only having an RC sub-folder
 function releases_linuxlite() {
-    local ReleasesList= ; local ReleasesTrue= ; i=0
-    ReleasesList="$(floatversion -M 5 -qs "$(web_pipe "https://sourceforge.net/projects/linux-lite/files/" | grep -s 'class="name')")"
+    local ReleasesList="" ReleasesTrue="" i="0" c="0"  Url=""
+    ReleasesList="$(web_pipe "https://sourceforge.net/projects/linux-lite/files/" | grep -s 'class="name' | floatversion -M 5 -qs)"
     for ChkRel in $ReleasesList; do
-        web_check "https://sourceforge.net/projects/linux-lite/files/${ChkRel}/linux-lite-${ChkRel}-64bit.iso" &&  ReleasesTrue+="$ChkRel "
-        ((i++)) ; [[ $i -gt 3 ]] && break
+        Url="https://sourceforge.net/projects/linux-lite/files/${ChkRel}/linux-lite-${ChkRel}-64bit.iso"
+        if [[ $(web_response_code "$Url") == "200" ]]; then ReleasesTrue+="$ChkRel " ; ((c++))
+        fi
+        ((i++)) ; [[ $c -eq 3 ]] && break
     done
     echo "$ReleasesTrue"
 }
@@ -584,6 +638,18 @@ function releases_lmde() {
     echo "$RelData" > "$ReleaseDataLog"
     Releases="$(cut -d'*' -f2 <<< "$RelData" | cut -d '-' -f2 | sort -nru | head -n 3 | paste -d ' ' -s )"
     echo "$Releases"
+}
+
+# FIX the URL which, at 02/26 SourceForge has pointing to the wrong folder, the one with the old kernel,
+# and thus is breaking the hash check as the name is wrong
+function get_maboxlinux() {
+    local HASH= ; local HashFile= ; IsoFile=
+    RepoUrl="https://repo.maboxlinux.org/iso"
+    HashFile=$(web_pipe "$RepoUrl" | tr ' ' '\n' | grep md5 | cut -d '"' -f 2)
+    HashFile="${HashFile/'/iso/'/}"
+    IsoFile="${HashFile/'.md5'/}"
+    HASH=$(web_pipe "$RepoUrl/$HashFile" | cut -d' ' -f1)
+    echo "$RepoUrl/$IsoFile ${HASH}"
 }
 
 ## UPGRADE only one release ... make dynamic
@@ -635,10 +701,19 @@ function get_mxlinux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## FIX HASH
+function get_openindiana() {
+    local HASH="" ; local ISO="" ; local URL=""
+    URL="https://dlc.openindiana.org/isos/hipster/${RELEASE}"
+    ISO="OI-hipster-${EDITION}-${RELEASE}.iso"
+    HASH=$(web_pipe "${URL}/${ISO}.sha256sum" |cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIX and UPDATE to new folder styles and names
 function releases_opensuse() {
     #echo "leap leap-micro slowroll tumbleweed"  @ 11/2025 leap has become inconsistent and/or absent
-    echo "leap-micro slowroll tumbleweed"
+    echo "slowroll tumbleweed"
 }
 function editions_opensuse() {
     if [[ ! $RELEASE ]]; then echo "DVD Gnome KDE XFCE Rescue"
@@ -696,8 +771,16 @@ function get_oraclelinux() {
 
 ## FIX hashes and folders
 function releases_parrotsec() {
-  # July 2025 > only latest folder now has iso's
-  web_pipe "https://deb.parrot.sh/parrot/iso/" | grep -s href | fv -Q -M
+    # July 2025 > only latest folder has iso's  But @ Feb 2026 content is variable, so folder grep becomes needed.
+    local Latest= ; local ReleaseList= ; local ReleasesTrue=
+    ReleaseList="$(web_pipe "https://deb.parrot.sh/parrot/iso" | grep -s href | tr '"' '\n' | grep -e ^'[[:digit:]]' | fv -qc -M 3)"
+    for ChkRel in $ReleaseList ; do
+        if check_pipe "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-home-${ChkRel}_amd64.iso" && \
+        check_pipe "https://deb.parrot.sh/parrot/iso/${ChkRel}/Parrot-security-${ChkRel}_amd64.iso" ; then
+            ReleasesTrue+="$ChkRel "
+        fi
+    done
+    echo "$ReleasesTrue"
 }
 function editions_parrotsec() {
     echo home security
@@ -706,7 +789,7 @@ function get_parrotsec() {
     local HASH="" ; local ISO="" ; local URL=
     ISO="Parrot-${EDITION}-${RELEASE}_amd64.iso"
     URL="https://deb.parrot.sh/parrot/iso/${RELEASE}"
-    HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -B 30 'sha384' | grep "${ISO}" | cut -d' ' -f1)"
+    HASH="$(web_pipe "${URL}/signed-hashes.txt" | grep -s -A 30 'sha256' | grep -m 1 "${ISO}" | cut -d' ' -f1)"
     echo "${URL}/${ISO} ${HASH}"
 }
 
@@ -907,6 +990,16 @@ function get_trisquel() {
 function releases_truenas-scale() {
     web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep NAS | cut -d'>' -f2 | fv -M -Q
 }
+# and restore from 4.99.01 removal
+function get_truenas-scale() {
+    local HASH=""
+    local ISO=""
+    local URL=""
+    local DLINFO="https://www.truenas.com/download-truenas-scale/"
+    URL=$(web_pipe "${DLINFO}" | grep -o "\"https://.*${RELEASE}.*\.iso\"" | cut -d'"' -f 2)
+    HASH=$(web_pipe "${URL}.sha256" | cut -d' ' -f1)
+    echo "${URL} ${HASH}"
+}
 
 ## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
 function get_ubuntu-server() {
@@ -918,7 +1011,7 @@ function get_ubuntu-server() {
     esac
     if web_check "${URL}/SHA256SUMS"; then
         RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
+        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso  | grep "$RelMax")
         ISO=$(cut -d'*' -f2 <<<"${DATA}")
         HASH=$(cut -d' ' -f1 <<<"${DATA}")
     else
@@ -936,6 +1029,14 @@ function get_ubuntu-server() {
         make_vm_config "${ISO}"
     fi
 }
+## FIX remove beta from stable
+function releases_ubuntu-server() {
+    local ALL_VERSIONS=
+    ALL_VERSIONS="$(web_pipe http://releases.ubuntu.com/streams/v1/com.ubuntu.releases:ubuntu-server.json | jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="live-server") | .version' \
+    | sort -rV | paste -d' ' -s)"
+    echo daily-live "${ALL_VERSIONS}"
+}
+
 function get_ubuntu() {
     local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
     if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
@@ -1026,7 +1127,11 @@ function get_zorin() {
 
 # Needed only for special case instructions, such as non-iso
 # Use for new qqX listed distros or for case overwrites
-# Add in the format of "guest_type_${OS} ()"
+# Add in the format of "mods_guest_type_${OS} ()"
+
+mods_guest_type_truenas-scale () {
+    GUEST="truenas" ; IMAGE_TYPE="iso"
+}
 
 ##########################################
 
@@ -1034,7 +1139,11 @@ function get_zorin() {
 
 # Needed only for special case instructions, such as needs legacy boot etc
 # Use for new qqX listed distros or for case overwrites
-# Add in the format of "config_${OS} ()"
+# Add in the format of "mods_config_${OS} ()"
+
+mods_config_truenas-scale () {
+    echo "boot=\"legacy\"" >> "${CONF_FILE}"
+}
 
 ##########################################
 
@@ -1042,9 +1151,9 @@ function get_zorin() {
 
 # Needed only for special case instructions, such as decompression routines
 # Use for new qqX listed distros or for 'case' overwrites
-# Add in the format of "finalize_${OS} ()"
+# Add in the format of "mods_finalize_${OS} ()"
 
-finalize_batocera () {
+mods_finalize_batocera () {
     # See https://wiki.batocera.org/run_batocera_in_vm#method_2 and fallocate
     # also https://github.com/quickemu-project/quickemu/issues/1794
     if [[ ${ISO} = *".gz"* ]]; then
@@ -1068,18 +1177,207 @@ finalize_batocera () {
 # For special and oversized 'get' functions or "get_${OS} ()" overwrites, eg Windows or Mac
 # Normally place 'get' functions next to releases and editions
 
+function download_windows_workstation() {
+
+    local HASH="" session_id="" iso_download_page_html="" product_edition_id=""
+    local language_skuid_table_cmd="" language_skuid_table_json="" sku_id=""
+    local iso_download_link_cmd="" iso_download_link_json="" iso_download_link=""
+
+    echo; echo "Downloading Windows ${RELEASE} (${I18N})"; echo
+    # This quickemu function is adapted from the Mido project:
+    # https://github.com/ElliotKillick/Mido
+    # Download newer consumer Windows versions from behind gated Microsoft API
+
+    # With further MODS and additions: Copyright (C) 2024 GPL3 Alex Genovese
+    # https://github.com/qqxproject/qqX
+
+    # Either 10, or 11 (@ 04/2026)
+    local windows_version="$1"  url=""
+    url="https://www.microsoft.com/en-us/software-download/windows$windows_version"
+    case "$windows_version" in
+        10) url="${url}ISO";;
+    esac
+
+    # Make log for dev analysis
+    { echo; date; echo; echo "$url"; echo
+    } >  "/tmp/qe_win_dl_log.txt"
+
+    { echo "I18N Lang: $I18N"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    # MOD update to 04/2026 versions  (needs to match the user agent in function web_get)
+    local user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+    # Microsoft Edge:
+    # local user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
+    # Google Chrome:
+    # local user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+
+    session_id="$(uuidgen)"
+
+    { echo "$user_agent"; echo; uuidparse "$session_id"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    # Get product edition ID for latest release of given Windows version
+    # Product edition ID: This specifies both the Windows release (e.g. 22H2) and edition ("multi-edition" is default, either Home/Pro/Edu/etc., we select "Pro" in the answer files) in one number
+    # This is the *only* request we make that Fido doesn't. Fido manually maintains a list of all the Windows release/edition product edition IDs in its script (see: $WindowsVersions array). This is helpful for downloading older releases (e.g. Windows 10 1909, 21H1, etc.) but we always want to get the newest release which is why we get this value dynamically
+    # Also, keeping a "$WindowsVersions" array like Fido does would be way too much of a maintenance burden
+    # Remove "Accept" header that curl sends by default
+    echo " - Parsing download page: ${url}"
+    iso_download_page_html="$(curl --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --user-agent "$user_agent" --header "Accept:" --max-filesize 1M --proto =https --tlsv1.2 --http1.1 -- "$url")" || {
+        handle_curl_error $?
+        return $?
+    }
+
+    # Slow down the 'bot' behaviour, make it seem more human, so the anti-ddos routines don't block us:
+
+    local RndNum=
+    RndNum="1""$( (tr -cd '1-4' | head -c 1) < /dev/urandom )"
+    echo " - Taking a few human seconds to appear to 'read' the download page ... " ; sleep "$RndNum"
+    echo "   ... to hopefully stop any now or future anti-ddos and anti-bot routines from blocking us"
+    echo
+    echo "   This is becoming increasingly difficult or impossible to achieve:" ; echo
+
+    # @ 04/2026 further ddos problems
+
+    { echo; date; echo "iso_download_page_html:"; echo; echo "$iso_download_page_html"; echo ; echo "End of Page"; echo
+    } >  "/tmp/qe_win_dl_page_html.txt"
+
+    echo -n " - Getting Product edition ID: "
+    # tr: Filter for only numerics to prevent HTTP parameter injection
+    # head -c was recently added to POSIX: https://austingroupbugs.net/view.php?id=407
+    product_edition_id="$(echo "$iso_download_page_html" | grep -Eo '<option value="[0-9]+">Windows' | cut -d '"' -f 2 | head -n 1 | tr -cd '0-9' | head -c 16)"
+    echo "$product_edition_id"
+
+    { echo "product_edition_id:"; echo; echo "$product_edition_id"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    echo " - Permit Session ID: $session_id"
+    # Permit Session ID
+    # "org_id" is always the same value
+    curl -qsf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - -o /dev/null --user-agent "$user_agent" --header "Accept:" --max-filesize 100K --proto =https --tlsv1.2 --http1.1 -- "https://vlscppe.microsoft.com/tags?org_id=y6jn8c31&session_id=$session_id" || {
+        # This should only happen if there's been some change to how this API works
+        handle_curl_error $?
+        return $?
+    }
+
+    RndNum="$( (tr -cd '3-6' | head -c 1) < /dev/urandom )"
+    echo " - A few human seconds here too ...." ; sleep "$RndNum"
+
+    local profile="606624d44113"
+
+    { echo "profile:"; echo; echo "$profile"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    echo -n " - Getting language SKU ID: "
+    # Get language -> skuID association table
+    language_skuid_table_cmd="curl -qsf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --max-filesize 100K --proto =https --tlsv1.2 --http1.1 \"https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_edition_id}&SKU=undefined&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}\""
+    language_skuid_table_json="$(eval "$language_skuid_table_cmd")" || {
+        handle_curl_error $?
+        return $?
+    }
+
+    { echo; date; echo "language_skuid_table_json - FULL "; echo; echo "$language_skuid_table_json"; echo ; echo "End of Page"; echo
+    } >  "/tmp/qe_win_dl_lang_table full.txt"
+
+    { echo "language_skuid_table_cmd:"; echo; echo "$language_skuid_table_cmd"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    { echo "language_skuid_table_json:"; echo; echo "$language_skuid_table_json"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    sku_id="$(echo "${language_skuid_table_json}" | jq -r '.Skus[] | select(.LocalizedLanguage=="'"${I18N}"'" or .Language=="'"${I18N}"'").Id')"
+    echo "$sku_id"
+
+    RndNum="$( (tr -cd '3-6' | head -c 1) < /dev/urandom )"
+    echo " - And a few human seconds here .... " ; sleep "$RndNum"
+
+    { echo "sku_id:"; echo; echo "$sku_id"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    echo " - Getting ISO download link..."
+
+    # Get ISO download link
+    # If any request is going to be blocked by Microsoft it's always this last one (the previous requests always seem to succeed)
+    # --referer: Required by Microsoft servers to allow request
+
+    iso_download_link_cmd="curl -qsLf --location-trusted --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --referer \"$url\" \"https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${sku_id}&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}\""
+
+    iso_download_link_json="$(eval "$iso_download_link_cmd")"
+
+    RndNum="$( (tr -cd '5-8' | head -c 1) < /dev/urandom )"
+    echo " - And some more, hopefully successful, human seconds before we start .... " ; sleep "$RndNum"
+
+    { echo "iso_download_link_cmd:"; echo; echo "$iso_download_link_cmd"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    { echo "iso_download_link_json:"; echo; echo "$iso_download_link_json"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    local failed=0
+    if ! [ "$iso_download_link_json" ]; then
+        # This should only happen if there's been some change to how this API works
+        echo; echo " - Microsoft servers gave us an empty response to our request for an automated download."
+        failed=1
+    fi
+
+    if echo "$iso_download_link_json" | grep -q "Sentinel marked this request as rejected."; then
+        echo; echo " - UNFORTUNATELY: Microsoft blocked the download request "; echo
+        failed=1
+    fi
+
+    if echo "$iso_download_link_json" | grep -q "We encountered a problem processing your request. Please try again later."; then
+        echo; echo " - UNFORTUNATELY: Microsoft blocked the request and is saying to try again later"; echo
+        failed=1
+    fi
+
+    if [ "${failed}" -eq 1 ]; then
+        echo "   RETRY in an hour's time .... ?" ; echo
+        echo "   Reboot your connection to get a new IP address ?" ; echo
+        echo "   OR, probably easiest, continue with the VM creation process, then"
+        echo "   manually download the Windows ${windows_version} ISO using a web browser from:"
+        echo "   ${url}"
+        echo "   Select 64 bit. Save the downloaded ISO to: $(realpath "${VM_PATH}")"
+        echo "   and update the .conf file. "; echo
+        echo "   (more instructions later on)"; echo
+        return 1
+    fi
+
+    # Filter for 64-bit ISO download URL
+    iso_download_link="$(echo "${iso_download_link_json}" | jq -r '.ProductDownloadOptions[].Uri' | grep x64)"
+
+    { echo "iso_download_link - filtered:"; echo; echo "$iso_download_link"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    if ! [ "$iso_download_link" ]; then
+        # This should only happen if there's been some change to the download endpoint web address
+        echo " - Microsoft servers gave us no download link to our request for an automated download."; echo "   Please manually download this ISO in a web browser:"; echo "   $url"
+        return 1
+    fi
+
+    echo " - URL: ${iso_download_link%%\?*}"
+
+    # Download ISO
+
+    FILE_NAME="$(echo "$iso_download_link" | cut -d'?' -f1 | cut -d'/' -f5)"
+    { echo "FILE_NAME"; echo; echo "$FILE_NAME"; echo
+    } >>  "/tmp/qe_win_dl_log.txt"
+
+    web_get "${iso_download_link}" "${VM_PATH}" "${FILE_NAME}"
+}
+
+
 function unattended_windows() {
 
-  mkdir -p "${1}/unattended" 2>/dev/null
+    mkdir -p "${1}/unattended" 2>/dev/null
 
-  RndSeq="$( (tr -cd 'b-zB-Z1-9' | tr -d 'eiouyEIOUY' | head -c 16) < /dev/urandom )"
-  {
-    echo "Admin  $RndSeq"
-    echo; echo "# Password recorded to hand but OS isolated. May be changed ...."
-  } > "${1}/Credentials.txt"
-  # Strengthen: Quickemu uses Quickemu/Quickemu for Admin ....
+    RndSeq="$( (tr -cd 'b-zB-Z1-9' | tr -d 'eiouyEIOUY' | head -c 16) < /dev/urandom )"
+    {
+        echo "Admin  $RndSeq"
+        echo; echo "# Password recorded to hand but OS isolated. May be changed ...."
+    } > "${1}/Credentials.txt"
+    # Strengthen: Quickemu uses Quickemu/Quickemu for Admin ....
 
-  cat << 'EOF' > "${1}/unattended/autounattend.xml"
+    cat << 'EOF' > "${1}/unattended/autounattend.xml"
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend"
   xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
@@ -1256,19 +1554,19 @@ function unattended_windows() {
       -->
 EOF
 
-  if [[ $RELEASE == "11" ]]; then
-    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
-      <DriverPaths>
-        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
-          <Path>F:\vioscsi\w11\amd64</Path>
-        </PathAndCredentials>
-        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
-          <Path>F:\viostor\w11\amd64</Path>
-        </PathAndCredentials>
-      </DriverPaths>
+    if [[ $RELEASE == "11" ]]; then
+        cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+        <DriverPaths>
+            <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+            <Path>F:\vioscsi\w11\amd64</Path>
+            </PathAndCredentials>
+            <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+            <Path>F:\viostor\w11\amd64</Path>
+            </PathAndCredentials>
+        </DriverPaths>
 EOF
-  else
-    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+    else
+        cat << 'EOF' >> "${1}/unattended/autounattend.xml"
       <DriverPaths>
         <PathAndCredentials wcm:action="add" wcm:keyValue="1">
           <Path>F:\vioscsi\w10\amd64</Path>
@@ -1278,10 +1576,10 @@ EOF
         </PathAndCredentials>
       </DriverPaths>
 EOF
-  fi
+    fi
 
-# shellcheck disable=SC2129
-cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+    # shellcheck disable=SC2129
+    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
     </component>
   </settings>
 
@@ -1291,9 +1589,9 @@ cat << 'EOF' >> "${1}/unattended/autounattend.xml"
         <Password>
 EOF
 
-  printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
+    printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
 
-  cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
           <PlainText>true</PlainText>
         </Password>
         <Enabled>true</Enabled>
@@ -1320,9 +1618,9 @@ EOF
             <Password>
 EOF
 
-  printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
+    printf "%s" "          <Value>${RndSeq}</Value>" >> "${1}/unattended/autounattend.xml"
 
-  cat << 'EOF' >> "${1}/unattended/autounattend.xml"
+    cat << 'EOF' >> "${1}/unattended/autounattend.xml"
               <PlainText>true</PlainText>
             </Password>
             <Description>Admin</Description>
@@ -1336,34 +1634,24 @@ EOF
       <RegisteredOwner>Admin</RegisteredOwner>
       <FirstLogonCommands>
         <SynchronousCommand wcm:action="add">
-          <CommandLine>msiexec /i F:\virtio-win-gt-x64.msi /passive /qn</CommandLine>
+          <CommandLine>msiexec /i E:\virtio-win-gt-x64.msi /passive /qn</CommandLine>
           <Description>Install virtio drivers</Description>
           <Order>1</Order>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
-          <CommandLine>msiexec /i E:\spice-vdagent-x64-0.10.0.msi /passive /qn</CommandLine>
+          <CommandLine>msiexec /i F:\spice-vdagent-x64-0.10.0-5.msi /passive /qn</CommandLine>
           <Description>Install spice-vdagent SPICE agent</Description>
           <Order>2</Order>
-        </SynchronousCommand>
-       <SynchronousCommand wcm:action="add">
-          <CommandLine>msiexec /i E:\spice-webdavd-x64-latest.msi /passive /qn</CommandLine>
-          <Description>Install spice-webdavd file sharing agent</Description>
-          <Order>3</Order>
-        </SynchronousCommand>
-        <SynchronousCommand wcm:action="add">
-          <CommandLine>F:\virtio-win-guest-tools.exe /quiet</CommandLine>
-          <Description>Install virtio tools</Description>
-          <Order>4</Order>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
           <CommandLine>cmd /c POWERCFG -H OFF</CommandLine>
           <Description>Disable Hibernation</Description>
-          <Order>5</Order>
+          <Order>3</Order>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
         <CommandLine>cmd /c net accounts /maxpwage:unlimited</CommandLine>
         <Description>Local account passwords never expire</Description>
-        <Order>6</Order>
+        <Order>4</Order>
       </SynchronousCommand>
       </FirstLogonCommands>
     </component>
@@ -1371,31 +1659,28 @@ EOF
 </unattend>
 EOF
 
-  echo "Downloading Spice drivers..."
-  web_get https://www.spice-space.org/download/windows/spice-webdavd/spice-webdavd-x64-latest.msi "${VM_PATH}/unattended"
-  web_get https://www.spice-space.org/download/windows/vdagent/vdagent-win-0.10.0/spice-vdagent-x64-0.10.0.msi "${VM_PATH}/unattended"
+    echo "Downloading Spice drivers..."
+    # web_get https://www.spice-space.org/download/windows/spice-webdavd/spice-webdavd-x64-latest.msi "${VM_PATH}/unattended"
+    # web_get https://www.spice-space.org/download/windows/vdagent/vdagent-win-0.10.0/spice-vdagent-x64-0.10.0.msi "${VM_PATH}/unattended"
 
-  # Spice downloads are difficult to enable dynamically as they are infrequent and differ in format.
-  # However, a qqX based version notifier is possible:
+    # Spice downloads are difficult to enable dynamically as they are infrequent and differ in format.
+    # A qqX based version notifier is possible but @ 04/2026 the spice space site has gone down
 
-  LatestSpiceAgent="$(web_pipe "https://www.spice-space.org/download/windows/vdagent" | tr '"' '\n' | grep -s vdagent | fv -Q -M)"
-  if fv -qg "$LatestSpiceAgent 0.10.0" ; then
-    echo; echo "A NEWER Spice agent has been found at https://www.spice-space.org/download/windows/vdagent"
-    echo "but auto adjusting downloads are difficult to enable for the Spice website:"
-    echo; echo "After the installation is finished, please manually update Spice to version $LatestSpiceAgent from inside Windows"
-    echo; echo "Please report this at https://github.com/qqxproject/qqX/issues "
-    echo "if a fix is not already in the development branch, so that a fix can be released."
-  fi
+    # With qqX 1.16, it has been discovered both that 'spice-webdavd' is not actually needed
+    # and that the RedHat/Fedora virt version of Spice vdagent is more up-to-date and better maintained, so switch to this:
 
-  # REMOVE - UsbDk is for Hosts (aka clients), not for Guests.
-  # See: https://www.ovirt.org/documentation/virtual_machine_management_guide/#sect-Configuring_USB_Devices
-  # web_get https://www.spice-space.org/download/windows/usbdk/UsbDk_1.0.22_x64.msi "${VM_PATH}/unattended"
+    local SpiceLink="https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/virtio-win-pkg-scripts-input/virtio-win-0.1.285-1/spice-vdagent-x64-0.10.0-5.msi"
+    web_get "$SpiceLink" "${VM_PATH}/unattended"
 
-  # passwords never expire: See https://github.com/quickemu-project/quickemu/issues/1622
+    # UsbDk is for Hosts (aka clients), not for Guests, and was removed with qqX 1.14
 
-  echo "Making unattended.iso"
-  mkisofs -quiet -J -R -input-charset utf-8 -o "${VM_PATH}/unattended.iso" "${VM_PATH}/unattended/"
+    # The Spice link is fixed, as the unattended script needs the exact name. Also it hasn't changed for quite a few years ...
+    # BUT a check routine has been written for a behind the scenes dev script to do regular checks for movement
 
+    # Note that the virtio-win.iso does NOT have an available checksum, nor the msi
+
+    echo "Making unattended.iso"
+    mkisofs -quiet -J -R -input-charset utf-8 -o "${VM_PATH}/unattended.iso" "${VM_PATH}/unattended/"
 }
 
 ##########################################
@@ -1453,8 +1738,11 @@ function validate_release() {
     local DISPLAY_NAME= ; DISPLAY_NAME="$(pretty_name "${OS}")"
     local ReleaseList="$1"
     [[ "$1" == releases* ]] && ReleaseList="$($1)"
-    if ! grep -qs " ${RELEASE} " <<< " ${ReleaseList} "; then
-        echo -e "ERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
+    if [[ " ${ReleaseList} " != *" ${RELEASE} "* ]]; then
+        if [[ "$(pwd)" == *'qqX.builtins'* ]]; then
+            show_os_info "${OS}"
+        fi
+        echo -e "\nERROR! ${DISPLAY_NAME} ${RELEASE} is not a supported release.\n"
         echo -n ' - Supported releases: '
         "releases_${OS}"
         exit 1
@@ -1464,44 +1752,94 @@ function validate_release() {
 ## TWEAK
 # A lot of these have already been modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
 
-# Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get')
+# Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get' and NOT to use on binaries)
 function web_pipe {
-    local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
-    if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 "${Args[@]}"; then
-        curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted  --max-time 30 "${Args[@]}"
+    [[ ! $1 ]] && return 1
+    if ! curl -qsLf --location-trusted --max-time 8 --output - "$@"; then
+        curl -qsLf --location-trusted --retry 6 --retry-max-time 2 --keepalive-time 2 --max-time 30 --output -  "$@"
     fi
 }
 
 # Download a JSON file from the web and pipe it to stdout
 function web_pipe_json {
-    local Args=("${@}") ; [[ ! "${Args[*]}" ]] && return 1
-    if ! curl --disable -sLf --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 20 --header "Accept: application/json" "${Args[@]}"; then
-        curl --disable -sLf --retry 6 --retry-max-time 6 --connect-timeout 6  --location-trusted --max-time 30 --header "Accept: application/json" "${Args[@]}"
+    [[ ! $1 ]] && return 1
+    if ! curl -qsLf --location-trusted --max-time 8 --header "Accept: application/json" --output - "$@"; then
+        curl -qsLf --location-trusted --retry 6 --retry-max-time 2 --keepalive-time 2 --max-time 30 --header "Accept: application/json" "$@"
+    fi
+}
+
+## TWEAK
+function web_check {
+    local HEADERS=() ; local URL="${1}"
+    # Normally just a URL. Mac OS has URL as $1 then followed by repeated headers requests.
+    while (( "$#" )); do
+        if [ "${1}" == "--header" ]; then HEADERS+=("${1}" "${2}") ; shift 2
+        else shift
+        fi
+    done
+    # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
+    printf "%s" "$URL" > "/tmp/qmod-dl-url"
+    if [[ ! $URL ]]; then
+        if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
+            printf "ERROR: No URL > Possible initial lookup or server problem\n\n" >> "$ChkLog"
+        fi
+        return 1
+    elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
+        if [[ $ChkLog ]] && ! grep -qs 'Non Conformant URL' "$ChkLog" ; then
+            printf "ERROR: Non Conformant URL > Possible initial lookup or server problem \n\n" >> "$ChkLog"
+        fi
+        return 1
+    fi
+    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
+    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
+    else return 1
     fi
 }
 
 ## ADD
-# Check the file headers. To be used for returns of 0 or 1 with pipe to log file,
+# Check the file headers. To be used for returns of 0 or 1 WITH PIPE TO LOG FILE,
 function check_pipe {
     printf "" > "/tmp/qGet_check_pipe.txt"
-    local Args=("${@}")
-    if [[ ! "${Args[*]}" ]]; then
+    if [[ ! "$1" ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'Missing Args for function check_pipe' "$ChkLog" ; then
             printf "\nERROR: Missing Args for function check_pipe\n" >> "$ChkLog"
         fi
         return 1
     fi
-    curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2  --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
-    if ! grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
+    # NB check_pipe --head output is used for size grep in quick_reroute script
+    # Also > direction output is more stable than curl's --output method
+    curl -qsLf --head --location-trusted --max-time 10 "$@" > "/tmp/qGet_check_pipe.txt" &
+    wait "$!" ; sleep 0.5
+    if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0
+    else
+        cp "/tmp/qGet_check_pipe.txt" "/tmp/qGet_check_pipe_fail.txt"
         printf "" > "/tmp/qGet_check_pipe.txt"
-        curl --disable -sLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+        local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+        curl -qsLf --head --location-trusted --retry 3 --retry-max-time 2 --max-time 20  --user-agent "${USER_AGENT}" "$@" > "/tmp/qGet_check_pipe.txt" &
+        wait "$!" ; sleep 1
+        if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1
+        fi
     fi
-    if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1 ; fi
 }
-# where HTTP/ 200 = success (with size data etc as readable) and 404 = not found = fail
+
+## where HTTP/ 200 = success (with size data etc as readable) and 404 = not found = fail
 # --location-trusted means extend secure connection to the mirror or to the CDN otherwise 302 redirects will lose https.
 # --no-keepalive/--keepalive-time as we don't need much, and so we then move on cleanly and can drop any cookies, if possible
 # REVIEW  no-keepalive can possibly clash with location-trusted
+
+## ADD  (qqX mods only)
+# Check the file headers. Returns FINAL RESPONSE CODE eg. 200 all-good, 404 not-found etc
+function web_response_code {
+    if [[ ! "$1" ]]; then
+        printf "\nERROR: Missing Args for function web_response_code\n"; sleep 5; return 1
+    fi
+    local WebResponse=; WebResponse="$(curl -qsLf --location-trusted --max-time 10 --max-filesize 100k -w "%{response_code}" "$@")"
+    if [[ $WebResponse ]]; then echo "$WebResponse"
+    else
+        local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+        curl -qsLf --location-trusted --retry 3 --retry-max-time 2 --max-time 20 --max-filesize 100k -w "%{response_code}" --user-agent "${USER_AGENT}" "$@"
+    fi
+}
 
 ## TWEAK
 # Check if a URL needs to be redirected and returns the final URL mirror or CDN
@@ -1517,8 +1855,13 @@ function web_redirect() {
 ## TWEAK
 # Download a file from the web, to storage
 function web_get() {
-    local CHECK="" ; local HEADERS=() ; local URL="${1}" ; local DIR="${2}" ; local FILE=""
-    local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+    local URL="${1}" DIR="${2}" CHECK="" FILE="" USER_AGENT=""
+    HEADERS=()
+    # REVIEW  https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Browser_detection_using_the_user_agent  (macos UA is from upstream)
+    # Windows download has already set itself up as 'FireFox' but without this if-then we would suddenly switch to 'Chrome'
+    if [[ $OS == "macos" ]]; then USER_AGENT="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+    else USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+    fi
     if [ -n "${3}" ]; then FILE="${3}"
     else FILE="${URL##*/}"
     fi
@@ -1542,7 +1885,7 @@ function web_get() {
         # CARE is also needed so that distro checks don't trigger background downloads.
         # The QuickGet VARIANT CONVOLUTIONS can have lots of twists and turns ....
         if [[ "$OS" != *ubuntu* ]]; then
-            local HASH= ; local GetLine= ; GetLine=$(get_"${OS}" "$RELEASE" "$EDITION")
+            local HASH="" GetLine="" ; GetLine=$(get_"${OS}" "$RELEASE" "$EDITION")
             # 'get_$OS' should output two args; a filepath URL, followed a checksum number
             #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
             #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
@@ -1579,7 +1922,7 @@ function web_get() {
     if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
         CurlParallel="--parallel" ; printf "  qqX multiplexed parallel download: \n\n"
     fi
-    if ! curl --disable -Lf $CurlParallel --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
+    if ! curl -qLf $CurlParallel --location-trusted --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
     --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
         # qqX needs to take control here, use exit instead  # $CurlParallel - unquoted
         if pgrep qqX >/dev/null ; then echo ; tput cnorm ; exit
@@ -1587,35 +1930,6 @@ function web_get() {
         fi
     fi
     tput cnorm ; echo
-}
-
-
-## TWEAK
-function web_check {
-    local HEADERS=() ; local URL="${1}"
-    # Normally just a URL. Mac OS has URL as $1 then followed by repeated headers requests.
-    while (( "$#" )); do
-        if [ "${1}" == "--header" ]; then HEADERS+=("${1}" "${2}") ; shift 2
-        else shift
-        fi
-    done
-    # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
-    printf "%s" "$URL" > "/tmp/qmod-dl-url"
-    if [[ ! $URL ]]; then
-        if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
-            printf "ERROR: No URL > Possible initial lookup or server problem\n\n" >> "$ChkLog"
-        fi
-        return 1
-    elif [[ "$(basename "$URL")" != *.* ]] && [[ "$(basename "$URL")" != *SUMS* ]]; then
-        if [[ $ChkLog ]] && ! grep -qs 'Non Conformant URL' "$ChkLog" ; then
-            printf "ERROR: Non Conformant URL > Possible initial lookup or server problem \n\n" >> "$ChkLog"
-        fi
-        return 1
-    fi
-    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
-    if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
-    else return 1
-    fi
 }
 
 ## ADD hash check, plus some output variants
@@ -1659,14 +1973,25 @@ function test_result {
 function test_all {
 
     OS="${1}"
-    if [[ $ChkLog ]]; then {
-        if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
-        else printf "\nOS > %s:\n\n" "${OS^^}"
+    if [[ $QuietOps ]]; then
+        if [[ $ChkLog ]]; then {
+            if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
+            else printf "\nOS > %s:\n\n" "${OS^^}"
+            fi
+            } >> "$ChkLog"
+        else printf "\nTest All - Internal ERROR: Check Log not found\n\n" >> "$ChkLog"
         fi
-        } | tee -a "$ChkLog"
+        [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" >> "$ChkLog" && return
+    else
+        if [[ $ChkLog ]]; then {
+            if [[ ! $OS ]]; then printf "\nTest All - Missing OS data: FAIL\n\n"
+            else printf "\nOS > %s:\n\n" "${OS^^}"
+            fi
+            } | tee -a "$ChkLog"
+        else printf "\nTest All - Internal ERROR: Check Log not found\n\n"
+        fi
+        [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" && return
     fi
-    [[ ! $OS ]] && return
-
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
     [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
 
@@ -1674,7 +1999,9 @@ function test_all {
         SECONDS=0
         for RELEASE in $("releases_${FUNC}"); do
             if [[ ! $RELEASE ]] && [[ $SECONDS -gt 60 ]]; then
-                printf "ERROR: %-40s  >  Releases function FAIL \n" "$OS" | tee -a "$ChkLog"
+                if [[ $QuietOps ]]; then printf "ERROR: %-40s  >  Releases function FAIL \n" "$OS" >> "$ChkLog"
+                else printf "ERROR: %-40s  >  Releases function FAIL \n" "$OS" | tee -a "$ChkLog"
+                fi
                 return 1
             fi
             SECONDS=0
@@ -1684,7 +2011,9 @@ function test_all {
                     #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
                     #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
                     if [[ ! $EDITION ]] && [[ $SECONDS -gt 60 ]]; then
-                        printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                        else printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        fi
                         return 1
                     fi
                     printf "" > "/tmp/qGet-test-all-GetLine.txt"
@@ -1694,7 +2023,9 @@ function test_all {
                         printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                     done
                     if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
-                        printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                        else printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        fi
                         return 1
                     fi
                     URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
@@ -1713,7 +2044,9 @@ function test_all {
                     SECONDS=0
                 done
                 if [[ ! $EDITION ]] && [[ $ChkLog ]] && ! grep -qs "$OS" <<< "$(grep -s 'Editions function FAIL' "$ChkLog")" ; then
-                    printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                    if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                    else printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                    fi
                 fi
             elif [[ "${OS}" == "windows"* ]]; then
                 # Caution with current Quickemu, --check windows with $2 (or/and $3) will trigger a windows download
@@ -1745,7 +2078,9 @@ function test_all {
                         printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                     done
                     if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
-                        printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
+                        else printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
+                        fi
                         return 1
                     fi
                     URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
@@ -1761,11 +2096,14 @@ function test_all {
             SECONDS=0
         done
         if [[ ! $RELEASE ]] && [[ $ChkLog ]] && ! grep -qs "$OS  >  Releases function FAIL" "$ChkLog" ; then
-            printf "ERROR: %s  >  Releases function FAIL \n"  "$OS"  >> "$ChkLog"
+            if [[ $QuietOps ]]; then printf "ERROR: %s  >  Releases function FAIL \n"  "$OS" >> "$ChkLog"
+            else printf "ERROR: %s  >  Releases function FAIL \n"  "$OS" | tee -a "$ChkLog"
+            fi
         fi
     fi
-    # prints at end of every distro set - a full test can take half an hour
-    printf "\n\n"
+    # Prints at end of every distro set - a full test can take half an hour
+    # Skip current test would be a nice feature but because tests run in sub-shells this appears to be a bit tricky to do (REVIEW)
+    [[ ! $QuietOps ]] && printf "\n\n"
     [[ $SingleCheck ]] && return
     if [[ $CompactOps || $FullCheckOps ]]; then
         printf "[s] to stop/pause tests (at next distro break point)\n"
@@ -1833,7 +2171,8 @@ case "${1}" in
             [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
         elif [[ ! $2 ]]; then
-            printf "\n" ; SingleCheck=1
+            [[ ! $QuietOps ]] && printf "\n"
+            SingleCheck=1
             os_supported ; test_all "${1}"
             [[ $CompactOps ]] && printf "  Log file: \"%s\" \n\n" "$ChkLog"
             exit
@@ -1847,17 +2186,24 @@ case "${1}" in
         printf "\n\n  --rel-notes       Output the additional release and installation notes, if supplied"
         printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qGet_FullResult.txt\""
         printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
-        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log check image URL(s) to file \"/tmp/qGet_QuietResult.txt\""
+        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log checks to file \"/tmp/qGet_QuietResult.txt\""
         printf "\n\n  --mirrors         Add-on for the above tests, to show info on possible mirror services. Omit for more generalized testing."
+        printf "\n\n  --arch            including --check-all-arch:  Arm hosts and arch checks are not currently supported"
         printf "\n\n  Without a specified 'OS' will run a complete 'test_all' whilst with 'OS' will test all releases and editions of that specified."
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."
         printf "\n\n----------------------------------------------------------------------------------\n\n"
         exit 0 ;;
 
-    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possibile:
+    # EXTRA qqX INTERNAL COMMANDS and FLAGS are also possible:
 
     --curl-no-para)
         Curl_NoPara=1 ; shift
+    ;;
+
+    --arch|--check-all-arch|-arch|-check-all-arch)
+        printf   "\n  qqX:  See https://qqxproject.org/Advanced/Custom-Machine-Types for help with running Arm, Risc-V or other guests on X86 hosts."
+        printf "\n\n  Arm hosts and Arch checks are however not currently supported.\n\n"
+        exit
     ;;
 
 esac

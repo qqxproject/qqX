@@ -24,13 +24,17 @@ VM_loader_selector_and_menu () {
 
   # LOADER
 
-  if [[ $ByPass_VM_Array_Loader ]] && [[ ${VM_Array[0,0]} ]]; then
+  if [[ $ByPass_VM_Array_Loader && ${VM_Array[0,0]} ]]; then
     # just clear the flag, may be bypassed if array present and nothing new added, or if settings not changed ...
     ByPass_VM_Array_Loader=
-    [[ $Loop_Diagnostics ]] && printf "\n\n Bypassing VM loader:" &&  main_loop_diagnostics
+    [[ $Loop_Diagnostics || $PathDiagnostics ]] && printColor "\n\n Bypassing VM loader:" &&  main_loop_diagnostics && path_diagnostics
   else
     refresh_sources_and_load_VM_arrays
-    [[ $Loop_Diagnostics ]] && printf "\n\n VM selector, post refresh_sources_and_load_VM_arrays:" &&  main_loop_diagnostics
+    if [[ $Loop_Diagnostics || $PathDiagnostics ]]; then
+      printColor "\n\n VM selector, post refresh_sources_and_load_VM_arrays: \n\n"
+      main_loop_diagnostics
+      path_diagnostics pause
+    fi
   fi
 
   # Autorun Main Menu on start up, if only one distro present, and not a mouse click start or similar, to help new users ...
@@ -72,28 +76,28 @@ VM_loader_selector_and_menu () {
 
       if [[ $Run_GT ]]; then  Run_GT= ; VM_Selection="gt"
 
+      elif [[ $DiskStorageChanges ]]; then
+
+        DiskStorageChanges= ; VM_Selection="r"
+        printColor "\n\n  Refreshing storage data.... \n\n"
+
       else
-        printf "\033c"
+        tput clear
         show_qqX_title_bar
-
-        if ! type -t "print_selector_array_${VM_SelectorStyle}_style" 1>/dev/null ; then VM_SelectorStyle="$Default_VM_SelectorStyle" ; fi
-
-        for Style in {A..Z} ; do
-          if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then LastSelectStyleAvailable="$Style" ; else break; fi
-        done
 
         printf "\n  Total Storage:  Drives %s (%s)  ISO's %s (%s)" "${TotalQcow2_Sizes}G" "$TotalQcow2_SizesCount" "${Total_ISO_Sizes}G" "$Total_ISO_SizesCount"
         [[ $BackUpQcowPresent ]] && printf "  Backups (%s)"  "$BackUpQcowPresent"
-        printf "  [r] refresh  [sz] show size details"
+        printf "  [r] refresh  [sz] show size details  [a] add/delete group folder"
         printf "\n"
 
+        # print the array of installed VMs to select which one, and in the required style:
         [[ ! $SelectArrayError ]] && print_selector_array_"$VM_SelectorStyle"_style
 
         if [[ $New_VM_Conf_File ]] && [[ ! $Current_VM_Folder_Recognised ]] && [[ -f "$(pwd)/$New_VM_Conf_File" ]]; then
           printColor "\n\n  For future display, add the NEW Current Folder to the VM array, [set] general settings ..."
         fi
 
-        main_loop_diagnostics
+        [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
         [[ $DefaultFolderError ]] && printf "\n\n  ERROR: DEFAULT FOLDER "
         [[ $ExtraFolderError ]] && printf "\n\n  ERROR: VM FOLDER ARRAY '%s' "  "$ExtraFolderError"
@@ -111,7 +115,10 @@ VM_loader_selector_and_menu () {
           if [[ $VM_ElementCount -ge "$ShowFindPoint" ]]; then  printf "   [fd] find distro   [set] edit settings"
           else printf "   [set] view or edit settings file"
           fi
-          printf "   [A-%s] change menu style %s"  "$LastSelectStyleAvailable"  "$VM_SelectorStyle"
+
+          printf "   [A-%s] "  "$LastSelectStyleAvailable"
+          [[ $CustomStyleList ]] && printf "[%s] "  "$CustomStyleList"
+          printf " change menu style %s" "$VM_SelectorStyle"
 
           if [[ $ZsyncDistrosFound || $LiveDistrosFound ]]; then
             printf "   ("
@@ -144,21 +151,31 @@ VM_loader_selector_and_menu () {
 
           if [[ $MenuStylePreviewed ]] && [[ ! $SettingsFileAdjusted ]] && [[ ! $VM_Selection_Overide ]]; then
             printColor "\n\n  Preview only - use [set] for menu permanency, [r] to return to default " ; MenuStylePreviewed=
-          elif [[ $SettingsFileAdjusted ]]; then printColor "\n\n  ARRAYS have been RELOADED and settings REFRESHED ...."; SettingsFileAdjusted=
+          elif [[ $SettingsFileAdjusted ]]; then
+            printColor "\n\n  ARRAYS have been RELOADED and settings REFRESHED ...."
+            SettingsFileAdjusted=
+          elif [[ $StylesSettingError ]]; then
+            printColor "\n\n  Set Selector STYLE NOT FOUND: Using defaults ...."
           fi
 
+          if [[ $CodingHotSwapShow ]]; then
+            # DEV NOTE - With quickemu and EMU mods, because the code becomes integrated into qqX, unlike quickGET,
+            # there is a theoretical risk that a code function present in one version could remain in memory
+            # when not present in another version:
+            # While quickGET uses a lot of 'type -t' function tests, which only check if the function is loaded into memory,
+            # all of these functions will auto-extinguish as they only exist in transitory background threads, so this is safe.
+            # For quickEMU, we need to mitigate by grepping for the actual script presence of any new or discontinued functions
+            # in '$QE_SourcePath' and in '$QE_ModPath' before getting qqX to make any critical calls.
+            printf "\n\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file."
+            CodingHotSwapShow=
+          fi
         fi
 
         [[ $FD_Phrase || $FD_Start ]] && [[ ! $FD_Found ]] && printColor "\n\n  NOT FOUND  %s/ %s" "Contains: $FD_Phrase " "Starts: $FD_Start"
 
-        path_diagnostics
+        [[ $PathDiagnostics ]] && path_diagnostics
         IgnoreConfigErrors=
         FD_Phrase= ; FD_Start= ; FD_Found=
-
-        if [[ $DiskStorageChanges ]]; then
-          DiskStorageChanges=
-          VM_Selection_Overide="r"
-        fi
 
         if [[ $VM_Selection_Overide ]];then
           VM_Selection="$VM_Selection_Overide"
@@ -190,15 +207,24 @@ VM_loader_selector_and_menu () {
       elif [[ "$VM_Selection" == [A-Z] ]]; then
 
         # NB: different to VM_selector_menu_refresh
-        VM_SelectorStyle="$VM_Selection"
-        ByPass_VM_Array_Loader=1
-        MenuStylePreviewed=1
-        ListTitleFolderOld=
-        InvertStyleColors=
-        VM_Conf_Dir=
-        VM_Conf_File=
-        VM_InstanceName=
-        VM_Selection=
+        refresh_selector_styles
+        if type -t "print_selector_array_${VM_Selection}_style" &>/dev/null ; then
+          VM_SelectorStyle="$VM_Selection"
+          ByPass_VM_Array_Loader=1
+          MenuStylePreviewed=1
+          ListTitleFolderOld=
+          InvertStyleColors=
+          VM_Conf_Dir=
+          VM_Conf_File=
+          VM_InstanceName=
+          VM_Selection=
+        else
+          printColor "\n\n  Style '%s' Not Available \n\n"  "$VM_Selection"
+          sleep 1.5
+          # clear any pressing of the enter key occuring during error message pause
+          read -r -t 0.1
+          read -r -t 0.1
+        fi
 
       # Note, for this script, 'refresh_sources_and_load_VM_arrays' gets run at start of loop on return
 
@@ -210,10 +236,6 @@ VM_loader_selector_and_menu () {
         CodingHotSwap="FreeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
       elif [[ ${VM_Selection^^} == "HB" ]] ; then
         CodingHotSwap="HomeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
-      elif [[ "${VM_Selection,,}" == ech* ]] ; then
-        CodingHotSwap="Echo" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
-      elif [[ "${VM_Selection,,}" == sys* ]] ; then
-        CodingHotSwap="System" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
       elif [[ "${VM_Selection}" == cust* ]] ; then
         CodingHotSwap="Custom" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; VM_selector_menu_refresh ; return
       elif [[ "${VM_Selection,,}" == dev* ]] ; then
@@ -231,10 +253,29 @@ VM_loader_selector_and_menu () {
         qqX_edit_settings
         return
 
-      elif [[ $VM_Selection == "sz" ]];then
+      elif [[ $VM_Selection == "sz" ]];then VM_Selection= ; show_VM_Array_sizes_text
 
-        VM_Selection=
-        show_VM_Array_sizes_text
+      elif [[ $VM_Selection == "a" ]];then
+
+        printColor "\n\n  To ADD (or delete) a group folder and organise your VM collection:"
+        printf "\n\n  1. Open the file manager and create a new entry eg Misc, Other, Etc ... "
+        printf "\n\n  2. Copy the folder name and path"
+        printf "\n\n  3. Open the qqX settings editor and paste the /full/path/folder in the top section Extra_VM_Folder+="
+        printf "\n\n  For deletion, follow same route but remove ..."
+        printf "\n\n  The VM selector display will auto-update"
+        printf "\n\n\n  Switching to view VM files in File Manager in new window ...."
+        printColor "\n\n  [enter] to open File Manager  [c] to cancel \n\n"
+        read -rp "  >  "  CancelFM
+        if [[ ! $CancelFM ]]; then
+          (nohup &> /dev/null  "$FileManager"  "$Default_VM_Folder"  & ) || file_manager_not_found_message
+          sleep 1
+          printColor "\n  [enter] to open settings editor and continue  [c] to cancel \n\n"
+          read -rp "  >  " CancelFM
+          [[ ! $CancelFM ]] && qqX_edit_settings
+          VM_Selection=
+          DiskStorageChanges=1
+          return
+        fi
 
       elif [[ $VM_Selection == "h" || $VM_Selection == "f" ]];then
 

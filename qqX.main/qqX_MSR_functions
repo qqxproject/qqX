@@ -157,7 +157,7 @@ select_msr_config () {
   while true ; do
 
     KVM_MSR_selector= ; Set_MSR_defaults=
-    printf "\033c"
+    tput clear
     qqX_logo_printf_title "Machine Specific Register controls"
     printf "\n\n"
 
@@ -227,7 +227,7 @@ msrs_conflict_check_resolver() {
   if [[ "$VM_InstanceName" == *windows*  ]] ||	[[ "$VM_InstanceName" == *macos*  ]] ; then
     [[ $ByPass_VM_Array_Selector ]] && MSR_DistrosFound=1
     if [[ $KVM_MSR_status == "N" ]] ; then
-      printf "\033c"
+      tput clear
       qqX_logo_printf_title "Machine Specific Register controls"
       printf "\n\n"
       show_kvm_msr_general_note

@@ -30,19 +30,7 @@
 
 function system_code_check_and_warn {
 
-  if [[ $CodingHotSwap == "System" && ! $QE_SystemFilePath ]]; then
-    printColor "\n\n  A standard plain Quickemu System Version has not been installed, or has NOT been LOCATED in \$PATH "
-    printf "\n\n  See https://github.com/quickemu-project/quickemu for more details"
-    printf "\n  Official Quickemu packages will install to /usr/bin, as loose files"
-    printf "\n\n  'Echo' is an older plain Quickemu version that is supplied as a built-in."
-    printf "\n\n  qqX will default to using FreeBird and FreeSpirit as these have the latest mods,"
-    printf "\n  contain general improvements, plus various tweaks to enable process controls."
-    printf "\n  Also fixes, where testing has revealed upstream Quickemu errors yet to be sorted."
-    printf "\n\n  [enter] to continue with FreeBird and/or re-select\n\n"
-    read -rp "  >  "
-    CodingHotSwap="FreeBird"
-
-  elif [[ $CodingHotSwap == "Custom" && ! -d "$Default_VM_Folder/qqX.custom/QE.Custom"  ]]; then
+  if [[ $CodingHotSwap == "Custom" && ! -d "$Default_VM_Folder/qqX.custom/QE.Custom"  ]]; then
     printColor "\n\n  Custom files should be located as detailed in the general settings file."
     printf "\n\n  [enter] to continue with FreeBird and/or set/re-select\n\n"
     read -rp "  >  "
@@ -56,23 +44,18 @@ function system_code_check_and_warn {
     read -rp "  >  "
     CodingHotSwap="FreeSpirit"
 
-  elif [[ ! $WarnedOnQE ]] && [[ $CodingHotSwap == "System" || $CodingHotSwap == "Echo" ]]; then
-    printColor "\n\n  CAUTION Legacy Source Version '%s' " "$QE_SourceVersion"
-    printColor "\n\n  Running of STANDARD QUICKEMU FILES is NOW DEPRECATED - not all of the features and functions will work"
-    printf "\n\n  To run qqX generated machines in original upstream mode, use 'quickemu -vm  distro-name.conf' at the command line"
-    printf "\n\n  qqX versions contain multiple downstream fixes and general improvements,"
-    printf "\n  plus various adjustments to runtime process controls ...."
-    printf "\n\n  [enter] to proceed with care  [f] to select FreeBird\n\n"
-    read -rp "  >  "  WarnedOnQE
-    [[ $WarnedOnQE ]] && CodingHotSwap="FreeBird"
-    WarnedOnQE=1
   fi
 }
 
-# I have backups and I understand ....
+
 function find_quickemu_source_functions_and_vars {
 
   ## Load the right version of quickemu  (from settings)
+
+  if [[ $PathDiagnostics ]]; then
+    printColor "\n\n  Start of wrap_quickemu's sourcing function 'find_quickemu_source_functions_and_vars' (includes Mods)"
+    path_diagnostics
+  fi
 
   [[ $SettingsFileAdjusted || $CodingHotSwap ]] && sort_qqX_builtin_settings
 
@@ -82,9 +65,10 @@ function find_quickemu_source_functions_and_vars {
     exit  hold
   fi
 
-  QE_496_Script= ; QE_495_Script=
-  if grep -q 'LOOP in {1..' "$QE_SourcePath" ; then QE_496_Script="true"
-  elif grep -q 'configure_storage' "$QE_SourcePath" ; then QE_495_Script="true"
+  # Check for expected upstream code layout, where at 05/2026 '498' layout appears to be current and also sufficiently valid for QE 4.9.9
+  QE_498_Script=
+  if grep -qs 'LOOP in {1..' "$QE_SourcePath" && grep -qs 'fileshare_param_check' "$QE_SourcePath" ; then QE_498_Script="true"
+  else printColor "\n\n  INTERNAL ERROR  QE_498_Script Check  >  wrap quickemu > function 'find_quickemu_source_functions_and_vars' \n\n" ; sleep 1000
   fi
 
   # Ignore first bits, bash check & locale preamble etc.
@@ -229,7 +213,11 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
 
     while [[ "${args[i]}" ]]; do
 
-      # fixes for quickemu deprecated code, to be updated from time to time REVIEW
+      # Fixes for quickemu deprecated code, to be updated from time to time REVIEW
+
+      # Most of the qemu and quickemu fixes and improvements now happen in 'qqX_quickEmu_mods'
+      # And even more fixes for quickemu's companion script 'quickget' happen in 'qqX_quickGet_mods' ....
+      # See the file 'path.notes.for.floatversion.deployment.md' in 'qqX.lib' that explains more on how this all gets integrated
 
       if [[ $FixArgs_hpet ]] && [[ "${args[i]}" == '-no-hpet' ]]; then args[i]="-machine hpet=off" ; fi
 
@@ -286,8 +274,18 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
       } | tee -a "$QemuArgsFile" &> /dev/null
     fi
 
-    if [[ $BootStyle == "slow" ]]; then BootStyleCmd=" -boot menu=on " ; else BootStyleCmd=" -boot menu=off " ; fi
-    printf "\n\n %s " "$BootStyleCmd" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
+    if [[ $BiosMode == "slow" ]]; then BiosModeCmd=" -boot menu=on " ; else BiosModeCmd=" -boot menu=off "
+    fi
+
+    if [[ $ControlledRestart == "on" ]]; then BiosModeCmd+=" -no-reboot " ; else true
+    fi
+
+    printf "\n\n %s " "$BiosModeCmd" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
+
+    if [[ $cpu_pins ]]; then
+      printf "\n\n  CPU Pinning: '%s'" "$cpu_pins" >> "$QemuArgsFile"
+      printf "\n\n  # CPU Pinning: '%s'" "$cpu_pins"  >> "$QemuArgsShortFile"
+    fi
 
     if [[ $secureboot == "on" ]]; then
       printf "\n\n  Secure Boot:  Set \n\n\n" >> "$QemuArgsFile"
@@ -296,7 +294,6 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
       printf "\n\n  Secure Boot:  Not Set \n\n\n" >> "$QemuArgsFile"
       printf "\n\n  # Secure Boot:  Not Set \n\n\n" >> "$QemuArgsShortFile"
     fi
-
 
     if [[ $VerboseArgs ]]; then
       # hold the launch till we have checked the config
@@ -346,7 +343,7 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
 
       ## call QEMU  (with any extras, if present)
       # https://qemu.readthedocs.io/en/latest/system/invocation.html  '-D'  for errors is problematic, use log file
-      eval "$QEMU"  "${args[*]}" "$BootStyleCmd" "$ExtraArgs"  "$SharedDriveArgs"  "$SecondDriveArgs" 2> "$QemuErrorLog" &
+      eval "$QEMU"  "${args[*]}" "$BiosModeCmd" "$ExtraArgs"  "$SharedDriveArgs"  "$SecondDriveArgs" 2> "$QemuErrorLog" &
 
     fi
 
@@ -379,22 +376,16 @@ function load_quickemu_cases_and_actions {
   # Quickemu normally sources in the .conf file at the start of "/tmp/qmod-actions-temp"  (see function 'quickemu')
   # BUT from qqX ver. 1.5 this happens at the end of 'VM_loader_selector_and_menu'
 
-  if [[ $QE_495_Script ]]; then
-    grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 '# Check if vm is already run' | head -n -1 > "/tmp/qmod-actions-conf-source-temp"
-  elif [[ $QE_496_Script ]]; then
+  if [[ $QE_498_Script ]]; then
     grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'LOOP in {1..' | head -n -7  > "/tmp/qmod-actions-conf-source-temp"
   else
-    grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'vm_boot' | head -n -2 > "/tmp/qmod-actions-conf-source-temp"
+    printColor "\n\n  INTERNAL ERROR  QE_498_Script Check  >  wrap quickemu > function 'load_quickemu_cases_and_actions' \n\n" ; sleep 1000
   fi
 
   grep -v 'source' "/tmp/qmod-actions-conf-source-temp" > "/tmp/qmod-actions-temp"
 
-  if [[ $QE_495_Script ]]; then
-    grep -A 200 '# Check if vm is already run' "/tmp/qmod-endof-file-temp"  > "/tmp/qmod-boot-temp"
-  elif [[ $QE_496_Script ]]; then
+  if [[ $QE_498_Script ]]; then
     grep -A 200 'fileshare_param_check' "/tmp/qmod-endof-file-temp" | tail -n +2   > "/tmp/qmod-boot-temp"
-  else
-    grep -A 200 'VM_UP} -eq 0' "/tmp/qmod-endof-file-temp" > "/tmp/qmod-boot-temp"
   fi
 
 }
@@ -402,6 +393,10 @@ function load_quickemu_cases_and_actions {
 load_quickemu_cases_and_actions
 
 function refresh_and_load_quickemu_sources {
+  if [[ $PathDiagnostics ]]; then
+    printColor "\n\n  Start of wrap_quickemu's 'refresh_and_load_quickemu_sources'"
+    path_diagnostics pause
+  fi
   system_code_check_and_warn
   find_quickemu_source_functions_and_vars
   load_quickemu_special_vars

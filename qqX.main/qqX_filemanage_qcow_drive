@@ -140,36 +140,33 @@ load_qf_defaults () {
 
 load_qf_defaults
 
-# LOOP
+# LOOP (opens in new fresh terminal)
 
 while true; do
 
-  printf "\033c"
+  #printf "\n"
   qqX_logo_printf_title "File Manager Utility for mounting/unmounting and for connecting QCOW2 drives"
   [[ "$(basename "$0")" == custom* ]] && printColor "  -  custom version"
   printf "\n"
 
-  if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
-  else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
+  if [[ $ShowTxTexts ]]; then [[ $MainTxOptionLine ]] && printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
+  else [[ $MainTxOptionLine ]] && printf  "\n\n  [tx] %s" "$MainTxOptionLine"
   fi
 
   printf "\n\n  This terminal window is PROCESS SEPARATED from qqX and may be LEFT OPEN, repositioned or minimized"
   printf "\n\n  The elevated permissions required to prepare the drives will remain isolated."
   printf "\n\n  Any opening of new qqF windows will terminate other qqF instances that are running."
+  #printf "\n"
+  printf "\n\n  Run option 'qqf' from the qqX menu if the VM is swapped.  Follow with [r] to refresh."
   printf "\n"
-  printf "\n\n  Run option 'qqf' from the qqX menu if the VM is swapped.  Follow with [r] to refresh"
-  printf "\n\n  Mounting of the connected drives is to be carried out as standard in the file-manager."
+  printColor "\n\n  Mounting of the connected drives may be carried out as standard in the file-manager"
+  printColor "\n\n  BUT use 'Gnome Disks' or similar if a drive appears empty or multi-partitioning is suspected."
   printf "\n"
 
   if [[ ! $HideRefreshMsgs ]] && [[ $qqf_CmdLineStart ]]; then
-    printColor "\n\n  qqF - Cmd Line Start  >  "
-    printf "  Use option 'qqf' from a selected qqX VM menu to populate the VM drives."
+    printf "\n\n  qqF - Cmd Line Start  >  "
+    printf "  Use option 'qqf' from a selected qqX VM menu to populate the Main drives."
     printf "\n\n  For spot input, use a right mouse click on the disk or at a new terminal type qqX \"/path/disk_name.qcow2\""
-    printf "\n"
-  fi
-  if [[ ! $HideRefreshMsgs ]] && [[ $InputAvailable ]] && [[ ! $qqf_CmdLineStart ]]; then
-    printColor "\n\n  qqF - Spot Input  >  "
-    printf "  Use option 'qqf' from a selected qqX VM menu to populate the VM drives."
     printf "\n"
   fi
 
@@ -179,11 +176,16 @@ while true; do
 
   [[ $VM_InstanceName ]] && printColor "\n\n  %s " "${VM_InstanceName^^}"
 
+  if [[ ! $HideRefreshMsgs ]] && [[ $InputAvailable ]] && [[ ! $qqf_CmdLineStart ]]; then
+    [[ ! $VM_InstanceName ]] && printf "\n\n  qqF - Spot Input"
+    printf "  >  Use option 'qqf' from a selected qqX VM menu to populate the standard preset drives"
+  fi
+
   printf "\n\n  Available Drive(s): "
   if [[ "$MainAvailable" ]]; then printf "  Main   " ; fi
   if [[ "$SecondPathName" ]]; then printf " Second  " ; fi
   if [[ "$SharedPathName" ]]; then printf " Shared  " ; fi
-  if [[ "$qqf_Input_Drivepath" ]]; then printf " Input  " ; fi
+  if [[ "$qqf_Input_Drivepath" ]]; then printColor " Input  " ; fi
 
   printf "\n\n  Connected Drive(s): "
   if ps -ef | grep nbd1 | grep -q qcow; then printf "  Main   " ; MainConnected=1 ; else MainConnected= ; fi

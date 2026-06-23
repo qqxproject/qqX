@@ -50,6 +50,7 @@ vm_pid_kill_menu() {
     # if instance didn't boot but Spicy did, then close the Spicy connect dialog window
     [[ $SpicyPID ]]  && kill "$SpicyPID" 2>/dev/null &
   else
+    configure_cpu_pinning
     [[ $UseCustomBootArgs ]] && printColor "  STARTING CUSTOM BOOT SEQUENCE:  \n"
     sleep  "$P_Kill_WaitSecs"
     printColor "\n  Quickemu instance %s on PID:  %s  %s"  "$VM_InstanceName"  "$InstancePID"  "$BootAlert"
@@ -65,33 +66,25 @@ vm_pid_kill_menu() {
 
   # return to menu requires VM to be shutdown first
   # run a check every second (-t 1)
-
   while true ; do
-
     read -rp  "  >  " -t 1  KillPID_Menu
-
     if [[ $KillPID_Menu == "k" ]]; then
-
       printf "\n\n"
       if [[ $( ps -p "$InstancePID" --no-headers 2>/dev/null) ]]; then
         [[ $SpicyPID ]] && kill "$SpicyPID" 2>/dev/null &
         kill "$InstancePID" 2>/dev/null &
       fi
-      sleep 3
+      sleep 3  # give time to background processes to start up, before moving on
       printf "\n\n"
       tput cnorm
       break
-
     elif [[ $KillPID_Menu == "r" ]]; then
-
       if [[ ! $(pgrep spicy) ]]; then
         eval "$SpicyReStartCmd"
-        sleep 2
+        sleep 2  # give time to background process before moving on
         SpicyPID="$(pgrep spicy)"
       fi
-
     else
-
       if [[ ! $( ps -p "$InstancePID" --no-headers 2>/dev/null) ]]; then
         tput cnorm
         break
@@ -99,9 +92,7 @@ vm_pid_kill_menu() {
         #  Erase text and adjust cursor:   "\e[1A\r"  "\e[2K\r"  etc    See https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
         printf "\r"
       fi
-
     fi
-
   done
 
   KillPID_Menu=
@@ -117,7 +108,7 @@ show_main_menu_header () {
 
   [[ $InstancePID ]] && [[ ! $(cat "${VMDIR}/${VMNAME}.pid" 2>/dev/null) ]] && InstancePID=
 
-  printf "\033c"
+  tput clear
   show_qqX_title_bar
   printf "\n"
   printColor "    %s " "$VM_InstanceName"
@@ -129,9 +120,10 @@ show_main_menu_header () {
   # quietly ignore errors if .conf lists an ISO but it has been removed
   if [[ $Mounted_ISO ]]; then [[ ! -e $Mounted_ISO ]] && Mounted_ISO= ; fi
   if [[ $Mounted_ISO ]]; then Mounted_ISO_DisplayName="${Mounted_ISO##*/}" ; fi
-
-  LiveBoot=
-  if  [[  ! -e "$MainDrive" ]] && [[ ! -e "$IsoImg" ]]; then  BootAlert="(Drives CHANGED or NOT FOUND - Reload VM?)"
+  LiveBoot= ; WindowsMissingIso=
+  if  [[  ! -e "$MainDrive" ]] && [[ ! -e "$IsoImg" ]]; then
+    BootAlert="(Drives CHANGED or NOT FOUND - Reload VM?)"
+    [[ "${VM_InstanceName,,}" == *windows* ]] && WindowsMissingIso=1
   elif  [[  ! -e "$MainDrive" ]]; then  BootAlert="(New: Std ISO Boot. Main Drive yet to be created)" ; LiveBoot=1
   elif  [[  ! $(du -b -t 1000000 "$MainDrive" 2>/dev/null) ]]; then
     if [[ ! "$IsoImg" ]] || [[ !  -e "$IsoImg" ]]; then
@@ -148,6 +140,7 @@ show_main_menu_header () {
 
   [[ $VM_Conf_Dir ]] && printf "  @   %s"  "$VM_Conf_Dir"
   if [[ "$BootAlert" == *'ERROR'* ||  "$BootAlert" == *'NOT FOUND'* ]]; then printColor "   %s" "$BootAlert"
+  elif [[ $VerboseArgs ]]; then [[ $BootAlert ]] && printf "   %s" "$BootAlert" ; printColor "   (Verbose Start)"
   else printf "   %s" "$BootAlert"
   fi
   printf "\n"
@@ -156,8 +149,8 @@ show_main_menu_header () {
 
   if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
     printf "\n  Designated Live Boot: %s \n" "$(basename "$IsoImg")"
-    [[ $BootStyle == "slow" ]] && printColor "\n  [iso] select an ISO to be mounted and made additionally accessible\n"
-  elif [[ $BootStyle == "slow" ]]; then
+    [[ $BiosMode == "slow" ]] && printColor "\n  [iso] select an ISO to be mounted and made additionally accessible\n"
+  elif [[ $BiosMode == "slow" ]]; then
     printf "\n  Designated Boot: Main Drive \n"
     if [[ ! $Mounted_ISO ]]; then
       if [[ ${#IsoList[*]} -ge 1 ]]; then printColor "\n  [iso] select an ISO to be mounted and made accessible\n"
@@ -168,7 +161,7 @@ show_main_menu_header () {
 
   if [[ $Mounted_ISO ]]; then
     printf "\n  Additional "
-    if [[ $BootStyle == "slow" ]]; then printColor "(mounted & boot selectable)"
+    if [[ $BiosMode == "slow" ]]; then printColor "(mounted & boot selectable)"
     else printf "(mounted, not bootable)"
     fi
     printf " ISO: %s \n" "$Mounted_ISO_DisplayName"
@@ -181,7 +174,7 @@ show_main_menu_header () {
   fi
 
   if stat "$VM_Conf_Dir/$VM_Conf_File" 2>/dev/null | grep -q "symbolic" ; then
-    printf "\n  Symbolically linked to real path %s \n" "$(realpath "$VM_Conf_Dir/$VM_InstanceName")"
+    printf "\n  SYMBOLICALLY LINKED TO REAL PATH %s \n" "$(realpath "$VM_Conf_Dir/$VM_InstanceName")"
   fi
 
   if [[ $qvWarn ]] ; then
@@ -194,10 +187,15 @@ show_main_menu_header () {
 
 check_disk_is_okay () {
 
-  local PrintErrors=
+  local PrintErrors=""  RunSnapChk=""  DiskChkAddSnap=""
   for CheckArg in "$@" ; do
     if [[ $CheckArg == "PrintErrors" ]]; then PrintErrors=1 ; shift ; fi
   done
+
+  if [[ $1 == "main_and_snaps" ]]; then
+    # reserved for main menu, where the main drive gets health checked but snapshot status is also assessed
+    shift "$#" ; RunSnapChk=1
+  fi
 
   if [[ $1 ]] && [[ ! $2 ]]; then
     DiskCheckFolderName="$(dirname "$1")"
@@ -207,7 +205,7 @@ check_disk_is_okay () {
     if [[ $2 ]]; then DiskCheck_Disk="$2" ; else DiskCheck_Disk="disk.qcow2"; fi
   fi
 
-  DiskChkExitCode= ;  DiskChkStatus=  ; DiskChkAddSnap=
+  DiskChkExitCode= ;  DiskChkStatus=
   local Selected_ChkDrive="$DiskCheckFolderName/$DiskCheck_Disk"
 
   if [[ -e "$Selected_ChkDrive" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
@@ -228,19 +226,38 @@ check_disk_is_okay () {
      63) DiskChkStatus="Checks are not supported by the image format -- not qcow2 ??" ;;
     esac
   fi
-  if [[ $DiskChkStatus == "Okay" ]] && [[ $(du -b -t 1000000 "$Selected_ChkDrive" 2>/dev/null) ]]; then
+
+  if [[ $RunSnapChk ]] && [[ $DiskChkStatus == "Okay" ]]; then
     # at least one recent snap should be present (if disk is of sufficient size)
-    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1
+    local NoSnapsYet=
+    if ! "$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | grep -qs 'Snapshot list:' ; then DiskChkAddSnap=1; NoSnapsYet=1
     else
       DiskChkEpochTime="$(date +%s)"
       LastSnapDate="$("$QEMU_IMG" snapshot -l "$Selected_ChkDrive" | tail -n 1 | awk '{print $5}')"
-      LastSnapEpochTime="$(date -d "$LastSnapDate" +%s)"
-      # where 1209600 = 14 days
-      [[ $((DiskChkEpochTime-LastSnapEpochTime)) -gt 1209600 ]] && DiskChkAddSnap=1
+      # eg: 13        Apr.06.15:22          0 B 2026-04-06 15:22:14 00:00:00.000
+      # where $5 is the 2026-04-06 bit of the last line in the list of snaps
+      LastSnapEpochTime="$(date -d "$LastSnapDate" +%s 2>/dev/null)"
+      # check that grepped data was sane, where 10 digits, as epoch time, is good for more than 200 years ...
+      DiskChkEpochTime="$(tr -cd '[:digit:]' <<< "$DiskChkEpochTime")"
+      LastSnapEpochTime="$(tr -cd '[:digit:]' <<< "$LastSnapEpochTime")"
+      if [[ ${#DiskChkEpochTime} == 10 ]] && [[ ${#LastSnapEpochTime} == 10 ]]; then
+        LastSnapDistance="$((DiskChkEpochTime-LastSnapEpochTime))"
+        # where 1209600 = 14 days
+        [[ $LastSnapDistance -gt 1209600 ]] && DiskChkAddSnap=1
+      fi
     fi
     if [[ $DiskChkAddSnap ]] ; then
+      if [[ $NoSnapsYet ]]; then  printColor "\n\n  Taking an Initial Main Drive Snapshot"
+      else printColor "\n\n  Taking Main Drive Auto-Snapshot >  Last snapshot was %d days ago" "$((LastSnapDistance/86400))"
+      fi
+      printf "\n\n  Drive is in good health \n\n"
       SnapTitle="$(date +%b.%d.%H:%M)"
-      "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive"
+      [[ -e  "$Selected_ChkDrive" ]] && "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_ChkDrive" &
+      SnapPid="$!"
+      # DiskStorageChanges=1  unlikely to cause changes, unless a VM is run and updating creates data ....  REVIEW
+      read -t 3 -rp "  Couple of secs ... "
+      wait "$SnapPid"
+      printf "\n\n" ; MainMenuChoicePreset="rq" ; Selected_DrivePreset=
     fi
   fi
 }
@@ -267,6 +284,9 @@ check_if_disk_needs_a_cleanup  () {
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.9)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=3
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.7)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=2
       elif [[ "$(bc -l <<< "$FileLength > ($DiskSize*1.5)" 2>/dev/null)" == "1" ]]; then  DiskDisparity=1
+      ## DiskDisparity levels are given textual interpretation for the user
+      # in the script 'qqX_main_menu_interface' after it has called this function
+      #
       #elif [[ $VirtualSize -le 32 ]]; then
       elif [[ "$(bc -l <<< "$VirtualSize <= 32" 2>/dev/null)" == "1" ]]; then
         DiskDisparity="$(bc -l <<< "$FileLength > ($DiskSize+10)" 2>/dev/null)"
@@ -354,8 +374,8 @@ function_delete_Selected_VM () {
     ((i+=1))
   done
 
-  printColor "\n\n  Folder: %s" "$1"
-  printColor "  &  File: %s  to be deleted?"  "$2"
+  printf "\n\n  Folder: %s" "$1"
+  printf "  &  File: %s  to be deleted?"  "$2"
 
   printColor "\n\n\n  Folder content: \n\n"
   ls "$1"
@@ -364,6 +384,8 @@ function_delete_Selected_VM () {
     printf "\n\n  TO DELETE THIS VM, removal of BOTH the above FOLDER/FILE and the CONNECTED LINKS is required."
     printf "\n\n  Deletion of the links is best done first to avoid residual files being left:"
     printColor "\n\n  Select [n] to manually DELETE LINKS FIRST using a file manager ...."
+  elif [[ $SelectedLinks ]]; then
+    printColor "\n\n  Consider [n] to MANUALLY DELETE LINKS using a file manager ...."
   else
     printf "\n\n  To delete this VM, removal of the above folder/file is sufficient."
     printf "\n\n  Select [n] to manually delete using a file manager, if there special files to keep ..."
@@ -371,11 +393,12 @@ function_delete_Selected_VM () {
 
 
   if [[ $TrashingAvailable ]]; then
-    if [[ $SelectedLinks ]]; then  printColor "\n\n  [enter] safely move the links to the recoverable trash bin"
+    if [[ $SelectedLinks ]]; then  printf "\n\n  [enter] move the links to the trash bin (may stay linked and report as taking up space)"
     elif [[ $ConnectedLinks ]]; then  printf "\n\n  [enter] move the folder & file to the recoverable trash bin"
     else printColor "\n\n  [enter] safely move the folder & file to the recoverable trash bin"
     fi
-    printf "\n\n  [n] keep    [y] yes, PERMANENTLY, I have back-ups ..."
+    printf "\n\n  [n] keep (and return)    [y] yes, PERMANENTLY, I have back-ups ..."
+    [[ $SelectedLinks ]] && printf "  including that of the original that this is linked to"
   else
     printColor "\n\n  [enter] use the file manager to move things the trash bin "
     printf "\n\n  [y] yes, PERMANENTLY, I have back-ups ..."
@@ -457,7 +480,7 @@ list_current_folder_instance_names () {
 
 move_rename_Selected_VM () {
 
-  printf "\033c"
+  tput clear
   show_qqX_title_bar
 
   if [[ ! $1 ]] && [[ ! $2 ]]; then
@@ -688,7 +711,10 @@ move_rename_Selected_VM () {
 read_x86_tiano_vars_list () {
 
   # Current source list (-A nn may need adjusting if adding to qe arrays)
-  # See quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
+  # Also see quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
+  # Listing works on the upstream script "$QE_SourcePath" not on "$QE_Modpath"
+  # and it will list all files and all vars, from both secure and from non-secure
+
   local String=
   String="$(grep -s -A 32 -m 1 'ovmfs=' "$QE_SourcePath" | grep -B 32 'esac' | grep '"')"
   if [[ ! $String ]]; then  TianoVarsGrepError=1 ; return
@@ -715,14 +741,14 @@ read_x86_tiano_vars_list () {
 
 refresh_tiano_vars () {
 
-  RtvBack= ; RtvArm=
+  RtvBack=
   read_x86_tiano_vars_list
 
-  if [[ $RunRtvCheck || $RtvManualOnly ]]; then RtvText=1 ; else RtvText=
+  if [[ $RunRtvCheck ]]; then RtvText=1
+  else RtvText=
   fi
 
   if [[ $RtvText ]]; then
-
     if [[ $TianoVarsGrepError ]]; then
       printColor  "\n\n  ERROR finding Tiano Variables List in current Source Code ?? "
       printf "\n\n  %s \n\n" "$QE_SourcePath"
@@ -731,10 +757,10 @@ refresh_tiano_vars () {
       printf "\n\n  Backups will be made, in case you need to revert, as *.fd.old etc \n\n  Your *VMF_VARS.fd file(s) will be reinstalled."
       if [[ "$VM_InstanceName" == *macos* ]]; then
         printf "\n\n  MacOS refreshes require an internet connection. The small boot drive 'OpenCore.qcow2' is also needed."
-        printf "\n\n  For security reasons, these Mac specific files should generally be updated at regular intervals...."
+        printf "\n\n  These Mac specific files should theoretically be updated at regular intervals to reflect upstream changes"
+        printf "\n\n  but since feb 2026 an older 'last known good version' is now in use.  See qqX issue #9 if problems persist."
       fi
-      if [[ $(ls "$VM_Conf_Dir/$VM_InstanceName/AAVMF"* 2>/dev/null) ]]; then
-        RtvArm=1
+      if [[ $RtvArm ]]; then
         if [[ ! $RtvArmFolder ]]; then
           printf  "\n\n  Using Standard Folder '/usr/share/AAVMF' >> Variations may be placed in main settings"
           RtvArmFolder="/usr/share/AAVMF"
@@ -742,16 +768,13 @@ refresh_tiano_vars () {
           printf  "\n\n  Using Folder '%s' >>  From variation placed in main settings" "$RtvArmFolder"
         fi
       fi
-      printColor  "\n\n  [enter] to continue"
+      printColor  "\n\n  [enter] to return"
     fi
-    printf  "  [b] to go back "
+    printf  "  [rtv] to confirm refresh \n\n"
     read -rp "  >  "  RtvBack
-
   fi
 
-  [[ $TianoVarsGrepError ]] && RtvBack="b"
-
-  if [[ $RtvBack ]]; then  printf "\n\n  Returning ... " ; sleep 1
+  if [[ $TianoVarsGrepError ]] || [[ $RtvBack != "rtv" ]]; then  printf "\n\n  Returning ... \n\n" ; sleep 1
 
   else
 
@@ -769,35 +792,58 @@ refresh_tiano_vars () {
 
     elif [[ "$VM_InstanceName" == *macos* ]]; then
 
-      RtvMacGet="Okay"
+      RtvMacGet="Okay"; local MvDate; MvDate="$(date +%d.%b-%Y-%k.%M.%S)"
+      # @ feb 2026 (QE 4.9.9) upstream problems appeared from using Kholia's Mac repo > Change to using forced sync dates
+      # '1771316058' = Feb 17th  (built-ins to be later implemented, if workable) REVIEW
+      [[ ! -d  "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old" ]] &&  mkdir "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old"
+
+      if [[ -d "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate" ]]; then
+        # avoid rapid refresh race conflict
+        sleep 2 ; MvDate="$(date +%d.%b-%Y-%k.%M.%S)"
+      fi
+      mkdir "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate"
 
       [[ -e "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" ]] &&  \
-      mv "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2.old"
+      cp "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate/OpenCore.qcow2"
 
       [[ -e "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" ]] &&  \
-      mv "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd.old"
+      cp "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate/OVMF_CODE.fd"
 
       [[ -e "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" ]] &&  \
-      mv "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd.old"
+      cp "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" "$VM_Conf_Dir/$VM_InstanceName/OpenCore_Old/$MvDate/OVMF_VARS-1920x1080.fd"
 
-      # as per quickget 4.9.2
+      # Originally based on/as per quickget 4.9.2  BUT @ feb 2026 (4.9.9) upstream problems appeared from using Kholia's repo
+      # The whole Mac bootloader and 'rtv' updater needs a REVIEW
 
      [[ $RtvText ]] && printf "\n\n  Checking ..."
 
-      wget -t 3 -T 2 -o "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OVMF_VARS-1920x1080.fd" \
+      # Pin to last known-good commit (https://github.com/quickemu-project/quickemu/pull/1854)
+      local OSX_KVM_COMMIT="da4b23b5e92c5b939568700034367e8b7649fe90"
+
+      wget -t 3 -T 2 -o "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/${OSX_KVM_COMMIT}/OVMF_VARS-1920x1080.fd" \
       -O "$VM_Conf_Dir/$VM_InstanceName/OVMF_VARS-1920x1080.fd" || RtvMacGet="Fail"
       [[ $RtvText ]] && printf "....."
 
-      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OVMF_CODE.fd" \
+      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/${OSX_KVM_COMMIT}/OVMF_CODE.fd" \
       -O "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd" || RtvMacGet="Fail"
+
+      # @ feb 2026 qemu complains that it needs size multiple of 65536 (0x1000) (qqX)
+      # fallocate -l 1966080 "$VM_Conf_Dir/$VM_InstanceName/OVMF_CODE.fd"
+
       [[ $RtvText ]] && printf "........ \n\n"
 
-      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/master/OpenCore/OpenCore.qcow2" \
+      wget -t 3 -T 2 -a "$VM_Conf_Dir/$VM_InstanceName/rtv.log" "https://github.com/kholia/OSX-KVM/raw/${OSX_KVM_COMMIT}/OpenCore/OpenCore.qcow2" \
       -O "$VM_Conf_Dir/$VM_InstanceName/OpenCore.qcow2" || RtvMacGet="Fail"
+
       [[ $RtvText ]] && grep -v '\.\.\.\.\.\.\.' "$VM_Conf_Dir/$VM_InstanceName/rtv.log"
 
       echo "$RtvMacGet" > "$VM_Conf_Dir/$VM_InstanceName/rtv.status.log"
-      [[ $RtvText ]] && printColor "\n  Update:  %s" "$RtvMacGet"
+      if [[ $RtvText ]]; then
+        printColor "\n  Update:  %s" "$RtvMacGet"
+        if [[ $RtvMacGet == "Okay" ]]; then
+          printf "\n\n  Old versions have been stored in the VM folder, with a current date/time stamp \n"
+        fi
+      fi
 
     else
 
@@ -826,7 +872,9 @@ refresh_tiano_vars () {
 
     fi
 
-    date +%s > "$VM_InstanceName/rtv.date.txt"
+    # @ feb 2026 (QE 4.9.9) Changed to using manual sync as there are problems with updates
+    # record date
+    echo "$EpochDateNow" > "$VM_InstanceName/rtv.date.txt"
 
     if [[ $RtvText ]]; then
       printf "\n\n  [enter] to return \n\n "
@@ -852,7 +900,7 @@ custom_boot_file () {
 
   if [[ $1 == "create" ]]; then
 
-    printColor "\n\n  Utility to copy QEMU args list from the last qemu boot formula"
+    printColor "\n\n  Utility to CREATE CUSTOM QEMU args from the last qemu boot formula"
     printf "\n\n  Boot in 'Verbose mode' is sufficient. Actual boot is not required."
     printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
@@ -881,7 +929,7 @@ custom_boot_file () {
 
   elif [[ $1 == "delete" ]]; then
 
-    printColor "\n\n  Utility to delete existing custom qemu boot formula"
+    printColor "\n\n  Utility to DELETE existing custom qemu boot formula"
     printf "\n\n  Full details are viewable online at \n\n  https://qqxproject.org/Advanced/Custom-Qemu-boot-parameters"
 
     if [[ ! -e "$VM_InstanceName/Qemu_ShortArgs_List.txt" ]]; then
@@ -967,7 +1015,7 @@ iso_select_mount_and_boot () {
 
   printf "\n\n\n  The boot manager is enabled separately, via the main menu"
   printf "\n\n  Current status:"
-  if [[ $BootStyle == "fast" ]]; then printf "  (fastboot > boot manager NOT enabled)"
+  if [[ $BiosMode == "fast" ]]; then printf "  (fastboot > boot manager NOT enabled)"
   else  printf "  (boot manager enabled)"
   fi
   printf "\n"
@@ -987,7 +1035,7 @@ iso_select_mount_and_boot () {
     print_quickget_and_folder_choices  IsoList
   fi
 
-  if [[ $Mounted_ISO ]]; then printf "\n\n  %s  IS CURRENTLY MOUNTED to guest" "$Mounted_ISO"
+  if [[ $Mounted_ISO ]]; then printColor "\n\n  %s  is CURRENTLY MOUNTED to guest" "$Mounted_ISO"
   else printf "\n\n  Currently, no ISO is mounted additionally to guest"
   fi
 
@@ -997,7 +1045,10 @@ iso_select_mount_and_boot () {
     printColor "  [b] to go back"
   else
     if [[ ${#IsoList[*]} -eq 1 ]]; then  printColor "  [m] to mount/unmount "
-    elif [[ ${#IsoList[*]} -gt 1 ]]; then  printColor "  [number] to select/reselect and/or mount/unmount "
+    elif [[ $Mounted_ISO ]] && [[ ${#IsoList[*]} -gt 1 ]]; then
+      printf "  [number] to select/reselect and/or mount/unmount "
+    elif [[ ${#IsoList[*]} -gt 1 ]]; then
+      printColor "  [number] to select/reselect and/or mount/unmount "
     fi
     printf "  [b] to go back"
   fi

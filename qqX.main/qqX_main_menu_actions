@@ -55,7 +55,7 @@ function  main_menu_actions {
 
     if [[ -e "$QemuArgsFile" ]]; then
 
-      printf "\033c"
+      tput clear
       if [[ -e "$QemuVirtHardwareRecord" ]]; then printf "\n\n  Existing Record: \n\n"; cat "$QemuVirtHardwareRecord"; fi
       printf "\n\n  Current Args / Qemu Virtual Hardware \n\n"
       cat "$QemuArgsFile"
@@ -103,8 +103,6 @@ function  main_menu_actions {
   elif [[ ${MainMenuChoice^^} == "FS" ]] ; then  CodingHotSwap="FreeSpirit" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ ${MainMenuChoice^^} == "FB" ]] ; then  CodingHotSwap="FreeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ ${MainMenuChoice^^} == "HB" ]] ; then  CodingHotSwap="HomeBird" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
-  elif [[ "${MainMenuChoice,,}" == ech* ]] ; then  CodingHotSwap="Echo" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
-  elif [[ "${MainMenuChoice,,}" == sys* ]] ; then  CodingHotSwap="System" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ "${MainMenuChoice,,}" == cust* ]] ; then  CodingHotSwap="Custom" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
   elif [[ "${MainMenuChoice,,}" == dev* ]] ; then  CodingHotSwap="Dev" ; SettingsFileAdjusted=1; CodingHotSwapShow=1; refresh_sources_and_load_VM_arrays
 
@@ -114,7 +112,8 @@ function  main_menu_actions {
     printf "\n\n"
     if [[ $(cat "$QemuErrorLog" 2>/dev/null) ]] ; then
       cat "$QemuErrorLog"
-      printf "\n\n  This log gets cleared when you run the VM, or it can be cleared now.  For permanent adjustments, see notes in the main settings."
+      printf "\n\n  This log gets cleared when you run the VM, or it can be cleared now."
+      printf "\n\n  For permanent adjustments, see the 'QemuErrorFilter' notes in the main settings."
     else  printf "  No qemu errors were present on the last VM load ...  ?? "
     fi
 
@@ -138,6 +137,7 @@ function  main_menu_actions {
       sleep 2
       printf "\n\n  [enter] to refresh and continue \n\n"
       read -rp "  >  "
+      MainMenuChoicePreset="rq"
     fi
 
   elif [[ $MainMenuChoice == "qqf" ]] ; then  qcow2_filemanagement_launcher qqf-info
@@ -158,8 +158,27 @@ function  main_menu_actions {
 
   elif [[ $MainMenuChoice == "fb" || $MainMenuChoice == "bm" ]] ; then
 
-    if [[ $BootStyle == "fast" ]]; then  BootStyle="slow" ; BootStyleMsg="slow"
-    elif [[ $BootStyle == "slow" ]]; then  BootStyle="fast" ; BootStyleMsg="fast"
+    if [[ $BiosMode == "fast" ]]; then  BiosMode="slow" ; BiosModeMsg="slow"
+    elif [[ $BiosMode == "slow" ]]; then  BiosMode="fast" ; BiosModeMsg="fast"
+    fi
+
+  elif [[ $MainMenuChoice == "crs" ]] ; then
+    printf "
+    # Allows easy between stage snapshots before making experimental changes
+    # or at the end of lengthy processes, helps avoid repeat downloads and repeat exit sequences
+
+    # Standard 'Do not turn off your computer' restarts will still work
+
+    # Set =\"off\" in main settings, if auto-restart is normally preferred"
+    printf "\n\n  "
+    if [[ $ControlledRestart == "on" ]]; then printf "[enter] for 'off'  "; printColor "[c] to continue as is \n\n"
+    else printColor "[enter] for 'on'  "; printf "[c] to continue as is \n\n"
+    fi
+    read -rp "  >  "  ControlledRestartSelect
+
+    if [[ ! $ControlledRestartSelect ]]; then
+      if [[ $ControlledRestart == "on" ]]; then ControlledRestart="off"; else  ControlledRestart="on"
+      fi
     fi
 
   elif [[ $MainMenuChoice == "qd" ]] ; then
@@ -170,9 +189,22 @@ function  main_menu_actions {
     printf "\n  Opening Browser ... \n\n"
     (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org"  & ) || web_browser_not_found_message
     sleep 1
+  elif [[ $MainMenuChoice == "wd" ]] ; then
+    printf "\n  Opening Browser ... \n\n"
+    (nohup &> /dev/null  "$WebBrowser"  "https://www.microsoft.com/en-us/software-download/"  & ) || web_browser_not_found_message
+    sleep 1
   elif [[ $MainMenuChoice == "qW" ]] ; then
     printf "\n  Opening Browser ... \n\n"
     (nohup &> /dev/null  "$WebBrowser"  "https://qqxproject.org/Guides/Windows-OS"  & ) || web_browser_not_found_message
+    sleep 1
+  elif [[ $MainMenuChoice == "news" ]] ; then
+    printf "\n  Opening Browser ... \n\n"
+    printf "\n%s\n" "$EpochDateNow" > "$HOME/.qqX/qqXnewsreader.log"
+    (nohup &> /dev/null  "$WebBrowser" "https://github.com/qqxproject/qqX/discussions/categories/announcements" & ) || web_browser_not_found_message
+    sleep 1
+  elif [[ $MainMenuChoice == "tags" ]] ; then
+    printf "\n  Opening Browser ... \n\n"
+    (nohup &> /dev/null  "$WebBrowser" "https://github.com/qqxproject/qqX/tags" & ) || web_browser_not_found_message
     sleep 1
 
   elif [[ $MainMenuChoice == "tune" ]] ; then function_config_tune_up "$VM_Conf_Dir/$VM_Conf_File"
@@ -186,7 +218,7 @@ function  main_menu_actions {
     # but run the selector
     ByPass_VM_Array_Selector=
     # signal to run the VM selection initializer with absent VM_InstanceName and return to qqX main loop
-    VM_InstanceName=
+    VM_InstanceName= ; VM_Conf_Dir= ; VM_Conf_File=
     # run the clearance sections but signal to go straight to the downloads menu, no need to load the selector one.
     Run_GT=1
     return
@@ -232,11 +264,21 @@ function  main_menu_actions {
 
     select_msr_config
 
+  elif [[ $MainMenuChoice == "v" ]] ; then
+
+    if [[ $VerboseArgs ]]; then VerboseArgs= ; else VerboseArgs=1 ; fi
+    Toggled_VerboseArgs="$VerboseArgs"
+
   elif [[ $MainMenuChoice == "gl" ]] ; then
 
-    if [[ $qqX_GL_Mode == "on" ]] ; then qqX_GL_Mode="off"
-    elif [[ $qqX_GL_Mode == "off" ]] ; then qqX_GL_Mode="on"
-    fi
+    if [[ $qqX_GL_Mode == "on" ]] ; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on" ; fi
+    if [[ $gl == "on" ]] ; then gl="off" ; else gle="on" ; fi
+    Toggled_GL_Mode="$qqX_GL_Mode"
+
+  elif [[ $MainMenuChoice == "net" ]] ; then
+
+    if [[ $qqX_NetMode == "on" ]] ; then qqX_NetMode="restrict" ; else qqX_NetMode="on" ; fi
+    Toggled_NetMode="$qqX_NetMode"
 
   elif [[ $MainMenuChoice == "C" ]] ; then
 
@@ -344,8 +386,8 @@ function  main_menu_actions {
     drives_and_snapshots
 
     if [[ $SharedDriveArgs && $SecondDriveArgs ]]; then
-      printColor "\n\n  Scroll to View " ; printf "\n\n  [enter] to return to menu \n\n"
-    else printColor "  [enter] to return to menu \n\n"
+      printColor "\n\n  Scroll to View " ; printf "\n\n  [enter] return to main menu \n\n"
+    else printColor "  [enter] return to main menu \n\n"
     fi
     read -rp "  >  "
 
@@ -353,14 +395,21 @@ function  main_menu_actions {
 
     drives_and_snapshots select  snaps
 
-    printColor "\n\n  [enter] Create snap with date.time title "
-    printf "  [text input] Create with text descriptor   [b] back to main menu "
-    SnapTitle= ; scReturn=
-    printf "\n\n"
-    read -rp "  >  "  SnapTitle
-    printf "\n\n"
-    [[ ! $SnapTitle ]] && SnapTitle="$(date +%b.%d.%H:%M)"
-    if [[ $SnapTitle != "b" ]]; then
+    [[ $MainMenuChoicePreset == "disk" ]] && sleep 2 && return
+    if [[ $Selected_DriveOption == "b" ]]; then SnapTitle="b"
+    else
+      printf "\n\n  Create an image of the drive or VM's current point in time:"
+      printColor "\n\n  [enter] Create snap with date.time title "
+      printf "  [text] Create with text descriptor   [b] back to main menu "
+      SnapTitle= ; scReturn=
+      printf "\n\n"
+      read -rp "  >  "  SnapTitle
+      printf "\n\n"
+      [[ ! $SnapTitle ]] && SnapTitle="$(date +%b.%d.%H:%M)"
+    fi
+    if [[ $SnapTitle == "b" ]]; then
+      MainMenuChoicePreset= ; Selected_DrivePreset= ; Selected_DriveNumber= ; Selected_Drive= ; Selected_DriveName=
+    else
       # remove spaces, make title dot separated, as easier to IFS
       SnapTitle="${SnapTitle// /.}"
       "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
@@ -368,10 +417,10 @@ function  main_menu_actions {
       DiskStorageChanges=1
       printf "\n\n  Drive Updated ..."
       printColor "\n\n  [enter] to return to menu"
-      printf "   [sd] delete older snaps \n\n "
+      printf "   [sd] to delete snaps (on this drive)\n\n "
       read -rp "  >  "  scReturn
-      if [[ $scReturn ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset=1
-      else MainMenuChoicePreset= ; Selected_DrivePreset=
+      if [[ $scReturn ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset="$Selected_DriveNumber"
+      else MainMenuChoicePreset= ; Selected_DrivePreset= ; Selected_DriveNumber= ; Selected_Drive= ; Selected_DriveName=
       fi
     fi
 
@@ -384,20 +433,27 @@ function  main_menu_actions {
 
     drives_and_snapshots select  snaps
     SnapNumber=
-
-    printf "\n\n  Return the VM to a previously recorded postion:"
-    printColor "\n\n  ID [number] of snapshot to apply  [enter] to return to menu "
-    printf "\n\n"
-    read -rp "  >  "  SnapNumber
-    printf "\n\n"
-
-    if [[ $SnapNumber ]]; then
-
-      "$QEMU_IMG" snapshot -q -a "$SnapNumber" "$Selected_Drive"
-
-      printf "\n\n  May take a moment .... \n\n"
-      printColor "\n\n  Snapshot %s has been applied. \n\n"  "$SnapNumber "
-
+    if [[ $Selected_DriveOption != "b" ]]; then
+      printf "\n\n  Reverts the VM or drive to a previously recorded position"
+      printf "\n\n  Will take a Snap of the current state, just in case you need to return ..."
+      printColor "\n\n  ID [number] of snapshot to apply   [enter] to go back to previous menu"
+      printf "\n\n"
+      read -rp "  >  "  SnapNumber
+      printf "\n\n"
+      if [[ $SnapNumber ]]; then
+        SnapTitle="$(date +%b.%d.%H:%M)"
+        SnapTitleNumber="$("$QEMU_IMG" snapshot  -l "$Selected_Drive" | tail -n 1 | awk '{print $1}' )" ; ((SnapTitleNumber++))
+        printf "  Adding the current state as "
+        printColor " New Snapshot: %s  %s \n\n" "$SnapTitleNumber" "$SnapTitle"
+        "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
+        sleep 1.5
+        printf "  Reverting the drive to the point in time selected"
+        printf "\n\n  May take a moment .... "
+        "$QEMU_IMG" snapshot -q -a "$SnapNumber" "$Selected_Drive"
+        printColor "\n\n  Snapshot %s has been applied to %s"  "$SnapNumber "  "$Selected_DriveName"
+        printf "\n\n  [enter] to continue \n\n"
+        read -rp "  >  "
+      fi
     fi
 
   elif [[ $MainMenuChoice == "2c" || $MainMenuChoice == "3c" ]] ; then
@@ -430,10 +486,6 @@ function  main_menu_actions {
     fi
     printf "\n\n  [enter] to return \n\n"
     read -rp "  >  "
-
-  elif [[ $MainMenuChoice == "v" ]] ; then
-
-    if [[ $VerboseArgs ]]; then VerboseArgs= ; else VerboseArgs=1 ; fi
 
   elif [[ $MainMenuChoice == "vm" ]] || [[ $MainMenuChoice == "b" ]] ; then
 
@@ -480,11 +532,15 @@ function  main_menu_actions {
     else  printColor "\n\n  NOT changed \n\n" ; sleep 1.5
     fi
 
-    printf "\033c\n\n"
+    tput clear
+    printf "\n\n"
 
   else
 
     # the [enter] to refresh option with 'rq' as hidden quiet
+    if [[ $MainMenuChoice == "rq" || $MainMenuChoice == "u" ]]; then true
+    elif [[ $MainMenuChoice ]]; then printColor "\n\n  '%s' was not recognised ... \n\n" "$MainMenuChoice" ; sleep 1.2
+    fi
     ShowUtilsMenu=
     VM_ExecBoot=
     refresh_and_load_quickemu_sources

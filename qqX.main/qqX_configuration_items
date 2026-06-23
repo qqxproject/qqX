@@ -22,42 +22,61 @@ custom_conf_notes () {
 
   printf "
 
-    #!/usr/bin/qqX --vm                (for qqX direct start)
+    '#!/usr/bin/qqX --vm'               (unquoted)  for qqX direct start
 
+    qqX only:
     Custom_SDL_ScreenPercent=\"xx\"      (integer from 25 to 99)
-    Custom_SDL_ScreenSize=\"WxH\"        (qe 4.95+ eg 2560x1440)
+    Custom_SDL_ScreenSize=\"WxH\"        (eg 2560x1440)
     HeadlessDisplay=\"true\"
-
     SecondDrive=\"My_Folder/My_VM/disk2.qcow2\"
     SharedDrive_Conf=\"no-shared\"
-    MacLegacyDrive=\"true\"
+    cpu_pins=\"x,x\"      give pairs of host cpu numbers, and where total number of elements match number of 'cpu_cores'
 
     Other:
-    disk_size=\"xxG\"   (integer, used once, for first build)
-    cpu_cores=\"x\"     (even integer)
-    ram=\"xG\"          (integer)
-    keyboard=           'usb' (default), 'ps2', 'virtio'
-    keyboard_layout=    'en-us' (default)
-    mouse=              'tablet' (default), 'ps2', 'usb', 'virtio'
-    network=            'bridge' >> -nic bridge,br=bridge,model=virtio-net-pci
-    usb_controller=     'ehci' (default), 'xhci', 'none'
-    sound_card=         'intel-hda' (default), 'ich9-intel-hda' 'ac97', 'es1370', 'sb16', 'usb-audio', 'none'
-    sound_duplex=        for intel: 'hda-micro' (default: speaker/mic), 'hda-duplex' (line-in/line-out), 'hda-output' (output-only)
+    disk_size=\"xxxG\"    (integer) used once only, for first build, may be later discarded
+    cpu_cores=\"x\"       (even integer)  = number of guest processor virtual *threads*
+    ram=\"xG\"            (integer)  odd or even numbers allowed
+    keyboard=            'usb' (default), 'ps2', 'virtio'
+    keyboard_layout=     'en-us' (default)
+    mouse=               'tablet' (default), 'ps2', 'usb', 'virtio'
+    network=              blank loads default drivers, or use 'none' (no drivers), 'restrict' (drivers but NO I/O)
+                          or 'bridge' (see general settings)
+    usb_controller=      'ehci' (default), 'xhci', 'none'
+    sound_card=          'intel-hda' (default), 'ich9-intel-hda' 'ac97', 'es1370', 'sb16', 'usb-audio', 'none'
+    sound_duplex=         for intel: 'hda-micro' (default: speaker/mic), 'hda-duplex' (line-in/line-out), 'hda-output' (output-only)
 
-    boot=\"legacy\"     (use bios, not UEFI) default: =\"efi\"
+    boot=\"legacy\"       (use bios, not UEFI) default: =\"efi\"
 
     Windows:
-    tpm=\"on\"          secureboot=\"off\"
-    gl=\"off\"          (scaleable SDL, easier restarts) (?)
+    tpm=\"on\"            secureboot=\"on\"
+    gl=\"off\"           (scaleable SDL, easier restarts) (?)
 
-    Early 2025 Insider betas are now requesting Secure Boot.
-    Tests are showing seemingly successful outcomes when set to \"on\"
+    Older Windows releases were better with Secure Boot set to \"off\"
+    but tests on 25H2 are now showing better outcomes when set to \"on\"
 
-    Difficult booting:
-    boot=\"legacy\"  &  gl=\"off\"  may help ...
+    For MacOS, newer versions may need 'virtio' devices and older may be better with 'usb'
+    A line macos_release=\"ventura\" or similar should be present.   Set cpu_cores=\"8\" \"16\" or \"32\"
+    Native Mac Sizes: Custom_SDL_ScreenSize=\"2560x1440\"  \"1920x1080\"  \"1280x720\"  (MacScreenRes is now deprecated)
+
+    Use QemuErrorFilter+=("") to supress nuisance errors  NB \'+=\' and any new values as double quoted and space separated
+    The 'cpu_pins' is an experimental new feature which may help, or may cause conflicts, with host cpu runtime microcode (?)
 
     highlight then shift-ctrl-c  to copy ...
-  \n"
+  "
+
+  printColor "\n\n   %s:\n" "${QE_SourceVersion^^}"
+  [[ $DisplayConf_ModOptions ]] &&  printf "\n   DisplayConf_Mod=  %s   (sys default '%s')" "$DisplayConf_ModOptions" "$DisplayConf_ModsPref"
+
+  if [[ $guest_os == "macos" ]] && grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" ; then
+    printf "\n"
+    grep -qs 'MacSSE4checks' "$QE_Modpath" &&           printf "\n   MacSSE4checks=\"ignore\"               Support for very old VMs, pre-existing or testing ..."
+    grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" &&  printf "\n   HighPrecisionMacTimers=\"disabled\"    Tests show High Precision runs faster. Possibly disable for older VMs?"
+    grep -qs 'Tahoe_CpuTweaks' "$QE_Modpath" &&         printf "\n   Tahoe_CpuTweaks=\"off\"                Seems to be needed for Tahoe and seems to help with Sequoia ..."
+    grep -qs 'Upstream_MacCpu' "$QE_Modpath" &&         printf "\n   Upstream_MacCpu=\"force\"              The upstream model has problems -  Your setup may vary ??"
+  fi
+
+  printf "\n\n"
+
 }
 
 function check_screen_percentage_and_output {
@@ -67,13 +86,11 @@ function check_screen_percentage_and_output {
   HeadlessCmd=
 
   #  Function 'refresh_conf_vars_and_values' should clear all existing .conf vars before sourcing a new conf file
-  #  Note that 'gl' is a quickemu internal variable which quickemu defaults to "on"
   #  From quickemu 4.8 onwards, the value " --screenpct xx"  may be used on SDL, where xx is a value from 25 to 99  & Linux VM's only.
   #  But check the source to see if the case option exists, don't rely on the version number as formats change or could be a custom version.
 
+  #  Note that 'gl' is a quickemu internal variable which quickemu defaults to "on" and which can also be set in .conf file
   if [[ $gl == "off" || $gl == "on" ]]; then  qqX_GL_Mode="$gl"
-  else
-    if [[ $SetGL_DefaultAsOff ]]; then qqX_GL_Mode="off" ; else qqX_GL_Mode="on" ; fi
   fi
 
   SDL_ScreenPercent=
@@ -86,17 +103,15 @@ function check_screen_percentage_and_output {
     [[ SDL_ScreenPercent -lt 25 ]] && SDL_ScreenPercent="25"
     [[ SDL_ScreenPercent -gt 97 ]] && SDL_ScreenPercent="97"
     if  ! grep -q -s -e 'screenpct' "/tmp/qmod-case-temp" ; then
-      if [[ ! $QE_495_Script ]] && [[ ! $QE_496_Script ]]; then
-        printColor "\n\n  WARNING:  SDL_ScreenPercent needs quickemu 4.8+ \n\n "
+        printColor "\n\n  WARNING:  SDL_ScreenPercent internal error \n\n "
         SDL_ScreenSize_Error="> not possible with this qe-version"
-      fi
     fi
   fi
 
   xRes= ; yRes= ; Mon_xRes= ; Mon_yRes= ; MonGrep=
   SDL_ScreenSize= ; MacScreenRes= ; SDL_ScreenSize_Cmd97=
 
-  if [[ $QE_495_Script || $QE_496_Script ]] && [[ $XDG_SESSION_TYPE == "x11" || $XDG_SESSION_TYPE == "wayland" ]]; then
+  if [[ ! $SDL_ScreenSize_Error ]] && [[ $XDG_SESSION_TYPE == "x11" || $XDG_SESSION_TYPE == "wayland" ]]; then
 
     if [[ $PhysicalMonitor ]]; then
       Mon_xRes="$(cut -d 'x' -f 1 <<< "$PhysicalMonitor")"
@@ -136,6 +151,7 @@ function check_screen_percentage_and_output {
     # MacOS REVIEW  # ? 1360 x 768  ? 1920 x 1080 (max ovmf)  ? 1280 x 720  (max default qxl)
     # The newer variable SDL_ScreenSize is functionally identical to MacScreenRes
     # but MacScreenRes has been left in place to emphasise that size options are more limited if used with Mac.
+    # MacScreenRes becomes DEPRECATED with qqX ver 1.16
     # Sonoma default is 2560 x 1440 low res. In other words 1280 x 720 at x2 Hi-DPI res.
     # Mac seems to be able to use 1280 and then takes control of the outcome itself, once set up.
     # Unless it's Sequoia where it needs to be specified in the conf file:
@@ -208,21 +224,15 @@ function set_drive_paths {
   #  which will have already sourced the .conf file and its variables
 
   if [[ $MacLegacyDrive == "true" ]]; then  BusType="ide-hd,bus=ahci.2"
-
   else BusType="virtio-blk-pci"; fi
 
   #  SECOND DRIVE
   #  Drive path to be individually set in the .conf file on a per VM basis.
-
   if [[ -e "$SecondDrive" ]]; then
-
     SecondDriveArgs=" -device ${BusType},drive=SecondDrive -drive id=SecondDrive,if=none,format=qcow2,file=$SecondDrive"
-
   elif [[ $SecondDrive ]]; then
-
     # whilst the conf entry exists the above test didn't find it
     DriveLocationError="ERROR SecondDrive NOT found (.conf file)"
-
   fi
 
   #  SHARED DRIVE
@@ -233,10 +243,8 @@ function set_drive_paths {
   fi
 
   if [[ $SharedDrive ]]; then
-
     # if not toggled from the main menu, then read the .conf file
     [[ ! $SharedDrive_Mount ]] && eval "$(grep -s SharedDrive_Conf "$VM_Conf_File" | grep -v '#')"
-
     if [[ $MacLegacyDrive ]] || [[ $SharedDrive_Conf ==  "no-shared" ]]; then
       SharedDriveArgs=
     elif [[ -e "$SharedDrive" ]]; then
@@ -245,11 +253,9 @@ function set_drive_paths {
     elif [[ $SharedDrive ]]; then
       DriveLocationError="ERROR SharedDrive NOT found (main settings)"
     fi
-
   fi
 
 }
-
 
 #  MAIN DRIVE & BOOT
 # 'refresh_conf_vars_and_values' from qqX ver 1.5 will source the quickemu .conf file
@@ -263,7 +269,7 @@ function read_main_drive_and_img_iso_conf_vars {
   IsoImg=
 
   if [[ $Trace_InputVars ]]; then
-    echo "QE Conf Var 'disk_img': $disk_img"  ; echo
+    echo; echo "QE Conf Var 'disk_img': $disk_img"  ; echo
     echo "QE Conf Var 'img': $img"  ; echo
     echo "QE Conf Var 'iso': $iso"  ; echo
     sleep "$Trace_InputVars"
@@ -315,8 +321,7 @@ function_conf_error () {
     printf "\n\n  Check the settings and re-run this script ... "
   fi
 
- [[ $Loop_Diagnostics ]] && echo
-  main_loop_diagnostics
+ [[ $Loop_Diagnostics ]] && echo && main_loop_diagnostics
 
   printf "\n\n  General Settings file:  %s \n\n" "$qqX_SettingsFile"
 
@@ -410,11 +415,33 @@ function_conf_error () {
   else
 
     if [[ $NewSetupFlag || $FolderConfigFlag || $ConfTypo ]]; then
-      NewSetupFlag= ; FolderConfigFlag= ; ConfTypo=
+      FolderConfigFlag= ; ConfTypo=
       qqX_edit_settings  "conf"
     else  qqX_edit_settings
     fi
 
+  fi
+
+}
+
+show_qqXmod_settings() {
+
+  DisplayConf_ModOptions="$(grep -s 'DisplayConf_Mods ==' "$QE_Modpath" | cut -d'"' -f2 | sort -u | paste -d' ' -s)"
+  if [[ ! $DisplayConf_ModOptions ]]; then
+    printf "  %s:  Conf_Mods not available in the older 'built-in' versions \n\n" "${QE_SourceVersion^^}"
+  else
+    [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModDefault"
+    DisplayConf_ModsPref="$(grep -s 'DisplayConf_Mods=' "$QE_Modpath" | grep \&\& | grep -v Default | cut -d'"' -f2)"
+    DisplayConf_ModsConf="$(grep -s 'DisplayConf_Mods=' "$VM_Conf_Dir/$VM_Conf_File" | cut -d'"' -f2 | paste -d' ' -s)"
+    [[ ! $DisplayConf_Mods ]] && DisplayConf_Mods="$DisplayConf_ModsPref"
+    DisplayConf_ModOptions="${DisplayConf_ModOptions//' '/'  '}"
+    if [[ "$DisplayConf_ModOptions" != *"$DisplayConf_Mods"* ]]; then
+      printColor "  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"
+    elif [[ $DisplayConf_ModsConf ]] && [[ "$DisplayConf_ModOptions" != *"$DisplayConf_ModsConf"* ]]; then
+      printColor "\n\n  %s:  DisplayConf_Mods = '%s' not available in this built-in OR settings error \n\n" "${QE_SourceVersion^^}" "$DisplayConf_ModsConf"
+    elif [[ $DisplayConf_ModsConf || $DisplayConf_ModDefault ]]; then
+      printf "  %s:  DisplayConf_Mods = %s  Default/SystemDefault = %s    Options = %s \n\n" "${QE_SourceVersion^^}" "$DisplayConf_Mods"  "${DisplayConf_ModDefault:-"$DisplayConf_ModsPref"}"  "$DisplayConf_ModOptions"
+    fi
   fi
 
 }
@@ -426,15 +453,19 @@ qqX_edit_settings() {
     # Run the editor:
     if [[ $1 == "conf" ]]; then
 
-      printf "\n\n"
-      cat "$VM_Conf_Dir/$VM_Conf_File"
-      printf "\n\n"
+      printf "\n"
+      cat "$VM_Conf_Dir/$VM_Conf_File" | grep -s -e ^'[[:print:]]'
+      printf "\n"
+      show_qqXmod_settings
 
       while true ; do
-        printColor "\n  [enter] to edit   [n] conf notes  [d] conf defaults list   [t] config tune-up wizard   [b] go back"
+        printColor "\n  [enter] to edit   [n] CONF NOTES and MODS   [d] upstream defaults list   [t] config tune-up wizard   "
+        if [[ $NewSetupFlag ]]; then printColor "[b] go back to CURRENT settings" ; NewSetupFlag=
+        else printColor "[b] go back"
+        fi
         printf "\n\n"
         read -rp "  >  "   ConfEdit_Select
-        if [[ $ConfEdit_Select == "n" ]] ; then  custom_conf_notes
+        if [[ $ConfEdit_Select == "n" ]] || [[ $ConfEdit_Select == "N" ]] ; then  custom_conf_notes
         elif [[ $ConfEdit_Select == "d" ]] ; then
           printColor "\n\n  Standard Quickemu hard-coded defaults: \n"
           grep -s -B 200 ACCESS "/tmp/qmod-qe-all-vars-temp" | grep -v -e ACCESS -e MAIN -e Lowercase
@@ -443,8 +474,8 @@ qqX_edit_settings() {
         else
           cp "$VM_Conf_File" "$VM_InstanceName/${VM_Conf_File}.edit.old.txt"
           (nohup &> /dev/null  "$TextEditor" "$VM_Conf_Dir/$VM_Conf_File" & ) || texteditor_not_found_message
-          custom_conf_notes
-          printColor "\n  [enter] to return, or when editing has been completed, to refresh \n\n"
+          printf "\n  ---------------------------------------------------------------------------- \n\n"
+          printf "\n  [enter] to return, when editing has been completed, and to refresh \n\n\n"
           read -rp "  >  "
           ConfSettingsAdjusted=1
           refresh_conf_vars_and_values
@@ -472,7 +503,7 @@ qqX_edit_settings() {
         read -rp "  >  "
         exit directly
       else
-        printColor "\n  refreshing sources and arrays .... \n\n"
+        printColor "\n  Refreshing Sources and Arrays .... \n\n"
         # time that file needs to save and close properly has been added into the refresh routine
         SettingsFileAdjusted=1
         refresh_sources_and_load_VM_arrays
@@ -532,12 +563,17 @@ function refresh_conf_vars_and_values {
     VM_Conf_File="$(basename "$VM_Conf_File")"
     if [[ ! -e "$VM_Conf_Dir/$VM_Conf_File" ]]; then function_conf_error  "Conf Refresh:  WRONG FOLDER/FILE ," ; fi
 
-    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
-    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
+    # Toggle values get stored, so they don't they don't have to be continually re-entered on a .conf refresh
+    # Get normally cleared with 'VM_check_and_load'
+    if [[ $SettingsFileAdjusted ]]; then
+      Toggled_VerboseArgs= ; Toggled_GL_Mode= ; Toggled_NetMode=
+    fi
 
+    # Make sure any settings edits have finished writing using 'ps aux' and source the clearance
+    while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
     source "$ConfClearanceLog"
 
-    # clear any qqX specifics
+    # Clear any qqX specifics
     SecondDrive=
     SharedDrive=
     DriveLocationError=
@@ -546,13 +582,16 @@ function refresh_conf_vars_and_values {
     SharedDriveArgs=
     SharedDrive_Mount=
     MacLegacyDrive=
+    MacScreenRes=
     QemuError_VM_Filter=()
     Custom_SDL_ScreenSize=
     Custom_SDL_ScreenPercent=
     QemuArgsCustomFile=
     QemuErrorLog=
+    cpu_pins=
+    DisplayConf_Mods=
 
-    ## make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
+    ## Make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
 
     # first fully unset any that don't auto-reset
     # eg sound_duplex="${sound_duplex:-hda-micro}" won't work if a empty var name is present
@@ -581,7 +620,8 @@ function refresh_conf_vars_and_values {
     # then reset
     source  "/tmp/qmod-qe-rw-vars-temp"
 
-    # reload_boot_style_defaults  # REVIEW
+
+    # load_bios_mode_defaults  # REVIEW
     # left off as if active then utils menu bm function reverts to defaults after booting once ...
     # at ver 1.12.01 has been placed into qqX main loop so switching vm is clean
 
@@ -589,7 +629,7 @@ function refresh_conf_vars_and_values {
 
     # CLEAR & RE-POPULATE the ConfClearanceLog with current fields, for the next occasion
 
-    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
+    # make sure any settings edits have finished writing using 'ps aux'
     # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
 
     SECONDS=0
@@ -613,7 +653,7 @@ function refresh_conf_vars_and_values {
       fi
     done
 
-    # make sure any settings edits have finished writing > REVIEW as .conf startings can conflict
+    # make sure any settings edits have finished writing using 'ps aux'
     # see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
     SECONDS=0
     [[ $ConfSettingsAdjusted ]] && while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 0.3 ; [[ $SECONDS -gt 1 ]] && break  ; done
@@ -626,13 +666,24 @@ function refresh_conf_vars_and_values {
     source "$VM_Conf_Dir/$VM_Conf_File"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 2:" &&  main_loop_diagnostics
+
     # check any menu values that are based on the file .conf
     check_screen_percentage_and_output
     read_main_drive_and_img_iso_conf_vars
     set_drive_paths
     check_disk_is_okay
-
+    check_net_mode
     refresh_logfile_locations
+
+    # Return stored toggle values, so they don't they don't have to be continually re-entered on a .conf refresh
+    # Get normally cleared with 'VM_check_and_load'  but also when setting file is adjusted
+    [[ $Toggled_VerboseArgs ]] && VerboseArgs="$Toggled_VerboseArgs"
+    [[ $Toggled_GL_Mode ]] && qqX_GL_Mode="$Toggled_GL_Mode"
+    [[ $Toggled_NetMode ]] && qqX_NetMode="$Toggled_NetMode"
+
+    # Re-Source the Emu Mods file, so that individual distro settings that affect the selection or operations of functions
+    # get the right mod function loaded
+    [[ -e $QE_Modpath ]] && source "$QE_Modpath"
 
     [[ $Loop_Diagnostics ]] && printf "\n\n Conf refresh 3:" &&  main_loop_diagnostics
 

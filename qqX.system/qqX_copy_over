@@ -54,14 +54,14 @@ Counter=0
 while true ; do
 
 	if [[ $Counter == 0 ]] && [[ ! $DevSetUpdArrOutputScrn ]]; then
-		printf "\033c"
+		tput clear
 		printf "\n From %s" "$SourceFolder"
 		printColor "\n\n COPY the qqX script to usr/bin"
 		printColor "\n\n COPY all qqX.main scripts to /usr/share/qqX \n"
 	fi
 
 	printf "\n\n Terminal may be kept open. Sudo will stay usable for a while ..."
-	printColor "\n\n COPY > [enter] for qqX scripts" ; printf "    [s] qqX SETTINGS update    [b] copy /qqX.builtins to /usr/share/qqX \n\n"
+	printColor "\n\n COPY > [enter] for qqX scripts" ; printf "    [s] qqX SETTINGS update    [b] copy /qqX.builtins and Mods to /usr/share/qqX \n\n"
 	read -rp " >  "  UpdSets
 
 	if [[ $UpdSets ]]; then

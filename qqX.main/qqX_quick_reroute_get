@@ -52,7 +52,7 @@ refresh_load_listing_filters () {
   declare -gA VM_Listing_Info=()
   VM_Listing_Info[all,info]="All listed Distros, of all types."
   VM_Listing_Info[desktop,info]="All distros, minus the server list. The mainly Desktop focused distros."
-  VM_Listing_Info[server-cl,info]="The mainly Server focused distros."
+  VM_Listing_Info[server-cl,info]="The mainly Server or Command Line focused distros."
   VM_Listing_Info[gaming,info]="Distros with gaming tuned kernels or with releases that offer gaming focused options."
   VM_Listing_Info[ultra-light,info]="Super Small from ~100 to 500 Mb or so, ideal for USB sticks and similar."
   VM_Listing_Info[security,info]="Distros for network specialists, security engineers, pen-testers and those wanting privacy lock-downs."
@@ -93,7 +93,7 @@ print_quickget_and_folder_choices () {
 
   declare -n  QGW_List_ArrName="$1"
   [[ $ShowQGetLists ]] && { printf "\n print choices transfer arr: "; printf "\n %s" "${QGW_List_ArrName[@]}"; printf "\n\n"; }
-  QGW_List_Arr_ItemLength=14
+  QGW_List_Arr_ItemLength=16
   local HighLightNumber=
 
   if [[ $2 == "HL" ]]; then shift; HighLightNumber="$2"; shift
@@ -406,21 +406,23 @@ function check_new_vm_folder_name {
 ## MAIN WRAPPING (QWG Quick Wrap Get)
 
 function show_QWG_header {
-  printf "\033c"
+  tput clear
   qqX_logo_printf_title "$qqX_Version"
   if [[ $QG_Modpath && $QG_ModsNumber ]]; then
-    printColor "  wrapping %s with mods %s  " "$QG_VerNumber" "$QG_ModsNumber"
+    printColor "  wrapping QUICKGET %s with mods %s  " "$QG_VerNumber" "$QG_ModsNumber"
   else
     printColor "  wrapping QUICKGET version %s  " "$QG_VerNumber"
   fi
   if [[ $InternetUp ]]; then
-    printf "(internet working) [R] to re-check"
+    printf "(internet working) [R] re-check"
     if [[ $QG_Modpath ]]; then
       printf "   ("
       printColor "%s" "$VM_ListingFilter"
       printf ") ["
       printColor "fl"
-      printf "] adjust filter "
+      printf "] "
+      [[ $VM_ListingFilter != "all" ]] && printf "[all] "
+      printf "adjust filter"
     fi
     printf "\n\n"
   else
@@ -430,14 +432,16 @@ function show_QWG_header {
 
 function show_hot_swap_line {
     printColor "               Using %s:  " "$QE_SourceVersion"
-    printf "[FS] FreeSpirit  [FB] FreeBird  [HB]  [Ech]  [Sys]  [Cust]  [Dev]"
+    printf "[FS] FreeSpirit  [FB] FreeBird  [HB]  [Cust]  [Dev]"
     printf "  [HF] help on different versions\n"
-  if [[ $CodingHotSwap && $CodingHotSwapShow ]] || [[ $DevStart ]]; then
+  if [[ $DevStart ]]; then
     printf "\n               Code Source: %s " "$QE_SourcePath"
-    [[ $CodingHotSwap ]] && CodingHotSwapShow=
+  elif [[ $CodingHotSwap && $CodingHotSwapShow ]]; then
+    printf "\n               HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file."
   elif [[ $QE_SourceVersion != "FreeSpirit" ]]; then
     printf "\n               FreeSpirit usually has the latest fixes and additions ...."
   fi
+  [[ $CodingHotSwap ]] && CodingHotSwapShow= && SettingsFileAdjusted=
   printf "\n\n"
 }
 
@@ -469,6 +473,7 @@ function refresh_QWG_selector {
   if [[ $1 == "no-set" ]] ; then
     clear_main_gt_start_vars
     show_QWG_header ; show_hot_swap_line
+    [[ $FilterInfo ]] && printColor "\n  %s \n\n" "$FilterInfo"
     print_quickget_and_folder_choices  "QGW_OS_Array"
     QGW_List_NumSelected=
     SettingsFileAdjusted=
@@ -492,13 +497,6 @@ run_distro_tests_UI () {
     read -rp "  >  "
     return
   fi
-  test_internet_is_up
-  ExitTestToMain= ; qGet_TestSynopis= ; qGet_TestSynopisTwo=
-  [[ $1 == "test-all" ]] && shift
-  # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
-  if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
-  elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? "
-  fi
   while true; do
         [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
     if [[ $1 ]]; then
@@ -512,7 +510,11 @@ run_distro_tests_UI () {
       printf "\n\n  Takes around 1/2 hour ..."
       printf "\n\n  Select a Distro for individual tests"
     fi
-    printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
+    if [[ "$QGW_OS_Arr_NameSelected" == *windows* ]]; then
+      printColor "\n\n  LISTS all possibilities but servers cannot be checked due to restrictions"
+    else
+      printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
+    fi
     printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
     printf "\n\n  and the TEST ALL report file in the downloaded release folder"
     printColor "\n\n  [enter] to start (in compact mode)  "
@@ -523,6 +525,13 @@ run_distro_tests_UI () {
     if [[ $TestDistros == "b" ]]; then break
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
     else
+      test_internet_is_up
+      ExitTestToMain= ; qGet_TestSynopis= ; qGet_TestSynopisTwo= ; qGet_TestSynopisRedux=
+      [[ $1 == "test-all" ]] && shift
+      # without $1 tests all, or where $1 option is a pre-validated distro name eg 'fedora' or 'archlinux' for a single test
+      if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? " ; continue
+      elif [[ ! $DnsOkay ]]; then printColor "\n\n  DNS server PROBLEMS   Check settings and equipment  >  Reset router? " ; continue
+      fi
       printf "\n\n  Starting: "
       if [[ $1 ]]; then
         printf "\n\n  Expect possible short pauses between releases or editions on slower servers"
@@ -530,18 +539,21 @@ run_distro_tests_UI () {
         printf "\n\n  Expect possible short pauses between distros, and possibly between editions, on slower servers"
         printColor "\n\n  A Pass/Fail summary will be supplied"
       fi
-      printf "\n\n"
+      printf "\n"
       # NB: 'ChkLog' is the matching qGet_mod var which runs in a separate process, with both using the same log files
       if [[ $TestDistros == "vm" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check --mirrors "$1"
       elif [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
       else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
       fi
+      while pgrep -af bash | grep -q 'quickget' ; do
+        sleep 0.5
+      done
       if [[ ! $(cat $TestLog) ]]; then
         printColor "\n\n  ERROR: No log contents ?"
         qGet_TestSynopis="ERROR: No log contents  > possible server issue ??"
         [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
-      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
-        printColor "\n  FAILS: \n"
+      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
+        printColor "\n  FAILS DETECTED: \n"
         # shows the straightforward fails, followed by any obscure possible error lines
         qGet_TestSynopis="$(grep FAIL "$TestLog")"
         qGet_TestSynopisTwo="$(grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]')"
@@ -549,23 +561,30 @@ run_distro_tests_UI () {
           [[ $qGet_TestSynopisTwo ]] && printf -v qGet_TestSynopis "%s\n\n%s" "$qGet_TestSynopis" "$qGet_TestSynopisTwo"
         elif [[ $qGet_TestSynopisTwo ]] ; then qGet_TestSynopis="$qGet_TestSynopisTwo"
         fi
-        printf "\n\n%s\n\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues" "$qGet_TestSynopis"
+        if [[ "$(grep -sc -e ^'[[:alnum:]]' "$TestLog")" -gt 20 ]]; then printf "\n%s\n" "$qGet_TestSynopis"
+        else
+          qGet_TestSynopisRedux="$(grep -sv Checksum <<< "$qGet_TestSynopis" | grep -e ^'[[:alnum:]]')"
+          printf "\n%s\n" "$qGet_TestSynopisRedux"
+        fi
+        printColor "\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
       elif ! grep -q -e ^'[[:alnum:]]' "$TestLog" ; then
         printColor "\n  FAIL: \n"
         printf "\n  Empty Log File ??  > possible internal issue ??"
         qGet_TestSynopis="Empty Log File ??  > possible internal issue ??"
       elif grep -qs PASS "$TestLog" ; then
-        printColor "\n\n  All Tests Successfully Passed"
+        # at this point, is not empty and at least one PASS present, without errors or fails
+        printColor "\n  All Tests Successfully Passed"
         qGet_TestSynopis="All Tests Successfully Passed"
       fi
-      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.$(date +%T-%b.%d).txt"
-      else qGet_TestSynopis_File="/tmp/qGet-test.ALL.$(date +%T-%b.%d).txt"
+      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.e$(date +%s).$(date +%b.%d).txt"
+      else qGet_TestSynopis_File="/tmp/qGet-test.ALL.e$(date +%s).$(date +%b.%d).txt"
       fi
       printf "\n\n%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  > "$qGet_TestSynopis_File"
       [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
       printf "\n\n" >> "$qGet_TestSynopis_File"
       [[ ! $1 ]] && printf "%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  >> "$qGet_TestSynopis_File"
       printf "\n\n  Analysis Log File: '%s'" "$qGet_TestSynopis_File"
+      printf "\n"
     fi
     TestDistros=
   done
@@ -576,7 +595,7 @@ function_quick_get_wrap ()  {
   show_QWG_header
   QGW_List_NumSelected=
   GT_Exit=
-  main_loop_diagnostics ; [[ $Loop_Diagnostics ]] && echo
+  [[ $Loop_Diagnostics ]] && main_loop_diagnostics && echo
   clear_main_gt_start_vars
 
   # Forced internet check/re-check when starting 'gt' menu (see $VM_Selection == "gt")
@@ -584,7 +603,7 @@ function_quick_get_wrap ()  {
 
   while [[ ! $InternetUp ]]; do
     local Test_Internet=
-    #tput sc
+    # tput sc
     test_internet_is_up
     if [[ ! $InternetUp ]]; then
       if [[ ! $ipOkay ]]; then printColor "\n\n  INTERNET CONNECTION NOT FOUND   Check settings and equipment  >  Reset router? "
@@ -594,7 +613,7 @@ function_quick_get_wrap ()  {
       read -rp "   >  "   Test_Internet
       echo
     fi
-    #tput rc ; tput ed  #  clear back the last lines to sc (set cursor)
+    # tput rc ; tput ed  #  clear back the last lines to sc (set cursor)
     [[ $Test_Internet == "b" ]] &&  QGW_List_NumSelected="B"  && break
     [[ $Test_Internet == "i" ]] && break
     show_QWG_header
@@ -624,10 +643,9 @@ function_quick_get_wrap ()  {
     while true ; do
 
       if [[ $QG_Modpath ]]; then
-        # printColor "\n\n  [a-z] to zoom or switch zoom, or [fl] adjust filter  >  [item number] to select distro    [H] help  [R] REFRESH   [B] go back  [Q] quit"
-        printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] go back  [Q] quit"
+        printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] back to main menus   [Q] quit"
       else
-        printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH   [B] go back  [Q] quit"
+        printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH  [B] back to main menus   [Q] quit"
       fi
       printf "\n\n"
 
@@ -640,10 +658,14 @@ function_quick_get_wrap ()  {
 
       elif [[ ${QGW_List_NumSelected^^} == "HF" ]]; then  QGW_List_NumSelected= ; show_qqX_general_help "f" ; GT_Help=1
 
+      elif [[ ${QGW_List_NumSelected,,} == "all" ]] && [[ $QG_Modpath ]]; then
+        refresh_load_listing_filters
+        VM_ListingFilter="all" ; FilterInfo=
+        load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
       elif [[ ${QGW_List_NumSelected,,} == "fl" ]] && [[ $QG_Modpath ]]; then
         refresh_load_listing_filters
         while true ; do
-          qqLselect= ; local fNum=0
+          qqLselect= ; local fNum=0 ; FilterInfo=
           while [[ ${VM_ListingArray[fNum]} ]]; do
             [[ ${VM_ListingArray[fNum]} == "${VM_ListingFilter,,}" ]] && break
             ((fNum+=1))
@@ -651,8 +673,10 @@ function_quick_get_wrap ()  {
           printf "\n  FilterDefault (%s) is editable in the general settings file ... " "$VM_ListingFilterDefault_Display"
           printf "\n\n  Some listed distros may have releases that offer other options. Some lists may overlap with others.\n\n"
           print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
-          printColor "\n\n  CURRENT FILTER  =  %s  =  %s" "${VM_ListingFilter^^}" "${VM_Listing_Info[$VM_ListingFilter,info]}"
-          printf "\n\n  [number] to reselect"
+          printf "\n\n  CURRENT FILTER  "
+          printColor "=  %s  =" "${VM_ListingFilter^^}"
+          printf "  %s" "${VM_Listing_Info[$VM_ListingFilter,info]}"
+          printColor "\n\n  [number] to reselect"
           printf "   [enter] to return or continue"
           printf "\n\n"
           read -rp "  >  " qqLselect
@@ -660,7 +684,10 @@ function_quick_get_wrap ()  {
           if [[ $(tr -cd '[:digit:]' <<< "$qqLselect") ]] && (( 0 < qqLselect && qqLselect <= VM_ListingArrayCount )); then
             VM_ListingFilter="${VM_ListingArray[qqLselect-1]}"
           fi
-          [[ ! $qqLselect ]] && break
+          if [[ ! $qqLselect ]]; then
+            [[ $VM_ListingFilter == "all" || $VM_ListingFilter == "desktop" ]] && break
+            FilterInfo="${VM_Listing_Info[$VM_ListingFilter,info]}" ; break
+          fi
         done
         load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
 
@@ -674,10 +701,6 @@ function_quick_get_wrap ()  {
         CodingHotSwap="FreeBird" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
       elif [[ ${QGW_List_NumSelected^^} == "HB" ]] ; then
         CodingHotSwap="HomeBird" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
-      elif [[ "${QGW_List_NumSelected,,}" == ech* ]] ; then
-        CodingHotSwap="Echo" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
-      elif [[ "${QGW_List_NumSelected,,}" == sys* ]] ; then
-        CodingHotSwap="System" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
       elif [[ "${QGW_List_NumSelected,,}" == cust* ]] ; then
         CodingHotSwap="Custom" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
       elif [[ "${QGW_List_NumSelected,,}" == dev* ]] ; then
@@ -698,7 +721,7 @@ function_quick_get_wrap ()  {
         fi
 
         if [[ $QGW_List_NumSelected == "m" ]]; then
-          printf "\n\n  and ...%-${QGW_List_Arr_ItemLength}s" " "
+          printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
           i=1 ; M=
           for M in "${QGW_OS_Array[@]}" ; do
             if [[ "$M" == *"linuxmint"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$M" ; fi
@@ -709,7 +732,7 @@ function_quick_get_wrap ()  {
         i= ; M=
 
         if [[ $QGW_List_NumSelected == "s" ]]; then
-          printf "\n\n  and ...%-${QGW_List_Arr_ItemLength}s" " "
+          printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
           i=1 ; S=
           for S in "${QGW_OS_Array[@]}" ; do
             if [[ "$S" == *"opensuse"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$S" ; fi
@@ -808,19 +831,35 @@ function_quick_get_wrap ()  {
 
           if [[ "$QGW_OS_Arr_NameSelected" == "macos"* ]]; then
             printColor "\n  [W] A Mac OS installation walk-thru is available via the qqX wiki \n"
+            # Check for recurrent Ryzen problems, using GPU test from 'quickreport'
+            # Taken from report output in quickEmu Mac issue #1742
+            if [[ "$(lspci | grep -i vga | cut -d':' -f3)" == *'Ryzen 4000/5000 Mobile Series'* ]]; then
+              printColor "\n  WARNING  Ryzen 4000/5000 Mobile Series have been reported as unable to run MacOS (may affect this computer)"
+              printf "\n\n  qqX Conf Mods may help?  See upstream quickemu issue archives for more details ... \n\n"
+            fi
+            if ! check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
+              if ! check_cpu_flag sse4_1 ; then
+                printColor "\n\n\n  INSTALLATION NOT POSSIBLE: MacOS requires a CPU with at least SSE 4.1 support \n\n"
+              elif check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
+                printColor "\n\n  Try MacOS MONTEREY or BIG SUR, newer versions require at least AVX2\n\n"
+              elif check_cpu_flag sse4_1 ; then
+                printColor "\n\n  If downloadable, MacOS MOJAVE may still be possible ?\n\n"
+              fi
+            fi
           fi
 
           QGW_OS_HomePage_Working=
           if [[ $QGW_OS_HomePage ]]; then
+            printColor "\n  ---------------------------------------------------------------------------- "
             printf "\n\n  Checking Distro Home Page (max 6 tries)  \n\n"
             printf "" > "/tmp/qmod-dl-homepage-report.txt"
             {
               printf "  HomePage = %s"  "$QGW_OS_HomePage"
               # note this 'HomePage =' line gets grepped (awk) for 'http' at a later point
-              if curl --disable -sLf --retry 3 --retry-max-time 2 --retry-delay 0 --max-time 6 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working)"; QGW_OS_HomePage_Working=1
+              if [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]]; then printf " (checks disabled to avoid anti-bot problems)"
+              elif curl --disable -sLf --retry 3 --retry-max-time 2 --retry-delay 0 --max-time 6 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working)"; QGW_OS_HomePage_Working=1
               elif curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 1 --max-time 12 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working, slowly ...)"; QGW_OS_HomePage_Working=1
               else
-                [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && printf "\n\n  Microsoft download limiter: access appears blocked to this IP address. Try later or try router reboot ... ?"
                 printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
                 if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
                   printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the page"
@@ -836,7 +875,6 @@ function_quick_get_wrap ()  {
       fi
 
       [[ $Loop_Diagnostics ]] && printf "\n\n End of Quickget first loop, stage 1:" &&  main_loop_diagnostics
-
 
       if [[ $CodingHotSwapShow || $GT_Help ]]; then
         show_QWG_header ; show_hot_swap_line
@@ -861,7 +899,8 @@ function_quick_get_wrap ()  {
       return
     fi
 
-    printf "\n\n\n  Checking releases > may need to check on-line and may take time\n\n"
+    printColor "\n\n  ---------------------------------------------------------------------------- "
+    printf "\n\n  Checking releases > may need to check on-line and may take time\n\n"
 
     declare -ga QGW_Releases_Array=() ; declare -ga QGW_Editions_Array=() ; declare -ga QGW_StockEditions_Array=()
     QGW_ReleasesEditions_ListRaw= ; QGW_Releases_ListRaw= ; QGW_Releases_List=
@@ -946,8 +985,12 @@ function_quick_get_wrap ()  {
         printColor "\n  QuickGet or internet ERROR, no releases found "
         printf "\n\n  Linux ISO's: Try downloading directly from the distro's Web Pages .... \n"
       elif [[ ${#QGW_Releases_Array[@]} -eq 1 ]] ; then
-        printColor "  One Release only: '%s' " "${QGW_Releases_Array[0]}"
-        printf " but Editions choice may be be possible"
+        if [[ ${QGW_Releases_Array[0]} == "latest" ]]; then
+          printColor "  The Latest Release is available"
+        else
+          printColor "  Release '%s' is available" "${QGW_Releases_Array[0]}"
+        fi
+        printf "  > an Editions choice may be be possible"
         printColor "\n\n  [enter] to continue"
       else
         print_quickget_and_folder_choices  "QGW_Releases_Array"
@@ -1087,7 +1130,8 @@ function_quick_get_wrap ()  {
 
         [[ ! $QGW_OS_Arr_NameSelected || ! $QGW_Release_Arr_NameSelected ]] && break
         printColor  "  OS / Release   =   %s  %s "  "$QGW_OS_Arr_NameSelected" "$QGW_Release_Arr_NameSelected"
-        printf "\n\n\n  Checking editions > may need to check on-line and may take time \n\n"
+        printColor "\n\n  ---------------------------------------------------------------------------- "
+        printf "\n\n  Checking editions > may need to check on-line and may take time \n\n"
 
         QGW_List_NumSelected=
         QGW_Edition_Arr_NumSelected= ; QGW_Edition_Arr_NameSelected=
@@ -1099,24 +1143,24 @@ function_quick_get_wrap ()  {
           # running checks in the background (&) means that we can stop the process if it hangs (as with releases check)
           printf "" > "/tmp/quickget-editions-data.txt"
           quickget "$QGW_OS_Arr_NameSelected" "$QGW_Release_Arr_NameSelected" > "/tmp/quickget-editions-data.txt" &
-          sleep 0.5
+          sleep 0.3
           [[ $ShowQGetLists ]] && { echo "Check 1"; (pgrep -af bash | grep quickget &); echo; }
           DataPID="$(pgrep -af bash | grep quickget | head -n 1 | cut -d' ' -f1 2>/dev/null)"
           [[ $ShowQGetLists ]] && { echo; echo "DataPID: '${DataPID}'"; echo; }
           DataCount="0"; QGW_ChkLoop=
           while true; do
-            grep -qs 'not a supported' "/tmp/quickget-releases-data.txt" && QGW_EditionsError=1 && break
+            grep -qs 'not a supported' "/tmp/quickget-editions-data.txt" && QGW_EditionsError=1 && break
             if grep -qs 'ERROR! You must specify an edition' "/tmp/quickget-editions-data.txt"; then
-              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- )"
+              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- | tr -cd '[:print:]')"
               break
             fi
             [[ $ShowQGetLists ]] && { echo "Check loop Editions $DataCount"; (ps -ef | grep bash | grep quickget); echo; }
-            read -rt 0.5  QGW_ChkLoop
+            read -rt 0.3  QGW_ChkLoop
             ((DataCount+=1))
-            [[ "$DataCount" == '20' ]] && printf "  Continuing to check ...\n\n"
-            [[ "$DataCount" == '40' ]] && printf "  Servers are busy or anti-bot slow-downs may be in place ...\n\n"
-            [[ "$DataCount" == '80' ]] && printf "  Continuing to try. Some distros may sometimes take a bit longer ... \n\n  [c] cancel now and retry later? \n\n  >  "
-            [[ "$DataCount" == '150' && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
+            [[ "$DataCount" == '30' ]] && printf "  Continuing to check ...\n\n"
+            [[ "$DataCount" == '60' ]] && printf "  Servers are busy or anti-bot slow-downs may be in place ...\n\n"
+            [[ "$DataCount" == '100' ]] && printf "  Continuing to try. Some distros may sometimes take a bit longer ... \n\n  [c] cancel now and retry later? \n\n  >  "
+            [[ "$DataCount" == '200' && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
             # use posix '-n' test here or switching focus back from a dev side-terminal will trigger the read function
             [[ -n $QGW_ChkLoop && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
             [[ -n $QGW_ChkLoop ]] && break
@@ -1133,13 +1177,11 @@ function_quick_get_wrap ()  {
 
         if [[ $QGW_Editions_List ]]; then
             mapfile -t QGW_Editions_Array <<< "$QGW_Editions_List"
-
             if [[ $QG_Modpath ]]; then
               QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
               if [[ $QGW_OS_RelNotes ]]; then fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes" ; printf "\n"
               fi
             fi
-
         fi
 
         if [[ $QGW_EditionsError ]]; then
@@ -1187,9 +1229,13 @@ function_quick_get_wrap ()  {
         else
           print_quickget_and_folder_choices  "QGW_Editions_Array"
           if [[ "${#QGW_Releases_Array[@]}" -gt 1 ]]; then
-            printColor "\n\n  Stock List (%s), all Releases: \n\n" "$QGW_Editions_StockListTotal"
-            printf "  %s"  "$QGW_Editions_StockListString"
-            printColor "\n\n  Give LIST number of Edition   [r] choose a different release or return to view web page or to test   [b] back to main menu \n\n"
+            if [[ "${QGW_StockEditions_Array[*]}" == "${QGW_Editions_Array[*]}" ]]; then
+              printf "\n\n  Stock List (%s), appears to be the same for all Releases" "$QGW_Editions_StockListTotal"
+            else  
+              printColor "\n\n  Stock List (%s), all Releases: \n\n" "$QGW_Editions_StockListTotal"
+              printf "  %s"  "$QGW_Editions_StockListString"
+            fi
+              printColor "\n\n  Give LIST number of Edition   [r] choose a different release or return to view web page or to test   [b] back to main menu \n\n"
           else
             printColor "\n\n  Give LIST number of Edition   [r] return to releases menu to view web page or to test    [b] back to main menu \n\n"
           fi
@@ -1254,7 +1300,7 @@ function_quick_get_wrap ()  {
     # TEST DOWNLOAD URL is correct and is good to go,
     # except Windows, where you get blocked if there too many calls, but should be 'potentially okay'
     if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
-      printf "\n\n  Microsoft servers may not report back accurately, may block repeat attempts or may need manual download ... "
+      printf "\n\n  Microsoft servers may not report back accurately, may block repeat attempts or may need manual download ... \n\n"
       show_distro_homepage_check_results
       # clear any previous distro tmps that test_iso would have made
       printf "" > "/tmp/qmod-dl-url" ; printf "" > "/tmp/qmod-dl-size"
@@ -1309,11 +1355,12 @@ function_quick_get_wrap ()  {
 
     while true ; do
 
-      main_loop_diagnostics
+      [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
       if [[ $MainMenuZsync ]]; then
         QGW_OverWriteAlert=1
       elif [[ ! $QGW_Download_BadLink ]]; then
+        printf "  ---------------------------------------------------------------------------- \n\n"
         show_current_group_folder_list
         printf "\n\n\n"
         printf "  DOWNLOADING:  "
@@ -1559,7 +1606,7 @@ function_quick_get_wrap ()  {
   [[ $GT_Exit ]] && return
   finalize_QGW_targets
 
-  main_loop_diagnostics
+  [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
   [[ $GT_Exit ]] && return
 
@@ -1695,15 +1742,13 @@ function_quick_get_wrap ()  {
       done
 
       # tidy up other possible background processes started by quickget ...
-      if [[ $(pgrep aria2) || $(pgrep curl) || $(pgrep wget) || $(pgrep zsync) ]]; then
-        # The use of aria2 and wget has been dropped since april 2024 (?) REVIEW
+      if [[  $(pgrep curl) || $(pgrep zsync) ]]; then
+        # The use of aria2 and wget has been dropped from quickget since april 2024
         while true; do
-          pkill aria2  2>/dev/null
           pkill curl   2>/dev/null
-          pkill wget   2>/dev/null
           pkill zsync  2>/dev/null
           sleep 1
-          if [[ ! $(pgrep aria2) ]] && [[ ! $(pgrep curl) ]] && [[ ! $(pgrep wget) ]] && [[ ! $(pgrep zsync) ]]; then
+          if [[ ! $(pgrep curl) ]] && [[ ! $(pgrep zsync) ]]; then
             QGW_DownloadStopped=1
             sleep 1 ; break
           fi
@@ -1738,6 +1783,10 @@ function_quick_get_wrap ()  {
         fi
         if [[ $DL_PercentageDone ]] && [[ $DL_PercentageDone != "0" ]]; then printf "\n  %s Percent appears to be downloaded"  "$DL_PercentageDone"
         else printf "\n  Percent downloaded not known"
+        fi
+        if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]] ; then
+          printf "\n\n  If WINDOWS download failed, but the other elements succeeded,"
+          printf "\n  conclude the process and Manual Download links will given from the Main Menu \n"
         fi
         printf "\n\n  Completed (or Stopped):"
         printColor "  [c] to conclude  [r] to resume, retry or re-check \n\n"

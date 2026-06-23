@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 ##  qqX component to be located in folder 'qqX.main'
+#   Sorts out main settings and defaults from the previously sourced 'qqX_SettingsFile' (qqX_Initialize)
+#   Creates sub-functions that can be re-run to refresh the scripts when changes have been made via 'qqX_edit_settings'
+#   and which runs the main function 'refresh_sources_and_load_VM_arrays' located in script 'qqX_VM_array_routines'
+#   Also run by function 'VM_loader_selector_and_menu' which is in the root qqX main loop
 
 ##  Copyright (c)  Alex Genovese   https://github.com/qqxproject
 #   SMALL CODE SNIPPETS eg the function printColor MAY BE USED
@@ -17,7 +21,21 @@
 
 ## VM selector style
 Default_VM_SelectorStyle="A"
-[[ ! $VM_SelectorStyle ]]  &&  VM_SelectorStyle="$Default_VM_SelectorStyle"
+
+refresh_selector_styles() {
+  # should have picked up a style when the settings file was sourced, but if it had been set blank ...
+  [[ ! $VM_SelectorStyle ]]  &&  VM_SelectorStyle="$Default_VM_SelectorStyle"
+
+  for Style in {A..Z} ; do
+    if type -t "print_selector_array_${Style}_style" 1>/dev/null ; then unset -f "print_selector_array_${Style}_style"; fi
+  done
+  source "$qqX_MainFolder/qqX_VM_selector_styles"
+
+  if ! type -t "print_selector_array_${VM_SelectorStyle}_style" 1>/dev/null ; then
+    VM_SelectorStyle="$Default_VM_SelectorStyle"; StylesSettingError=1
+  else StylesSettingError=
+  fi
+}
 
 function_create_VM_folderList() {
 
@@ -125,9 +143,11 @@ find_file_manager_browser
 find_texteditor
 
 ## PATHS
-
 # Set the original initial value of paths as found on start up. Check Once.
 OriginalPATH="$PATH"
+# System paths stored for info BUT direct support removed 2026/01
+# Note that 'QE_SystemFilePath' should be probed before any builtins or re-routes happen,
+# otherwise finding the filepath gets a bit complex ... (needed for compatability tune-ups)
 QE_SystemFilePath="$(type -p quickemu)"
 QG_SystemFilePath="$(type -p quickget)"
 
@@ -158,63 +178,51 @@ function sort_qqX_builtin_settings {
     printf "\n\n  Settings File: %s \n\n" "$qqX_SettingsFile"  ; sleep 4
   fi
 
-  if [[ $QE_SourceVersion == "system" ]]; then
-    if [[ $QE_SystemFilePath && $QG_SystemFilePath ]]; then
-      QE_SourceVersion="System"
-      QE_SourcePath="$QE_SystemFilePath"
-      QG_SourcePath="$QG_SystemFilePath"
-    else
-      QE_SourceVersion="Missing System Files"
-      QE_SourcePath= ; QG_SourcePath= ; FreePath=
-    fi
-  fi
+  # DEV NOTE - With quickemu and EMU mods, because the code becomes integrated into qqX, unlike quickGET,
+  # there is a theoretical risk that a code function present in one version could remain in memory
+  # when not present in another version:
+  # While quickGET uses a lot of 'type -t' function tests, which only check if the function is loaded into memory,
+  # all of these functions will auto-extinguish as they only exist in transitory background threads, so this is safe.
+  # For quickEMU, we need to mitigate by grepping for the actual script presence of any new or discontinued functions
+  # in '$QE_SourcePath' and in '$QE_ModPath' before getting qqX to make any critical calls.
 
-  if [[ $QE_SourceVersion != "System" ]]; then
-
-    if [[ $QE_SourceVersion == "freebird" ]]; then
-      QE_SourceVersion="FreeBird"
-      FreePath="$qqX_BuiltinsFolder/freebird"
-    elif [[ $QE_SourceVersion == "freespirit" ]]; then
+  if [[ $QE_SourceVersion == "freebird" ]]; then
+    QE_SourceVersion="FreeBird"
+    FreePath="$qqX_BuiltinsFolder/freebird"
+  elif [[ $QE_SourceVersion == "freespirit" ]]; then
+    QE_SourceVersion="FreeSpirit"
+    FreePath="$qqX_BuiltinsFolder/freespirit"
+  elif [[ $QE_SourceVersion == "homebird" ]]; then
+    QE_SourceVersion="HomeBird"
+    FreePath="$qqX_BuiltinsFolder/homebird"
+  elif [[ $QE_SourceVersion == "custom" ]]; then
+    QE_SourceVersion="Custom"
+    FreePath="$Default_VM_Folder/qqX.custom/QE.Custom"
+    if [[ ! -e "$FreePath" ]]; then FreePath="$qqX_BuiltinsFolder/freebird" ; fi
+  elif [[ $QE_SourceVersion == "dev" ]]; then
+    QE_SourceVersion="Dev"
+    FreePath="$QE_DevPath"
+    if [[ ! -e "$FreePath" ]]; then
       QE_SourceVersion="FreeSpirit"
       FreePath="$qqX_BuiltinsFolder/freespirit"
-    elif [[ $QE_SourceVersion == "homebird" ]]; then
-      QE_SourceVersion="HomeBird"
-      FreePath="$qqX_BuiltinsFolder/homebird"
-    elif [[ $QE_SourceVersion == "echo" ]]; then
-      QE_SourceVersion="Echo"
-      FreePath="$qqX_BuiltinsFolder/echo"
-    elif [[ $QE_SourceVersion == "custom" ]]; then
-      QE_SourceVersion="Custom"
-      FreePath="$Default_VM_Folder/qqX.custom/QE.Custom"
-      if [[ ! -e "$FreePath" ]]; then FreePath="$qqX_BuiltinsFolder/freebird" ; fi
-    elif [[ $QE_SourceVersion == "dev" ]]; then
-      QE_SourceVersion="Dev"
-      FreePath="$QE_DevPath"
-      if [[ ! -e "$FreePath" ]]; then
-        QE_SourceVersion="FreeSpirit"
-        FreePath="$qqX_BuiltinsFolder/freespirit"
-        printf "\n\n  Dev path  '%s'  Not Found   >>  Using FreeSpirit \n\n"  "$QE_DevPath"
-        sleep 2 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
-      fi
-    else
-      printf "\n\n  Source Setting  '%s'  Not Recognised   >>  Using FreeBird \n\n"  "$QE_SourceVersion"
-      sleep 3 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
-      QE_SourceVersion="FreeBird"
-      FreePath="$qqX_BuiltinsFolder/freebird"
+      printf "\n\n  Dev path  '%s'  Not Found   >>  Using FreeSpirit \n\n"  "$QE_DevPath"
+      sleep 2 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
     fi
-
-    QE_SourcePath="$FreePath/quickemu"
-    QG_SourcePath="$FreePath/quickget"
-    if [[ -e "$FreePath/qqX_quickGet_mods" ]]; then QG_Modpath="$FreePath/qqX_quickGet_mods"
-    else QG_Modpath= ; fi
-    if [[ -e "$FreePath/qqX_quickEmu_mods" ]]; then QE_Modpath="$FreePath/qqX_quickEmu_mods"
-    else QE_Modpath= ; fi
+  else
+    printf "\n\n  Source Setting  '%s'  Not Recognised   >>  Using FreeBird \n\n"  "$QE_SourceVersion"
+    sleep 3 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
+    QE_SourceVersion="FreeBird"
+    FreePath="$qqX_BuiltinsFolder/freebird"
   fi
+
+  QE_SourcePath="$FreePath/quickemu"
+  QG_SourcePath="$FreePath/quickget"
+  if [[ -e "$FreePath/qqX_quickGet_mods" ]]; then QG_Modpath="$FreePath/qqX_quickGet_mods" ; else QG_Modpath= ; fi
+  if [[ -e "$FreePath/qqX_quickEmu_mods" ]]; then QE_Modpath="$FreePath/qqX_quickEmu_mods" ; else QE_Modpath= ; fi
 
   if [[ $FreePath ]]; then
     export PATH="${FreePath}:${qqX_LibraryFolder}:${OriginalPATH}"
-  else
-    export PATH="${qqX_LibraryFolder}:${OriginalPATH}"
+  else export PATH="${qqX_LibraryFolder}:${OriginalPATH}"
   fi
 
   if [[ $QE_SourcePath ]] && [[ ! -e "$QE_SourcePath" ]]; then
@@ -246,26 +254,11 @@ function find_quick_version_numbers {
 
   # QuickEMU also uses an internal variable '$VERSION' but this only works after the correct script has been sourced.
   # But use grep to avoid bad original source $QEMU_VER_SHORT routines throwing errors
-  QE_VerNumber="$(grep -s 'VERSION=' "$QE_SourcePath" | cut -d'"' -f2)"
-
-  # QuickGET as @ ver 4.9.2 'official-vanilla' actually makes a call to EMU to find the number.
-  # But the 'quickget' call goes to a qqX capture function of the same name,
-  # and allows re-routes to custom versions that may work differently.
-  if [[ $QE_SourceVersion == "System" || $QE_SourceVersion == "Echo" ]]; then
-    QG_VerNumber="$QE_VerNumber"
-    QE_Modpath= ; QE_ModsNumber= ; QG_Modpath= ; QG_ModsNumber=
-  else QG_VerNumber="$("$QG_SourcePath" --version 2>/dev/null)"
-  fi
-
-  # Release Quickemu 4.9.2 was still numbered 4.9.1
-  # Use the changes to fedora releases 'echo 38 39' as a fixing flag:
-  if grep -q -s 'echo 38 39' "$QG_SourcePath" ; then
-    [[ $QG_VerNumber == "4.9.1" ]] && QG_VerNumber="4.9.2"
-    [[ $QE_VerNumber == "4.9.1" ]] && QE_VerNumber="4.9.2"
-  fi
+  QE_VerNumber="$(grep  -e 'VERSION=' "$QE_SourcePath" | cut -d'"' -f2)"
+  QG_VerNumber="$(grep  -A 6 -e '--version|-vers' "$QG_SourcePath" | grep echo | cut -d'"' -f2)"
 
   if [[ ! $QE_VerNumber ]] || [[ ! $QG_VerNumber ]]; then
-    printColor "\n\n  ERROR finding QuickEmu/Quickget Source Path or running Source Checks"
+    printf "\n\n  ERROR finding QuickEmu/Quickget Source Path or running Source Checks"
     printf "\n\n  If you have just re/installed and are running an initial start up, "
     printf "\n\n  this may be due to your Linux distro being cautious about new scripts."
     printf "\n\n\n  A close down and a standard restart of qqX should probably solve things ...."
@@ -348,26 +341,39 @@ function qemu_version_check {
 
 qemu_version_check
 
-path_diagnostics  pause
+[[ $PathDiagnostics ]] && path_diagnostics pause
 
 # How the Tiano BIOS/UEFI loads up:
 
-function store_boot_style_defaults {
-  [[ ! $BootStyle ]] && BootStyle="fast"
-  [[ ! $BootStyleMsg ]] && BootStyleMsg="slow"
-  BootStyle_Default="$BootStyle"
-  BootStyleMsg_Default="$BootStyleMsg"
+function store_bios_mode_defaults {
+  [[ ! $BiosMode ]] && BiosMode="fast"
+  [[ ! $BiosModeMsg ]] && BiosModeMsg="slow"
+  BiosMode_Default="$BiosMode"
+  BiosModeMsg_Default="$BiosModeMsg"
+  [[ ! $VM_ControlledRestart_Default ]] && VM_ControlledRestart_Default="on"
+  case "$VM_ControlledRestart_Default" in
+    on) ControlledRestart="on" ;;
+    off) ControlledRestart="off" ;;
+    *) VM_ControlledRestart_Default="on" ; ControlledRestart="on" ;;
+  esac
 }
 
-function reload_boot_style_defaults {
-  BootStyle="$BootStyle_Default"
-  BootStyleMsg="$BootStyleMsg_Default"
+function load_bios_mode_defaults {
+  BiosMode="$BiosMode_Default"
+  BiosModeMsg="$BiosModeMsg_Default"
+  [[ ! $VM_ControlledRestart_Default ]] && VM_ControlledRestart_Default="on"
+  case "$VM_ControlledRestart_Default" in
+    on) ControlledRestart="on" ;;
+    off) ControlledRestart="off" ;;
+    *) VM_ControlledRestart_Default="on" ; ControlledRestart="on" ;;
+  esac
 }
 
-function clear_boot_style_vars {
-  BootStyle= ; BootStyle_Default=
-  BootStyleMsg= ; BootStyleMsg_Default=
+function clear_bios_mode_vars {
+  BiosMode= ; BiosMode_Default=
+  BiosModeMsg= ; BiosModeMsg_Default=
+  VM_ControlledRestart_Default= ; ControlledRestart=
 }
 
-store_boot_style_defaults
+store_bios_mode_defaults
 
