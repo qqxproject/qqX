@@ -4,7 +4,7 @@ SPIN-OFF NEXT LEVEL QUICKEMU / QUICKGET
 
 Adds fixes, tools and improvements to the popular [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) system
 
-See announcements for the [latest news](https://github.com/qqxproject/qqX/discussions/categories/announcements) and updates
+See announcements for [what's happening behind the scenes](https://github.com/qqxproject/qqX/discussions/categories/announcements)
 
 -----
 
@@ -22,31 +22,35 @@ CAREFULLY WRITTEN AND CAREFULLY CHECKED [![Ask DeepWiki](https://deepwiki.com/ba
 
 - Huge, easy build range of _installation-ready_ distros and desktops, including Windows and MacOS
 
-- Improved upstream code base with [rolling-release](https://qqxproject.org/FreeBird) updates
-
 - Quickemu and Quickgui compatible
 
 -----
 
-See [qqxproject.org](https://qqxproject.org/) for full details and FAQ's
+See qqxproject.org for user [help, details and FAQ's](https://qqxproject.org/)
+
+See DeepWiki for [impartial analysis and flow charted explainations of how qqX works under the hood](https://deepwiki.com/qqxproject/qqX/1.1-architecture-overview)
 
 -----
 
-RECENT HIGHLIGHTS Include:
+RECENT HIGHLIGHTS for 1.16 Include:
 
-- Multiplexed parallel downloads with enhanced stop/start
+- qqX exclusive macOS runtimes with faster performance and range of CPU option adjusters
 
-- Main interface Extended Distro Test Suite
+- A further improved qqX Windows installer, with improved reliability and security
 
-- Extra Quickemu dependency checks
+- An upgraded drive/VM snapshot system
 
-- Improved Windows installer with improved security
+- qqX enhanced CPU pinning configurations
 
-- Extra fixes for Wayland and Gnome and Cosmic
+- New Main Menu style options
+
+- Range of qqX exclusive updates for QuickGet
+
+Plus 1.15's
+
+- Extended Distro Test Suite
 
 - 51 language auto-translation system
-
-- Pre-release downloading and a pre-release alert system
 
 -----
 
