@@ -131,11 +131,11 @@ drives_and_snapshots() {
     if [[ $Selected_DrivePreset ]]; then Selected_DriveOption="$Selected_DrivePreset"
     else
       case "$MainMenuChoice" in
-        sc) printf "\n\n  Creates an image of the VM's current point in time ... \n\n" ;;
-        sa) printf "\n\n  Reverts a drive or VM to a previous point in time\n"
-            printf "  whilst leaving forward and backward snap images still available, if present ... \n\n" ;;
-        sd) printf "\n\n  Deletes an image of a particular point in time in the VM's history, \n"
-            printf "  whilst leaving forward and backward snap images still available, if present ... \n\n" ;;
+        sc) printf "\n\n  CREATE:  an image of the drive or VM's current point in time ... \n" ;;
+        sa) printf "\n\n  REVERT:  a drive or VM to a previous point in time\n"
+            printf "  whilst leaving forward and backward snap images still available, if present ... \n" ;;
+        sd) printf "\n\n  DELETE:  an image of a particular point in time in the VM's history, \n"
+            printf "  whilst leaving forward and backward snap images still available, if present ... \n" ;;
       esac
       printColor "\n  SELECT:  [enter]  MAIN DRIVE"
       [[ $SecondDriveArgs ]] && printColor "   [2]  Second Drive"
@@ -389,8 +389,9 @@ function qqX_snapshot_delete {
 
   [[ $Selected_DriveOption == "b" ]] && return
 
-  printColor "\n\n qqX Snapshot Delete function "
-  printf "\n\n Selected Drive = %s  (reselection & cancel prompts are given before starting)" "${Selected_DriveName^^}"
+  printColor "\n\n\n qqX Snapshot DELETE FUNCTION "
+  printf "  >  Selected Drive = %s " "${Selected_DriveName^^}"
+  printf "\n\n For difficult names only showing correctly in the FULL listing enter [full individual name]"
 
   # Create range-selectable array (finds lines with a date entry)
   SnapListString="$("$QEMU_IMG" info "$Selected_Drive" | grep '[0-9][0-9]:')"
@@ -410,10 +411,9 @@ function qqX_snapshot_delete {
   done
 
   SnapListArrTotal=$((i-1))
-  printColor "\n Enter ARRAY number [0] to [%s], either for individual SNAPSHOT, or for the START of snapshot range"  "$SnapListArrTotal"
-  printf "\n\n or [full individual name] for difficult names only showing correctly in the FULL listing"
-  printf "\n\n or [enter] to return to main menu "
-
+  printColor "\n\n Give ARRAY number [0] to [%s], either for individual SNAPSHOT, or for the START of snapshot range"  "$SnapListArrTotal"
+  printf "\n\n Re-selection and cancel prompts are given before actually starting ..."
+  printf "\n\n [enter] to return to main menu, to start afresh, or to do something else ..."
   SnapName=
   SnapDeleteStart=
   SnapDeleteEnd=
@@ -422,7 +422,9 @@ function qqX_snapshot_delete {
   printf "\n\n"
   read -rp " >  "  SnapDeleteStart
 
-  if [[ $SnapDeleteStart ]]; then
+  if [[ ! $SnapDeleteStart ]]; then
+    MainMenuChoicePreset= ; Selected_DrivePreset= ; Selected_DriveNumber= ; Selected_Drive= ; Selected_DriveName= ; return
+  else
     SpecialSnapName="$SnapDeleteStart"
     SpecialSnapName="$(tr -d "[:digit:]" <<< "$SpecialSnapName")"
     if  [[ $SpecialSnapName ]]; then
@@ -431,7 +433,7 @@ function qqX_snapshot_delete {
       printf "\n  Snap to delete: \"%s\"" "$SpecialSnapName"
     else
       printColor "\n [enter] for an INDIVIDUAL SNAPSHOT, to cancel, or to correct an error "
-      printf "\n\n Or ARRAY [number] to select the END of range (inclusive) \n\n"
+      printf "\n\n Or ARRAY [number] to select the END OF RANGE (inclusive) \n\n"
       read -rp " >  "  SnapDeleteEnd
       if [[ $SnapDeleteEnd ]]; then
         SnapDeleteEnd="$(tr -cd "[:digit:]" <<< "$SnapDeleteEnd")"
@@ -456,24 +458,26 @@ function qqX_snapshot_delete {
       fi
     fi
 
-    printColor "\n [enter] to delete   [b] back to main menu (or reselect) \n\n"
+    printColor "\n [del] to confirm delete   [b] back to main menu (or reselect) \n\n"
     read -rp " >  "  SnapDeleteConfirm
 
-    if [[ $SnapDeleteConfirm == "b" ]]; then  printf "\n\n Deletion schedule has been CANCELLED"
+    if [[ $SnapDeleteConfirm != "del" ]]; then
+      printf "\n\n Deletion schedule has been CANCELLED \n"
     else
-       if [[ $SpecialSnapName ]]; then
+      printColor "\n\n Confirmed  > \n\n"
+      if [[ $SpecialSnapName ]]; then
         "$QEMU_IMG" snapshot -q -d "$SpecialSnapName" "$Selected_Drive"
-       else
-         SnapDeleteRangeCounter=$SnapDeleteStart
-         while [[ $SnapDeleteRangeCounter -le $SnapDeleteEnd ]]; do
+      else
+        SnapDeleteRangeCounter=$SnapDeleteStart
+        while [[ $SnapDeleteRangeCounter -le $SnapDeleteEnd ]]; do
           IFS=' ' read -ra SnapListArrSeparated <<< "${SnapListArrRaw[$SnapDeleteRangeCounter]}"
           SnapName="${SnapListArrSeparated[1]}"
           if [[ ! $SnapName ]]; then
-            printColor "\n\n ERROR with SnapShot Array List \n\n"
+            printColor " ERROR with SnapShot Array List \n\n"
             sleep 5
             exit 1
           else
-            printColor "\n\n Deleting SnapShot %2d   %2d  %s \n\n"  "${SnapListArrSeparated[0]}"  "$SnapDeleteRangeCounter"  "${SnapListArrSeparated[1]}"
+            printColor " Deleting SnapShot %2d   %2d  %s \n\n"  "${SnapListArrSeparated[0]}"  "$SnapDeleteRangeCounter"  "${SnapListArrSeparated[1]}"
             "$QEMU_IMG" snapshot -q -d "$SnapName" "$Selected_Drive"
           fi
           ((SnapDeleteRangeCounter+=1))
@@ -497,7 +501,7 @@ function qqX_snapshot_delete {
 
     fi
     sdReturn=
-    printf "\n\n [enter] to return to menu   [sd] delete again   [sc] create new snap \n\n "
+    printf "\n [enter] to return to main menu   [sd] delete again (on this drive)  [sc] create new snap (on this drive)\n\n "
     read -rp " >  "  sdReturn
       if [[ $sdReturn == "sd" ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset="$Selected_DriveNumber"
       elif [[ $sdReturn == "sc" ]]; then MainMenuChoicePreset="sc" ; Selected_DrivePreset="$Selected_DriveNumber"

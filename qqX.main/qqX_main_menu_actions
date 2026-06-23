@@ -386,8 +386,8 @@ function  main_menu_actions {
     drives_and_snapshots
 
     if [[ $SharedDriveArgs && $SecondDriveArgs ]]; then
-      printColor "\n\n  Scroll to View " ; printf "\n\n  [enter] to return to menu \n\n"
-    else printColor "  [enter] to return to menu \n\n"
+      printColor "\n\n  Scroll to View " ; printf "\n\n  [enter] return to main menu \n\n"
+    else printColor "  [enter] return to main menu \n\n"
     fi
     read -rp "  >  "
 
@@ -398,8 +398,9 @@ function  main_menu_actions {
     [[ $MainMenuChoicePreset == "disk" ]] && sleep 2 && return
     if [[ $Selected_DriveOption == "b" ]]; then SnapTitle="b"
     else
+      printf "\n\n  Create an image of the drive or VM's current point in time:"
       printColor "\n\n  [enter] Create snap with date.time title "
-      printf "  [text input] Create with text descriptor   [b] back to main menu "
+      printf "  [text] Create with text descriptor   [b] back to main menu "
       SnapTitle= ; scReturn=
       printf "\n\n"
       read -rp "  >  "  SnapTitle
@@ -416,7 +417,7 @@ function  main_menu_actions {
       DiskStorageChanges=1
       printf "\n\n  Drive Updated ..."
       printColor "\n\n  [enter] to return to menu"
-      printf "   [sd] delete older snaps \n\n "
+      printf "   [sd] to delete snaps (on this drive)\n\n "
       read -rp "  >  "  scReturn
       if [[ $scReturn ]]; then MainMenuChoicePreset="sd" ; Selected_DrivePreset="$Selected_DriveNumber"
       else MainMenuChoicePreset= ; Selected_DrivePreset= ; Selected_DriveNumber= ; Selected_Drive= ; Selected_DriveName=
@@ -442,7 +443,8 @@ function  main_menu_actions {
       if [[ $SnapNumber ]]; then
         SnapTitle="$(date +%b.%d.%H:%M)"
         SnapTitleNumber="$("$QEMU_IMG" snapshot  -l "$Selected_Drive" | tail -n 1 | awk '{print $1}' )" ; ((SnapTitleNumber++))
-        printf "  Adding the current state as New Snapshot:  %s  %s \n\n" "$SnapTitleNumber" "$SnapTitle"
+        printf "  Adding the current state as "
+        printColor " New Snapshot: %s  %s \n\n" "$SnapTitleNumber" "$SnapTitle"
         "$QEMU_IMG" snapshot  -c "$SnapTitle" "$Selected_Drive"
         sleep 1.5
         printf "  Reverting the drive to the point in time selected"
