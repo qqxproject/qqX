@@ -474,8 +474,8 @@ qqX_edit_settings() {
         else
           cp "$VM_Conf_File" "$VM_InstanceName/${VM_Conf_File}.edit.old.txt"
           (nohup &> /dev/null  "$TextEditor" "$VM_Conf_Dir/$VM_Conf_File" & ) || texteditor_not_found_message
-          custom_conf_notes
-          printColor "\n  [enter] to return, or when editing has been completed, to refresh \n\n"
+          printf "\n  ---------------------------------------------------------------------------- \n\n"
+          printf "\n  [enter] to return, when editing has been completed, and to refresh \n\n\n"
           read -rp "  >  "
           ConfSettingsAdjusted=1
           refresh_conf_vars_and_values
