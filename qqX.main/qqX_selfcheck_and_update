@@ -181,8 +181,12 @@ check_for_qqX_updates() {
   [[ -e "/tmp/qqXnews.txt"  ]] && rm "/tmp/qqXnews.txt"
   curl -qsLf  -m 180  "https://github.com/qqxproject/qqX/discussions/categories/announcements" > "/tmp/qqXnews.txt"
   qqX_LatestNewsTitle="$(grep -s -e '/discussions/[[:digit:]]' "/tmp/qqXnews.txt" | grep -m 1 hovercard | tr '"' '\n' | grep '>' | cut -d'<' -f1 | cut -d'>' -f2)"
-  qqX_LatestNewsDate="$(grep -s 'relative-time' "/tmp/qqXnews.txt"  | tr '"' '\n' | grep -e '/relative' | cut -d'<' -f1 | cut -d'>' -f2)"
-
+  qqX_LatestNewsDate="$(grep -s 'relative-time' "/tmp/qqXnews.txt"  | tr '"' '\n' | grep -e '/relative' | cut -d'<' -f1 | cut -d'>' -f2 | head -n 1 | tr -d ',')"
+  local LatestEpochNewsDate="" LastNewsReading="" EpochDateNow=""
+  EpochDateNow="$(date +%s)"
+  LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"
+  LastNewsReading="$(cat "$HOME/.qqX/qqXnewsreader.log" | tr -cd '[:digit:]')"
+  ((LatestEpochNewsDate > LastNewsReading)) && echo "$((EpochDateNow+1209600))" > "$HOME/.qqX/qqXnewsreader.log"
 
   # Inherits Vars from qqX nesting but IF A NEW UPDATE IS FOUND
   # needs to populate an OUTPUT TRANSFER FILE, as check runs in background ...

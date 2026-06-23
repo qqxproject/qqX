@@ -542,8 +542,10 @@ else
         local LastNewsReading="" HideNewsAlert="" MuteNewsAlert="" HighlightNewsAlert="" LatestEpochNewsDate=""
         LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"
         [[ -e "$HOME/.qqX/qqXnewsreader.log" ]] && LastNewsReading="$(cat "$HOME/.qqX/qqXnewsreader.log" | tr -cd '[:digit:]')"
+        # Hide old news
         (( (EpochDateNow - LatestEpochNewsDate) < 1209600 )) && HighlightNewsAlert=1
         (( (EpochDateNow - LatestEpochNewsDate) > 3628800 )) && HideNewsAlert=1
+        # Mute news if it has been recently read
         if [[ $LastNewsReading ]]; then
           (( (LastNewsReading+(3600*48)) < EpochDateNow )) && HideNewsAlert=1
           (( (LastNewsReading+(3600*2)) < EpochDateNow )) && MuteNewsAlert=1
