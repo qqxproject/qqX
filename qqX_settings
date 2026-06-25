@@ -163,6 +163,11 @@ VM_SelectorStyle="A"
 #
 # Custom/Dev - Your own customised or development version (see notes towards the end)
 
+# As Jan 2026 (commit 612a5ef1) the older 'Echo' built-in has had to be removed, as this too difficult to sustain,
+# and 'System' installed upstream versions of Quickemu are no longer able to be directly supported.
+
+# qqX remains fully compatibile with upstream built virtual machines.
+
 # Set qqX start default in the settings file as quoted "name" or may be set blank for qqX selected
 # Any qqX generated machines may still be run in quickemu upstream mode, using 'quickemu -vm  distro-name.conf' at the command line
 
@@ -551,6 +556,10 @@ VM_SelectorStyle="A"
 # HomeBird   - An older FreeBird release.  Just in case of the unforeseen ....
 #
 # Custom/Dev - Your own customised or development version
+
+# As Jan 2026 (commit 612a5ef1) the older 'Echo' built-in has had to be removed, as this too difficult to sustain,
+# and 'System' installed upstream versions of Quickemu are no longer able to be directly supported.
+# qqX remains fully compatibile with upstream built virtual machines.
 
 ## End of Settings
 

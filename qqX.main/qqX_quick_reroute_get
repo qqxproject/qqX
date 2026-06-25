@@ -1460,9 +1460,6 @@ function_quick_get_wrap ()  {
           fi
 
         else
-          if [[ $QE_SourceVersion == "System" || $QE_SourceVersion == "Echo" ]]; then
-            printColor "\n\n  WARNING Source Version '%s' :  Stopping and Restarting of partly completed downloads requires the Freebird/FreeSpirit builtins." "$QE_SourceVersion"
-          fi
           # clear any accidental initial double pressing of the enter key
           read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
           if [[ $DL_PotentialOkay ]]; then

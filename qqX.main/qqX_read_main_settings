@@ -186,6 +186,10 @@ function sort_qqX_builtin_settings {
   # For quickEMU, we need to mitigate by grepping for the actual script presence of any new or discontinued functions
   # in '$QE_SourcePath' and in '$QE_ModPath' before getting qqX to make any critical calls.
 
+  # As Jan 2026 (commit 612a5ef1) the older 'Echo' built-in has had to be removed, as this too difficult to sustain,
+  # and 'System' installed upstream versions of Quickemu are no longer able to be directly supported.
+  # qqX remains fully compatibile with upstream built virtual machines.
+
   if [[ $QE_SourceVersion == "freebird" ]]; then
     QE_SourceVersion="FreeBird"
     FreePath="$qqX_BuiltinsFolder/freebird"
