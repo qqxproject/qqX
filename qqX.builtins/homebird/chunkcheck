@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+#  ChunkCheck is a quickemu project utility based on work by MCJack123: https://gist.github.com/MCJack123/943eaca762730ca4b7ae460b731b68e7
+#  See https://github.com/quickemu-project/quickemu/commit/8ab2590e5b106d907fc4b98085179f84dd88b9eb
+
 from pathlib import Path
 import struct
 import hashlib

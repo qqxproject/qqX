@@ -120,7 +120,18 @@ load_quickemu_special_vars
 
 function  load_mod_quickemu_boot {
 
-  ## OVERWRITE ORIGINAL Functions Source, as required
+  ## OVERWRITE ORIGINAL Functions Source, as required:
+
+  # As of 2025/26, note that an increasing number of function overwrites are also happening through 'qqX_quickEmu_mods'
+  # which gets added via sourcing at the start of this script,
+  # and made easier by improved function modularity upstream during the last couple of years ...
+
+  # The newer Mods files are specific to their matching 'built-in' counterpart,
+  # whereas here, they are more general legacy and apply to all built-in versions.
+
+  # This is slightly different to 'quickGet' and to 'qqX_quickGet_mods', which is sourced via lines added towards the end
+  # of the fork variant quickget script that is used by the built-ins:
+  # https://github.com/qqxproject/quickemu/blob/freespirit-next/quickget
 
   declare -f vm_boot  >  "/tmp/qmod-function-vm_boot-orig-temp"
   grep -B 500 -m 1 'MACHINE_TYPE=' "/tmp/qmod-function-vm_boot-orig-temp"  >  "/tmp/qmod-function-vm_boot-interim-temp"

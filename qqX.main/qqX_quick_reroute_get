@@ -23,6 +23,12 @@ function quickget {
   # To be run after rerouting functions for quickemu & quickget are in place & code has been sourced.
   # And if rerunning after a settings change, to be run after 'find_quickemu_source_functions_and_vars'
   # has been, so that the right QE & QG versions have been established and loaded.
+
+  # Many of the original upstream quickget will have had needed fixes or will have had mods applied.
+  # This is done through 'qqX_quickGet_mods' which is sourced via lines added
+  # towards the end of the fork variant quickget script that is used by the built-ins:
+  # https://github.com/qqxproject/quickemu/blob/freespirit-next/quickget
+
   # See function 'refresh_and_load_quickemu_sources'
   eval command '"$QG_SourcePath"' " $*"
   return
@@ -1724,19 +1730,23 @@ function_quick_get_wrap ()  {
       # removing the old rcksum files not only tidies up but also stops the background monitor process
       [[ $(ls "$VM_Conf_Dir/"rcksum* 2>/dev/null) ]] && remove_old_rcksum_files
 
-      # check macOS particularities ...
-      # '/usr/bin/macrecovery' now deprecated and has been replaced with chunkcheck  REVIEW
-      P3_Arr=()
-      mapfile -t  P3_Arr <<< "$(pgrep python3)"
-      for P3_PID in "${P3_Arr[@]}" ; do
-        P3_MacOS_Cmd="$(ps --no-headers -o cmd "$P3_PID" 2>/dev/null)"
-        if [[ "$P3_MacOS_Cmd" == *'macrecovery'* || "$P3_MacOS_Cmd" == *'chunkcheck'* ]]; then
-          kill "$P3_PID" 2>/dev/null
-          printColor "\n\nStopped \n\n"
-          QGW_DownloadStopped=1
-          break
-        fi
-      done
+
+      #  Check for any macOS download particularities ...
+      if [[ "$QGW_DownloadSelection" == *"macos"* ]]; then
+        #  ChunkCheck is an upstream utility based on work by MCJack123: https://gist.github.com/MCJack123/943eaca762730ca4b7ae460b731b68e7
+        #  See https://github.com/quickemu-project/quickemu/commit/8ab2590e5b106d907fc4b98085179f84dd88b9eb
+        P3_Arr=()
+        mapfile -t  P3_Arr <<< "$(pgrep python3)"
+        for P3_PID in "${P3_Arr[@]}" ; do
+          P3_MacOS_Cmd="$(ps --no-headers -o cmd "$P3_PID" 2>/dev/null)"
+          if [[ "$P3_MacOS_Cmd" == *'chunkcheck'* ]]; then
+            kill "$P3_PID" 2>/dev/null
+            printColor "\n\nStopped \n\n"
+            QGW_DownloadStopped=1
+            break
+          fi
+        done
+      fi
 
       # tidy up other possible background processes started by quickget ...
       if [[  $(pgrep curl) || $(pgrep zsync) ]]; then
