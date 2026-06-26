@@ -20,6 +20,11 @@
 # For this script: x.x.xx-suffix > major.minor.point
 # Current Version > set locally in function case statements
 
+# Ver 1.7.00 adds standard life-cycle presets, principally to make sure 'dev' precedes 'beta'
+# as in common with open source releases, and not in a,b,c,d order as previously
+# eg 1.2.3-foo.02  1.2.3-random.01  1.2.3-dev.01  1.2.3-dev.02  1.2.3-alpha.01  1.2.3-beta.01  1.2.3-beta.02  1.2.3-rc.01  1.2.3-stable.01  1.2.3-gold  1.2.3
+# See https://en.wikipedia.org/wiki/Software_release_life_cycle#Stages_of_development
+
 # POSIX and Mac/HomeBrew compliant initial Bash test:
 if [ ! "$(command -v bash)" ] || ! bash --version | grep bash | grep -qEo '[ ]+[5-9]+[.]' ; then
   echo; echo "  FloatVersion: you need Bash, probably 5.0 or newer to run this script."; echo
@@ -190,7 +195,7 @@ floatversion ()  {
       -h|--help)
         show_help ; return 0 ;;
       -V|--version)
-        CurrentVersion="1.6.01"
+        CurrentVersion="1.7.00"
         printf "\n CurrentVersion: %s" "$CurrentVersion"
         if [[ $(type -t 'fv') == "function" ]]; then
           printf "\n\n Checking for updates....   "
@@ -332,8 +337,8 @@ floatversion ()  {
    grep -v -sE '[[:alpha:]]' )"
   fi
 
-  # make sure list is line seaprated
-  printf -v Nums "%s\n" "$Nums"
+  # make sure list is line separated
+  Nums="$(tr ' ' '\n' <<< "$Nums")"
 
   # check
   Nums="$(grep -s '[[:print:]]' <<< "$Nums")"
@@ -352,7 +357,7 @@ floatversion ()  {
   # none found, return false
   [[ ! $Nums ]] && return 1
 
-  mapfile -t NumArrTemp  <<< "$(tr ' ' '\n' <<< "$Nums")"
+  mapfile -t NumArrTemp  <<< "$Nums"
   [[ $Verbose ]] && { declare -p NumArrTemp ; echo ;}
 
   # sort unique, as required
@@ -370,8 +375,19 @@ floatversion ()  {
     mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrSorted[@]}" | sort -V )"
   else
     # See https://stackoverflow.com/a/77961624/27611101 and others
+    # and https://en.wikipedia.org/wiki/Software_release_life_cycle#Stages_of_development  (added for 1.7)
     mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrSorted[@]}" | jq -Rrn '
       # read input lines as an array
+        def pre_priority:
+        if . == null or . == "" then 7
+        elif startswith("dev") then 1
+        elif startswith("alpha") then 2
+        elif startswith("beta") then 3
+        elif startswith("rc") then 4
+        elif startswith("stable") then 5
+        elif startswith("gold") then 6
+        else 0
+        end;
       [inputs]
       |sort_by(
         # ignore build
@@ -379,12 +395,13 @@ floatversion ()  {
         # extract version core and pre-release as arrays of numbers and strings
         |split("-")|(.[0]|split(".")|map(tonumber? // .)) as $version_core
         |(.[1:]|join("-")|split(".")|map(tonumber? // .)) as $pre_release
+        | (.[1:] | join("-") | split(".")[0] | pre_priority) as $label_priority
         # sort by
         |$version_core,
         # pre-release versions have a lower precedence than the associated normal version
         ($pre_release|length)==0,
         # sort by
-        $pre_release
+        $label_priority, $pre_release
       )
       #extract values from an array
       |.[]'
@@ -563,22 +580,19 @@ fv ()  {
     else GrepFull=1 ; fi
   fi
   if [[ $GrepFull ]]; then Nums="$(grep -sEo '[0-9]+([.][0-9]+)+([.][0-9]+)?+([.][0-9]+)?+([.][0-9]+)?+([-][[:alnum:]]+)?+([.][[:digit:]]+)?' <<< "$InputText" )"
-  else Nums="$(grep -sEo '[0-9]+([.][0-9]+)+([.][0-9]+)?+([.][0-9]+)?+([.][0-9]+)?' <<< "$InputText" )"; fi ;  printf -v Nums "%s\n" "$Nums"
+  else Nums="$(grep -sEo '[0-9]+([.][0-9]+)+([.][0-9]+)?+([.][0-9]+)?+([.][0-9]+)?' <<< "$InputText" )"; fi ; Nums="$(tr ' ' '\n' <<< "$Nums")"
   Nums="$(grep -s '[[:print:]]' <<< "$Nums")" ; NumsCount="$(grep -sc '[[:print:]]' <<< "$Nums")"
   if [[ $GTcompare ]] && [[ "$NumsCount" != 2 ]]; then [[ ! $HideErrors ]] && printf "\n  FloatVersion:  TWO floating point or TWO semantic version values should be supplied \n\n" >&2 ; return 1 ; fi
   [[ ! $Nums ]] && return 1
-  mapfile -t NumArrTemp  <<< "$(tr ' ' '\n' <<< "$Nums")"
+  mapfile -t NumArrTemp  <<< "$Nums"
   if [[ $ShowAll ]]; then mapfile -t  NumArrSorted <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
   else mapfile -t  NumArrSorted <<< "$(printf "%s\n" "${NumArrTemp[@]}" | sort -u )" ; fi
   if [[ $SortNum ]]; then mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrSorted[@]}" | sort -n )"
   else
-    mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrSorted[@]}" | jq -Rrn '
-    [inputs] |sort_by( split("+")[0]
-      |split("-")|(.[0]|split(".")|map(tonumber? // .)) as $version_core
-      |(.[1:]|join("-")|split(".")|map(tonumber? // .)) as $pre_release
-      |$version_core, ($pre_release|length)==0, $pre_release
-    ) |.[]' )"
-  fi
+    mapfile -t fvOutputArr <<< "$(printf "%s\n" "${NumArrSorted[@]}" | jq -Rrn '
+      def pre_priority: if . == null or . == "" then 7 elif startswith("dev") then 1 elif startswith("alpha") then 2 elif startswith("beta") then 3 elif startswith("rc") then 4 elif startswith("stable") then 5 elif startswith("gold") then 6 else 0 end;
+      [inputs]|sort_by(split("+")[0]|split("-")|(.[0]|split(".")|map(tonumber? // .)) as $vc|(.[1:]|join("-")|split(".")|map(tonumber? // .)) as $pr|(.[1:]|join("-")|split(".")[0]|pre_priority) as $lp|$vc,($pr|length)==0,$lp,$pr)|.[]'
+    )"  ; fi
   if [[ ! $GTcompare ]]; then
     if [[ $FilterString ]]; then n=0
       while [[ $n -lt "${#FilterArr[@]}" ]]; do NumArrTemp=(); i=0
@@ -607,7 +621,7 @@ fv ()  {
       if [[ $RevMax ]]; then NumArrTemp=(); i="${#fvOutputArr[@]}"; ((i-=1))
         while [[ $i -ge 0 ]]; do NumArrTemp+=("${fvOutputArr[i]}"); ((i-=1)); done
         mapfile -t  fvOutputArr <<< "$(printf "%s\n" "${NumArrTemp[@]}")"
-      fi 
+      fi
     elif [[ $LowMax ]]; then NumArrTemp=(); i="${#fvOutputArr[@]}"
       if [[ $i -gt "$LowMax" ]]; then TopShow="$((i-LowMax))"; else TopShow="$i"; fi ; ((i-=1)) ; [[ $TopShow -gt "$i" ]] && TopShow="0"
       while true; do NumArrTemp+=("${fvOutputArr[i]}"); ((i-=1)); [[ $i -lt "$TopShow" ]] && break; done
