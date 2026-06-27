@@ -1172,7 +1172,9 @@ sudo -k
 if [[ $End_Install == "q" ]]; then exit ; fi
 
 if [[ $Start_qqX ]]; then
-  printf "\n\n  If this window stays open, then keep it open until qqX is no longer running.\n\n  [enter] to close \n\n"
+  printf "\n\n  If this window stays open, then keeping it open until qqX is no longer running"
+  printf "\n\n  is usually fine, but you may need to close things if multi-instance warnings appear"
+  printf "\n\n  [enter] to close \n\n"
   # for normal installations switch to $HOME as we are not doing devstarts ...
   cd "$HOME" || printf "\n\n  ERROR switching to home folder %s ?? \n\n" "$HOME"
   if [[ $UserTerm == "konsole" || "$(pgrep konsole)" ]]; then
