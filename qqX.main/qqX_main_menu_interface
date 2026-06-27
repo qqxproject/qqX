@@ -554,13 +554,13 @@ else
         # And where NewsAlert flag will mute news after 2hrs if it has been recently read, followed by hiding it after 2days
         if [[ $HighlightNewsAlert ]] && [[ ! $HideNewsAlert && ! $MuteNewsAlert ]]; then
           printColor "  [news] %s" "$qqX_LatestNewsTitle"
-          [[ $qqX_Current_ReleaseType == "beta" ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
+          [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
           printf "\n\n"
         elif [[ ! $HideNewsAlert ]]; then
           printf "\n  [news] %s" "$qqX_LatestNewsTitle"
-          [[ $qqX_Current_ReleaseType == "beta" ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
+          [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
           printf "\n\n"
-        elif [[ $qqX_Current_ReleaseType == "beta" ]]; then
+        elif [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]]; then
           printf "\n  [tags] latest code %s > " "$qqX_Newest_Tag"
           if ! fv -qg "$qqX_Newest_Tag $qqX_Version" ; then printf "up-to-date\n\n"
           else printf "%s\n\n"  "$qqX_Newest_TagText"

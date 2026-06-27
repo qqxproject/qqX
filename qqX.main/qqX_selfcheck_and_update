@@ -124,9 +124,11 @@ check_for_qqX_updates() {
 
   # A release should exist BUT beta might be possible as 'latest' in unusual circumstances, so use the API for 'latest'
   # qqX_Latest_ReleaseNumber="$(fv -Q -M <<< "$qqX_ReleasesList")" is numbers only ...
-  qqX_Latest_ReleaseNumber="$(grep -e 'releases/tag/' "$qqX_Latest_ReleaseFile" | fv -f -Q)"
+  qqX_Latest_ReleaseNumber="$(grep -e 'releases/tag/' "$qqX_Latest_ReleaseFile" | fv -f -Q | tr -d ' ')"
   [[ ! $qqX_Latest_ReleaseNumber ]] && return 1
-  [[ $qqX_Latest_ReleaseNumber == "$qqX_Newest_PreRelease" ]] && qqX_Newest_PreRelease=
+
+  # Give priority to releases over pre and tag, when beta releases have a follow up
+  floatversion --gt -Q "$qqX_Latest_ReleaseNumber  $qqX_Newest_PreRelease" && qqX_Newest_PreRelease=
 
   # Versioning, normally as x.x.xx-suffix > major.minor.point and with optional suffix as -beta.01 etc
   # where --gt check eg "1.12.02-beta.01  1.12.01" is true (remembering that fv --gt also implies --full)
@@ -134,7 +136,7 @@ check_for_qqX_updates() {
   # and noting that actual release and pre-release --gt comparisons are treated differently
 
   if floatversion --gt -Q "$qqX_Latest_ReleaseNumber  $qqX_Version"; then
-    # Test the standard release channel first, before checking the CurrentType flag,
+    # TEST THE STANDARD RELEASE CHANNEL FIRST, before checking the CurrentType flag,
     # for people who have not been using qqX for a bit and haven't had a chance to update maybe ...
     # eg people with 1.14.00-beta.07 get offered 1.14.00 or 1.14.01 before they get offered 1.15.00-beta.10
 
@@ -150,11 +152,11 @@ check_for_qqX_updates() {
     if [[ $qqX_Latest_ReleaseNumber == *[[:alpha:]]* ]] ; then  qqX_Latest_ReleaseType="beta"
     else qqX_Latest_ReleaseType="release"
     fi
-    # Change upd flag for beta or rc in the latest channel
-    [[ $qqX_Latest_ReleaseType == "beta" ]] && qqX_UpdateAvail=
 
-  elif [[ $qqX_Current_ReleaseType == "beta" ]]; then
-    # (via initialization flag from 'read_main_settings' script) gives an easy download to people who are on the pre-release beta channel
+  elif [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_PreRelease ]]; then
+    # (via initialization flag from 'read_main_settings' script)
+    # gives an easy download to people who are on the pre-release beta channel
+    # (pretends pre-release is actual release, if first check release test is null)
     if floatversion --gt -Q "$qqX_Newest_PreRelease  $qqX_Version"; then
       qqX_Latest_ReleaseType="beta"
       qqX_Latest_ReleaseNumber="$qqX_Newest_PreRelease"
