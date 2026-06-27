@@ -32,7 +32,7 @@ See DeepWiki for [impartial analysis and flow charted explainations of how qqX w
 
 -----
 
-RECENT HIGHLIGHTS for 1.16 Include:
+RECENT HIGHLIGHTS include:
 
 - qqX exclusive macOS runtimes with faster performance and range of CPU option adjusters
 
@@ -46,16 +46,14 @@ RECENT HIGHLIGHTS for 1.16 Include:
 
 - Range of qqX exclusive updates for QuickGet
 
-Plus 1.15's
-
-- Extended Distro Test Suite
-
-- 51 language auto-translation system
+- Extended Distro Test Suite with multiple fixes for upstream
 
 -----
 
 ![qqX-part-of-quickemu-edited3b](https://github.com/user-attachments/assets/3322789f-ed89-4b6c-90b3-630958860b2f)
 
 -----
+
+51 language auto-translation system:
 
 [Translate from English](https://qqxproject-org.translate.goog/?_x_tr_sl=auto&_x_tr_tl=it&_x_tr_hl=en&_x_tr_pto=wapp) - - 从英语翻译 - - 영어에서 번역하십시오 - - Μεταφράστε από τα Αγγλικά - - ترجمة من اللغة الإنجليزية
