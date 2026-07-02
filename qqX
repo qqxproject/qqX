@@ -152,6 +152,9 @@ fi
 
 # NON-FHS installs should normally locate Main and Built-Ins in with this file, so ./ will locate things
 
+# See DeepWiki for an impartial analysis and flow charted explainations of how qqX works under the hood
+# https://deepwiki.com/qqxproject/qqX/1.1-architecture-overview
+
 # The default location for the .desktop file, from ver 1.9 onwards, is '/usr/share/applications'
 XDG_GUI_desktop_Folder="/usr/share/applications"
 
@@ -281,6 +284,9 @@ tput  cnorm
 
 # Either 'VM_loader_selector' or 'main_menu' may exit to the QuickGET (GT) interface,
 # and on 'return' the variable '$VM_InstanceName' controls which one of the two to return to.
+
+# See DeepWiki for an impartial analysis and flow charted explainations of how qqX works under the hood
+# https://deepwiki.com/qqxproject/qqX/1.1-architecture-overview
 
 ##########################################
 

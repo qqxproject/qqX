@@ -234,7 +234,12 @@ function distro_release_notes {
 # If available, the checksum should be downloaded, cleaned and supplied to $2.
 
 # Where possible, try to keep web greps dynamic. This is made easier with 'floatversion' and may include 'fv' pipes.
-# See https://github.com/TuxVinyards/floatversion
+# See https://github.com/Alex-Genovese/floatversion
+
+# And DeepWiki for an impartial analysis and flow charted explainations of how floatversion works under the hood
+# https://deepwiki.com/Alex-Genovese/floatversion/2-core-architecture
+
+# Also see 'path.notes.for.floatversion.deployment.md' in the folder qqX.lib
 
 # Place standard sized 'get' functions here, next to releases and editions, and any oversized ones in section 7.
 # Downloads may occasionally need a special tidy-up and finalization. See sections 4 to 6.
