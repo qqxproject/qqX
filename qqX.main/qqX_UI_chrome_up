@@ -234,7 +234,7 @@ function show_qqX_general_help {
     printf  "\n\n  [f] see FreeBird notes  [c] command line & mouse notes"
 
     if [[ $WebBrowser ]]; then
-      printf "\n\n\n  [w] Online HELP PAGES, FAQs and Release Notes @ qqxproject.org"
+      printf "\n\n\n  [w] Online HELP PAGES, FAQs and Release Notes @ qqxproject.org   [dw] DeepWiki on how qqX works under the hood"
       printColor "\n\n  [N] latest news and discussion @ qqX GitHub"
       if [[ $guest_os == "windows" ]]; then
         WinVirtDate="$(curl -qsLf -m 3 "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/" | grep 'latest-virtio' | tr '>' '\n' | grep 20 | awk '{print $1}')"
@@ -280,6 +280,12 @@ function show_qqX_general_help {
       HelpSelect=
       printf "\n  Opening Browser ... \n"
       (nohup &> /dev/null  "$WebBrowser" "https://qqxproject.org/FAQs-and-Help"  & ) || web_browser_not_found_message
+      sleep 1
+
+    elif [[ $HelpSelect == "dw" ]]; then
+      HelpSelect=
+      printf "\n  Opening Browser ... \n"
+      (nohup &> /dev/null  "$WebBrowser" "https://deepwiki.com/qqxproject/qqX"  & ) || web_browser_not_found_message
       sleep 1
 
     elif [[ $HelpSelect == "n" ]] || [[ $HelpSelect == "N" ]]; then
