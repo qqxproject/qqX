@@ -29,14 +29,10 @@
 # IF CODE IN GENERAL BECOMES USED IN ANY OTHER PROJECT,
 # THE GPL3 LICENCE APPLIES & YOU SHOULD SHOW CLEAR ATTRIBUTIONS.
 
-# https://www.shellcheck.net/wiki  ShellCheck global disables:
-# SC2242 as it clashes with use of exit traps used to keep mouse click scripts open
-# Whilst SC1090,SC2024, SC154 become unfortunately necessary due to file sourcing of modules
-
-# shellcheck disable=SC2242
-# shellcheck disable=SC1090
-# shellcheck disable=SC2034
-# shellcheck disable=SC2154
+## ShellCheck global disables:
+# https://www.shellcheck.net/wiki/SC2242 as it clashes with use of exit traps used to keep mouse click scripts open
+# and SC1090,SC1091,SC2024, SC2154 for necessity of dynamic file sourcing
+#  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154,SC2009
 
 # Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
 # Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
