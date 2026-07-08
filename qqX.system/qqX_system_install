@@ -675,10 +675,10 @@ else
 
       MkDefDir=
       printColor "\n\n\n  A default VM directory is required >> "
-      printf "\n\n  %s\n\n  This location can be easily moved and/or renamed later," "$HOME/VMQs"
+      printf "\n\n  %s\n\n  Recommended for now, as it can be easily moved and/or renamed later," "$HOME/VMQs"
       printf "\n\n  simply by using the file manager and by editing the qqX settings."
       printColor "\n\n  [enter] make folder '%s'" "$HOME/VMQs"
-      printColor "  [n] not yet >> edit the settings file later ... \n\n"
+      printColor "  [n] not yet (advanced) >> editing the settings file later ... \n\n"
       read -rp "  >  "  MkDefDir
 
       if [[ ! $MkDefDir ]] && [[ ! -d "$HOME/VMQs" ]]; then  mkdir "$HOME/VMQs"  ||  printColor "\n\n  ERROR  making Default VM folder %s \n\n"

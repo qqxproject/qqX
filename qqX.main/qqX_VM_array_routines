@@ -387,7 +387,11 @@ refresh_sources_and_load_VM_arrays() {
   local RefreshCall_VM_Folder=
   RefreshCallFolder="$(pwd)"
   RefreshCall_VM_Folder="$Current_VM_Folder"
-  cd "$Default_VM_Folder" || printf "\n\n  ERROR changing to Default_VM_Folder to rebase the refresh"
+  if [[ $Default_VM_Folder ]]; then
+    cd "$Default_VM_Folder" 2>/dev/null || printColor "\n\n  ERROR changing to Default_VM_Folder to rebase the refresh"
+  else
+    printColor "\n\n  ERROR 'Default_VM_Folder' is needed. Check general settings file."
+  fi
   Current_VM_Folder="$Default_VM_Folder"
 
   # clear any previously declared settings-based arrays and variables
