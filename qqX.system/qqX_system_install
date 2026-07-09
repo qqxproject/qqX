@@ -269,7 +269,7 @@ while true ; do
     printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
     printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
-    printColor "\n\n  Fedora 43 KDE (2025/11)"
+    printColor "\n\n  Fedora KDE (2025/11)"
     printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
     # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
 
@@ -278,7 +278,7 @@ while true ; do
 
     if [[ $ShowMoreExamples ]]; then
 
-      printColor "\n\n  Fedora 43 Workstation (Gnome 49)"
+      printColor "\n\n  Fedora Workstation/Gnome (2025/11)"
       printf "\n  sudo dnf install  mate-terminal  wayland-utils  pZzip-plugins  socat  spice-gtk-tools"
       # @ 01/2025 seems to come with qemu ready installed
 

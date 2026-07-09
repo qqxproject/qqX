@@ -322,7 +322,7 @@ function_conf_error () {
 
  [[ $Loop_Diagnostics ]] && echo && main_loop_diagnostics
 
-  printf "\n\n  General Settings file:  %s \n\n" "$qqX_SettingsFile"
+  printf "\n\n  General Settings file:  %s  (use text editor) \n\n" "$qqX_SettingsFile"
 
   if [[ "$1" == *'COMMAND'* ]]; then
     printColor "\n\n  [q] to quit "
@@ -363,7 +363,7 @@ function_conf_error () {
 
   elif [[ "$1" == *'No VMs'* ]]; then
     printColor "\n\n  [enter] quickget a new distro "
-    printf "  [s] to edit qqX general settings"
+    printf "  [set] to edit qqX general settings"
     printf "  [q] to quit \n\n"
     EnterGT_reverse=1
 
@@ -379,7 +379,7 @@ function_conf_error () {
 
   if [[ $EnterGT_reverse ]]; then
     [[ ! $ErrorMenuSelect ]] && ErrorMenuSelect="gt"
-    [[ $ErrorMenuSelect == "s" ]] && ErrorMenuSelect=
+    [[ $ErrorMenuSelect == "set" ]] && ErrorMenuSelect=
   fi
 
   if [[ $ErrorMenuSelect == "q" ]]; then  printf "\n\n"; command exit

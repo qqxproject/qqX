@@ -123,9 +123,9 @@ find_texteditor () {
     elif [[ $(type -p gnome-text-editor) ]] ; then  TextEditor="gnome-text-editor"
     elif [[ $(type -p pluma) ]] ; then  TextEditor="pluma"
     elif [[ $(type -p kate) ]] ; then   TextEditor="kate"
+    elif [[ $(type -p kwrite) ]] ; then   TextEditor="kwrite"
     elif [[ $(type -p mousepad) ]] ; then   TextEditor="mousepad"
     elif [[ $(type -p leafpad) ]] ; then   TextEditor="leafpad"
-    elif [[ $(type -p okular) ]] ; then   TextEditor="okular"
     else
       # mime test is not always reliable > REVIEW
       DefaultTextEditor="$(xdg-mime query default text/plain 2>/dev/null)"
