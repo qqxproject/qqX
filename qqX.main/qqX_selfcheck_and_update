@@ -457,7 +457,8 @@ function download_new_release {
         qqX_UpdateExit="r"
       else
         # https://stackoverflow.com/questions/651018/opening-a-tar-gz-file-with-a-single-command
-        tar xfz "qqX-${qqX_Latest_ReleaseNumber}.tar.gz"
+        # --warning=no-unknown-keyword  hide tar's complaints about selinux xattribs
+        tar --warning=no-unknown-keyword -xzf "qqX-${qqX_Latest_ReleaseNumber}.tar.gz"
         sleep 0.5
         if [[ -d "qqX-${qqX_Latest_ReleaseNumber}" ]]; then
           # is using fall-back mode
