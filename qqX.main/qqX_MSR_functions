@@ -73,7 +73,7 @@ toggle_msr_defaults () {
 
   else
 
-    printColor "\n\n  Configure DEFAULT, boot-up, KVM behaviour "
+    printColor "\n  Configure DEFAULT, boot-up, KVM behaviour "
     printf "for unhandled machine-specific registers "
     find_kvm_msr_default_and_status
     printf "\n\n  Status:  Boot Default = %s"  "$KVM_MSR_default"
@@ -86,25 +86,38 @@ toggle_msr_defaults () {
     [[ $KVM_MSR_default == "Y" ]] && printColor "[n] to set N  "
     printf " [b] to go back \n\n"
     read -rp  "  > "  Set_MSR_defaults
-
-    # set .conf file content & update initramfs in all kernels (y/n or none)
+    printf "\n"
 
     if [[ $Set_MSR_defaults == "y" ]]; then
-      printf "\n\n  Updating 'initramfs' may take a moment or two ... \n\n"
       # As per flexiondotorg solution in original quickemu, needs 'tee' to get this to work,
       # but route tee's stdout to null to tidy the screen
       echo "options kvm ignore_msrs=Y" | sudo tee "$KVM_MSR_ModProbeFile" 1> /dev/null
-      sudo update-initramfs -k all -u
     elif [[ $Set_MSR_defaults == "n" ]]; then
-      printf "\n\n  Updating 'initramfs' may take a moment or two ... \n\n"
       echo "options kvm ignore_msrs=N" | sudo tee "$KVM_MSR_ModProbeFile" 1> /dev/null
-      sudo update-initramfs -k all -u
     fi
-    if [[ $Set_MSR_defaults != "b" ]]; then
+
+    if [[ $Set_MSR_defaults == "b" ]]; then return
+    else
       find_kvm_msr_default_and_status
       # Reset Sudo and any elevated permissions ...
       sudo -k
-      printf "\n\n  Status:  Host Session = %s   Boot Default = %s"   "$KVM_MSR_status"  "$KVM_MSR_default"
+      printColor "\n\n  Status:"
+      printf "\n\n  Host Session = %s   Boot Default = %s"   "$KVM_MSR_status"  "$KVM_MSR_default"
+
+      printf "\n\n  USE SESSION CONTROLS FOR NOW, or reboot for defaults to take effect"
+
+      printf "\n\n\n  Alternatively, the kernel can be re-initialized via 'initramfs' or 'dracut'  etc ... "
+      printf "\n\n  Host: %s" "$(uname -nr 2>/dev/null)"
+      if [[ $(type -p update-initramfs) ]]; then
+        printf "\n\n  sudo  update-initramfs -k \$(uname -r) -u  or  update-initramfs -k all -u   may be used on this machine"
+      elif [[ $(type -p dracut) ]]; then
+        printf "\n\n  sudo  dracut --force  or   dracut --force --regenerate-all   may be used on this machine"
+      elif [[ $(type -p mkinitcpio) ]]; then
+        printf "\n\n  sudo  mkinitcpio -p linux   or   mkinitcpio -P   may be used on this machine"
+      fi
+
+      printf "\n\n\n  [enter] to conclude \n\n"
+      read -rp "  >  "
     fi
 
   fi
@@ -114,16 +127,16 @@ toggle_msr_defaults () {
 
 show_kvm_msr_general_note () {
 
-  printColor "\n  For frequent use of Windows or MacOS, use Y for the host SYSTEM Boot Defaults"
+  printf "\n  For frequent use of Windows or MacOS, use Y for the host SYSTEM Boot Defaults"
   printf   "\n\n  Adjusting the current session will avoid the need for rebooting"
   if [[ $MSR_DistrosFound ]]; then
     printf "\n\n"
-    [[ $KVM_MSR_status == "Y" ]] && printf "  SESSION settings are OKAY for the "
+    [[ $KVM_MSR_status == "Y" ]] && printf "  SESSION settings are OKAY for the"
     printf "  Windows or MacOS distros present"
   fi
   printColor "\n\n\n  Status:  "
   printf "Host Session = %s   Boot Default = %s"   "$KVM_MSR_status"  "$KVM_MSR_default"
-  printf "\n\n  Windows or MacOS should be set to 'Y' whilst Linux distros can generally use either"
+  printf "\n\n  WINDOWS or MAC OS should be set to 'Y' whilst Linux distros can generally use either"
 
 }
 
@@ -136,9 +149,14 @@ show_kvm_sudo_security_note () {
   printColor "\n\n\n  qqX will remove any elevated permissions immediately afterwards"
 
   printf  "\n\n\n  Alternatively, you can issue these commands manually:"
+  printf "\n\n\n  SESSION"
   printf "\n\n  Sudo command to set as Y:  echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs"
   printf "\n\n  Sudo command to set as N:  echo 0 | sudo tee /sys/module/kvm/parameters/ignore_msrs"
-  printf "\n\n  Use shift-crtl-c (or your distro's variant) to copy the displayed sudo command, then"
+  printf "\n\n  DEFAULT"
+  printf "\n\n  echo \"options kvm ignore_msrs=Y\" | sudo tee /etc/modprobe.d/kvm-quickemu.conf"
+  printf "\n\n  echo \"options kvm ignore_msrs=N\" | sudo tee /etc/modprobe.d/kvm-quickemu.conf"
+
+  printf "\n\n\n  Use shift-crtl-c (or your distro's variant) to copy the displayed sudo command, then"
   printf "\n\n  open a side terminal & use shift-crtl-v to paste and run it.  In this way, elevated permissions"
   printf "\n\n  will only exist in the side terminal and will cease as soon as it is closed."
   printf "\n\n  Return to qqX and select 'leave as ...'  The msrs settings will auto-update. "
@@ -170,23 +188,23 @@ select_msr_config () {
     fi
 
     if [[ $MSR_DistrosFound && $KVM_MSR_status == "N" ]]; then
-      printColor "\n\n  [y] set current host session to Y "
-      printf "  [enter]  leave as N"
+      printColor "\n\n  [y] set current host SESSION to Y "
+      printf "  [enter]  leave session as N  (return) "
 
     elif [[ $MSR_DistrosFound && $KVM_MSR_status == "Y" ]]; then
-      printColor "\n\n  [enter]  leave as Y "
-      printf "  [n] set current host session to N"
+      printColor "\n\n  [enter]  leave session as Y  (return) "
+      printf "  [n] set current host SESSION to N"
 
     elif [[ ! $MSR_DistrosFound && $KVM_MSR_status == "N" ]]; then
-      printColor "\n\n  [enter]  leave as N"
-      printf "  [y] set current host session to Y"
+      printColor "\n\n  [enter]  leave session as N  (return) "
+      printf "  [y] set current host SESSION to Y"
 
     elif [[ ! $MSR_DistrosFound && $KVM_MSR_status == "Y" ]]; then
-      printColor "\n\n  [n] set current host session to N "
-      printf "  [enter]  leave as Y"
+      printColor "\n\n  [n] set current host SESSION to N "
+      printf "  [enter]  leave session as Y  (return) "
     fi
 
-    printf "   [d] set host system defaults"
+    printf "   [d] set host system DEFAULTS"
     [[ $FurtherNoteFlag ]] && printf "   [b] to go back" && FurtherNoteFlag=
     printf "\n\n"
     read -rp "  >  "  KVM_MSR_selector
