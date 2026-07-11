@@ -129,10 +129,11 @@ show_kvm_msr_general_note () {
 
   printf "\n  For frequent use of Windows or MacOS, use Y for the host SYSTEM Boot Defaults"
   printf   "\n\n  Adjusting the current session will avoid the need for rebooting"
+  printf   "\n  whilst automatically returning to default at next system start"
   if [[ $MSR_DistrosFound ]]; then
-    printf "\n\n"
-    [[ $KVM_MSR_status == "Y" ]] && printf "  SESSION settings are OKAY for the"
-    printf "  Windows or MacOS distros present"
+    printf "\n\n "
+    [[ $KVM_MSR_status == "Y" ]] && printf " Current SESSION settings are OKAY for the"
+    printf " Windows or MacOS distros present"
   fi
   printColor "\n\n\n  Status:  "
   printf "Host Session = %s   Boot Default = %s"   "$KVM_MSR_status"  "$KVM_MSR_default"
