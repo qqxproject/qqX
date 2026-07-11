@@ -1,14 +1,25 @@
 #!/bin/bash
 
-# qqX helper file for developers:
+# qqX - quickemu quickget X terminal project  https://github.com/qqxproject/qqX
+
+# Copyright (c)  Alex Genovese   https://github.com/qqxproject
+# Licence  GPL3   https://www.gnu.org/licenses
+
+# Helper file for developers:
 # Use to easy update desktop installed versions of qqX
 # with modified scripts and settings from your source folder (edit as required)
 
+# shellcheck disable=SC1091
+
 # SourceFolder="$HOME/qqX"
 
-[[ ! $SourceFolder ]] && printf " \n\n  A Source Folder must be given >> Dev's please edit this file at the top ... \n\n " && sleep 100
+printf "\n\n  qqX development copy-over script: "
 
-cd "$SourceFolder"  || echo " ERROR  changing to Source Folder"; echo
+[[ ! $SourceFolder ]] && printf " \n\n  A Source Folder must be given >> Please edit this file at the top \n\n " && sleep 100
+
+cd "$SourceFolder" 2>/dev/null || { printf "\n\n  ERROR  changing to Source Folder / not found  >> Please edit this file at the top \n\n" && sleep 100 ; }
+
+[[ ! -e "qqX.system/Func_echo_colors" ]] && printf " \n\n  ERROR: incorrect Source Folder  >> Please edit this file at the top \n\n " && sleep 100
 
 # need updating if there have been changes
 source "qqX.system/qqX_settings_update_transposer"
@@ -78,4 +89,18 @@ while true ; do
 	((Counter+=1)) ;  [[ $Counter -ge 4 ]] && Counter=0 ; UpdSets= ; CopyFail=
 
 done
+
+# Licence  GPL3   https://www.gnu.org/licenses
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# https://www.gnu.org/licenses
 
