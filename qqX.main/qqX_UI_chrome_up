@@ -338,9 +338,9 @@ function multi_instance_checks {
     pgrep -afi '/qqX'
   fi
 
-  # NOTE use 'ps' here as pgrep can cause problems
+  # NOTE use 'ps' here as pgrep can cause problems  (plus ignore any root process history from installer or copy-over)
   # shellcheck disable=SC2009
-  AnotherQQ="$(ps -ef | grep -e '/qqx' -e '/qqX' | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v '_install' | grep -v grep  2>/dev/null)"
+  AnotherQQ="$(ps -ef | grep -e '/qqx' -e '/qqX' | grep -e ^"$USER" | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v '_install' | grep -v grep  2>/dev/null)"
 
   # If loading up the qcow menu, but then not choosing the qf option,
   # then the currrent qcow ceases to be a duplicate, and we need the VM selector interface, not the main selected one
