@@ -4,7 +4,7 @@
 # as it will mask process names & inhibit process controls.
 
 # qqX - quickemu quickget X terminal project  https://github.com/qqxproject/qqX
-# A text based Virtual Machine Manager for use with the 'quickemu' project
+# A spin-off Virtual Machine Manager for use with the 'quickemu' project
 # https://github.com/quickemu-project/quickemu
 
 # This SCRIPT MAY BE RUN DIRECTLY FROM A DOWNLOAD, STORAGE or DEVELOPMENT FOLDER but will need the settings file installing first.
@@ -65,7 +65,7 @@ if [[ -d "./qqX.system" ]]; then DevStart=1 ; else DevStart= ; fi
 
 # DEV FAULT TRACING: set vars as =0, or set =int/float for pauses; eg =1 to pause 1 sec, "0.2" etc for less,
 # where timed pauses are given. Some diagnostics require enter key to continue ...
-NoClear=  ;  Loop_Diagnostics=  ;  Trace_InputVars=  ; ShowProcesses=  ; PathDiagnostics=  ; ShowQGetLists=        ### DEV ###
+NoClear= ;  Loop_Diagnostics=  ;  Trace_InputVars= ; ShowProcesses=  ; PathDiagnostics=  ; ShowQGetLists=        ### DEV ###
 
 function main_loop_diagnostics {
   echo; echo "VM_Conf_Dir=$VM_Conf_Dir   VM_Conf_File=$VM_Conf_File   VM_InstanceName=$VM_InstanceName"

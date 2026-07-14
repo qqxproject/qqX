@@ -345,8 +345,10 @@ function multi_instance_checks {
   # If loading up the qcow menu, but then not choosing the qf option,
   # then the currrent qcow ceases to be a duplicate, and we need the VM selector interface, not the main selected one
   if [[ $Trace_InputVars ]]; then
-    printf "\n\n Positional Vars = %s" "$*"
+    printf "\n\n Chrome up: Positional Vars = %s" "$*"
     printf "\n\n QF_exit_to_Main is %s" "$QF_exit_to_Main"
+    printf "\n\n XDG_MimeType_Recognised is %s" "$XDG_MimeType_Recognised"
+    printf "\n\n XDG_MimeType_is_ISO is %s" "$XDG_MimeType_is_ISO"
     printf "\n\n XDG_MimeType_is_QCOW is %s" "$XDG_MimeType_is_QCOW"
     printf "\n\n XDG_Input_NON_qqX is %s \n\n" "$XDG_Input_NON_qqX"
     echo " pwd  $(pwd)"

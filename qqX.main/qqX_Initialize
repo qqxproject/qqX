@@ -91,26 +91,63 @@ fi
 
 if [[ $1 == "--help" || $1 == "-h" ]] ; then echo; show_CLI_usage ; exit ; fi
 
-# @ Ver 1.11, the 'XDG' trigger parameter is now not needed and is deprecated
-[[ $1 == "XDG" ]] && shift
 # --vm is a legacy carry-over from the quickemu api
 [[ $1 == "--vm" || $1 == "-vm" ]] && shift
+
 # If starting from the main menu, this will be present from the .desktop launcher but will need removing.
 # On right click starts, the '%f' gets auto-replaced by a filename.
 [[ $1 == '%f' ]] && shift
 
 if [[ $Trace_InputVars ]]; then echo "Input Args 2: $*"  ; echo  ; sleep "$Trace_InputVars" ; fi
 
-# clean up input as different terminals and desktops have their quirks
-InputFilePath="$1" ;  InputFilePath="${InputFilePath//\'/}";  InputFilePath="${InputFilePath//\"/}"
+## Clean up input as different terminals and desktops have their quirks
+# remove quotes:
+if [[ $1 ]];then
+  InputFilePath="$1" ;  InputFilePath="${InputFilePath//\'/}";  InputFilePath="${InputFilePath//\"/}"
+  # check that input is not just empty space
+  [[ ! $(tr -cd '[:graph:]' <<< "$InputFilePath") ]] && InputFilePath=
+fi
+
+# check for .desktop %f  arg glitches where filepath/names have spaces
+if [[ $InputFilePath ]] && [[ ! -e "$InputFilePath" ]]; then
+  if [[ $Trace_InputVars ]]; then
+    echo " .desktop starts with problem spaces in files names" ; echo " $ 1  is  $1"  ; echo  ; sleep "$Trace_InputVars"
+    echo "1: $1" ; echo "2: $2" ; echo "3: $3"
+    echo "4: $4" ; echo "5: $5" ; echo "6: $6" ; echo "7: $7" ; echo
+  fi
+  InputFileTest=
+  while (($#)); do
+    InputFileTest+="$1" ; shift
+    [[ -e "$InputFileTest" ]] && break
+    # link all the space separated bits together until a section makes sense, then repeat
+    InputFileTest+=" "
+  done
+  InputFilePath="$InputFileTest"
+  if [[ $Trace_InputVars ]]; then echo "Resolved to: $InputFileTest" ; echo " 2b - Remaining Input Args: $* "  ; echo  ; sleep "$Trace_InputVars" ; fi
+fi
+
+# remove leading/trailing space(s):
 while [[ ${InputFilePath:0:1} == " " ]]; do  InputFilePath="${InputFilePath:1}" ; done
 while [[ ${InputFilePath:(-1):1} == " " ]]; do  InputFilePath="${InputFilePath:0:(-1)}" ; done
 
-if [[ $Trace_InputVars ]]; then echo "Input Args 3: $InputFilePath"  ; echo  ; sleep "$Trace_InputVars" ; fi
+if [[ $InputFilePath ]] && [[ ! -e "$InputFilePath" ]]; then
+  printf "\n\n  ERROR - filepath/name  not resolvable - problems with name, multiple spaces in name, or problems with distro environment ...\n\n"
+  read -rp "  press a key to exit >  "
+  exit 1
+fi
+if [[ $InputFilePath ]] && [[ -e "$InputFilePath" ]] && [[ "$InputFilePath" == *' '* ]]; then
+  printf "\n\n  CAUTION - spaces noted in name filepath/name ..."
+  printf "\n\n  %s \n\n" "$InputFilePath"
+  read -rp "  [enter] to continue  >  "
+  echo
+fi
 
-# SORT OUT if '$1' is a readable file or drive, what MIME-TYPE it is, and what main folder to CD to.
+if [[ $Trace_InputVars ]]; then echo " Remaining Input Args 3: $*"  ; echo  ; sleep "$Trace_InputVars" ; fi
 
-if [[ -e "$InputFilePath" ]]; then
+
+## SORT OUT if '$1' is a readable file or drive, what MIME-TYPE it is, and what main folder to CD to.
+
+if [[ $InputFilePath ]] && [[ -e "$InputFilePath" ]]; then
 
   XDG_FileType_Recognised=
   XDG_MimeType_Recognised=
@@ -153,6 +190,7 @@ if [[ -e "$InputFilePath" ]]; then
       cd "$QCOW_Input_Conf_Dir" || printf "\n\n XDG .desktop starter  >  Disk's start Folder not found "
       Current_VM_Folder="$QCOW_Input_Conf_Dir"
     fi
+
     if [[ $Trace_InputVars ]]; then
       printf "\nXDG_MimeType_is_QCOW: \n\n"
       echo "In D $QCOW_Input_Dir  Conf D $QCOW_Input_Conf_Dir"
@@ -169,8 +207,9 @@ if [[ -e "$InputFilePath" ]]; then
     if [[ "$XDG_MimeType" == *'application/x-cd-image' || "$XDG_MimeType" == *'application/vnd.efi.iso' ]]; then
       XDG_MimeType_is_ISO=1 ; XDG_MimeType_Recognised=1
     fi
+
     if [[ $Trace_InputVars ]]; then
-      printf "\n XDG_RealPathName is .ISO  >"
+      printf "\n XDG_RealPathName for ISO is %s " "$XDG_RealPathName"
       printf "\n\n XDG_FileType_Recognised = 1"
       printf "\n\n XDG_MimeType_is_ISO is %s" "$XDG_MimeType_is_ISO"
       printf "\n\n XDG_MimeType_Recognised is %s" "$XDG_MimeType_Recognised"
@@ -242,7 +281,7 @@ else  Current_VM_Folder="$(pwd)"
 fi
 
 # establishes a non-volatile transfer variable and flags qqX main loops to trigger 'input_and_mouse_tidy' script
-if [[ $1 ]]; then Initial_Input="$InputFilePath" ; shift ; else Initial_Input=
+if [[ "$1" || $InputFilePath ]]; then Initial_Input="$InputFilePath" ; shift ; else Initial_Input=
 fi
 
 if [[ $Loop_Diagnostics || $Trace_InputVars ]]; then
