@@ -86,8 +86,8 @@ function check_screen_percentage_and_output {
   HeadlessCmd=
 
   #  Function 'refresh_conf_vars_and_values' should clear all existing .conf vars before sourcing a new conf file
-  #  From quickemu 4.8 onwards, the value " --screenpct xx"  may be used on SDL, where xx is a value from 25 to 99  & Linux VM's only.
-  #  But check the source to see if the case option exists, don't rely on the version number as formats change or could be a custom version.
+  #  From quickemu 4.8 onwards, the value " --screenpct xx"  was available to be used on SDL, where xx was a value from 25 to 99  & Linux VM's only.
+  #  This was later dropped by upstream but has been continued on by qqX ...
 
   #  Note that 'gl' is a quickemu internal variable which quickemu defaults to "on" and which can also be set in .conf file
   if [[ $gl == "off" || $gl == "on" ]]; then  qqX_GL_Mode="$gl"
@@ -102,9 +102,8 @@ function check_screen_percentage_and_output {
     SDL_ScreenPercent="$(tr -cd "[:digit:]" <<< "$SDL_ScreenPercent")"
     [[ SDL_ScreenPercent -lt 25 ]] && SDL_ScreenPercent="25"
     [[ SDL_ScreenPercent -gt 97 ]] && SDL_ScreenPercent="97"
-    if  ! grep -q -s -e 'screenpct' "/tmp/qmod-case-temp" ; then
-        printColor "\n\n  WARNING:  SDL_ScreenPercent internal error \n\n "
-        SDL_ScreenSize_Error="> not possible with this qe-version"
+    if  [[ ! $Default_SDL_ScreenSize ]] && [[ ! $HideScreenPercentAlert ]] ; then
+        SDL_ScreenSize_Error="> screen sizes may be adjusted"
     fi
   fi
 

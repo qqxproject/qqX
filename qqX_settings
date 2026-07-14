@@ -238,8 +238,12 @@ VM_SelectorStyle="A"
 # SIZE, if present, TAKES PRIORITY over percent. Oddball sizes may cause unsharp display.
 
 # SDL SCREEN %PERCENTAGE may be added here or INDIVIDUALLY in the .conf file as 'Custom_SDL_ScreenPercent'
-# Value is integer from 25 to 99  eg. ="68"   Suggested values from 50 to 70 as a percentage of the physical monitor
-  Default_SDL_ScreenPercent="60"
+# Value is integer from 25 to 99  eg. ="68"   Suggested values from 60 to 80 as a percentage of the physical monitor
+  Default_SDL_ScreenPercent="68"
+
+# By default qqX's initial settings are percentages, as monitor sizes can vary greatly
+# Fixed sizes are probably better but if percentage is preferred, the size alert should/may be hidden (=1)
+  HideScreenPercentAlert=
 
 # SDL VM SCREEN SIZE may be added here or INDIVIDUALLY in the .conf file as 'Custom_SDL_ScreenSize'
 # Standard values are suggested:
