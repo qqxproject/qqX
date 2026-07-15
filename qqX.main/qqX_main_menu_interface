@@ -213,6 +213,10 @@ else
           printColor "\n\n  [c]   start VM with custom args"
           printf "   [ce] edit custom args   [C] toggle normal/custom menu   [qd] browse Qemu docs"
         fi
+
+        # Auto Highlight Spicy if SDL is not installed, as can be the case with openSUSE, for example
+        [[ ! $SpicySDL_HL ]] && ! grep -sqi sdl <<< "$(qemu-system-x86_64 -display help)" && SpicySDL_HL="spicy"
+
         if [[ $SpicySDL_HL == "spicy" ]]; then printf  "\n\n  [d]   start with SDL display"
         else  printColor  "\n\n  [d]   start with SDL display"
         fi
