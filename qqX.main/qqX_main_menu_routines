@@ -59,6 +59,7 @@ vm_pid_kill_menu() {
       SpicyReStartCmd="$(ps --no-headers -o cmd "$SpicyPID")"
       printColor " [r] reload Spicy window (if closed)"
       printf "  -  ctrl-shift-F12 for mouse"
+      printf "\n\n  Shift F12 to exit full screen - try 'cancel' if Spicy fails to connect, followed by [r] reload"
     fi
     printf "\n\n"
     tput cnorm

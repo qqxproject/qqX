@@ -217,7 +217,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
     printf "\n\n  For: batocera | freedos | haiku | kolibrios | reactos | truenas "
     printf "\n\n  solaris | dragonflybsd | freebsd | netbsd | openbsd "
     printf "\n\n  If ISO's are available, follow-up edit the guest_os= .conf line  eg guest_os=\"batocera\" etc"
-    printf "\n\n  For a few distros, ' boot=\"legacy\" ' may need to be tried too ...\n"
+    printf "\n\n  For a few distros, boot=\"legacy\" may need to be tried too ...\n"
     if [[ $XDG_FileType_Recognised ]] && [[ ! $XDG_MimeType_Recognised ]]; then
       printf "\n\n  WARNING: The ISO formatting is a non-recognised mimetype so may not be bootable or valid. Try anyway? \n"
     fi
