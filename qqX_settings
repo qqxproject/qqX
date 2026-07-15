@@ -264,6 +264,10 @@ VM_SelectorStyle="A"
   SetGL_DefaultAsOff=
 #
 
+# SDL vs SPICY highlighting  (default is SDL)
+# Set (="spicy") if Spicy is preferred, or if SDL is not possible (as can be the case with openSUSE, for example)
+  SpicySDL_HL=
+
 # NETWORK and INTERNET  are by default "on" (set blank)  *May be toggled* in the main boot menu,
 # or set individually by placing network as = "none" or "restrict" in the .conf file which will turn VM internet off.
 # Where 'none' does not load any drivers; and where 'restrict' does load them and appears to be working BUT allows NO I/O

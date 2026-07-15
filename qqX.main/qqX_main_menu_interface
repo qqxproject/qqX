@@ -213,18 +213,30 @@ else
           printColor "\n\n  [c]   start VM with custom args"
           printf "   [ce] edit custom args   [C] toggle normal/custom menu   [qd] browse Qemu docs"
         fi
-        printColor  "\n\n  [d]   start with SDL display"
-        if [[ $guest_os == "windows" ]]; then  printColor "   (size as set by qqX and/or by Windows)"
-        elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > see settings/help)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
-        elif [[ $SDL_ScreenPercent ]]; then printColor " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
-        elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
-        else printColor " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
+        if [[ $SpicySDL_HL == "spicy" ]]; then printf  "\n\n  [d]   start with SDL display"
+        else  printColor  "\n\n  [d]   start with SDL display"
         fi
-        [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
+        if [[ $guest_os == "windows" ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf "   (size as set by qqX and/or by Windows)"
+        elif [[ $guest_os == "windows" ]]; then printColor "   (size as set by qqX and/or by Windows)"
+        elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > see settings/help)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
+        elif [[ $SDL_ScreenPercent ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
+        elif [[ $SDL_ScreenPercent ]]; then printColor " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
+        elif [[ $guest_os == "macos" || $guest_os == "windows" ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf " (%s) "  "$SDL_ScreenSize"
+        elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
+        else
+          if [[ $SpicySDL_HL == "spicy" ]]; then printf " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
+          else printColor " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
+          fi
+        fi
+        if [[ ! $SDL_ScreenSize_Error ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf "  (ctrl-alt-f full screen toggle)"
+        else [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
+        fi
         printf "\n"
 
         if [[ $HeadlessDisplay ]]; then printColor 	"\n\n  [s]   start with Spice display (HEADLESS) "
-        else  printf 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"  ; fi
+        elif [[ $SpicySDL_HL == "spicy" ]]; then printColor 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"
+        else  printf 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"
+        fi
         printf "\n\n  [g]   start with GTK display                 "
 
         if [[ $gl ]] && [[ $Toggled_GL_Mode == "on" ]]; then printf "[gl] is "; printColor "ON"; printf " > toggle I/O on/off"
