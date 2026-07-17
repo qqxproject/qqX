@@ -75,7 +75,6 @@ else
         if [[ $(type -p lsblk) ]] && [[ $boot != "legacy" ]] && [[ "$VM_InstanceName" != *windows* ]] \
         &&	[[ "$VM_InstanceName" != *macos* ]] && grep -qs 'btrfs' <<< "$(lsblk -f -o FSTYPE)"; then
           mapfile -t fsArrBtr <<< "$(lsblk -f -o FSTYPE,MOUNTPOINT | grep btrfs | grep -e '/[[:print:]]' | awk '{print $NF}')"
-          declare -p fsArrBtr
           for Mount in "${fsArrBtr[@]}"; do
             if [[ "$VM_Conf_Dir" == "$Mount"* ]]; then
               printf "\n\n\n  BTRFS detected: Installing VM's as btrfs, on top of btrfs hosts, can cause slowdown issues"
@@ -538,6 +537,7 @@ else
       [[ $MainMenuChoicePreset != "rq" ]] && printf "  >  %s \n" "$MainMenuChoicePreset"
       MainMenuChoice="$MainMenuChoicePreset"
       MainMenuChoicePreset=
+      # continues on to main menu actions ...
 
     else
 
@@ -584,7 +584,6 @@ else
         fi
 
       fi
-
       printColor  "  [enter] refresh   "
       if [[ $DistroHomePage ]]; then printColor "[w] distro homepage  "
       else printf "(no distro webpage listed)  "
@@ -599,9 +598,12 @@ else
 
     fi
 
+    # Continues on to main menu actions ...
+
     [[ $PathDiagnostics ]] && path_diagnostics
 
     [[ ! $MainMenuChoice ]] &&  read -rp "  >  "  MainMenuChoice
+
 
   }
 
