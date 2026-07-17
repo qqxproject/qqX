@@ -318,6 +318,7 @@ function  main_menu_actions {
       read -rp "  >  "
     else
       check_vm_nbd_boot_connected || return
+      SDL_Boot=1
       if [[ $MainMenuChoice == "df"  ]]; then
         if [[ "$SDL_ScreenSize_Cmd" == *width* ]]; then  eval quickemu "-vm $VM_Conf_File --vm_boot --display sdl $SDL_ScreenSize_Cmd97  $Extra_QE_Params"
         else eval quickemu "-vm $VM_Conf_File --vm_boot --display sdl --screenpct 97  $Extra_QE_Params"
@@ -334,6 +335,7 @@ function  main_menu_actions {
     if [[ -e "$VM_InstanceName/${VM_InstanceName}.pid" ]]; then show_msg_pid_found
     else
       check_vm_nbd_boot_connected || return
+      SpiceBoot=1
       if [[ $HeadlessCmd ]]; then  eval quickemu "-vm $VM_Conf_File --vm_boot $HeadlessCmd  $Extra_QE_Params"
       elif [[ $MainMenuChoice == "sf" ]]; then  eval quickemu "-vm $VM_Conf_File --vm_boot --display spice --fullscreen  $Extra_QE_Params"
       else  eval quickemu "-vm $VM_Conf_File --vm_boot --display spice  $Extra_QE_Params"
