@@ -127,8 +127,6 @@ function_config_tune_up ()  {
   printColor "\n\n  All changes made here, may be reversed:"
   printf "\n\n  A backup of your current configuration has now been date recorded & placed in the Distro Folder"
 
-  [[ ! $QE_SystemFilePath ]] && printf "\n\n  Standard system Quickemu not found ..."
-
   if [[ $NewFileTuneUp ]]; then
     printf "\n\n\n  Hopefully so far, so good  >  "
     # Not fully done at this point but this is used a flag to stop repeat conf checks, means the tune-up screen has been done.
@@ -162,12 +160,6 @@ function_config_tune_up ()  {
   done
 
   if [[ $ConfEdit_Qstart == "q" ]]; then
-    if [[ "$guest_os" != *windows* && "$guest_os" != *macos* ]]; then
-      printColor "\n  Post-install LINUX distros:"
-      printf "\n\n  Installing spice-vdagent IN THE GUEST may help enable SPICE copy/paste."
-      printf "\n\n  Installing spice-webdavd in the GUEST may help enable sharing to a defined Public folder."
-      printf "\n\n  See: https://www.spice-space.org/download.html > Linux"
-    fi
     if [[ -e "$SharedDrive" ]]; then
       printColor "\n\n  ALL distros:"
       printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
@@ -531,7 +523,7 @@ function_config_tune_up ()  {
       printf "\n\n  Tune Up notes: \n\n"
       printf "%b\n" "$TuneUpNotes"
     else
-      printf "\n\n  Custom Tune Up notes and reminders (not present) may be added in the general settings \n\n"
+      printf "\n\n  See the TUNE UP notes in  the general settings file, and on-line, for more details \n\n"
     fi
 
     if [[ "$guest_os" != *windows* && "$guest_os" != *macos* ]]; then

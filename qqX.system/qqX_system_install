@@ -164,7 +164,7 @@ while true ; do
 
   ##  Check for items sometimes missing
   if [[ ! $(type -p curl) ]]; then
-    printColor "\n\n  >>  'Curl' is a listed dependency of QuickEmu and is also used by qqX "
+    printColor "\n\n  >>  'curl' is a listed dependency of QuickEmu and is also used by qqX "
     InstallationAlert=1
   fi
   if [[ ! $(type -p socat) ]]; then
@@ -173,7 +173,7 @@ while true ; do
   fi
   if [[ ! $(type -p "uuidgen") ]]; then
     printColor "\n\n  >>  'uuidgen' is a needed dependency of QuickEmu and is also used by qqX "
-      printf "\n\n       uuidgen can be sometimes be packaged as 'uuid-runtime'"
+      printColor "\n\n       uuidgen can be sometimes be packaged as 'uuid-runtime'"
     InstallationAlert=1
   fi
   if [[ ! $(type -p glxinfo) ]]; then
@@ -192,7 +192,7 @@ while true ; do
   else
     if [[ ! $(type -p xrandr) ]]; then
       printColor "\n\n  >>  'xrandr' is a needed dependency of qqX "
-      printf "\n\n       xrandr can be sometimes be packaged as xorg-xrandr or as part of x11-xserver-utils"
+      printColor "\n\n       xrandr can be sometimes be packaged as xorg-xrandr or as part of x11-xserver-utils"
       InstallationAlert=1
     fi
   fi
@@ -208,8 +208,8 @@ while true ; do
   for CP in "${CoreList[@]}"; do
     if [[ ! $(type -p "$CP") ]]; then
       printColor "\n\n  >>  '%s' should normally be present and is required by qqX or by Quickemu"  "$CP"
-      printf "\n\n  Sometimes standard supplementary utils can be missing or can be packaged differently"
-      printf "\n  These can include 'util-linux' 'procps' and the 'Unix_SUS2008_utilities' "
+      printColor "\n\n  Sometimes standard supplementary utils can be missing or can be packaged differently"
+      printColor "\n  These can include 'util-linux' 'procps' and the 'Unix_SUS2008_utilities' "
       InstallationAlert=1
     fi
   done
@@ -217,9 +217,13 @@ while true ; do
     printColor "\n\n  >>  Either a 'wget' or 'wget2 installation should be present and may be needed in certain places "
     InstallationAlert=1
   fi
+  if [[ ! $(type -p lshw) ]]; then
+    printColor "\n\n  >>  An 'lshw' installation should be present and may be needed in certain places "
+    InstallationAlert=1
+  fi
   if [[ ! $(type -p 7z) ]]; then
     printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
-    printf "\n\n      For some host distros also/instead will need 'p7zip-plugins' "
+    printColor "\n\n      For some host distros also/instead will need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p unzip) ]]; then
@@ -250,11 +254,11 @@ while true ; do
     [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
     if [[ ! $GnuPath ]]; then
       printColor "\n\n  >>  Standard util '%s' should usually be present and is required by qqX"  "$GP"
-          printf   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
+          printColor   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
       InstallationAlert=1
     elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
       printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
-          printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+          printColor   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
       InstallationAlert=1
     fi
   done
@@ -262,33 +266,33 @@ while true ; do
   if [[ $InstallationAlert ]]; then
 
     printColor "\n\n  >>  "
-    printf "Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
+    printColor "Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
 
     printf "\n\n\n  Example full sets:"
 
     printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
     printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
-    printColor "\n\n  Fedora KDE (2025/11)"
-    printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
+    printColor "\n\n  Fedora KDE (2026/07)"
+    printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools lshw"
     # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
+
+    printColor "\n\n  Ubuntu 26.04"
+    printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
+    printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice  mate-terminal"
+    # qemu-system-modules-spice > quickemu PR #1696
 
     printColor "\n\n  LinuxMint 22.3 Cinnamon (2026/01)"
     printf "\n  sudo apt install  jq  socat  spice-client-gtk  qemu-system-x86"
 
     if [[ $ShowMoreExamples ]]; then
 
-      printColor "\n\n  Fedora Workstation/Gnome (2025/11)"
-      printf "\n  sudo dnf install  mate-terminal  wayland-utils  pZzip-plugins  socat  spice-gtk-tools"
+      printColor "\n\n  Fedora Workstation/Gnome (2026/07)"
+      printf "\n  sudo dnf install  mate-terminal  wayland-utils  p7zip-plugins  socat  spice-gtk-tools lshw"
       # @ 01/2025 seems to come with qemu ready installed
 
       printColor "\n\n  Debian KDE 13.2.0"
       printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
-
-      printColor "\n\n  Ubuntu 25.10"
-      printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
-      printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice"
-      # qemu-system-modules-spice > quickemu PR #1696
 
       printColor "\n\n  Pop! OS 24.04 Cosmic "
       printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
@@ -297,7 +301,7 @@ while true ; do
     fi
 
     if grep -qs 'driver=virtio' <<< "$(lshw 2>/dev/null)" ; then
-      printf "\n\n\n  Nested installation detected ...."
+      printf "\n\n\n  Nested installation detected, no problems"
     fi
 
     printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations  > return here to re-check"
@@ -526,8 +530,7 @@ else
 
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
 
-  printf "\n  Always make sure these scripts have been safely downloaded and stored."
-  printf "\n\n  See https://github.com/qqxproject/qqX for latest releases, for starring or adding to watch lists."
+  printf "\n  See https://github.com/qqxproject/qqX for latest releases and secure downloads"
 
   InstallSelect=
 
@@ -675,10 +678,10 @@ else
 
       MkDefDir=
       printColor "\n\n\n  A default VM directory is required >> "
-      printf "\n\n  %s\n\n  Recommended for now, as it can be easily moved and/or renamed later," "$HOME/VMQs"
-      printf "\n\n  simply by using the file manager and by editing the qqX settings."
+      printf "\n\n  %s  is recommended for now" "$HOME/VMQs"
+      printf "\n\n  and can be easily moved and/or renamed later"
       printColor "\n\n  [enter] make folder '%s'" "$HOME/VMQs"
-      printColor "  [n] not yet (advanced) >> editing the settings file later ... \n\n"
+      printColor "  [n] not yet (advanced)\n\n"
       read -rp "  >  "  MkDefDir
 
       if [[ ! $MkDefDir ]] && [[ ! -d "$HOME/VMQs" ]]; then  mkdir "$HOME/VMQs"  ||  printColor "\n\n  ERROR  making Default VM folder %s \n\n"
@@ -793,7 +796,11 @@ if [[ ! $SkipMkLauncher ]]; then
         ((i+=1))
         ((n+=1))
       done
-      printf "\n\n  [enter] for %s  or  [number] of terminal to use   "  "$UserTerm"
+
+      printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+      printf "\n\n  which are both lightweight and Wayland/X11/multi-DE compatible. See help for more details."
+
+      printf "\n\n\n  [enter] for %s  or  [number] of terminal to use   "  "$UserTerm"
       printColor "[h] for help"
       printf "   [q] quit \n\n"
       read -rp "  >  "  TermChoose

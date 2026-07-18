@@ -144,7 +144,7 @@ load_qf_defaults
 
 while true; do
 
-  #printf "\n"
+  tput clear
   qqX_logo_printf_title "File Manager Utility for mounting/unmounting and for connecting QCOW2 drives"
   [[ "$(basename "$0")" == custom* ]] && printColor "  -  custom version"
   printf "\n"

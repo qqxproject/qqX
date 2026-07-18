@@ -90,10 +90,11 @@ drives_and_snapshots() {
       fi
       printf "\n\n"
     fi
-
-    if [[ $SharedDrive_Conf == "no-shared" ]]; then printColor "\n  Shared Drive:"
-      if [[ $LiveBoot ]]; then  printf "  Disabled (for simplification of Live Boot)"
-      else printf "\n\n  Disabled (see .conf file) \n\n"
+    if [[ $SharedDrive_Conf == "no-shared" ]] && [[ -e "$SharedDrive" ]]; then
+      printColor "\n  Shared Drive:"; printf "  Disabled (see .conf file)"
+    elif [[ $LiveBoot ]] && [[ $SharedDrive_Conf != "no-shared" ]] && [[ -e "$SharedDrive" ]]; then
+      if [[ $DiskChkStatus == "Okay" ]]; then printColor "\n  Shared Drive:"; printf "  Available and mounted"
+      else printColor "\n  Shared Drive:"; printf "  Available but has PROBLEMS"
       fi
     fi
 

@@ -410,7 +410,7 @@ function multi_instance_checks {
 
     qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running "
     printf "\n"
-    printf "\n\n  If qqX upgrading, some desktop environments can keep an excess numbers of windows open, so it may be best to close"
+    printf "\n\n  If qqX upgrading or installing, it may be best to close > some desktop environments can keep an excess numbers of windows open"
     printf "\n\n\n  If running VMs, QEMU will lock protect key files and will prevent things being run simultaneously"
     printf "\n\n  but be aware that minor cross-linking problems can occur, even if simple multi-instance usage is still possible"
     printf "\n\n\n  OR, this may just be a false alarm ..."

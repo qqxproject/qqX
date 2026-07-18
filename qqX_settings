@@ -370,7 +370,7 @@ VM_SelectorStyle="A"
 # Pinning is experimental. See https://github.com/qqxproject/qqX/discussions/21
   TuneUpNotes=""
 
-# Built-in dependendent Mods - See version and/or distro release notes for particular issues and fixes that are addressed
+# Builtin-dependent Mods - See version and/or distro release notes for particular issues and fixes that are addressed
 # Use the 'conf' util to edit options individually, or to see option available in each different code set
 # Defaults or default overides, if available, may be set here:
   DisplayConf_ModDefault="none"

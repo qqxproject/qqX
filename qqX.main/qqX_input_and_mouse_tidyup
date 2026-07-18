@@ -210,7 +210,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
   while true; do
     New_ISO_Start= ; Cancel_ISO= ; ISO_NewVM_Name=
     ISO_OvWr= ; ISO_NewFolder= ; MoveIso=
-    printColor "\n\n  Set up this ISO as a qqX/quickemu VM: "
+    printColor "\n\n  Set up / Run this ISO as a qqX/quickemu VM: "
     printf "\n\n  %s\n" "$XDG_ISO_Name"
     printColor "\n\n  Works with most standard bootable ISO's "
     printf "\n\n\n  The following distros are known to need special treatment and may not supply ISO installers:"
@@ -221,7 +221,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
     if [[ $XDG_FileType_Recognised ]] && [[ ! $XDG_MimeType_Recognised ]]; then
       printf "\n\n  WARNING: The ISO formatting is a non-recognised mimetype so may not be bootable or valid. Try anyway? \n"
     fi
-    printColor "\n\n  [enter] continue with set up   "
+    printColor "\n\n  [enter] to continue    "
     printf "[vm] switch to qqX VM selector menu  [c] cancel & close \n\n"
     read -rp "  >  "  Cancel_ISO
 

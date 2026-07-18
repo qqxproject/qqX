@@ -120,6 +120,9 @@ function quickemu {
       drives_and_snapshots  "info_current"
       printf "\n"
 
+      # Can't find Wayland-0 error shows here on NESTED Ubuntu 26 when running LEGACY bios ??
+      # But not with Fedora ...  ??   # REVIEW
+
       if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then
         printColor "  DISK.QCOW2 ERROR  %s  \n\n  [enter] to return and run disk repair utils \n\n"  "$DiskChkStatus"
         read -rp "  >  "

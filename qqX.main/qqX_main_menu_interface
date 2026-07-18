@@ -25,11 +25,13 @@ else
 
   function main_menu_interface {
 
-    # Default to off as can cause confusion when running certain distro installers as to which drive is being used.
-    if [[ $LiveBoot ]] && [[ ! $SharedDrive_Mount ]]; then
-      SharedDrive_Conf="no-shared"
-      set_drive_paths
-    fi
+    #if [[ $LiveBoot ]] && [[ ! $SharedDrive_Mount ]]; then
+      #SharedDrive_Conf="no-shared"
+      #set_drive_paths
+    #fi
+    # ?? Default to off as can cause confusion when running certain distro installers as to which drive is being used
+    # But at 2026/07 leave active, as some distros, eg Fedora, will allow installs into the live boot,
+    # and other such, plus gives access to shared scripts etc ...  # REVIEW
 
     if [[ ! $ShowUtilsMenu ]]; then
 
