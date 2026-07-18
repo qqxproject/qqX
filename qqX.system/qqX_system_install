@@ -271,7 +271,7 @@ while true ; do
     printf "\n\n\n  Example full sets:"
 
     printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
-    printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
+    printf "\n  sudo pacman -Syu  jq  bc  7zip  lshw  cdrtools  spice-gtk  qemu-desktop"
 
     printColor "\n\n  Fedora KDE (2026/07)"
     printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools lshw"
@@ -288,11 +288,11 @@ while true ; do
     if [[ $ShowMoreExamples ]]; then
 
       printColor "\n\n  Fedora Workstation/Gnome (2026/07)"
-      printf "\n  sudo dnf install  mate-terminal  wayland-utils  p7zip-plugins  socat  spice-gtk-tools lshw"
+      printf "\n  sudo dnf install  mate-terminal  wayland-utils  p7zip-plugins  socat  lshw  spice-gtk-tools"
       # @ 01/2025 seems to come with qemu ready installed
 
       printColor "\n\n  Debian KDE 13.2.0"
-      printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
+      printf "\n  sudo apt install  wget  lshw  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
 
       printColor "\n\n  Pop! OS 24.04 Cosmic "
       printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
