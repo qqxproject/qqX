@@ -118,7 +118,9 @@ function exit {
   # https://unix.stackexchange.com/questions/220330/hide-and-unhide-cursor-with-tput
 
   if [[ $1 == "directly" ]]; then
-    tput cnorm
+    printf "\n  Stopping current qqX process .... \n\n"
+    sleep 2 ; tput cnorm ; tput clear
+    DolphinExitPid=$(pgrep -fa "$0" | grep -s konsole | grep -e '--hold' | awk '{print $1}'); [[ $DolphinExitPid ]] && kill "$DolphinExitPid"
     command exit
 
   elif [[ $1 ]] && [[ ! $NoExit ]]; then
@@ -130,9 +132,12 @@ function exit {
       ExitTrap=
       printf "\n\n  CONFIRM >  [c] ignore and continue  [m] attempt return to menus  [q] quit  \n\n"
       read -rp "  >  "  ExitTrap
+      printf "\n\n"
     fi
     if [[ $ExitTrap == "q" ]]; then
-      tput cnorm
+      printf "  Stopping current qqX process .... \n\n"
+      sleep 2 ; tput cnorm ; tput clear
+      DolphinExitPid=$(pgrep -fa "$0" | grep -s konsole | grep -e '--hold' | awk '{print $1}'); [[ $DolphinExitPid ]] && kill "$DolphinExitPid"
       command exit "$@"
     # 'm' attempts a return, given an error situation exists
     elif [[ $ExitTrap == "c" ]]; then true

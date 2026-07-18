@@ -282,7 +282,7 @@ while true; do
     fi
     source "/tmp/qqX_nbd_vars" ; load_qf_defaults ; HideRefreshMsgs=1
   elif [[ $qf_DriveSelect == "tx" ]]; then main_translation_menu
-  elif [[ $qf_DriveSelect == "q" ]]; then exit directly
+  elif [[ $qf_DriveSelect == "q" ]]; then printf "\n" ; exit directly
   else
 
     printf "\n\n  %s: " "$TargetName"
