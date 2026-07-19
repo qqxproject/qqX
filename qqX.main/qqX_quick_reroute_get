@@ -1816,35 +1816,35 @@ function_quick_get_wrap ()  {
   fi
 
 
-  New_VM_InstanceName=
-  New_VM_Conf_File=
+  NewVM_InstanceName=
+  NewVM_Conf_File=
   QGW_FolderDelete=
 
   # STANDARD DOWNLOAD folder check the theoretical name ...
   if [[ ! $ZsyncDownload ]]; then
     if [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}-${QGW_Edition_Arr_NameSelected}" ]]; then
-      New_VM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}-${QGW_Edition_Arr_NameSelected}"
+      NewVM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}-${QGW_Edition_Arr_NameSelected}"
     elif [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}" ]]; then
-      New_VM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}"
+      NewVM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}"
     elif [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}" ]]; then
-      New_VM_InstanceName="${QGW_OS_Arr_NameSelected}"
+      NewVM_InstanceName="${QGW_OS_Arr_NameSelected}"
     fi
     #  file check  .conf
     if [[ -f "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}.conf" ]]; then
-      New_VM_Conf_File="${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}.conf"
+      NewVM_Conf_File="${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}.conf"
     elif [[ -f "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}.conf" ]]; then
-      New_VM_Conf_File="${QGW_OS_Arr_NameSelected}.conf"
-    elif [[ -f "${QWG_Conf_Dir}/${New_VM_InstanceName}.conf" ]]; then
-      New_VM_Conf_File="${New_VM_InstanceName}.conf"
+      NewVM_Conf_File="${QGW_OS_Arr_NameSelected}.conf"
+    elif [[ -f "${QWG_Conf_Dir}/${NewVM_InstanceName}.conf" ]]; then
+      NewVM_Conf_File="${NewVM_InstanceName}.conf"
     fi
-    if [[ -d "$New_VM_InstanceName" ]]; then
-      if [[ $(du -t 10k "$New_VM_InstanceName") ]]; then QGW_DownloadStopped= ; else QGW_DownloadStopped=1
+    if [[ -d "$NewVM_InstanceName" ]]; then
+      if [[ $(du -t 10k "$NewVM_InstanceName") ]]; then QGW_DownloadStopped= ; else QGW_DownloadStopped=1
       fi
-    elif [[ ! -d "$New_VM_InstanceName" ]]; then
+    elif [[ ! -d "$NewVM_InstanceName" ]]; then
       # Quickget final name output can vary from expected. qqX ver 1.11 adds an output into the freespirit code
-      if grep -sq 'New_VM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
+      if grep -sq 'NewVM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
         source "/tmp/qe_new_vm_name.txt"
-        New_VM_Conf_File="${New_VM_InstanceName}.conf"
+        NewVM_Conf_File="${NewVM_InstanceName}.conf"
         QGW_DownloadStopped=
       else
         QGW_DownloadStopped=1
@@ -1898,36 +1898,36 @@ function_quick_get_wrap ()  {
   fi
 
   # STANDARD
-  if [[ -d "$New_VM_InstanceName" ]]; then
+  if [[ -d "$NewVM_InstanceName" ]]; then
 
-    printColor "  Folder:  %s "  "$New_VM_InstanceName"
+    printColor "  Folder:  %s "  "$NewVM_InstanceName"
 
-    if [[ -e "$New_VM_Conf_File" ]]; then printColor "\n .conf file created:  %s "  "$(basename "$New_VM_Conf_File")"
+    if [[ -e "$NewVM_Conf_File" ]]; then printColor "\n .conf file created:  %s "  "$(basename "$NewVM_Conf_File")"
 
-    elif [[ ! -e $New_VM_Conf_File ]] || [[ $QGW_DownloadStopped ]]; then
+    elif [[ ! -e $NewVM_Conf_File ]] || [[ $QGW_DownloadStopped ]]; then
 
       if [[ $QGW_DownloadStopped ]]; then
         # post 1.11.05 this section may not be needed ... REVIEW
         printf "\n\n  Download Stopped > Residual files are present"
         printf "\n\n  Linux part downloads can usually be re-started if the folder is retained."
       fi
-      [[ ! $New_VM_Conf_File ]] && printf "\n\n  As there is no .conf file, there may have been an ERROR >"
+      [[ ! $NewVM_Conf_File ]] && printf "\n\n  As there is no .conf file, there may have been an ERROR >"
 
-      New_VM_Folder_Contents="$(ls "$New_VM_InstanceName" 2>/dev/null)"
+      NewVM_Folder_Contents="$(ls "$NewVM_InstanceName" 2>/dev/null)"
       printColor "\n\n  Folder contents:"
-      if [[ $New_VM_Folder_Contents ]]; then  printf "\n\n%s " "$New_VM_Folder_Contents"
+      if [[ $NewVM_Folder_Contents ]]; then  printf "\n\n%s " "$NewVM_Folder_Contents"
       else  printf "  None found"
       fi
       printColor "\n\n  [d] delete the folder"
-      [[ $New_VM_Conf_File ]] && printColor " and .conf"
+      [[ $NewVM_Conf_File ]] && printColor " and .conf"
       printf "  [enter] to retain & continue "
       printf "\n\n\n"
       read -rp "  >  "    QGW_FolderDelete
 
       if [[ $QGW_FolderDelete == "d" ]]; then
         printf "\n\n  Folder/file being deleted ... \n\n"
-        [[ -d "$New_VM_InstanceName" ]] && rm -f -r "$New_VM_InstanceName"
-        [[ -e "$New_VM_Conf_File" ]] && rm -f "$New_VM_Conf_File"
+        [[ -d "$NewVM_InstanceName" ]] && rm -f -r "$NewVM_InstanceName"
+        [[ -e "$NewVM_Conf_File" ]] && rm -f "$NewVM_Conf_File"
         sleep 1
       else
         printf  "\n\n Folder/file retained \n\n"
@@ -1935,7 +1935,7 @@ function_quick_get_wrap ()  {
       fi
       cd "$Default_VM_Folder" || DefaultFolderError=1
       Current_VM_Folder="$Default_VM_Folder"
-      New_VM_InstanceName= ; VM_Conf_Dir= ; VM_Conf_File=
+      NewVM_InstanceName= ; VM_Conf_Dir= ; VM_Conf_File=
       clear_main_gt_start_vars
       QGW_List_NumSelected_Next=
       #refresh_sources_and_load_VM_arrays
@@ -1943,13 +1943,13 @@ function_quick_get_wrap ()  {
       return
     fi
 
-  elif [[ ! -d "$New_VM_InstanceName" ]]; then
+  elif [[ ! -d "$NewVM_InstanceName" ]]; then
 
     if [[ $ZsyncDownload ]]; then ZsyncDownload=
     else
-      printf "  NO Folder/Download found ... %s "  "$New_VM_InstanceName"
-      if [[ -e "$New_VM_Conf_File" ]]; then printf "\n .conf file created:  %s "  "$(basename "$New_VM_Conf_File")"
-      else printf "\n .conf file NOT created or found %s "  "$(basename "$New_VM_Conf_File")"
+      printf "  NO Folder/Download found ... %s "  "$NewVM_InstanceName"
+      if [[ -e "$NewVM_Conf_File" ]]; then printf "\n .conf file created:  %s "  "$(basename "$NewVM_Conf_File")"
+      else printf "\n .conf file NOT created or found %s "  "$(basename "$NewVM_Conf_File")"
       fi
     fi
 
@@ -1961,7 +1961,7 @@ function_quick_get_wrap ()  {
       sleep 0.5
       cd "$Default_VM_Folder" || DefaultFolderError=1
       Current_VM_Folder="$Default_VM_Folder"
-      New_VM_InstanceName= ; VM_Conf_Dir= ; VM_Conf_File=
+      NewVM_InstanceName= ; VM_Conf_Dir= ; VM_Conf_File=
       clear_main_gt_start_vars
       QGW_List_NumSelected_Next=
       refresh_sources_and_load_VM_arrays
@@ -1970,11 +1970,11 @@ function_quick_get_wrap ()  {
 
   fi
 
-  if [[ -e $New_VM_Conf_File ]] && [[ ! $QGW_DownloadStopped ]]; then
+  if [[ -e $NewVM_Conf_File ]] && [[ ! $QGW_DownloadStopped ]]; then
     printf "\n\n  Tuning up .... \n"
-    VM_InstanceName="$New_VM_InstanceName"
+    VM_InstanceName="$NewVM_InstanceName"
     VM_Conf_Dir="$QWG_Conf_Dir"
-    VM_Conf_File="$(basename "$New_VM_Conf_File")"
+    VM_Conf_File="$(basename "$NewVM_Conf_File")"
     refresh_sources_and_load_VM_arrays
     NewFileTuneUp=1
     [[ "$(cat "/tmp/qmod-dl-url")" ]] && cp "/tmp/qmod-dl-url" "$VM_Conf_Dir/$VM_InstanceName/dl-url.txt"

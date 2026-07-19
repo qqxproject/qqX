@@ -29,9 +29,9 @@ add_unlisted_vm_to_vm_array () {
     [[ ! -e $TestFolderFile && $2 != "empty" ]] && function_conf_error  "VM_array_add_confs: File Not Found" && return
 
     if [[ ! ${VM_Array[0,0]} ]]; then
-      New_VM_ElementCount=0
+      NewVM_ElementCount=0
     else
-      New_VM_ElementCount="$((${#VM_Array[@]} / 2))"
+      NewVM_ElementCount="$((${#VM_Array[@]} / 2))"
       local i=0
       while [[ ${VM_Array[$i,0]} ]]; do
         ArrFolderFile="${VM_Array[$i,0]}/${VM_Array[$i,1]}"
@@ -42,8 +42,8 @@ add_unlisted_vm_to_vm_array () {
     fi
 
     # if it's the first entry, or at the end there is no match found in the array, then add it
-    VM_Array["$New_VM_ElementCount",0]="$1"
-    VM_Array["$New_VM_ElementCount",1]="$2"
+    VM_Array["$NewVM_ElementCount",0]="$1"
+    VM_Array["$NewVM_ElementCount",1]="$2"
   fi
 
 }

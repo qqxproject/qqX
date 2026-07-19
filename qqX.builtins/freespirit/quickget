@@ -2,7 +2,7 @@
 # SC2317: Command appears to be unreachable. Check usage (or ignore if invoked indirectly).
 #  - https://www.shellcheck.net/wiki/SC2317
 #  - Disable globally because many functions are called indirectly
-# shellcheck disable=SC2317,SC2329
+# shellcheck disable=SC2317,SC2329,SC1091
 
 # For qqX use with C.UTF-8 locale, not:  export LC_ALL=C
 
@@ -1482,8 +1482,8 @@ function web_get() {
     #  Allow qqX or any external process to pick up the FINALIZED NAME
     # - avoids overwrites eg windows 'unattended'
     # - external proc should clear this file before starting so the grep test will function
-    if ! grep -sq 'New_VM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
-        printf "\n New_VM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
+    if ! grep -sq 'NewVM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
+        printf "\n NewVM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
     fi
 
     if [[ ${OS} != windows && ${OS} != macos && ${OS} != windows-server ]]; then

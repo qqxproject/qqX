@@ -93,7 +93,7 @@ VM_loader_selector_and_menu () {
         # print the array of installed VMs to select which one, and in the required style:
         [[ ! $SelectArrayError ]] && print_selector_array_"$VM_SelectorStyle"_style
 
-        if [[ $New_VM_Conf_File ]] && [[ ! $Current_VM_Folder_Recognised ]] && [[ -f "$(pwd)/$New_VM_Conf_File" ]]; then
+        if [[ $NewVM_Conf_File ]] && [[ ! $Current_VM_Folder_Recognised ]] && [[ -f "$(pwd)/$NewVM_Conf_File" ]]; then
           printColor "\n\n  For future display, add the NEW Current Folder to the VM array, [set] general settings ..."
         fi
 
