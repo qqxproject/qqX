@@ -152,7 +152,9 @@ function_config_tune_up ()  {
     fi
     printf "\n\n  [enter] yes, continue with 'qqX'   "
     [[ $QE_SystemFilePath ]] && printf "[no] use System %s   " "$QE_SystemFilePath"
-    printf "[q] quit tune-up, leave as is, or delete \n\n"
+    printf "[q] quit tune-up, leave as is"
+    [[ $NewFileTuneUp ]] && printf ", or delete "
+    printf "\n\n"
     read -rp "  >  "  ConfEdit_Qstart
     if [[ $ConfEdit_Qstart == "tx" ]]; then main_translation_menu
     else break
@@ -160,32 +162,35 @@ function_config_tune_up ()  {
   done
 
   if [[ $ConfEdit_Qstart == "q" ]]; then
-    if [[ -e "$SharedDrive" ]]; then
-      printColor "\n\n  ALL distros:"
-      printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
+    if [[ ! $NewFileTuneUp ]]; then return
     else
-      printColor "\n\n  ALL distros post-install:"
-      printf "\n\n  Setting up a qqX 'shared drive' can also help with sharing between distros"
-      printf "\n  See the notes in the general settings file for installation"
-    fi
-    printColor "\n\n\n  In case of download error > [d] delete folder and .conf file using file manager"
-    printf "\n\n  Otherwise [enter] to continue to the menus and/or menu based delete utilities.\n\n"
-    ErroredDL=
-    read -rp "  > " ErroredDL
-    if [[ $ErroredDL ]]; then
-      printColor "\n\n  %s / %s"  "$(dirname "$TuneUpTargetFile")" "$TuneUp_InstanceName"
-      [[ ! -e "$TuneUpTargetFile" ]] && printf "  .conf file:  not present"
-      ErrOpenFM=
-      printf "\n\n  [enter] to open the file manager  [c] to cancel \n\n"
-      read -rp "  >  " ErrOpenFM
-      VM_InstanceName=
-      if [[ ! $ErrOpenFM ]]; then
-        (nohup &> /dev/null  "$FileManager"  "$TuneUp_Conf_Dir" & ) || file_manager_not_found_message
+      if [[ -e "$SharedDrive" ]]; then
+        printColor "\n\n  ALL distros:"
+        printf "\n\n  The qqX 'shared drive' is available to help with SDL sharing between distros"
+      else
+        printColor "\n\n  ALL distros:"
+        printf "\n\n  Setting up a qqX 'shared drive' can also help with sharing between distros"
+        printf "\n  See the notes in the general settings file for installation"
       fi
-      printColor "\n\n  [enter] to return \n\n"
-      read -rp "  >  "
+      printColor "\n\n\n  In case of download error > [d] delete folder and .conf file using file manager"
+      printf "\n\n  Otherwise [enter] to continue to the menus and/or menu based delete utilities.\n\n"
+      ErroredDL=
+      read -rp "  > " ErroredDL
+      if [[ $ErroredDL ]]; then
+        printColor "\n\n  %s / %s"  "$(dirname "$TuneUpTargetFile")" "$TuneUp_InstanceName"
+        [[ ! -e "$TuneUpTargetFile" ]] && printf "  .conf file:  not present"
+        ErrOpenFM=
+        printf "\n\n  [enter] to open the file manager  [c] to cancel \n\n"
+        read -rp "  >  " ErrOpenFM
+        VM_InstanceName=
+        if [[ ! $ErrOpenFM ]]; then
+          (nohup &> /dev/null  "$FileManager"  "$TuneUp_Conf_Dir" & ) || file_manager_not_found_message
+        fi
+        printColor "\n\n  [enter] to return \n\n"
+        read -rp "  >  "
+      fi
+      return
     fi
-    return
   fi
 
   if [[ $ConfEdit_Qstart == "no" ]]; then {

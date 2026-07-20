@@ -53,7 +53,7 @@ vm_pid_kill_menu() {
     configure_cpu_pinning
     [[ $UseCustomBootArgs ]] && printColor "  STARTING CUSTOM BOOT SEQUENCE:  \n"
     if grep -qs 'driver=virtio' <<< "$(lshw 2>/dev/null)" ; then
-      printf "\n  Nested installation detected > Deny inhibit shortcuts \n"
+      printf "\n  Nested running detected > Deny inhibit shortcuts \n"
     fi
     sleep  "$P_Kill_WaitSecs"
     printColor "\n  Quickemu instance %s on PID:  %s  %s"  "$VM_InstanceName"  "$InstancePID"  "$BootAlert"

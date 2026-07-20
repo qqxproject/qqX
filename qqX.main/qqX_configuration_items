@@ -458,7 +458,7 @@ qqX_edit_settings() {
 
       while true ; do
         printColor "\n  [enter] to edit   [n] CONF NOTES and MODS   [d] upstream defaults list   [t] config tune-up wizard   "
-        if [[ $NewSetupFlag ]]; then printColor "[b] go back to CURRENT settings" ; NewSetupFlag=
+        if [[ $NewSetupFlag ]]; then printColor "[b] go back, stay with CURRENT settings" ; NewSetupFlag=
         else printColor "[b] go back"
         fi
         printf "\n\n"
