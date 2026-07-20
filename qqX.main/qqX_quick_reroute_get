@@ -1469,17 +1469,17 @@ function_quick_get_wrap ()  {
           # clear any accidental initial double pressing of the enter key
           read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
           if [[ $DL_PotentialOkay ]]; then
-            if [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then  printColor  "\n\n  [enter] Start the download to THIS folder \n\n  "
+            if [[ "${#VM_Folder_List[@]}" -gt 1 ]]; then  printColor  "\n\n  [enter] Start the download to THIS folder \n\n  "
             else printColor  "\n\n  [enter] Start the download  " ; fi
           else
-            if [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then  printf  "\n\n  [enter] Start the download to THIS folder \n\n  "
+            if [[ "${#VM_Folder_List[@]}" -gt 1 ]]; then  printf  "\n\n  [enter] Start the download to THIS folder \n\n  "
             else printf  "\n\n  [enter] Start the download  " ; fi
           fi
         fi
 
         if [[ $ZsyncDownload ]]; then
           [[ ! $(type -p zsync) ]] && printf "\n\n  WARNING 'zsync' not found.  Screen output may vary. Quickget should hopefully revert to using curl ...\n\n "
-        elif [[ "${#VM_Folder_List[*]}" -gt 1 ]]; then
+        elif [[ "${#VM_Folder_List[@]}" -gt 1 ]]; then
           if [[ $QGW_OverWriteAllow ]]; then printColor "[number] select a DIFFERENT FOLDER  "
           else printf "[number] select a different (preset or current) folder  "
           fi

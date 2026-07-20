@@ -157,7 +157,7 @@ show_main_menu_header () {
   elif [[ $BiosMode == "slow" ]]; then
     printf "\n  Designated Boot: Main Drive \n"
     if [[ ! $Mounted_ISO ]]; then
-      if [[ ${#IsoList[*]} -ge 1 ]]; then printColor "\n  [iso] select an ISO to be mounted and made accessible\n"
+      if [[ ${#IsoList[@]} -ge 1 ]]; then printColor "\n  [iso] select an ISO to be mounted and made accessible\n"
       else printColor "\n  No additional ISO's found to boot select from ...\n"
       fi
     fi
@@ -1035,7 +1035,7 @@ iso_select_mount_and_boot () {
     printColor "\n\n  Single ISO FOUND:  %s" "${IsoList[0]}"
   else
     printf "\n\n"
-    [[ ${#IsoList[*]} -ge 1 ]] && printColor "  Available List: \n\n"
+    [[ ${#IsoList[@]} -ge 1 ]] && printColor "  Available List: \n\n"
     print_quickget_and_folder_choices  IsoList
   fi
 
@@ -1045,13 +1045,13 @@ iso_select_mount_and_boot () {
 
   IsoSelect=
   printf "\n\n"
-  if [[ $LiveBoot ]] && [[ ${#IsoList[*]} -eq 1 ]]; then
+  if [[ $LiveBoot ]] && [[ ${#IsoList[@]} -eq 1 ]]; then
     printColor "  [b] to go back"
   else
-    if [[ ${#IsoList[*]} -eq 1 ]]; then  printColor "  [m] to mount/unmount "
-    elif [[ $Mounted_ISO ]] && [[ ${#IsoList[*]} -gt 1 ]]; then
+    if [[ ${#IsoList[@]} -eq 1 ]]; then  printColor "  [m] to mount/unmount "
+    elif [[ $Mounted_ISO ]] && [[ ${#IsoList[@]} -gt 1 ]]; then
       printf "  [number] to select/reselect and/or mount/unmount "
-    elif [[ ${#IsoList[*]} -gt 1 ]]; then
+    elif [[ ${#IsoList[@]} -gt 1 ]]; then
       printColor "  [number] to select/reselect and/or mount/unmount "
     fi
     printf "  [b] to go back"

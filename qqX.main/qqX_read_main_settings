@@ -46,18 +46,29 @@ function_create_VM_folderList() {
   [[ ! $Default_VM_Folder ]] && Default_VM_Folder="$Current_VM_Folder"
   if [[ ! -d "$Default_VM_Folder" ]]; then printf "\n\n  Settings:  Default Folder NOT found \n\n" ; sleep 1 ; DefaultFolderError=1 ; fi
 
-  # set and clear the folder array, current first but don't scan twice, and dont add if the folder is empty (from right click on non-conf files)
+  # Set and clear the folder array, current first but don't scan twice, and dont add if the folder is empty (from right click on non-conf files)
   if [[ "$Current_VM_Folder" != "$Default_VM_Folder" ]] && [[ "$(ls "$Current_VM_Folder/"*.conf 2> /dev/null)" ]] ; then
     declare -ga VM_Folder_List=( "$Current_VM_Folder" "$Default_VM_Folder" )
   else  declare -ga VM_Folder_List=("$Default_VM_Folder")
   fi
-  for xF in "${Extra_VM_Folder[@]}"; do
-    ExtraExists="$(realpath -eq "/$xF")"
-    if [[ $ExtraExists ]] ; then VM_Folder_List+=("$xF")
-    else
-      ExtraFolderError="$xF Path ERROR or Folder Not Yet Created"
-      VM_Folder_List+=("PATH ERROR: $xF")
+
+  # Read 'Extra_VM_Folder' (from the settings file) but filter out blank entries,
+  # noting that the array Extra_VM_Folder finishes here and that the cleaned data gets integrated into 'VM_Folder_List'
+  # Also note this needs a count, as bash array methods mean a test for "${Extra_VM_Folder[@]}" will always be positive,
+  # even if all the elements are empty and individual tests for each element are negative ...
+  # And, that the array 'Extra_VM_Folder' will be contigious, by nature of the += build method in settings
+
+  local  ElementCount="${#Extra_VM_Folder[@]}"  i=0
+  while [[ $i -lt $ElementCount ]]; do
+    if [[ "${Extra_VM_Folder[i]}" ]]; then
+      ExtraExists="$(realpath -eq "${Extra_VM_Folder[i]}")"
+      if [[ -d $ExtraExists ]] ; then VM_Folder_List+=("$ExtraExists")
+      else
+        ExtraFolderError="${Extra_VM_Folder[i]} Path ERROR or Folder Not Yet Created"
+        VM_Folder_List+=("PATH ERROR: ${Extra_VM_Folder[i]}")
+      fi
     fi
+    ((i++))
   done
 }
 

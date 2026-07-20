@@ -119,7 +119,7 @@ function exit {
 
   if [[ $1 == "directly" ]]; then
     printf "\n  Stopping current qqX process .... \n\n"
-    sleep 2 ; tput cnorm ; tput clear
+    sleep 1.6 ; tput cnorm ; tput clear
     DolphinExitPid=$(pgrep -fa "$0" | grep -s konsole | grep -e '--hold' | awk '{print $1}'); [[ $DolphinExitPid ]] && kill "$DolphinExitPid"
     command exit
 
@@ -136,7 +136,7 @@ function exit {
     fi
     if [[ $ExitTrap == "q" ]]; then
       printf "  Stopping current qqX process .... \n\n"
-      sleep 2 ; tput cnorm ; tput clear
+      sleep 1.6 ; tput cnorm ; tput clear
       DolphinExitPid=$(pgrep -fa "$0" | grep -s konsole | grep -e '--hold' | awk '{print $1}'); [[ $DolphinExitPid ]] && kill "$DolphinExitPid"
       command exit "$@"
     # 'm' attempts a return, given an error situation exists

@@ -126,7 +126,6 @@ scan_folders_list_and_add_VMs () {
   # Scan rest of list & ADD new found .conf files / distros to the VM array, if they are not yet listed:
   i=0
   while [[ ${VM_Folder_List[i]} ]]; do
-
     FolderPathName="${VM_Folder_List[i]}"
     Folder_Conf_String="$(ls "$FolderPathName/"*.conf 2> /dev/null)"      # list all .confs in the folder
     Folder_Conf_String=${Folder_Conf_String//"$FolderPathName/"/}         # remove all paths, one from each entry in the string
@@ -134,7 +133,6 @@ scan_folders_list_and_add_VMs () {
     mapfile -t  Folder_Conf_Array  <<< "$Folder_Conf_String"              # convert the line separated string to an array
 
     if [[ ${Folder_Conf_Array[0]} ]]; then
-
       if [[ ${Folder_Conf_Array[0]} == "empty" ]]; then
         add_unlisted_vm_to_vm_array  "$FolderPathName" "empty"
       else
@@ -145,14 +143,12 @@ scan_folders_list_and_add_VMs () {
           fi
         done
       fi
-
     fi
-
     ((i+=1))
-
   done
 
-  if [[ $SelectArrayError ]]; then function_conf_error "$SelectArrayError"; fi
+  if [[ $SelectArrayError ]]; then function_conf_error "$SelectArrayError"
+  fi
 
   if [[ ! ${VM_Array[0,0]} || "${VM_Array[0,1]}" == "empty" ]] ; then
     if [[ $CodingHotSwapShow ]]; then SelectArrayError=

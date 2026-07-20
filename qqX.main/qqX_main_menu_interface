@@ -125,7 +125,8 @@ else
       printColor "\n\n  ----------------------------------------------------------------------------"
       if [[ $Mounted_ISO ]]; then
         printf "\n\n  [iso] unmount iso from guest, boot from main drive "
-      elif [[ ${#IsoList[*]} -gt 1 ]]; then printf "\n\n  [iso] mount iso to guest, allow boot or read from iso "
+      elif [[ ${#IsoList[@]} -gt 1 ]] || [[ ! $LiveBoot && ${#IsoList[@]} -ge 1 ]] ; then
+        printf "\n\n  [iso] mount iso to guest, allow boot or read from iso "
       else printf "\n\n"
       fi
       if [[ $BiosMode == "fast" ]]; then printf "  [bm] enable boot management menu"
@@ -363,7 +364,7 @@ else
       if [[ $(type -p "$FileManager") ]]; then
         printf "  [qf] | [qqf]  open a qcow2 drive"
         printf " in file manager"
-        [[ ${#IsoList[*]} -gt 1 ]] && printf "  [iso] un/mount iso to guest"
+        [[ ${#IsoList[@]} -gt 1 ]] && printf "  [iso] un/mount iso to guest"
         if [[ $LiveBootMissing ]]; then  printColor "   [f]  open VM folder"
         else printf "   [f]  open VM folder"
         fi
