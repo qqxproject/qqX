@@ -953,8 +953,9 @@ function configure_display() {
     fi
 }
 
-
 ## Fix ovmfs array parse but @ feb 2026 SUSPEND due to upstream changes and improvements in 4.99  REVIEW
+#  Of interest (lol) @ july 2026 > a quickemu PR  (via AI ... ) https://github.com/quickemu-project/quickemu/pull/1938
+
 function xxconfigure_xxbios() {
 
     # Always Boot macOS using EFI
