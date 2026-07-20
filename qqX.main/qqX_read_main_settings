@@ -42,7 +42,10 @@ function_create_VM_folderList() {
   DefaultFolderError=
   ExtraFolderError=
 
-  # Make sure that 'Default_VM_Folder' has a value and it exists
+  ## Creates Array 'VM_Folder_List' which contains the general GROUP storage folders
+  # See 'VM_Array' and script VM_Array_routines for the individual VM_Instances
+
+  # Make sure that 'Default_VM_Folder' has a value and it exists  (the general group storage folder)
   [[ ! $Default_VM_Folder ]] && Default_VM_Folder="$Current_VM_Folder"
   if [[ ! -d "$Default_VM_Folder" ]]; then printf "\n\n  Settings:  Default Folder NOT found \n\n" ; sleep 1 ; DefaultFolderError=1 ; fi
 
@@ -54,9 +57,13 @@ function_create_VM_folderList() {
 
   # Read 'Extra_VM_Folder' (from the settings file) but filter out blank entries,
   # noting that the array Extra_VM_Folder finishes here and that the cleaned data gets integrated into 'VM_Folder_List'
+
   # Also note this needs a count, as bash array methods mean a test for "${Extra_VM_Folder[@]}" will always be positive,
   # even if all the elements are empty and individual tests for each element are negative ...
-  # And, that the array 'Extra_VM_Folder' will be contigious, by nature of the += build method in settings
+  # And, that both arrays 'Extra_VM_Folder' and 'VM_Folder_List' will be contigious, by nature of the += build methods
+
+  # Following selection of an element from the array 'VM_Folder_List' in the VM selector script, that element content becomes stored
+  # by the easy-reference variable 'VM_Conf_Dir' which is also associated, in the dual 'VM_Array', with the 'VM_Conf_File'
 
   local  ElementCount="${#Extra_VM_Folder[@]}"  i=0
   while [[ $i -lt $ElementCount ]]; do

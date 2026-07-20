@@ -41,13 +41,13 @@
 
 #  -------------------------------------------------------------------------------------------------------------------
 
-## SET THE DEFAULT GENERAL VM FOLDER, where the Virtual Machines are normally stored.
+## SET THE DEFAULT GENERAL GROUP VM FOLDER, where the Virtual Machines are normally stored.
 #  Installation pre-set is "$HOME/VMQs"  -  Reconfigure as appropriate.
 #  Contains the .conf files and the 'InstanceName' containers.
 
 Default_VM_Folder="$HOME/VMQs"
 
-# ADD any EXTRA FOLDERS OR SUB-FOLDERS where VM's may be located:
+# ADD any EXTRA GROUP FOLDERS OR group SUB-FOLDERS where VM's may be located:
 # leave blank for none, set one entry per folder as +=("/full/path/folder") or +=("$Default_VM_Folder/folder")
 # or multiple as quoted and space separated as in +=("/full/path/folder" "/full/path/folder" "/full/path/folder")
 # or as in +=("$HOME/VMQs/folder" "$HOME/VMQs/folder" "$HOME/VMQs/folder")
@@ -98,7 +98,7 @@ VM_SelectorStyle="A"
 # OPTIONAL:
 
 # To select VM's to show at the TOP OF THE LIST
-# where [n,0] is the full path general folder / sub-folder  &  [n,1] is the .conf file
+# where [n,0] is the full path general group folder / group sub-folder  &  [n,1] is the individual .conf file
 # eg:
 # VM_Array[0,0]="$Default_VM_Folder" ; VM_Array[0,1]="windows-11.conf"
 # VM_Array[1,0]="$Default_VM_Folder/MAC" ; VM_Array[1,1]="macos-catalina.conf"
