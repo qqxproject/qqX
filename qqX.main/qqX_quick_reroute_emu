@@ -128,18 +128,15 @@ function quickemu {
         return
       else
         if [[ ! $boot || $boot != "legacy" ]]; then  printf "  UEFI/BIOS mode = UEFI \n\n"
-        else
-          printf "  UEFI/BIOS mode = bios legacy "
-          [[ ${XDG_SESSION_TYPE,,} == "wayland" ]] && printf "  >  Some distros may throw Wayland error warnings but these can be generally ignored"
-          printf "\n\n"
+        else printf "  UEFI/BIOS mode = bios legacy \n\n"
         fi
         if grep -qs 'driver=virtio' <<< "$(lshw 2>/dev/null)" ; then
           printf "  Nested running detected > Deny inhibit shortcuts \n\n\n"
         else printf "\n"
         fi
         # Can't find Wayland-0 error shows here on NESTED Ubuntu 26 when running LEGACY bios ??
-        # But not with Fedora ...  ??   # REVIEW
-
+        # But not with Fedora ...  ??   Seems to be routed in UpStream 4.99 CPU code, along with other problems ...
+        # Now bypassed with qqXmods and UseUpstreamNesting = false (by default)
         if [[ $LiveBoot ]] && [[ "$VM_InstanceName" != *windows* && "$VM_InstanceName" != *macos* ]]; then
           printf "  LIVE BOOT:"
           if [[ $SpiceBoot ]]; then

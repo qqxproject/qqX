@@ -163,54 +163,72 @@ function configure_cpu() {
         QEMU_ACCEL="kvm"
     fi
 
+    ## MOD ##
 
-    if [ "${ARCH_VM}" == "aarch64" ]; then
-        # ARM64 guest support
-        # https://qemu-project.gitlab.io/qemu/system/arm/virt.html
-        # highmem=on allows aarch64 guests on the "virt" machine type to access guest RAM
-        # above the 4GB boundary. This is required for VMs configured with >3GB RAM and is
-        # generally more compatible on modern aarch64 systems.
-        # pflash0/pflash1 reference the blockdev nodes for AAVMF firmware
-        MACHINE_TYPE="virt,highmem=on,pflash0=rom,pflash1=efivars"
-        case ${ARCH_HOST} in
-            arm64|aarch64)
-                # Native ARM64 host running ARM64 guest - use hardware acceleration
-                CPU_MODEL="max";;
-            *)
-                # Cross-architecture emulation (e.g., x86_64 host running ARM64 guest)
-                CPU_MODEL="max"
-                QEMU_ACCEL="tcg";;
-        esac
-    elif [ "${ARCH_VM}" != "${ARCH_HOST}" ]; then
-        # If the architecture of the VM is different from the host, disable acceleration
-        # and use TCG (Tiny Code Generator) software emulation. TCG emulates the target
-        # architecture in software, allowing cross-architecture virtualisation (e.g.,
-        # running x86_64 VMs on ARM hosts).
-        #
-        # Users can manually force TCG mode by adding this to their VM .conf file:
-        #   cpu_model="qemu64"
-        #   extra_args="-accel tcg"
-        # or by exporting QEMU_ACCEL in the shell environment:
-        #   export QEMU_ACCEL="tcg"
-        #
-        # TCG is useful for:
-        # - Cross-architecture virtualisation (x86 on ARM, ARM on x86)
-        # - Testing VMs on hosts without hardware virtualisation support
-        # - Emulating CPU features in software (e.g., running macOS x86_64 VMs on ARM Macs)
-        CPU_MODEL="qemu64"
-        CPU_KVM_UNHALT=""
-        QEMU_ACCEL="tcg"
+    if [[ $UseUpstreamNesting ]]; then
+
+        ## Questionable Upstream section - driven by macOS and Arm
+
+        if [ "${ARCH_VM}" == "aarch64" ]; then
+            # ARM64 guest support
+            # https://qemu-project.gitlab.io/qemu/system/arm/virt.html
+            # highmem=on allows aarch64 guests on the "virt" machine type to access guest RAM
+            # above the 4GB boundary. This is required for VMs configured with >3GB RAM and is
+            # generally more compatible on modern aarch64 systems.
+            # pflash0/pflash1 reference the blockdev nodes for AAVMF firmware
+            MACHINE_TYPE="virt,highmem=on,pflash0=rom,pflash1=efivars"
+            case ${ARCH_HOST} in
+                arm64|aarch64)
+                    # Native ARM64 host running ARM64 guest - use hardware acceleration
+                    CPU_MODEL="max";;
+                *)
+                    # Cross-architecture emulation (e.g., x86_64 host running ARM64 guest)
+                    CPU_MODEL="max"
+                    QEMU_ACCEL="tcg";;
+            esac
+        elif [ "${ARCH_VM}" != "${ARCH_HOST}" ]; then
+            # If the architecture of the VM is different from the host, disable acceleration
+            # and use TCG (Tiny Code Generator) software emulation. TCG emulates the target
+            # architecture in software, allowing cross-architecture virtualisation (e.g.,
+            # running x86_64 VMs on ARM hosts).
+            #
+            # Users can manually force TCG mode by adding this to their VM .conf file:
+            #   cpu_model="qemu64"
+            #   extra_args="-accel tcg"
+            # or by exporting QEMU_ACCEL in the shell environment:
+            #   export QEMU_ACCEL="tcg"
+            #
+            # TCG is useful for:
+            # - Cross-architecture virtualisation (x86 on ARM, ARM on x86)
+            # - Testing VMs on hosts without hardware virtualisation support
+            # - Emulating CPU features in software (e.g., running macOS x86_64 VMs on ARM Macs)
+            CPU_MODEL="qemu64"
+            CPU_KVM_UNHALT=""
+            QEMU_ACCEL="tcg"
+        fi
+
     fi
 
-    # Detect if running inside a VM based on manufacturer detection
-    # Note: Checking CPU flags (vmx/svm) indicates hardware virtualisation SUPPORT,
-    # not whether we're inside a VM. Nested virtualisation may expose these flags.
-    case ${MANUFACTURER,,} in
-        qemu|virtualbox) CPU_MODEL="qemu64"
-                         QEMU_ACCEL="tcg"
-                         HYPERVISOR="${MANUFACTURER,,}";;
-        *) HYPERVISOR="";;
-    esac
+    #  qqX tests repeatedly show this section CAUSES NESTED VM FAILURE
+    #  Causes -smp / hyperthreading errors ....
+
+        # Detect if running inside a VM based on manufacturer detection
+        # Note: Checking CPU flags (vmx/svm) indicates hardware virtualisation SUPPORT,
+        # not whether we're inside a VM. Nested virtualisation may expose these flags.
+
+        case ${MANUFACTURER,,} in
+
+        qemu|virtualbox)
+            [[ $UseUpstreamNesting ]] &&    CPU_MODEL="qemu64"
+            [[ $UseUpstreamNesting ]] &&    QEMU_ACCEL="tcg"
+                                            HYPERVISOR="${MANUFACTURER,,}"
+                                            ;;
+            *)                              HYPERVISOR=""
+                                            ;;
+        esac
+
+
+    #### End MOD ###
 
 
     if [ -z "${HYPERVISOR}" ]; then

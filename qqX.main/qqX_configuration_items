@@ -65,14 +65,20 @@ custom_conf_notes () {
   "
 
   printColor "\n\n   %s:\n" "${QE_SourceVersion^^}"
-  [[ $DisplayConf_ModOptions ]] &&  printf "\n   DisplayConf_Mod=  %s   (sys default '%s')" "$DisplayConf_ModOptions" "$DisplayConf_ModsPref"
+
+  if [[ $DisplayConf_ModOptions ]]; then
+    printf "\n   DisplayConf_Mod  options are:  %s   (sys default = '%s')" "$DisplayConf_ModOptions" "$DisplayConf_ModsPref"
+    printf "\n   Mainly affects macOS  YMMV  (none = upstream)"
+  fi
+  printf "\n\n   OTHER options: "
+  grep -qs 'UseUpstreamNesting' "$QE_Modpath" &&  printf "\n\n   UseUpstreamNesting=\"force\"   qqX tests show the upstream code CAUSES NESTED VM FAILURE but can be forced (for testing, or other ?)"
 
   if [[ $guest_os == "macos" ]] && grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" ; then
-    printf "\n"
+    printf "\n\n   MAC: \n"
     grep -qs 'MacSSE4checks' "$QE_Modpath" &&           printf "\n   MacSSE4checks=\"ignore\"               Support for very old VMs, pre-existing or testing ..."
-    grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" &&  printf "\n   HighPrecisionMacTimers=\"disabled\"    Tests show High Precision runs faster. Possibly disable for older VMs?"
-    grep -qs 'Tahoe_CpuTweaks' "$QE_Modpath" &&         printf "\n   Tahoe_CpuTweaks=\"off\"                Seems to be needed for Tahoe and seems to help with Sequoia ..."
-    grep -qs 'Upstream_MacCpu' "$QE_Modpath" &&         printf "\n   Upstream_MacCpu=\"force\"              The upstream model has problems -  Your setup may vary ??"
+    grep -qs 'HighPrecisionMacTimers' "$QE_Modpath" &&  printf "\n   HighPrecisionMacTimers=\"disabled\"    Tests show High Precision runs faster. Possibly disable for older VMs ?"
+    grep -qs 'Tahoe_CpuTweaks' "$QE_Modpath" &&         printf "\n   Tahoe_CpuTweaks=\"off\"               'On' seems to be needed for Tahoe and seems to help with Sequoia ..."
+    grep -qs 'Upstream_MacCpu' "$QE_Modpath" &&         printf "\n   Upstream_MacCpu=\"force\"              The upstream model has problems but can be forced -  Your setup may vary ??"
   fi
 
   printf "\n\n"
