@@ -166,6 +166,7 @@ function quickemu {
           printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection"
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
           read -rp "  >  "  Mounted_ISO_Return
+          printf "\n\n"
         elif [[ ! $Mounted_ISO && $BiosMode == "slow" && $BiosModeMsg == "slow" ]]; then
           printf "  Press 'esc' once, when 'Start boot Option' appears, to access the BIOS"
           if [[ $img ]]; then
@@ -179,6 +180,7 @@ function quickemu {
           printf "\n\n  Use the qqX [iso] utility to add an ISO to the selection"
           printColor "\n\n  [enter] to continue  [b] to go back \n\n"
           read -rp "  >  "  Mounted_ISO_Return
+          printf "\n\n"
         elif [[ $BiosMode == "fast" ]]; then
           if [[ $LiveBoot ]]; then
             [[ $iso || $img ]] && printColor "  Booting from:" && printf " %s  %s" "$(basename "$iso")" "$(basename "$img")"
@@ -233,6 +235,7 @@ function quickemu {
         elif [[ $LiveBootControlOptions != "c" ]]; then
           secureboot="off"; ControlledRestart="off"
           printf "\n  Set CRS: '%s'  SB: '%s' \n\n" "$ControlledRestart" "$SecureBootStatus"
+        else  printf "\n\n"
         fi
       elif [[ $LiveBoot && $img ]] && [[ $ControlledRestart == "on" ]]; then
         printf "  This installation is being carried out from a '.img' file and usually indicates a combination boot setup"
@@ -244,6 +247,7 @@ function quickemu {
         elif [[ $LiveBootControlOptions != "c" ]]; then
           ControlledRestart="off"
           printf "\n  Set CRS: '%s' \n\n" "$ControlledRestart"
+        else  printf "\n\n"
         fi
       elif [[ $LiveBoot ]] && [[ $ControlledRestart == "on" ]]; then
         printf "  This appears to be a standard live iso ..."
@@ -253,6 +257,7 @@ function quickemu {
         elif [[ $LiveBootControlOptions == "c" ]]; then
           ControlledRestart="off"
           printf "\n  >  Starting: CRS = '%s' \n\n" "$ControlledRestart"
+        else  printf "\n\n"
         fi
       elif [[ $LiveBoot ]] && [[ $ControlledRestart == "off" ]]; then
         printf "  This appears to be a standard live iso ..."
@@ -262,6 +267,7 @@ function quickemu {
         elif [[ $LiveBootControlOptions == "c" ]]; then
           ControlledRestart="on"
           printf "\n  >  Starting: CRS = '%s' \n\n" "$ControlledRestart"
+        else  printf "\n\n"
         fi
       fi
 
