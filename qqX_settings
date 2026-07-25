@@ -395,10 +395,27 @@ VM_SelectorStyle="A"
 
 # FIXES for QUICKEMU'S  QEMU  'args'
 # Selected fixes & hot-fixes for the quickemu code that gets passed to QEMU,
-# where quickemu has not yet fixed things or has released the fix.  Some may not be needed or may be distro specfic.
+# where quickemu has not yet fixed things or hasn't yet released the fix.  Some may not be needed or may be distro specfic.
 # Set = blank to disable, if causing problems or if not needed with your particular installation.  Set = 1 to activate.
-  FixArgs_hpet=1
+# May also be individually added to .conf files
+
+# Fix for smartcard support bug in older versions of Qemu (8.2 era)
   FixArgs_smartcard=1
+
+# Fix for QuickEmu VM INTERNET and nested VM internet:
+# QEMU user-mode networking has default addressing (10.0.2.0/24 in many setups)
+# In a nested scenario, both levels can effectively end up “trying to be the same network” from the inner guest’s perspective
+# Using an explicit subnet for the outer VM’s user-mode network, and also ensuring the inner/nested VM uses another one,
+# and that both of these are different to the Host setup, should fix things
+# Use terminal command 'ip route' to see what is being used
+#
+# The Qemu primary VM setting can normally be left blank
+# but try "net=10.77.0.0/24,dhcpstart=10.77.0.10" or other if there are conflicts with the host
+  SetPrimaryVM_Net=
+# Quickemu doesn't allocate a setting for nested VM's
+# Using "net=10.88.0.0/24,dhcpstart=10.88.0.10" should probably work, unless it clashes with your Host setup
+# If needed, tweak these two settings to make sure that all three are slightly different ...
+  SetNestedVM_Net="net=10.88.0.0/24,dhcpstart=10.88.0.10"
 
 #  -------------------------------------------------------------------------------------------------------------------
 

@@ -224,39 +224,38 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
 
     while [[ "${args[i]}" ]]; do
 
-      # Fixes for quickemu deprecated code, to be updated from time to time REVIEW
+      # Fixes for quickemu and qemu code, to be updated from time to time REVIEW
 
       # Most of the qemu and quickemu fixes and improvements now happen in 'qqX_quickEmu_mods'
-      # And even more fixes for quickemu's companion script 'quickget' happen in 'qqX_quickGet_mods' ....
+      # And even more fixes for quickemu's companion script 'quickget' happen in 'qqX_quickGet_mods'
+      # However, quickEmu has much longer functions than Get, so we still need to add some Emu mods here ....
       # See the file 'path.notes.for.floatversion.deployment.md' in 'qqX.lib' that explains more on how this all gets integrated
 
-      if [[ $FixArgs_hpet ]] && [[ "${args[i]}" == '-no-hpet' ]]; then args[i]="-machine hpet=off" ; fi
+      # eg. this fix was used for older 4.5 era code that had deprecations that were not getting updated:
+      # if [[ $FixArgs_hpet ]] && [[ "${args[i]}" == '-no-hpet' ]]; then args[i]="-machine hpet=off" ; fi
 
-      if [[ $FixArgs_smartcard ]] && [[ "${args[i]}" == *ccid* ]] && [[ $NoSmartcardSupport ]]; then
+      if [[ $RunningAsNested ]] && [[ $SetNestedVM_Net ]] ; then [[ "${args[i]}" == *'id=nic' ]] && args[i]+=",${SetNestedVM_Net}"
+      elif [[ $SetPrimaryVM_Net ]]; then [[ "${args[i]}" == *'id=nic' ]] && args[i]+=",${SetPrimaryVM_Net}"
+      fi
 
+      if [[ "${args[i]}" == *ccid* ]] && [[ $NoSmartcardSupport ]] && [[ $FixArgs_smartcard ]]; then
         args[i]=" " ;  args[i-1]=" "
-
       else
-
         a="${args[i]}"
-
         if [[ "$a" == *'(c)'* ]]; then
           a="${a//(/'\('}"
           a="${a//)/"\)"}"
         fi
-
         if [[ "$a" == -dev* ]]; then printf "\n\n  %s" "$a" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
         elif [[ "$a" == -* ]]; then printf "\n  %s" "$a" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
         else printf " %s" "$a" | tee -a "$QemuArgsFile" -a "$QemuArgsShortFile" &> /dev/null
         fi
-
-        args[i]=" $a"   # add extra space
-
+        # add extra space, so ${args[*]} can later be used
+        args[i]=" $a"
       fi
 
       # add quotes - REVIEW ?? should be quoted, theoretically, but runs counter to quickemu
       # if [[ "$a" != -* ]]; then [[ "$a" != \'* ]] && args[i]='"'"$a"'"' ; fi
-
       ((i+=1))
 
     done
