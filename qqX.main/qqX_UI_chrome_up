@@ -334,10 +334,19 @@ function multi_instance_checks {
   CurrentQQ="$$"
   CurrentQQ_FullLine="$$  $0"
   CurrentQQ_Parent="$(ps --no-header -fo ppid "$CurrentQQ" | tr -cd '[:digit:]')"
+  CurrentQQ_GrandParent="$(ps --no-header -fo ppid "$CurrentQQ_Parent" | tr -cd '[:digit:]')"
+  CurrentQQ_SharedGrandParent="$(ps --no-header -fo ppid "$CurrentQQ_GrandParent" | tr -cd '[:digit:]')"
+  CurrentQQ_GrandParentText="$(ps -f --no-header "$CurrentQQ_Parent")"
+  CurrentQQ_SharedGrandParentText="$(ps -f --no-header "$CurrentQQ_GrandParent")"
 
   if [[ $ShowProcesses ]]; then
-    [[ $CurrentQQ ]] && printf "\n    CurrentQQ = %s" "$CurrentQQ"
+    [[ $CurrentQQ ]] && printf "\n    CurrentQQ \$\$ = %s" "$CurrentQQ"
+    [[ $CurrentQQ_FullLine ]] && printf "  -  CurrentQQ_FullLine \$\$  \$0 = '%s' \n\n" "$CurrentQQ_FullLine"
     [[ $CurrentQQ_Parent ]] && printf "    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
+    [[ $CurrentQQ_GrandParent ]] && printf "    CurrentQQ_GrandParent = %s" "$CurrentQQ_GrandParent"
+    [[ $CurrentQQ_SharedGrandParent ]] && printf "    CurrentQQ_SharedGrandParent = %s \n\n" "$CurrentQQ_SharedGrandParent"
+    [[ $CurrentQQ_GrandParentText ]] && printf "    CurrentQQ_GrandParentText = '%s' \n\n" "$CurrentQQ_GrandParentText"
+    [[ $CurrentQQ_SharedGrandParentText ]] && printf "    CurrentQQ_SharedGrandParentText = '%s' \n\n" "$CurrentQQ_SharedGrandParentText"
     printf "\n\n"
     printf "\n\n    POST find pid/ppid > pgrep -afi '/qqX' > \n\n"
     pgrep -afi '/qqX'
@@ -345,7 +354,8 @@ function multi_instance_checks {
 
   # NOTE use 'ps' here as pgrep can cause problems  (plus ignore any root process history from installer or copy-over)
   # shellcheck disable=SC2009
-  AnotherQQ="$(ps -ef | grep -e '/qqx' -e '/qqX' | grep -e ^"$USER" | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v '_install' | grep -v grep  2>/dev/null)"
+  AnotherQQ="$(ps -ef | grep -e '/qqx' -e '/qqX' | grep -e ^"$USER" | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v '_install' \
+  | grep -v -e 'code/code' | grep -v grep  2>/dev/null)"
 
   # If loading up the qcow menu, but then not choosing the qf option,
   # then the currrent qcow ceases to be a duplicate, and we need the VM selector interface, not the main selected one
@@ -369,6 +379,10 @@ function multi_instance_checks {
     printf "\n\n QF_exit_to_Main = %s \n\n" "$QF_exit_to_Main"
   fi
 
+  # Starting Main via the .qcow2 route needs to counted too. And only 1 QF instance should exist.
+  # .qcow2 remains when 'exit to main' but changes to 'filemanage' when switching to QF
+  # Plus while elif [[ "$QQ" == *'.qcow2'* ]]; gets included in [[ "$QQ" != *'qqX_copy_over'* ]]
+
   CurrentQQ_mode="main"
   if [[ ! $QF_exit_to_Main ]]; then
     # qcow, in the sense of manage a qcow disk, not just use one trigger a main menu ...
@@ -377,29 +391,40 @@ function multi_instance_checks {
     esac
   fi
 
-  # Starting Main via the .qcow2 route needs to counted too. And only 1 QF instance should exist.
-  # .qcow2 remains when 'exit to main' but changes to 'filemanage' when switching to QF
-  # while elif [[ "$QQ" == *'.qcow2'* ]]; gets included in [[ "$QQ" != *'qqX_copy_over'* ]]
-
-  if [[ $AnotherQQ ]]; then
+if [[ $AnotherQQ ]]; then
     # NB: awk '{print $1}' for pgrep and awk '{print $2}' for ps
     OtherQQ_MainArr=()
     OtherQQ_qqF_Arr=()
     mapfile -t AnotherQQ_Arr <<< "$AnotherQQ"
     for QQ in "${AnotherQQ_Arr[@]}"; do
-      [[ "$QQ" == *"$CurrentQQ"* ]] || [[ "$QQ" == *"$CurrentQQ_Parent"* ]] && continue
-      [[ "$QQ" == *'/usr/'* ]] && [[ "$QQ" != *'/usr/share/qqX'* ]] && [[ "$QQ" != *'/usr/bin/qqX'* ]] && continue
-      if [[ "$QQ" == *'--qqf'* ]] || [[ "$QQ" == *'qqX_filemanage'* ]]; then
+      [[ "$QQ" == *"$CurrentQQ"* ]] && [[ "$QQ" == *"$CurrentQQ_Parent"* ]] && continue
+	  [[ $ShowProcesses ]] && printf "\n Awk \$3 %s  match GP %s or SGP %s? \n" "$(awk '{print $3}' <<< "$QQ")" "$CurrentQQ_GrandParent" "$CurrentQQ_SharedGrandParent"
+      [[ $CurrentQQ_GrandParent ]] && [[ $(awk '{print $3}' <<< "$QQ") == "$CurrentQQ_GrandParent" ]] && continue
+      [[ $CurrentQQ_SharedGrandParent ]] && [[ $(awk '{print $3}' <<< "$QQ") == "$CurrentQQ_SharedGrandParent" ]] && continue
+      # check for empty transitional processes that are now closed
+      QQtempChkPID="$(awk '{print $2}' <<< "$QQ")"
+      QQtempChkResult="$(ps -f  --no-header "$QQtempChkPID" 2>/dev/null)"
+      [[ ! $QQtempChkResult ]] && QQtempChkResult="null" && continue
+      [[ $ShowProcesses ]] && printf "\n QQtempChk for %s is '%s' \n" "$QQtempChkPID" "$QQtempChkResult"
+      # remove obscure non-qqX specific
+      #[[ "$QQ" == *'/usr/'* ]] && [[ "$QQ" != *'/usr/share/qqX'* ]] && [[ "$QQ" != *'/usr/bin/qqX'* ]] && continue
+      [[ "$QQ" == *'qqX_copy_over'* ]] && continue
+      # remove qqX_filemanage_qcow, and keep tally for indicative dev output
+      if [[ "$QQ" == *'--qqf'* ]] || [[ "$QQ" == *'qqX_filemanage_qcow'* ]]; then
         OtherQQ_qqF_Arr+=("$(awk '{print $2}' <<< "$QQ")")
-      elif [[ "$QQ" != *'qqX_copy_over'* ]]; then
+      else
+        # this should now be the count of other instances
+        # note, if qqf has been started as a child to a qqX main window, the qqf window will show as a second instance
+        # but the count will not include any 'qqX --qqf' separate command line starts
         [[ $QF_exit_to_Main ]] && QF_exit_to_Main=
         OtherQQ_MainArr+=("$(awk '{print $2}' <<< "$QQ")")
       fi
     done
-
     if [[ $ShowProcesses ]]; then
-      [[ $CurrentQQ ]] && printf "\n CurrentQQ = %s" "$CurrentQQ"
+      [[ $CurrentQQ ]] && printf "\n\n CurrentQQ = %s" "$CurrentQQ"
       [[ $CurrentQQ_Parent ]] && printf "    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
+      [[ $CurrentQQ_GrandParent ]] && printf "    CurrentQQ_GrandParent = %s" "$CurrentQQ_GrandParent"
+      [[ $CurrentQQ_SharedGrandParent ]] && printf "    CurrentQQ_SharedGrandParent = %s" "$CurrentQQ_SharedGrandParent"
       printf "\n\n"
       echo; declare -p AnotherQQ_Arr; echo
       echo; declare -p OtherQQ_MainArr; echo
