@@ -265,8 +265,7 @@ while true ; do
 
   if [[ $InstallationAlert ]]; then
 
-    printColor "\n\n  >>  "
-    printColor "Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
+    [[ ! $(type -p qqX) ]] && printColor "\n\n  >>  Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
 
     printf "\n\n\n  Example full sets:"
 
