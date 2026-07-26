@@ -285,10 +285,12 @@ while true; do
   elif [[ $qf_DriveSelect == "q" ]]; then printf "\n" ; exit directly
   else
 
-    printf "\n\n  %s: " "$TargetName"
-    printColor "\n\n  [c] connect  [d] disconnect current and unmount  [enter] [r] to reselect or return"
+    printf "\n\n  %s: \n\n" "$TargetName"
+    printColor "  [c] connect"
+    printColor "  [d] disconnect current and unmount"
+    printColor "  [enter] [r] to reselect or return"
     printf "\n\n  Connected drives may be mounted as standard in the file-manager"
-    printf "\n\n  External formats are not always readable using the ndb method ..."  # REVIEW  is a convertion possible ?
+    printf "\n\n  External formats are not always readable using the ndb method ..."  # REVIEW  is a conversion possible ?
     printf "\n\n"
     read -rp "  >  " qf_DriveSelect
     printf "\n\n"
@@ -335,14 +337,18 @@ while true; do
         printf "qemu-nbd connecting \n\n"
 
         if [[ "$TargetName" == All* ]]; then
-          [[ $InputAvailable ]] && sudo qemu-nbd -c "/dev/nbd0"  -f qcow2  "$qqf_Input_Drivepath"
-          [[ $MainAvailable ]] && sudo qemu-nbd -c "/dev/nbd1"  -f qcow2  "$MainPathName"
-          [[ $SecondAvailable ]] && sudo qemu-nbd -c "/dev/nbd2"  -f qcow2  "$SecondPathName"
+          [[ $InputAvailable ]] && [[ ! $InputConnected ]] && sudo qemu-nbd -c "/dev/nbd0"  -f qcow2  "$qqf_Input_Drivepath"
+          [[ $MainAvailable ]] && [[ ! $MainConnected ]] &&  sudo qemu-nbd -c "/dev/nbd1"  -f qcow2  "$MainPathName"
+          [[ $SecondAvailable ]] && [[ ! $SecondConnected ]] &&  sudo qemu-nbd -c "/dev/nbd2"  -f qcow2  "$SecondPathName"
           if [[ $TargetName == "All Drives" ]]; then
-            [[ $SharedAvailable ]] && sudo qemu-nbd -c "/dev/nbd3"  -f qcow2  "$SharedPathName"
+            [[ $SharedAvailable ]] && [[ ! $SharedConnected ]] &&  sudo qemu-nbd -c "/dev/nbd3"  -f qcow2  "$SharedPathName"
           fi
         else
-          [[ $TargetAvailable ]] && sudo qemu-nbd -c "$TargetDevice"  -f qcow2  "$TargetPathName"
+          TargetGrep="${TargetDevice/'/dev/'/}"
+          if ! ps -ef | grep "$TargetGrep" | grep -q qcow; then
+            [[ $TargetAvailable ]] && sudo qemu-nbd -c "$TargetDevice"  -f qcow2  "$TargetPathName"
+          else printf "\n  ERROR ?  Already Connected ...\n\n"
+          fi
         fi
 
       fi

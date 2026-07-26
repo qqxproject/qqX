@@ -474,11 +474,11 @@ if [[ $AnotherQQ ]]; then
 
   if [[ $ShowProcesses ]]; then
     echo; echo "Script: qqX_UI_chrome_up - end of function 'MULTI_INSTANCE_CHECKS' > "
-    if [[ ${AnotherQQ_Arr[0]} ]]; then echo; declare -p AnotherQQ_Arr; echo; else printf "\n\n 'AnotherQQ_Arr' not present"; fi
-    if [[ ${OtherQQ_MainArr[0]} ]]; then echo; declare -p OtherQQ_MainArr; echo; else printf "\n\n 'OtherQQ_MainArr' not present"; fi
-    if [[ ${OtherQQ_qqF_Arr[0]} ]]; then echo; declare -p OtherQQ_qqF_Arr; echo; else printf "\n\n 'OtherQQ_qqF_Arr' not present"; fi
-    printf "\n\n  CurrentQQ = %s\n\n" "$CurrentQQ"
-    printf "\n\n  CurrentQQ_mode = %s\n\n" "$CurrentQQ_mode"
+    if [[ ${AnotherQQ_Arr[0]} ]]; then echo; declare -p AnotherQQ_Arr; echo; else printf "\n\n 'AnotherQQ_Arr' not present\n"; fi
+    if [[ ${OtherQQ_MainArr[0]} ]]; then echo; declare -p OtherQQ_MainArr; echo; else printf "\n\n 'OtherQQ_MainArr' not present\n"; fi
+    if [[ ${OtherQQ_qqF_Arr[0]} ]]; then echo; declare -p OtherQQ_qqF_Arr; echo; else printf "\n\n 'OtherQQ_qqF_Arr' not present\n"; fi
+    printf "\n\n  CurrentQQ = %s" "$CurrentQQ"
+    printf "    CurrentQQ_mode = %s\n\n" "$CurrentQQ_mode"
     read -rp " >  "
   fi
 
