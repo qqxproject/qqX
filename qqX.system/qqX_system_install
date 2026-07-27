@@ -254,11 +254,11 @@ while true ; do
     [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
     if [[ ! $GnuPath ]]; then
       printColor "\n\n  >>  Standard util '%s' should usually be present and is required by qqX"  "$GP"
-          printColor   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
+      printColor   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
       InstallationAlert=1
     elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
       printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
-          printColor   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+      printColor   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
       InstallationAlert=1
     fi
   done
@@ -813,8 +813,8 @@ if [[ ! $SkipMkLauncher ]]; then
           printf "\n\n\n  85%% of users are probably covered by \"gnome-terminal\" \"konsole\" \"mate-terminal\" \"xfce4-terminal\""
           printf "\n\n  and over 95%% probably when \"qterminal\" and \"alacritty\" are added."
 
-          printf "\n\n\n  Flatpak installs and the new Gnome Terminal 'ptyxis' are currently problematic"
-          printf "\n\n  whilst, for qqX purposes, alacritty works better in tiling window managers:"
+          printf "\n\n\n  Flatpak terminals are currently problematic but problems with the new Gnome Terminal 'ptyxis'"
+          printf "\n\n  do seem to be resolving, whilst for qqX purposes, alacritty works better in tiling window managers:"
           printf "\n\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
           printf "\n\n  which are both lightweight and Wayland/X11/multi-DE compatible."
           printf "\n\n\n  Systems are fine with more than one terminal installed and present ..."
@@ -885,8 +885,8 @@ if [[ ! $SkipMkLauncher ]]; then
       printColor "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
 
       if [[ $(type -p "ptyxis") ]] ; then
-        # 10/2025 ptyxis  partly resolved, from ver 49.1 (tested on Fedora 43 beta) but fails to open QF second windows
-        printf "\n\n  Although the new GNOME TERMINAL 'Ptyxis' is present on this system, it is currently problematic:"
+        printf "\n\n  The new GNOME TERMINAL 'Ptyxis' is present on this system."
+        printf "\n  Since Terminal/Ptyxis ver 50.1 the situation has improved BUT manual window sizing is still required:"
       fi
 
       if [[ $(type -p "cosmic-term") ]] ; then
@@ -1090,7 +1090,7 @@ if [[ ! $SkipMkLauncher ]]; then
       if [[ $CustomTerminalProfile ]]; then
         echo "Exec=$UserTerm $CustomTerminalProfile " '"' "$qqX_Std_File_Path %f" '"'
       elif [[ $UserTerm == "ptyxis" ]]; then
-        echo "Exec=$UserTerm --title qqX -x "'"'"bash -c ""'""$qqX_Std_File_Path""'""  %f"'"'
+        echo "Exec=$UserTerm --title qqX -x " '"' "$qqX_Std_File_Path %f" '"'
       elif [[ $UserTerm == "kgx" ]]; then
         echo "Exec=$UserTerm -- $qqX_Std_File_Path "'"'" %f"'"'
       elif [[ $UserTerm == "gnome-terminal" ]]; then

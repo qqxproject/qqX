@@ -758,10 +758,12 @@ qcow2_filemanagement_launcher () {
   # Eg. Exec=mate-terminal  --geometry=145x50 --hide-menubar --title=qqX  -e  " /usr/bin/qqX  XDG %f "
   GrepExecLine="$(grep -s Exec "$XDG_GUI_desktop_Folder/qqX.desktop")"
   if [[ $GrepExecLine ]]; then
-    GrepExecLine="${GrepExecLine/'Exec='/}"
-    if grep -qs 'gnome-terminal' "$XDG_GUI_desktop_Folder/qqX.desktop" ; then
+    if [[ "$GrepExecLine" == *'gnome-terminal'* ]]; then
       Terminal_Start="$(cut -d '/' -f 1 <<< "$GrepExecLine")"
+    elif [[ "$GrepExecLine" == *'ptyxis'* ]]; then
+     	Terminal_Start="ptyxis --new-window --title qqX -x "
     else
+      GrepExecLine="${GrepExecLine/'Exec='/}"
       Terminal_Start="$(cut -d '"' -f 1 <<< "$GrepExecLine")"
       [[ "$Terminal_Start" == *'kgx'* ]] && Terminal_Start="kgx --"
     fi
