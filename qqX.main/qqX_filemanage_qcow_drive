@@ -54,25 +54,64 @@ if [[ ! $(type -p "$FileManager") ]] ; then
   printf "\n\n\n  ERROR:  File Manager '%s' NOT found.\n" "$FileManager" ; sleep 2
 fi
 
-# One control window per VM. Auto-closes others if new one opened. Avoids confusion.
-# New PID always goes on end of list but pgrep sub-shell creates another.
+if [[ $Trace_InputVars ]]; then echo ; read -rp "  QF window > [enter] to  Continue > " ; echo
+fi
 
-# Note: kde/dolphin/konsole opens two PIDs - one for the terminal and one for the script
-# and gnome based terminals open just one and with a 'bash' nomination.
+# One control window per VM. Auto-closes others if new one opened.
+# Revised for Gnome and KDE changes 07/2026
 # Also see function 'multi_instance_checks' in 'UI_chrome_up' ...
 
-if pgrep -af qqX_filemanage | grep -q "$UserTerm" ; then
-  ThisPID="$(pgrep -n "$UserTerm")"
-    while [[ "$(pgrep -af qqX_filemanage)" ]] ; do
-    ChkPID="$(pgrep -af qqX_filemanage | grep "$UserTerm" | cut -d' ' -f1 | head -n 1)"
-    if [[ $ChkPID == "$ThisPID" ]] ; then break ; else kill "$ChkPID" 2>/dev/null ; fi
-  done
-else
-  ThisPID="$(pgrep -af qqX_filemanage | cut -d' ' -f1 | tail -n 2 | head -n 1)"
-  while [[ "$(pgrep -af qqX_filemanage)" ]] ; do
-    ChkPID="$(pgrep -af qqX_filemanage | cut -d' ' -f1 | head -n 1)"
-    if [[ $ChkPID == "$ThisPID" ]] ; then break ; else kill "$ChkPID" 2>/dev/null ; fi
-  done
+ThisPID="$$"
+
+if [[ $Trace_InputVars ]]; then
+  echo; echo "pgrep -af qqX_filemanage:"; echo
+  pgrep -af qqX_filemanage
+  echo
+  printf "\n\n \$0 is %s " "$0"
+  echo
+  printf "\n\n pgrep -af  %s :\n\n" "$0"
+  pgrep -af "$0"
+  printf "\n\n  **** "
+  printf "\n\n \$\$ is %s " "$ThisPID"
+  printf "\n\n ThisPID:  ps -f  %s :\n\n" "$ThisPID"
+  ps -f "$ThisPID"
+  ParentPID="$(ps --no-header -fo ppid "$ThisPID" | tr -cd '[:digit:]')"
+  if [[ $ParentPID ]]; then
+    printf "\n\n ParentPID:  ps -f  %s :\n\n " "$ParentPID"
+    ps -f "$ParentPID"
+  fi
+  echo ; read -rp "QF window > [enter] to  Continue > " ; echo
+fi
+
+ChkPID_List="$(pgrep -af qqX_filemanage | grep -v "$UserTerm" | cut -d' ' -f1)"
+mapfile -t ChkPID_Arr <<< "$ChkPID_List"
+
+if [[ $Trace_InputVars ]]; then echo ; declare -p ChkPID_Arr ; echo ; read -rp "  QF window > [enter] to  Continue > " ; echo
+fi
+
+i=0
+while [[ ${ChkPID_Arr[i]} ]] ; do
+  ChkPID="$(tr -cd '[:digit:]' <<< "${ChkPID_Arr[i]}")"
+  Test_ChkPID="$(ps --no-header -f "$ChkPID" 2>/dev/null)"
+  if [[ $Trace_InputVars ]]; then
+    if [[ ! $Test_ChkPID ]]; then Test_ChkPID_Display="null"
+    else Test_ChkPID_Display="$Test_ChkPID"
+    fi
+    echo; echo " i = $i  > ThisPID = $ThisPID   ChkPID = $ChkPID  = $Test_ChkPID_Display"
+    echo ; read -rp "QF window checks  > [enter] to  Continue > " ; echo
+  fi
+  ((i++))
+  [[ ! $Test_ChkPID ]] && continue
+  if [[ $ChkPID != "$ThisPID" ]] && [[ $ChkPID != "$ParentPID" ]]  ; then
+    ChkParentPID="$(ps --no-header -fo ppid "$ChkPID" | tr -cd '[:digit:]')"
+    if [[ $Trace_InputVars ]]; then echo "ChkPID = $ChkPID   ChkParentPID =  $ChkParentPID   ParentPID = $ParentPID" ; echo
+    fi
+    kill "$ChkPID" 2>/dev/null
+    [[ $ChkParentPID != "$ParentPID" ]] && kill "$ChkParentPID" 2>/dev/null
+  fi
+done
+
+if [[ $Trace_InputVars ]]; then echo ; read -rp "  QF window > [enter] to  Continue > " ; echo
 fi
 
 show_nbd_help () {
