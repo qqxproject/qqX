@@ -1,1 +1,5 @@
-floatversion
+#!/usr/bin/env bash
+
+# source instead of link, as some distros have Access Control limitations
+
+source floatversion
