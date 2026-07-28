@@ -468,20 +468,19 @@ function_config_tune_up ()  {
       }   >> "$TuneUpTargetDraft"
 
     elif [[ "$guest_os" == *macos* ]]; then
-
       ConfLine="$(grep -s 'macos_release=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then  printf "macos_release=\"\"\n"  >> "$TuneUpTargetDraft" ; fi
-
       ConfLine="$(grep -s 'mouse=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then printf "mouse=\"virtio\"\n"  >> "$TuneUpTargetDraft" ; fi
-
       ConfLine="$(grep -s 'keyboard=' "$TuneUpTmpCopy")"
       if [[ ! $ConfLine ]] || [[ "$ConfLine" == *'#'* ]]; then  printf "keyboard=\"usb\"\n"  >> "$TuneUpTargetDraft" ; fi
-
     fi
-
   fi
 
+  if grep -qs 'porteus' "$TuneUpTargetDraft" &&  ! grep -qs 'legacy' "$TuneUpTargetDraft" ; then
+    printf "  Adding legacy boot as Porteus seems to need this ... \n\n"
+    printf "\nboot=\"legacy\"\n"  >> "$TuneUpTargetDraft"
+  fi
 
   while true; do
 
@@ -566,8 +565,8 @@ function_config_tune_up ()  {
 
       printColor "\n\n  Undoing changes to config file \n\n"
       cat "$TuneUpTargetFile"
-      printf "\n\n"
-      read -rp "  [enter] to return  >  "
+      printf "\n\n  [enter] to refresh and return \n\n"
+      read -rp "  >  "
       break
 
     elif [[ $NewFileTuneUp ]] && [[ $TuneUpConfConfirm == "d" ]]; then
@@ -601,6 +600,7 @@ function_config_tune_up ()  {
   else
 
     ConfSettingsAdjusted=1
+    printColor "\n\n  Reloading and refreshing may take a moment ...\n\n" ; sleep 0.7
     refresh_conf_vars_and_values
 
   fi

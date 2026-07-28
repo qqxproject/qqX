@@ -230,7 +230,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
     printf "\n\n  %s\n" "$XDG_ISO_Name"
     printColor "\n\n  Works with most standard bootable ISO's "
     printf "\n\n\n  The following distros are known to need special treatment and may not supply ISO installers:"
-    printf "\n\n  For: batocera | freedos | haiku | kolibrios | reactos | truenas "
+    printf "\n\n  For: batocera | freedos | haiku | kolibrios | porteus | reactos | truenas "
     printf "\n\n  solaris | dragonflybsd | freebsd | netbsd | openbsd "
     printf "\n\n  If ISO's are available, follow-up edit the guest_os= .conf line  eg guest_os=\"batocera\" etc"
     printf "\n\n  For a few distros, boot=\"legacy\" may need to be tried too ...\n"
