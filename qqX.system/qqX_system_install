@@ -884,9 +884,11 @@ if [[ ! $SkipMkLauncher ]]; then
 
       printColor "\n\n  Select 'standard' if in doubt, or where terminals do not have a -geometry parameter."
 
-      if [[ $(type -p "ptyxis") ]] ; then
-        printf "\n\n  The new GNOME TERMINAL 'Ptyxis' is present on this system."
-        printf "\n  Since Terminal/Ptyxis ver 50.1 the situation has improved BUT manual window sizing is still required:"
+      if [[ $(type -p "ptyxis") ]] && [[ $UserTerm == "ptyxis" ]]; then
+        printf "\n\n\n  PTYXIS:"
+        printf "\n\n  The situation has now improved with the new Gnome Terminal BUT manual window sizing may still be required."
+        printf "\n  After installation, from the Terminal/Ptyxis top right menu, select preferences > behaviour, then"
+        printf "\n  at 'Restore Window Size' enter 180 columns and 50 rows. Scroll down to, and enter, save as default."
       fi
 
       if [[ $(type -p "cosmic-term") ]] ; then
