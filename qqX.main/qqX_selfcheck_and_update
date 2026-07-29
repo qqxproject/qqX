@@ -107,7 +107,7 @@ check_for_qqX_updates() {
   # Using 'fv --full' detects 'beta' releases, alpha, rc etc AND to be NORMALLY 'pre-releases' only
 
   # FIRST PAGE, includes 'latest' and 'pre-releases' (newest)
-  qqX_ReleasesList="$(curl -qsLf  -m 180 "https://github.com/qqxproject/qqX/releases" | tr ' ' '\n' | grep -s tree | fv --full -Q)"
+  qqX_ReleasesList="$(curl -qsLf -m 30 "https://github.com/qqxproject/qqX/releases" | tr ' ' '\n' | grep -s tree | fv --full -Q)"
   [[ ! $qqX_ReleasesList ]] && return 1
 
   qqX_Newest_PreRelease="$(fv --full -Q -M <<< "$qqX_ReleasesList")"
@@ -118,7 +118,7 @@ check_for_qqX_updates() {
   # So, use Github's API (no access-token needed, works on any repo) BUT it only works with github's 'latest' routing algo ...
   local ApiTarget=
   ApiTarget="https://api.github.com/repos/qqxproject/qqX/releases/latest"
-  curl -qsLf -m 180 -H "X-GitHub-Api-Version:2022-11-28" "$ApiTarget" > "$qqX_Latest_ReleaseFile"
+  curl -qsLf -m 30 -H "X-GitHub-Api-Version:2022-11-28" "$ApiTarget" > "$qqX_Latest_ReleaseFile"
   sleep 1
   [[ ! -e  "$qqX_Latest_ReleaseFile" ]] && return 1
 
@@ -163,11 +163,11 @@ check_for_qqX_updates() {
       qqX_UpdateAvail="$qqX_Newest_PreRelease"
       # make use the presumed standard format and check if correct (given that the API route cannot be used)
       qqX_Latest_SecureTarBall_Addr="https://github.com/qqxproject/qqX/releases/download/${qqX_Newest_PreRelease}/qqX-${qqX_Newest_PreRelease}.tar.gz"
-      if [[ "$(curl -qsLf --head  --location-trusted -m 180 "$qqX_Latest_SecureTarBall_Addr" | grep 'HTTP/' | tail -n1)" != *200* ]]; then
+      if [[ "$(curl -qsLf --head  --location-trusted -m 30 "$qqX_Latest_SecureTarBall_Addr" | grep 'HTTP/' | tail -n1)" != *200* ]]; then
         qqX_Latest_SecureTarBall_Addr=
       fi
       qqX_Latest_SecureTarSha_Addr="https://github.com/qqxproject/qqX/releases/download/${qqX_Newest_PreRelease}/qqX-${qqX_Newest_PreRelease}.tar.gz.sha256"
-      if [[ "$(curl -qsLf --head  --location-trusted -m 180 "$qqX_Latest_SecureTarSha_Addr" | grep 'HTTP/' | tail -n1)" != *200* ]]; then
+      if [[ "$(curl -qsLf --head  --location-trusted -m 30 "$qqX_Latest_SecureTarSha_Addr" | grep 'HTTP/' | tail -n1)" != *200* ]]; then
         qqX_Latest_SecureTarSha_Addr=
       fi
     fi
@@ -175,13 +175,13 @@ check_for_qqX_updates() {
 
   # All TAGS, released or not. Use head -n1, not fv -M, to make sure dev tags don't take priority over beta  (dev NOT to be used for pre-release)
   [[ -e "/tmp/qqXtags.txt"  ]] && rm "/tmp/qqXtags.txt"
-  curl -qsLf  -m 180 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqXtags.txt"
+  curl -qsLf -m 30 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqXtags.txt"
   qqX_Newest_Tag="$(grep -s '/tags/' "/tmp/qqXtags.txt" | head -n1 | fv -f -M -Q)"
   qqX_Newest_TagText="$(grep -s -e 'text-small color-fg-muted"' "/tmp/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
 
   # qqX announcements
   [[ -e "/tmp/qqXnews.txt"  ]] && rm "/tmp/qqXnews.txt"
-  curl -qsLf  -m 180  "https://github.com/qqxproject/qqX/discussions/categories/announcements" > "/tmp/qqXnews.txt"
+  curl -qsLf -m 30  "https://github.com/qqxproject/qqX/discussions/categories/announcements" > "/tmp/qqXnews.txt"
   if [[ -e "/tmp/qqXnews.txt" ]]; then
     qqX_LatestNewsTitle="$(grep -s -e '/discussions/[[:digit:]]' "/tmp/qqXnews.txt" | grep -m 1 hovercard | tr '"' '\n' | grep '>' | cut -d'<' -f1 | cut -d'>' -f2)"
     qqX_LatestNewsDate="$(grep -s 'relative-time' "/tmp/qqXnews.txt"  | tr '"' '\n' | grep -e '/relative' | grep -v github | cut -d'<' -f1 | cut -d'>' -f2 | head -n 1 | tr -d ',')"

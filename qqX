@@ -176,9 +176,8 @@ source "$qqX_MainFolder/qqX_main_translation"
 
 [[ $Loop_Diagnostics ]] && printf "\n\n QE_SourcePath = %s \n\n QG_SourcePath = %s \n"  "$QE_SourcePath" "$QG_SourcePath"
 
-# Don't load up code until checked for other instances, as the defaults could overwrite hot-swapped source files on the other instance
-# With exception of $1 starts, which would lead to a branch decider of Main or QF
-[[ ! $Initial_Input ]] && multi_instance_checks
+# Don't load up code until we have checked for other instances
+multi_instance_checks
 
 source "$qqX_MainFolder/qqX_MSR_functions"
 source "$qqX_MainFolder/qqX_wrap_quickemu"
@@ -217,10 +216,10 @@ fi
 #  BUT $1 / Initial Input may also be a '.qcow' disk, and that disk may or may not be bootable,
 #  so different menu paths may be taken > initial input could go either to Main or to QF:
 
-[[ $Initial_Input ]] && source "$qqX_MainFolder/qqX_input_and_mouse_tidyup" &&  multi_instance_checks
+[[ $Initial_Input ]] && source "$qqX_MainFolder/qqX_input_and_mouse_tidyup"
 
 # If 'Initial_Input' routed to the QF menu but then re-routed to Main:
-[[ $QF_exit_to_Main ]] && tput clear  &&  multi_instance_checks
+[[ $QF_exit_to_Main ]] && tput clear
 
 # If 'Initial_Input' has already made a VM selection:
 [[ $VM_InstanceName ]] && ByPass_VM_Array_Selector=1
@@ -270,6 +269,8 @@ while true ; do
       [[ $Loop_Diagnostics ]] && printf "\n\n Main Loop, pre conf refresh:" &&  main_loop_diagnostics
       refresh_conf_vars_and_values
       [[ $Loop_Diagnostics ]] && printf "\n\n Main Loop, post conf, pre main menu:" &&  main_loop_diagnostics
+      # re-check for new instances
+      multi_instance_checks
       main_menu
       [[ $Loop_Diagnostics ]] && printf "\n\n Main Loop, post main menu:" &&  main_loop_diagnostics
     else
