@@ -55,7 +55,8 @@ fi
 
 # One control window per VM. Auto-closes others if new one opened.
 # Revised for Gnome and KDE changes 07/2026
-# Also see function 'multi_instance_checks' in 'UI_chrome_up' ...
+# Also see function 'multi_instance_checks' which focuses on the main qqX script processes
+# These less complex checks focus on the QF windows ....
 
 ThisPID="$$"
 

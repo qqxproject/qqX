@@ -173,6 +173,7 @@ source "$qqX_MainFolder/qqX_Initialize"
 source "$qqX_MainFolder/qqX_read_main_settings"
 source "$qqX_MainFolder/qqX_UI_chrome_up"
 source "$qqX_MainFolder/qqX_main_translation"
+source "$qqX_MainFolder/qqX_multi_instance_checks"
 
 [[ $Loop_Diagnostics ]] && printf "\n\n QE_SourcePath = %s \n\n QG_SourcePath = %s \n"  "$QE_SourcePath" "$QG_SourcePath"
 
