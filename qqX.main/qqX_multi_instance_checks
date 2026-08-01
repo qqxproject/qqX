@@ -19,55 +19,87 @@
 # Standard command line Qemu (and Quickemu) likes one VM at a time
 # Otherwise, libvirt/virsh is needed, and things no longer stay relatively simple ...
 
-# 2026 changes to the way Gnome and KDE run non-native terminals has complicated process tracing,
-# in particular Gnome ....
+# 2026 changes to the way Gnome and KDE run have complicated process tracing,
+# in particular with Gnome where the replacement gnome-terminal 'ptyxis' is still finding its feet.
+# From ptyxis version 50.1 onwards we are seeing the WiP dust as somewhat settled but we are still
+# unable to boot with window size presets ...
+
+# Different terminals now use different process controls:
+# Ptyxis and Konsole will issue new shared (grand)parents for every window, and gnome now uses an intermediary 'ptyxis-agent'
+# whereas mate-terminal and qterminal will route all windows through the same parent ...
+
+# To resolve this 2026 dilemma, the instance checker has now been sharded off into its own script
+# and the idea of tagging each window/session start with a time based unique identifier has been introduced
+
+# Run once:
+
+qqX_SessionID="$(uuidgen -7)"
+qqX_SessionFile="/tmp/qqX_session_$qqX_SessionID"
+printf '#!/bin/bash' > "$qqX_SessionFile"
+chmod +x "$qqX_SessionFile"
+
+if [[ $ShowProcesses ]]; then
+  printf "\n\n General Script 'MULTI_INSTANCE_CHECKS' > "
+  printf "\n\n qqX_SessionID  %s" "$qqX_SessionID"
+  printf "\n\n\n    PRE find pid/ppid > pgrep -afi '/qqX' > \n\n"
+  pgrep -afi '/qqX'
+fi
+
+sleep 0.2
+MultiQuit= ; KillQQ= ; AnotherQQ=
+CurrentQQ_FullLine= ; CurrentQQ_LastField= ; CurrentQQ= ; CurrentQQ_Parent= ; CurrentQQ_GrandParent=
+CurrentQQ_GrandParentText= ; CurrentQQ_SharedGrandParent= ; CurrentQQ_SharedGrandParentText=
+
+CurrentQQ="$$"
+# shellcheck disable=SC2016
+{ printf "\n\nCurrentQQ=\"%s\"\n\n" "$CurrentQQ"
+printf 'while [[ $(ps --no-header -f "$CurrentQQ" 2>/dev/null) ]]; do sleep 1 ; done'
+printf "\n\n"
+} >> "$qqX_SessionFile" &
+wait "$!"
+# script autostops when parent finishes whilst the instance checker ignores scripts that are not running
+# and any unneeded tmp files will get dropped soon enough
+# set background ID process running:
+"$qqX_SessionFile" &
+
+CurrentQQ_FullLine="$(ps --no-header -f "$$")"
+if [[ "$CurrentQQ_FullLine" != *'/qqX' ]]; then
+  CurrentQQ_Input="$(awk '{print $NF}' <<< "$CurrentQQ_FullLine")"
+else CurrentQQ_Input=
+fi
+CurrentQQ_Parent="$(ps --no-header -fo ppid "$CurrentQQ" | tr -cd '[:digit:]')"
+CurrentQQ_Parent_FullLine="$(ps --no-header -f "$CurrentQQ_Parent")"
+CurrentQQ_GrandParent="$(ps --no-header -fo ppid "$CurrentQQ_Parent" | tr -cd '[:digit:]')"
+CurrentQQ_SharedGrandParent="$(ps --no-header -fo ppid "$CurrentQQ_GrandParent" | tr -cd '[:digit:]')"
+CurrentQQ_GrandParentText="$(ps -f --no-header "$CurrentQQ_Parent")"
+CurrentQQ_SharedGrandParentText="$(ps -f --no-header "$CurrentQQ_GrandParent")"
+
+# track any starts made via KDE dolphin as simple exits are not possible in these cases
+DolphinExitPid="$(pgrep -fa "$0" | grep -s konsole | grep -e '--hold' | awk '{print $1}' 2>/dev/null)"
+
+if [[ $ShowProcesses ]]; then
+  [[ $CurrentQQ ]] && printf "\n    CurrentQQ \$\$ = %s" "$CurrentQQ"
+  [[ $CurrentQQ_FullLine ]] && printf "\n\n    CurrentQQ_FullLine ps -f \$\$ '%s'" "$CurrentQQ_FullLine"
+  if [[ $CurrentQQ_Input ]]; then printf "\n\n    CurrentQQ_Input = %s" "$CurrentQQ_Input"
+  else  printf "\n\n    CurrentQQ_Input = no specific targets"
+  fi
+  [[ $UserTerm ]] && printf "\n\n    UserTerm = %s" "$UserTerm"
+  [[ $DolphinExitPid ]] && printf "\n\n    DolphinExitPid = %s" "$DolphinExitPid"
+  [[ $CurrentQQ_Parent_FullLine ]] && printf "\n\n    CurrentQQ_Parent_FullLine = %s" "$CurrentQQ_Parent_FullLine"
+  [[ $CurrentQQ_Parent ]] && printf "\n\n    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
+  [[ $CurrentQQ_GrandParent ]] && printf "    CurrentQQ_GrandParent = %s" "$CurrentQQ_GrandParent"
+  [[ $CurrentQQ_SharedGrandParent ]] && printf "    CurrentQQ_SharedGrandParent = %s \n\n" "$CurrentQQ_SharedGrandParent"
+  [[ $CurrentQQ_GrandParentText ]] && printf "    CurrentQQ_GrandParentText = '%s' \n\n" "$CurrentQQ_GrandParentText"
+  [[ $CurrentQQ_SharedGrandParentText ]] && printf "    CurrentQQ_SharedGrandParentText = '%s' \n\n" "$CurrentQQ_SharedGrandParentText"
+  printf "\n\n    POST find pid/ppid > pgrep -afi '/qqX' > \n\n"
+  pgrep -afi '/qqX'
+fi
+
+# Re-checkable:
 
 function multi_instance_checks {
 
   while true; do
-
-    if [[ $ShowProcesses ]]; then
-      printf "\n\n General Script 'MULTI_INSTANCE_CHECKS' > "
-      printf "\n\n\n    PRE find pid/ppid > pgrep -afi '/qqX' > \n\n"
-      pgrep -afi '/qqX'
-    fi
-
-    sleep 0.2
-    MultiQuit= ; KillQQ= ; AnotherQQ=
-    CurrentQQ_FullLine= ; CurrentQQ_LastField= ; CurrentQQ= ; CurrentQQ_Parent= ; CurrentQQ_GrandParent=
-    CurrentQQ_GrandParentText= ; CurrentQQ_SharedGrandParent= ; CurrentQQ_SharedGrandParentText=
-    CurrentQQ="$$"
-    CurrentQQ_FullLine="$(ps --no-header -f "$$")"
-    if [[ "$CurrentQQ_FullLine" != *'/qqX' ]]; then
-      CurrentQQ_Input="$(awk '{print $NF}' <<< "$CurrentQQ_FullLine")"
-    else CurrentQQ_Input=
-    fi
-    CurrentQQ_Parent="$(ps --no-header -fo ppid "$CurrentQQ" | tr -cd '[:digit:]')"
-    CurrentQQ_Parent_FullLine="$(ps --no-header -f "$CurrentQQ_Parent")"
-    CurrentQQ_GrandParent="$(ps --no-header -fo ppid "$CurrentQQ_Parent" | tr -cd '[:digit:]')"
-    CurrentQQ_SharedGrandParent="$(ps --no-header -fo ppid "$CurrentQQ_GrandParent" | tr -cd '[:digit:]')"
-    CurrentQQ_GrandParentText="$(ps -f --no-header "$CurrentQQ_Parent")"
-    CurrentQQ_SharedGrandParentText="$(ps -f --no-header "$CurrentQQ_GrandParent")"
-
-    DolphinExitPid="$(pgrep -fa "$0" | grep -s konsole | grep -e '--hold' | awk '{print $1}' 2>/dev/null)"
-
-    if [[ $ShowProcesses ]]; then
-      [[ $CurrentQQ ]] && printf "\n    CurrentQQ \$\$ = %s" "$CurrentQQ"
-      [[ $CurrentQQ_FullLine ]] && printf "\n\n    CurrentQQ_FullLine ps -f \$\$ '%s'" "$CurrentQQ_FullLine"
-      if [[ $CurrentQQ_Input ]]; then printf "\n\n    CurrentQQ_Input = %s" "$CurrentQQ_Input"
-      else  printf "\n\n    CurrentQQ_Input = no specific targets"
-      fi
-      [[ $UserTerm ]] && printf "\n\n    UserTerm = %s" "$UserTerm"
-      [[ $DolphinExitPid ]] && printf "\n\n    DolphinExitPid = %s" "$DolphinExitPid"
-      [[ $CurrentQQ_Parent_FullLine ]] && printf "\n\n    CurrentQQ_Parent_FullLine = %s" "$CurrentQQ_Parent_FullLine"
-      [[ $CurrentQQ_Parent ]] && printf "\n\n    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
-      [[ $CurrentQQ_GrandParent ]] && printf "    CurrentQQ_GrandParent = %s" "$CurrentQQ_GrandParent"
-      [[ $CurrentQQ_SharedGrandParent ]] && printf "    CurrentQQ_SharedGrandParent = %s \n\n" "$CurrentQQ_SharedGrandParent"
-      [[ $CurrentQQ_GrandParentText ]] && printf "    CurrentQQ_GrandParentText = '%s' \n\n" "$CurrentQQ_GrandParentText"
-      [[ $CurrentQQ_SharedGrandParentText ]] && printf "    CurrentQQ_SharedGrandParentText = '%s' \n\n" "$CurrentQQ_SharedGrandParentText"
-      printf "\n\n    POST find pid/ppid > pgrep -afi '/qqX' > \n\n"
-      pgrep -afi '/qqX'
-    fi
 
     # NOTE use 'ps' here as pgrep can cause problems  (plus ignore any root process history from installer or copy-over)
     # pgrep -an is not reliable and pgrep sub-shell creates another pid too ...
@@ -161,12 +193,17 @@ function multi_instance_checks {
 
       [[ $ShowProcesses ]] && printf "\n\n MULTI_INSTANCE_CHECKS > Messaging and Options > Current Process PID: %s\n\n" "$CurrentQQ"
 
-      qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running "
-      printf "\n"
-      printf "\n\n  If qqX upgrading or installing, it may be best to close > some desktop environments can keep an excess numbers of windows open"
-      printf "\n\n\n  If running VMs, QEMU will lock protect key files and will prevent things being run simultaneously"
+      qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running: "
+      printf "\n\n"
+      for Other in "${OtherQQ_MainArr[@]}"; do
+        OtherTxt="$(ps --no-header -fo pid,cmd "$Other")"
+        OtherTxt="${OtherTxt/'/tmp'/}"
+        printf "\n  %s \n" "$OtherTxt"
+      done
+      printf "\n\n  If running VMs, QEMU will lock protect key files and will prevent things being run simultaneously"
       printf "\n\n  but be aware that minor cross-linking problems can occur, even if simple multi-instance usage is still possible"
-      printf "\n\n\n  OR, this may just be a false alarm ..."
+      printf "\n\n\n  If qqX upgrading or installing, it may be best to close > some desktop environments can keep an excess numbers of windows open"
+      printf "\n\n  OR, this may just be a false alarm ..."
       printf "\n\n\n  [enter] to continue with all   [r] re-check   [k] kill other instances and continue with just this one "
       printColor "\n\n  [q] to quit \n\n"
       read -rp "  >  "   MultiQuit
@@ -208,7 +245,8 @@ function multi_instance_checks {
       read -rp " >  "
     fi
 
-    if [[ $MultiQuit == "r" ]]; then continue
+    if [[ $MultiQuit == "r" ]]; then
+      MultiQuit= ;  printf "\n\n  Re-Checking ...." ; sleep 0.8 ; tput clear ; sleep 0.3
     else break
     fi
 
