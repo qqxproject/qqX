@@ -791,12 +791,13 @@ if [[ ! $SkipMkLauncher ]]; then
       i=0 ; n=1
       while [[ "${TermChooseArr[i]}" ]]; do
         printf "\n\n  %s  %s" "$n" "${TermChooseArr[i]}"
-        [[ ${TermChooseArr[i]} == "alacritty" ]] && printf "  -  some distros may need a custom profile and .toml file"
+        [[ ${TermChooseArr[i]} == "alacritty" ]] && printf "  -  works well with Tiling WMs but some may need a custom profile and .toml file"
+        [[ ${TermChooseArr[i]} == "ptyxis" ]] && printf "  -  much improved at mid 2026 with ver 50.1 but may still need manual size setting"
         ((i+=1))
         ((n+=1))
       done
 
-      printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+      printf "\n\n  Recommended general installations, either as main or alternative, are 'mate-terminal' or 'qterminal'"
       printf "\n\n  which are both lightweight and Wayland/X11/multi-DE compatible. See help for more details."
 
       printf "\n\n\n  [enter] for %s  or  [number] of terminal to use   "  "$UserTerm"
@@ -815,7 +816,7 @@ if [[ ! $SkipMkLauncher ]]; then
 
           printf "\n\n\n  Flatpak terminals are currently problematic but problems with the new Gnome Terminal 'ptyxis'"
           printf "\n\n  do seem to be resolving, whilst for qqX purposes, alacritty works better in tiling window managers:"
-          printf "\n\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+          printf "\n\n\n  Recommended general installations, either as main or alternative, are 'mate-terminal' or 'qterminal'"
           printf "\n\n  which are both lightweight and Wayland/X11/multi-DE compatible."
           printf "\n\n\n  Systems are fine with more than one terminal installed and present ..."
           printf "\n"
@@ -895,7 +896,7 @@ if [[ ! $SkipMkLauncher ]]; then
         printf "\n\n  Although the new COSMIC terminal 'cosmic-term' is present on this system, it is currently problematic:"
       fi
 
-      printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+      printf "\n\n  Recommended general installations, either as main or alternative, are 'mate-terminal' or 'qterminal'"
       printf "\n  which are both lightweight and Wayland/X11/multi-DE compatible."
       printf "\n\n  Systems are fine with more than one terminal installed and present ..."
 
