@@ -31,6 +31,10 @@
 # To resolve this 2026 dilemma, the instance checker has now been sharded off into its own script
 # and the idea of tagging each window/session start with a time based unique identifier has been introduced
 
+# pgrep doesn't always do what it should, tend to use 'ps -ef | grep' as more reliable and more in depth:
+# shellcheck disable=SC2016,SC2009
+
+
 # Run once:
 
 qqX_SessionID="$(uuidgen -7)"
@@ -41,58 +45,79 @@ chmod +x "$qqX_SessionFile"
 if [[ $ShowProcesses ]]; then
   printf "\n\n General Script 'MULTI_INSTANCE_CHECKS' > "
   printf "\n\n qqX_SessionID  %s" "$qqX_SessionID"
-  printf "\n\n\n    PRE find pid/ppid > pgrep -afi '/qqX' > \n\n"
-  pgrep -afi '/qqX'
+  printf "\n\n\n" ; printf '    PRE find pid/ppid > ps -ef | grep /qqX >' ; printf " \n\n"
+  ps -ef | grep '/qqX' 2>/dev/null
 fi
 
 sleep 0.2
-MultiQuit= ; KillQQ= ; AnotherQQ=
+MultiQuit= ; KillQQ= ; AnotherQQ_Session_List= ; CurrentQQ_Terminal= ; qqX_Session_List=
 CurrentQQ_FullLine= ; CurrentQQ_LastField= ; CurrentQQ= ; CurrentQQ_Parent= ; CurrentQQ_GrandParent=
-CurrentQQ_GrandParentText= ; CurrentQQ_SharedGrandParent= ; CurrentQQ_SharedGrandParentText=
+CurrentQQ_GrandParent_FullLine= ; CurrentQQ_GreatGrandParent= ; CurrentQQ_GreatGrandParent_FullLine=
 
+# create autostop script that finishes when the main process stops,
+# only running scripts are detected, and the tmp files will get dropped soon enough
 CurrentQQ="$$"
-# shellcheck disable=SC2016
 { printf "\n\nCurrentQQ=\"%s\"\n\n" "$CurrentQQ"
 printf 'while [[ $(ps --no-header -f "$CurrentQQ" 2>/dev/null) ]]; do sleep 1 ; done'
 printf "\n\n"
 } >> "$qqX_SessionFile" &
 wait "$!"
-# script autostops when parent finishes whilst the instance checker ignores scripts that are not running
-# and any unneeded tmp files will get dropped soon enough
 # set background ID process running:
 "$qqX_SessionFile" &
 
-CurrentQQ_FullLine="$(ps --no-header -f "$$")"
+# determine the Current main process Parent PID's
+CurrentQQ_FullLine="$(ps --no-header -fo pid,ppid,cmd "$CurrentQQ")"
 if [[ "$CurrentQQ_FullLine" != *'/qqX' ]]; then
   CurrentQQ_Input="$(awk '{print $NF}' <<< "$CurrentQQ_FullLine")"
 else CurrentQQ_Input=
 fi
 CurrentQQ_Parent="$(ps --no-header -fo ppid "$CurrentQQ" | tr -cd '[:digit:]')"
-CurrentQQ_Parent_FullLine="$(ps --no-header -f "$CurrentQQ_Parent")"
+CurrentQQ_Parent_FullLine="$(ps --no-header -fo pid,ppid,cmd "$CurrentQQ_Parent")"
 CurrentQQ_GrandParent="$(ps --no-header -fo ppid "$CurrentQQ_Parent" | tr -cd '[:digit:]')"
-CurrentQQ_SharedGrandParent="$(ps --no-header -fo ppid "$CurrentQQ_GrandParent" | tr -cd '[:digit:]')"
-CurrentQQ_GrandParentText="$(ps -f --no-header "$CurrentQQ_Parent")"
-CurrentQQ_SharedGrandParentText="$(ps -f --no-header "$CurrentQQ_GrandParent")"
+CurrentQQ_GrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$CurrentQQ_GrandParent")"
+CurrentQQ_GreatGrandParent="$(ps --no-header -fo ppid "$CurrentQQ_GrandParent" | tr -cd '[:digit:]')"
+CurrentQQ_GreatGrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$CurrentQQ_GreatGrandParent")"
 
-# track any starts made via KDE dolphin as simple exits are not possible in these cases
-DolphinExitPid="$(pgrep -fa "$0" | grep -s konsole | grep -e '--hold' | awk '{print $1}' 2>/dev/null)"
+
+# Determine terminal window PID:
+# All scripts are run by bash, so has '/bash' as part of path in the full ps output,
+# and any terminal start that needs 'bash -c' as part of the cmd won't have the forward slash, theoretically ...
+# BUT as some terminals run everything from one root and others use one root per window,
+# we also need to do a match-up process later on too ...
+
+for QQ in "$CurrentQQ" "$CurrentQQ_Parent" "$CurrentQQ_GrandParent" "$CurrentQQ_GreatGrandParent" ; do
+  QQCheck="$(ps --no-header -f "$QQ")"
+  [[ "$QQCheck" != *'/bash'* ]] && [[ "$QQCheck" == *'/qqX'* ]] && CurrentQQ_Terminal="$QQ" && break
+done
+
+[[ $CurrentQQ_Terminal ]] && CurrentQQ_Terminal_FullLine="$(ps --no-header -fo pid,ppid,cmd "$CurrentQQ_Terminal")"
+
+# track any starts made via KDE dolphin as simple exits may not be possible in these cases
+if [[ "$CurrentQQ_Terminal_FullLine" == *'konsole'* ]] && [[ "$CurrentQQ_Terminal_FullLine" == *'--hold'* ]]; then
+  DolphinExitPid="$CurrentQQ_Terminal"
+else DolphinExitPid=
+fi
 
 if [[ $ShowProcesses ]]; then
-  [[ $CurrentQQ ]] && printf "\n    CurrentQQ \$\$ = %s" "$CurrentQQ"
-  [[ $CurrentQQ_FullLine ]] && printf "\n\n    CurrentQQ_FullLine ps -f \$\$ '%s'" "$CurrentQQ_FullLine"
+  printf "\n"
+  printf "    CurrentQQ \$\$ = %s" "$CurrentQQ"
+  printf "    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
+  printf "    CurrentQQ_GrandParent = %s" "$CurrentQQ_GrandParent"
+  printf "    CurrentQQ_GreatGrandParent = %s" "$CurrentQQ_GreatGrandParent"
+
+  printf "\n\n    CurrentQQ_FullLine = %s" "$CurrentQQ_FullLine"
+
   if [[ $CurrentQQ_Input ]]; then printf "\n\n    CurrentQQ_Input = %s" "$CurrentQQ_Input"
   else  printf "\n\n    CurrentQQ_Input = no specific targets"
   fi
-  [[ $UserTerm ]] && printf "\n\n    UserTerm = %s" "$UserTerm"
-  [[ $DolphinExitPid ]] && printf "\n\n    DolphinExitPid = %s" "$DolphinExitPid"
-  [[ $CurrentQQ_Parent_FullLine ]] && printf "\n\n    CurrentQQ_Parent_FullLine = %s" "$CurrentQQ_Parent_FullLine"
-  [[ $CurrentQQ_Parent ]] && printf "\n\n    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
-  [[ $CurrentQQ_GrandParent ]] && printf "    CurrentQQ_GrandParent = %s" "$CurrentQQ_GrandParent"
-  [[ $CurrentQQ_SharedGrandParent ]] && printf "    CurrentQQ_SharedGrandParent = %s \n\n" "$CurrentQQ_SharedGrandParent"
-  [[ $CurrentQQ_GrandParentText ]] && printf "    CurrentQQ_GrandParentText = '%s' \n\n" "$CurrentQQ_GrandParentText"
-  [[ $CurrentQQ_SharedGrandParentText ]] && printf "    CurrentQQ_SharedGrandParentText = '%s' \n\n" "$CurrentQQ_SharedGrandParentText"
-  printf "\n\n    POST find pid/ppid > pgrep -afi '/qqX' > \n\n"
-  pgrep -afi '/qqX'
+
+  printf "\n\n    CurrentQQ_Terminal = %s" "$CurrentQQ_Terminal"
+  printf "\n\n    CurrentQQ_Terminal_FullLine = %s" "$CurrentQQ_Terminal_FullLine"
+  printf "\n\n    UserTerm = %s" "$UserTerm"
+  printf "\n\n    DolphinExitPid = %s" "$DolphinExitPid"
+  printf "\n\n    CurrentQQ_Parent_FullLine = %s" "$CurrentQQ_Parent_FullLine"
+  printf "\n\n    CurrentQQ_GrandParent_FullLine = '%s'" "$CurrentQQ_GrandParent_FullLine"
+  printf "\n\n    CurrentQQ_GreatGrandParent_FullLine = '%s'" "$CurrentQQ_GreatGrandParent_FullLine"
 fi
 
 # Re-checkable:
@@ -103,10 +128,10 @@ function multi_instance_checks {
 
     # NOTE use 'ps' here as pgrep can cause problems  (plus ignore any root process history from installer or copy-over)
     # pgrep -an is not reliable and pgrep sub-shell creates another pid too ...
-
     # shellcheck disable=SC2009
-    AnotherQQ="$(ps -ef | grep -e '/qqx' -e '/qqX' | grep -e ^"$USER" | grep -v 'qqX_copy_over' | grep -v 'qqX/tags' | grep -v '_install' \
-    | grep -v -e 'code/code' | grep -v -e 'lib/fv' | grep -v qqxproject | grep -v grep  2>/dev/null)"
+
+    qqX_Session_List="$(ps -ef | grep -s qqX_session | grep -v grep)"
+    [[ $qqX_Session_List ]] && AnotherQQ_Session_List="$(grep -sv "$qqX_SessionID" <<< "$qqX_Session_List")"
 
     # If loading up the qcow menu, but then not choosing the qf option,
     # then the currrent qcow ceases to be a duplicate, and we need the VM selector interface, not the main selected one
@@ -126,76 +151,90 @@ function multi_instance_checks {
     # With pgrep -afi qqX_filemanage as: pid /bin/bash /usr/share/qqX/qqX.main/qqX_filemanage_qcow_drive --qqf
 
     if [[ $ShowProcesses ]]; then
-      echo; echo " AnotherQQ String List:"; [[ $AnotherQQ ]] && printf "\n%s" "$AnotherQQ"
-      printf "\n\n QF_exit_to_Main = %s \n\n" "$QF_exit_to_Main"
+      printf "\n\n\n qqX_Session_List:"; [[ $qqX_Session_List ]] && printf "\n%s" "$qqX_Session_List"
+      printf "\n\n AnotherQQ_Session_List:"; [[ $AnotherQQ_Session_List ]] && printf "\n%s" "$AnotherQQ_Session_List"
+      printf "\n\n\n QF_exit_to_Main = %s \n\n" "$QF_exit_to_Main"
     fi
 
-    # Starting Main via the .qcow2 route needs to counted too. And only 1 QF instance should exist.
-    # .qcow2 remains when 'exit to main' but changes to 'filemanage' when switching to QF
-    # Plus while elif [[ "$QQ" == *'.qcow2'* ]]; gets included in [[ "$QQ" != *'qqX_copy_over'* ]]
+    SharedTerminalRoot=
+    AnotherQQ_SessionArr=()
+    AnotherQQ_MainArr=()
 
-    CurrentQQ_mode="main"
-    if [[ ! $QF_exit_to_Main ]]; then
-      # qcow, in the sense of manage a qcow disk, not just use one trigger a main menu ...
-      case "$CurrentQQ_LastField" in
-        *'.qcow2'*|*'--qqf'*|*'qqX_filemanage '*) CurrentQQ_mode="qcow" ;;
-      esac
-    fi
+    if [[ $AnotherQQ_Session_List ]]; then
 
-  if [[ $AnotherQQ ]]; then
-      # NB: awk '{print $1}' for pgrep and awk '{print $2}' for ps
-      OtherQQ_MainArr=()
-      OtherQQ_qqF_Arr=()
-      mapfile -t AnotherQQ_Arr <<< "$AnotherQQ"
-      for QQ in "${AnotherQQ_Arr[@]}"; do
-        [[ "$QQ" == *"$CurrentQQ"* ]] && [[ "$QQ" == *"$CurrentQQ_Parent"* ]] && continue
-      [[ $ShowProcesses ]] && printf "\n Awk \$3 %s (process parent) matches Current process or Parents ++ ?? \n" "$(awk '{print $3}' <<< "$QQ")"
-        [[ $CurrentQQ ]] && [[ $(awk '{print $3}' <<< "$QQ") == "$CurrentQQ" ]] && continue
-        [[ $CurrentQQ_Parent ]] && [[ $(awk '{print $3}' <<< "$QQ") == "$CurrentQQ_Parent" ]] && continue
-        [[ $CurrentQQ_GrandParent ]] && [[ $(awk '{print $3}' <<< "$QQ") == "$CurrentQQ_GrandParent" ]] && continue
-        [[ $CurrentQQ_SharedGrandParent ]] && [[ $(awk '{print $3}' <<< "$QQ") == "$CurrentQQ_SharedGrandParent" ]] && continue
-        # check for empty transitional processes that are now closed
-        QQtempChkPID="$(awk '{print $2}' <<< "$QQ")"
-        QQtempChkResult="$(ps -f  --no-header "$QQtempChkPID" 2>/dev/null)"
-        [[ ! $QQtempChkResult ]] && QQtempChkResult="null" && continue
-        [[ $ShowProcesses ]] && printf "\n QQtempChk for %s is '%s' \n" "$QQtempChkPID" "$QQtempChkResult"
-        # remove obscure non-qqX specific
-        #[[ "$QQ" == *'/usr/'* ]] && [[ "$QQ" != *'/usr/share/qqX'* ]] && [[ "$QQ" != *'/usr/bin/qqX'* ]] && continue
-        [[ "$QQ" == *'qqX_copy_over'* ]] && continue
-        # remove qqX_filemanage_qcow, and keep tally for indicative dev output
-        if [[ "$QQ" == *'--qqf'* ]] || [[ "$QQ" == *'qqX_filemanage_qcow'* ]]; then
-          OtherQQ_qqF_Arr+=("$(awk '{print $2}' <<< "$QQ")")
+      mapfile -t AnotherQQ_SessionArr <<< "$AnotherQQ_Session_List"
+
+      for QQ in "${AnotherQQ_SessionArr[@]}"; do
+
+        # Find the session parent PID, which will be the main process, but not necessarily the window root
+        # The KillPointPID gets recorded in the AnotherQQ_MainArr and will depend on which terminal is being used
+
+        local SessionQQ="" SessionQQ_Parent="" SessionQQ_Parent_FullLine="" SessionQQ_GrandParent="" SessionQQ_GrandParent_FullLine=""
+        local SessionQQ_GreatGrandParent="" SessionQQ_GreatGrandParent_FullLine=""
+        SessionQQ="$(awk '{print $2}' <<< "$QQ")"
+        SessionQQ_Parent="$(awk '{print $3}' <<< "$QQ")"
+        SessionQQ_Parent_FullLine="$(ps --no-header -fo pid,ppid,cmd "$SessionQQ_Parent")"
+        SessionQQ_GrandParent="$(ps --no-header -fo ppid "$SessionQQ_Parent" | tr -cd '[:digit:]')"
+        SessionQQ_GrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$SessionQQ_GrandParent")"
+        SessionQQ_GreatGrandParent="$(ps --no-header -fo ppid "$SessionQQ_GrandParent" | tr -cd '[:digit:]')"
+        SessionQQ_GreatGrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$SessionQQ_GreatGrandParent")"
+
+        if [[ "$SessionQQ_Parent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_Parent_FullLine" == *'/qqX'* ]]; then
+          # don't risk killing system processes (check qqX is present ...)
+          if [[ $SessionQQ_Parent == "$CurrentQQ_Terminal" ]]; then
+            SharedTerminalRoot="$CurrentQQ_Terminal" ; AnotherQQ_MainArr+=("$SessionQQ")
+          else AnotherQQ_MainArr+=("$SessionQQ_Parent")
+          fi
+          [[ $ShowProcesses ]] && printf "\n\n  parent test %s %s" "$SessionQQ_Parent" "$CurrentQQ_Terminal"
+        elif [[ "$SessionQQ_GrandParent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_GrandParent_FullLine" == *'/qqX'* ]]; then
+          if [[ $SessionQQ_GrandParent == "$CurrentQQ_Terminal" ]]; then
+            SharedTerminalRoot="$CurrentQQ_Terminal" ; AnotherQQ_MainArr+=("$SessionQQ_Parent")
+          else AnotherQQ_MainArr+=("$SessionQQ_GrandParent")
+          fi
+          [[ $ShowProcesses ]] && printf "\n\n  grand parent test %s %s" "$SessionQQ_GrandParent" "$CurrentQQ_Terminal"
+        elif [[ "$SessionQQ_GreatGrandParent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_GreatGrandParent_FullLine" == *'/qqX'* ]]; then
+          if [[ $SessionQQ_GreatGrandParent == "$CurrentQQ_Terminal" ]];then
+            SharedTerminalRoot="$CurrentQQ_Terminal" ; AnotherQQ_MainArr+=("$SessionQQ_GrandParent")
+          else AnotherQQ_MainArr+=("$SessionQQ_GreatGrandParent")
+          fi
+          [[ $ShowProcesses ]] && printf "\n\n  great grand parent test %s %s" "$SessionQQ_GreatGrandParent" "$CurrentQQ_Terminal"
         else
-          # this should now be the count of other instances
-          # note, if qqf has been started as a child to a qqX main window, the qqf window will show as a second instance
-          # but the count will not include any 'qqX --qqf' separate command line starts
-          [[ $QF_exit_to_Main ]] && QF_exit_to_Main=
-          OtherQQ_MainArr+=("$(awk '{print $2}' <<< "$QQ")")
+          # make the best of a bad job (should stop processes but may leave windows open)
+          AnotherQQ_MainArr+=("$SessionQQ_Parent")
         fi
+
+        if [[ $ShowProcesses ]]; then
+          printf "\n\n    QQ loop item = %s" "$QQ"
+          printf "\n\n    SessionQQ = %s" "$SessionQQ"
+          printf "    SessionQQ_Parent = %s" "$SessionQQ_Parent"
+          printf "    SessionQQ_GrandParent = %s" "$SessionQQ_GrandParent"
+          printf "    SessionQQ_GreatGrandParent = %s" "$SessionQQ_GreatGrandParent"
+          printf "\n\n    SessionQQ_Parent = %s" "$SessionQQ_Parent_FullLine"
+          printf "\n\n    SessionQQ_GrandParent = %s" "$SessionQQ_GrandParent_FullLine"
+          printf "\n\n    SessionQQ_GreatGrandParent = %s" "$SessionQQ_GreatGrandParent_FullLine"
+          [[ $SharedTerminalRoot ]] && printf "\n\n\n    SharedTerminalRoot = %s \n\n" "$CurrentQQ_Terminal_FullLine"
+        fi
+
       done
+
       if [[ $ShowProcesses ]]; then
-        [[ $CurrentQQ ]] && printf "\n\n CurrentQQ = %s" "$CurrentQQ"
-        [[ $CurrentQQ_Parent ]] && printf "    CurrentQQ_Parent = %s" "$CurrentQQ_Parent"
-        [[ $CurrentQQ_GrandParent ]] && printf "    CurrentQQ_GrandParent = %s" "$CurrentQQ_GrandParent"
-        [[ $CurrentQQ_SharedGrandParent ]] && printf "    CurrentQQ_SharedGrandParent = %s" "$CurrentQQ_SharedGrandParent"
-        printf "\n\n\n RAW Array List  >\n\n"
-        declare -p AnotherQQ_Arr
+        printf "\n\n\n Session Array List  >"
+        [[ ${AnotherQQ_SessionArr[0]} ]] && printf "\n\n" && declare -p AnotherQQ_SessionArr
         printf "\n\n Distilled Array (Trigger) List  >   "
-        declare -p OtherQQ_MainArr
-        printf "\n\n QF Array List  >   "
-        declare -p OtherQQ_qqF_Arr; echo
-        echo; echo " CurrentQQ_mode= $CurrentQQ_mode"; echo
+        [[ ${AnotherQQ_MainArr[0]} ]] && declare -p AnotherQQ_MainArr
+        printf "\n\n"
         read -rp " >  "
       fi
     fi
 
-    if [[ $CurrentQQ_mode == "main" ]] && [[ "${#OtherQQ_MainArr[@]}" -ge 1 ]]; then
+    if [[ "${#AnotherQQ_MainArr[@]}" -ge 1 ]]; then
 
       [[ $ShowProcesses ]] && printf "\n\n MULTI_INSTANCE_CHECKS > Messaging and Options > Current Process PID: %s\n\n" "$CurrentQQ"
 
       qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running: "
       printf "\n\n"
-      for Other in "${OtherQQ_MainArr[@]}"; do
+      printf "\n\n  Current Session is  %s \n\n  Other Sessions: \n\n" "$qqX_SessionID"
+      for Other in "${AnotherQQ_MainArr[@]}"; do
         OtherTxt="$(ps --no-header -fo pid,cmd "$Other")"
         OtherTxt="${OtherTxt/'/tmp'/}"
         printf "\n  %s \n" "$OtherTxt"
@@ -220,9 +259,9 @@ function multi_instance_checks {
         printf "\n\n  [k] yes, kill   [enter] continue with all   [q] to quit \n\n"
         read -rp "  >  "  KillQQ
         if [[ $KillQQ == "k" ]]; then
-          for QQ in "${OtherQQ_MainArr[@]}"; do
+          for QQ in "${AnotherQQ_MainArr[@]}"; do
             KillTarget="$(tr -cd '[:digit:]' <<< "$QQ"  2>/dev/null)"
-            [[ $ShowProcesses ]] && printf "\n QQ = %  > killing: %s" "$QQ" "$KillTarget"
+            [[ $ShowProcesses ]] && printf "\n QQ = %s  > killing: %s" "$QQ" "$KillTarget"
             [[ $KillTarget ]] &&  kill "$KillTarget" 2>/dev/null
           done
           printColor "\n\n  Closed  \n\n" ; sleep 0.7
@@ -232,21 +271,18 @@ function multi_instance_checks {
 
     fi
 
-    if [[ $ShowProcesses ]]; then
-      echo; echo "End of function 'MULTI_INSTANCE_CHECKS' > "
-      printf "\n\n\n RAW Array List  >\n\n"
-      declare -p AnotherQQ_Arr
+    if [[ $ShowProcesses ]] && [[ $MultiQuit != "r" ]]; then
+      printf "\n\n End of function 'MULTI_INSTANCE_CHECKS' > "
+      printf "\n\n\n Session Array List  >"
+      [[ ${AnotherQQ_SessionArr[0]} ]] && printf "\n\n" && declare -p AnotherQQ_SessionArr
       printf "\n\n Distilled Array (Trigger) List  >   "
-      declare -p OtherQQ_MainArr
-      printf "\n\n QF Array List  >   "
-      declare -p OtherQQ_qqF_Arr; echo
-      printf "\n\n  CurrentQQ = %s" "$CurrentQQ"
-      printf "    CurrentQQ_mode = %s\n\n" "$CurrentQQ_mode"
+      [[ ${AnotherQQ_MainArr[0]} ]] && declare -p AnotherQQ_MainArr
+      printf "\n\n"
       read -rp " >  "
     fi
 
     if [[ $MultiQuit == "r" ]]; then
-      MultiQuit= ;  printf "\n\n  Re-Checking ...." ; sleep 0.8 ; tput clear ; sleep 0.3
+      MultiQuit= ;  printf "\n\n  Re-Checking .... \n\n" ; sleep 1.5 ; tput clear ; sleep 0.3
     else break
     fi
 
