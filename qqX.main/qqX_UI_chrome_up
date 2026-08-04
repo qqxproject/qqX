@@ -120,7 +120,7 @@ function exit {
   if [[ $1 == "directly" ]]; then
     printf "\n  Stopping current qqX process .... \n\n"
     sleep 1.4 ; tput cnorm ; tput clear
-    [[ $DolphinExitPid ]] && kill "$DolphinExitPid"
+    [[ $CurrentQQ_Terminal ]] && kill -15 "$CurrentQQ_Terminal"
     command exit
 
   elif [[ $1 ]] && [[ ! $NoExit ]]; then
@@ -137,7 +137,7 @@ function exit {
     if [[ $ExitTrap == "q" ]]; then
       printf "  Stopping current qqX process .... \n\n"
       sleep 1.4 ; tput cnorm ; tput clear
-      [[ $DolphinExitPid ]] && kill "$DolphinExitPid"
+      [[ $CurrentQQ_Terminal ]] && kill -15 "$CurrentQQ_Terminal"
       command exit "$@"
     # 'm' attempts a return, given an error situation exists
     elif [[ $ExitTrap == "c" ]]; then true

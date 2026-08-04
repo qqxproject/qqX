@@ -41,15 +41,8 @@ qqX_SessionID="$(uuidgen -7)"
 qqX_SessionFile="/tmp/qqX_session_$qqX_SessionID"
 printf '#!/bin/bash' > "$qqX_SessionFile"
 chmod +x "$qqX_SessionFile"
-
-if [[ $ShowProcesses ]]; then
-  printf "\n\n General Script 'MULTI_INSTANCE_CHECKS' > "
-  printf "\n\n qqX_SessionID  %s" "$qqX_SessionID"
-  printf "\n\n\n" ; printf '    PRE find pid/ppid > ps -ef | grep /qqX >' ; printf " \n\n"
-  ps -ef | grep '/qqX' 2>/dev/null
-fi
-
 sleep 0.2
+
 MultiQuit= ; KillQQ= ; AnotherQQ_Session_List= ; CurrentQQ_Terminal= ; qqX_Session_List=
 CurrentQQ_FullLine= ; CurrentQQ_LastField= ; CurrentQQ= ; CurrentQQ_Parent= ; CurrentQQ_GrandParent=
 CurrentQQ_GrandParent_FullLine= ; CurrentQQ_GreatGrandParent= ; CurrentQQ_GreatGrandParent_FullLine=
@@ -64,6 +57,14 @@ printf "\n\n"
 wait "$!"
 # set background ID process running:
 "$qqX_SessionFile" &
+sleep 0.2
+
+if [[ $ShowProcesses ]]; then
+  printf "\n\n General Script 'multi_instance_checks' - RUN ONCE - Current Session: "
+  printf "\n\n qqX_SessionID  %s" "$qqX_SessionID"
+  printf "\n\n\n" ; printf '    PRE find pid/ppid > ps -ef | grep -i /qqX >' ; printf " \n\n"
+  ps -eo pid,ppid,cmd | grep -i '/qqX'
+fi
 
 # determine the Current main process Parent PID's
 CurrentQQ_FullLine="$(ps --no-header -fo pid,ppid,cmd "$CurrentQQ")"
@@ -74,10 +75,10 @@ fi
 CurrentQQ_Parent="$(ps --no-header -fo ppid "$CurrentQQ" | tr -cd '[:digit:]')"
 CurrentQQ_Parent_FullLine="$(ps --no-header -fo pid,ppid,cmd "$CurrentQQ_Parent")"
 CurrentQQ_GrandParent="$(ps --no-header -fo ppid "$CurrentQQ_Parent" | tr -cd '[:digit:]')"
-CurrentQQ_GrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$CurrentQQ_GrandParent")"
+CurrentQQ_GrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$CurrentQQ_GrandParent" 2>/dev/null)"
 CurrentQQ_GreatGrandParent="$(ps --no-header -fo ppid "$CurrentQQ_GrandParent" | tr -cd '[:digit:]')"
-CurrentQQ_GreatGrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$CurrentQQ_GreatGrandParent")"
-
+# some distros don't like checks on root activity and may throw errors here, so 2>/dev/null
+CurrentQQ_GreatGrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$CurrentQQ_GreatGrandParent" 2>/dev/null)"
 
 # Determine terminal window PID:
 # All scripts are run by bash, so has '/bash' as part of path in the full ps output,
@@ -85,18 +86,18 @@ CurrentQQ_GreatGrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$Cu
 # BUT as some terminals run everything from one root and others use one root per window,
 # we also need to do a match-up process later on too ...
 
-for QQ in "$CurrentQQ" "$CurrentQQ_Parent" "$CurrentQQ_GrandParent" "$CurrentQQ_GreatGrandParent" ; do
+if [[ $CurrentQQ_GreatGrandParent == "1" ]]; then QQCheckList="$CurrentQQ $CurrentQQ_Parent $CurrentQQ_GrandParent"
+else QQCheckList="$CurrentQQ $CurrentQQ_Parent $CurrentQQ_GrandParent $CurrentQQ_GreatGrandParent"
+fi
+
+for QQ in $QQCheckList ; do
   QQCheck="$(ps --no-header -f "$QQ")"
-  [[ "$QQCheck" != *'/bash'* ]] && [[ "$QQCheck" == *'/qqX'* ]] && CurrentQQ_Terminal="$QQ" && break
+  if [[ "$QQCheck" != *'/bash'* ]] && [[ "$QQCheck" == *@('/qqx'|'/qqX')* ]]; then
+    CurrentQQ_Terminal="$QQ" && break
+  fi
 done
 
 [[ $CurrentQQ_Terminal ]] && CurrentQQ_Terminal_FullLine="$(ps --no-header -fo pid,ppid,cmd "$CurrentQQ_Terminal")"
-
-# track any starts made via KDE dolphin as simple exits may not be possible in these cases
-if [[ "$CurrentQQ_Terminal_FullLine" == *'konsole'* ]] && [[ "$CurrentQQ_Terminal_FullLine" == *'--hold'* ]]; then
-  DolphinExitPid="$CurrentQQ_Terminal"
-else DolphinExitPid=
-fi
 
 if [[ $ShowProcesses ]]; then
   printf "\n"
@@ -114,7 +115,6 @@ if [[ $ShowProcesses ]]; then
   printf "\n\n    CurrentQQ_Terminal = %s" "$CurrentQQ_Terminal"
   printf "\n\n    CurrentQQ_Terminal_FullLine = %s" "$CurrentQQ_Terminal_FullLine"
   printf "\n\n    UserTerm = %s" "$UserTerm"
-  printf "\n\n    DolphinExitPid = %s" "$DolphinExitPid"
   printf "\n\n    CurrentQQ_Parent_FullLine = %s" "$CurrentQQ_Parent_FullLine"
   printf "\n\n    CurrentQQ_GrandParent_FullLine = '%s'" "$CurrentQQ_GrandParent_FullLine"
   printf "\n\n    CurrentQQ_GreatGrandParent_FullLine = '%s'" "$CurrentQQ_GreatGrandParent_FullLine"
@@ -151,6 +151,7 @@ function multi_instance_checks {
     # With pgrep -afi qqX_filemanage as: pid /bin/bash /usr/share/qqX/qqX.main/qqX_filemanage_qcow_drive --qqf
 
     if [[ $ShowProcesses ]]; then
+      printf "\n\n\n Function 'MULTI_INSTANCE_CHECKS' Session Checker "
       printf "\n\n\n qqX_Session_List:"; [[ $qqX_Session_List ]] && printf "\n%s" "$qqX_Session_List"
       printf "\n\n AnotherQQ_Session_List:"; [[ $AnotherQQ_Session_List ]] && printf "\n%s" "$AnotherQQ_Session_List"
       printf "\n\n\n QF_exit_to_Main = %s \n\n" "$QF_exit_to_Main"
@@ -179,20 +180,20 @@ function multi_instance_checks {
         SessionQQ_GreatGrandParent="$(ps --no-header -fo ppid "$SessionQQ_GrandParent" | tr -cd '[:digit:]')"
         SessionQQ_GreatGrandParent_FullLine="$(ps --no-header -fo user,pid,ppid,cmd "$SessionQQ_GreatGrandParent")"
 
-        if [[ "$SessionQQ_Parent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_Parent_FullLine" == *'/qqX'* ]]; then
+        if [[ "$SessionQQ_Parent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_Parent_FullLine" == *@('/qqx'|'/qqX')* ]]; then
           # don't risk killing system processes (check qqX is present ...)
           if [[ $SessionQQ_Parent == "$CurrentQQ_Terminal" ]]; then
             SharedTerminalRoot="$CurrentQQ_Terminal" ; AnotherQQ_MainArr+=("$SessionQQ")
           else AnotherQQ_MainArr+=("$SessionQQ_Parent")
           fi
           [[ $ShowProcesses ]] && printf "\n\n  parent test %s %s" "$SessionQQ_Parent" "$CurrentQQ_Terminal"
-        elif [[ "$SessionQQ_GrandParent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_GrandParent_FullLine" == *'/qqX'* ]]; then
+        elif [[ "$SessionQQ_GrandParent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_GrandParent_FullLine" == *@('/qqx'|'/qqX')* ]]; then
           if [[ $SessionQQ_GrandParent == "$CurrentQQ_Terminal" ]]; then
             SharedTerminalRoot="$CurrentQQ_Terminal" ; AnotherQQ_MainArr+=("$SessionQQ_Parent")
           else AnotherQQ_MainArr+=("$SessionQQ_GrandParent")
           fi
           [[ $ShowProcesses ]] && printf "\n\n  grand parent test %s %s" "$SessionQQ_GrandParent" "$CurrentQQ_Terminal"
-        elif [[ "$SessionQQ_GreatGrandParent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_GreatGrandParent_FullLine" == *'/qqX'* ]]; then
+        elif [[ "$SessionQQ_GreatGrandParent_FullLine" != *'/bash'* ]] && [[ "$SessionQQ_GreatGrandParent_FullLine" == *@('/qqx'|'/qqX')* ]]; then
           if [[ $SessionQQ_GreatGrandParent == "$CurrentQQ_Terminal" ]];then
             SharedTerminalRoot="$CurrentQQ_Terminal" ; AnotherQQ_MainArr+=("$SessionQQ_GrandParent")
           else AnotherQQ_MainArr+=("$SessionQQ_GreatGrandParent")
@@ -218,13 +219,18 @@ function multi_instance_checks {
       done
 
       if [[ $ShowProcesses ]]; then
-        printf "\n\n\n Session Array List  >"
-        [[ ${AnotherQQ_SessionArr[0]} ]] && printf "\n\n" && declare -p AnotherQQ_SessionArr
-        printf "\n\n Distilled Array (Trigger) List  >   "
-        [[ ${AnotherQQ_MainArr[0]} ]] && declare -p AnotherQQ_MainArr
+        printf "\n\n\n OTHER Session PID Array:"
+        if [[ ${AnotherQQ_SessionArr[0]} ]]; then printf "\n\n" ; declare -p AnotherQQ_SessionArr
+        else printf "  NONE"
+        fi
+        printf "\n\n OTHER Terminal PID Array:"
+        if [[ ${AnotherQQ_MainArr[0]} ]]; then printf "\n\n" ; declare -p AnotherQQ_MainArr
+        else printf "  NONE"
+        fi
         printf "\n\n"
         read -rp " >  "
       fi
+
     fi
 
     if [[ "${#AnotherQQ_MainArr[@]}" -ge 1 ]]; then
@@ -262,7 +268,7 @@ function multi_instance_checks {
           for QQ in "${AnotherQQ_MainArr[@]}"; do
             KillTarget="$(tr -cd '[:digit:]' <<< "$QQ"  2>/dev/null)"
             [[ $ShowProcesses ]] && printf "\n QQ = %s  > killing: %s" "$QQ" "$KillTarget"
-            [[ $KillTarget ]] &&  kill "$KillTarget" 2>/dev/null
+            [[ $KillTarget ]] &&  kill -15 "$KillTarget" 2>/dev/null
           done
           printColor "\n\n  Closed  \n\n" ; sleep 0.7
         elif [[ $KillQQ == "q" ]]; then exit directly
@@ -272,11 +278,15 @@ function multi_instance_checks {
     fi
 
     if [[ $ShowProcesses ]] && [[ $MultiQuit != "r" ]]; then
-      printf "\n\n End of function 'MULTI_INSTANCE_CHECKS' > "
-      printf "\n\n\n Session Array List  >"
-      [[ ${AnotherQQ_SessionArr[0]} ]] && printf "\n\n" && declare -p AnotherQQ_SessionArr
-      printf "\n\n Distilled Array (Trigger) List  >   "
-      [[ ${AnotherQQ_MainArr[0]} ]] && declare -p AnotherQQ_MainArr
+      printf "\n\n Function 'MULTI_INSTANCE_CHECKS' "
+      printf "\n\n\n OTHER Session PID Array:"
+      if [[ ${AnotherQQ_SessionArr[0]} ]]; then printf "\n\n" ; declare -p AnotherQQ_SessionArr
+      else printf "  NONE"
+      fi
+      printf "\n\n OTHER Terminal PID Array:"
+      if [[ ${AnotherQQ_MainArr[0]} ]]; then printf "\n\n" ; declare -p AnotherQQ_MainArr
+      else printf "  NONE"
+      fi
       printf "\n\n"
       read -rp " >  "
     fi
