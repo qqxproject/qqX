@@ -19,7 +19,13 @@
 # This script is then CALLED using the flag 'Initial_Input' when input is present by the qqX main script
 # AFTER all the other scripts, files and functions have been sourced but BEFORE starting the qqX main loop.
 
-if [[ $Trace_InputVars ]]; then  echo; echo "pwd $(pwd)"; echo ; echo "1 $Initial_Input" ; sleep "$Trace_InputVars" ; fi
+QF_exit_to_Main= ; QF_exit_to_VM_Selector=
+
+if [[ $Trace_InputVars ]]; then
+  echo; echo "pwd $(pwd)"; echo ; echo "1 $Initial_Input"
+  echo; echo "QF_exit_to_Main $QF_exit_to_Main   QF_exit_to_VM_Selector $QF_exit_to_VM_Selector"
+  sleep "$Trace_InputVars"
+fi
 
 if [[ $XDG_MimeType_is_QCOW ]]; then
   # should have changed to the right directory at this point (also see initialze script for .conf checks)
@@ -193,6 +199,7 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
         VM_InstanceName=
         VM_Conf_Dir=
         VM_Conf_File=
+        QF_exit_to_VM_Selector=1
         printf "\n\n  Loading ... \n\n"
         break
       else
@@ -205,6 +212,7 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
             VM_InstanceName=
             VM_Conf_Dir=
             VM_Conf_File=
+            QF_exit_to_VM_Selector=1
             printf "\n\n  Loading ... \n\n"
             break
           else sleep 0.5 ; exit directly
@@ -220,6 +228,11 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
 
 fi
 
+if [[ $Trace_InputVars ]]; then
+  echo; echo "pwd $(pwd)"; echo ; echo "2 $Initial_Input"
+  echo; echo "QF_exit_to_Main $QF_exit_to_Main   QF_exit_to_VM_Selector $QF_exit_to_VM_Selector"
+  sleep "$Trace_InputVars"
+fi
 
 if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]; then
   refresh_sources_and_load_VM_arrays
@@ -247,6 +260,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
       VM_Conf_Dir=
       VM_Conf_File=
       XDG_MimeType_is_QCOW=
+      QF_exit_to_VM_Selector=1
       break
     else
       printColor "\n\n  Please give a short VM name for the folder."
@@ -255,7 +269,7 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
       printf "\n\n  [vm] switch to qqX VM selector menu   [c] cancel & close \n\n"
       read -rp "  >  "  ISO_NewVM_Name
       [[ ! $ISO_NewVM_Name ]] && ISO_NewVM_Name="$(basename "$XDG_ISO_Name" .iso)"
-      [[ $ISO_NewVM_Name == "vm" ]] && break
+      [[ $ISO_NewVM_Name == "vm" ]] && QF_exit_to_VM_Selector=1 && break
       [[ $ISO_NewVM_Name == "c" ]] && sleep 0.5 && exit directly
     fi
 
@@ -383,10 +397,19 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
 
 fi
 
+if [[ $Trace_InputVars ]]; then
+  echo; echo "pwd $(pwd)"; echo ; echo "3 $Initial_Input"
+  echo; echo "QF_exit_to_Main $QF_exit_to_Main   QF_exit_to_VM_Selector $QF_exit_to_VM_Selector"
+  sleep "$Trace_InputVars"
+fi
 
-if [[ -e "$VM_Conf_Dir/$VM_Conf_File" ]] && [[ $XDG_Input_VM_qqX ]]; then
-  cd "$VM_Conf_Dir" || printColor "\n\n  ERROR changing to New VM Location"
+if [[ $QF_exit_to_VM_Selector ]]; then
+  cd "$Default_VM_Folder" || printColor "\n\n  ERROR changing to Default_VM_Folder"
   Current_VM_Folder="$Default_VM_Folder"
+  refresh_sources_and_load_VM_arrays
+elif [[ -e "$VM_Conf_Dir/$VM_Conf_File" ]] && [[ $XDG_Input_VM_qqX ]]; then
+  cd "$VM_Conf_Dir" || printColor "\n\n  ERROR changing to New VM Location"
+  Current_VM_Folder="$VM_Conf_Dir"
   [[ $VM_Conf_File ]] && check_conf_file_for_typos "$VM_Conf_File" && source "$VM_Conf_File"
   read_main_drive_and_img_iso_conf_vars
 else
