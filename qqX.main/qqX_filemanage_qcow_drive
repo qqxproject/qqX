@@ -101,8 +101,8 @@ while [[ ${ChkPID_Arr[i]} ]] ; do
     ChkParentPID="$(ps --no-header -fo ppid "$ChkPID" | tr -cd '[:digit:]')"
     if [[ $Trace_InputVars ]]; then echo "ChkPID = $ChkPID   ChkParentPID =  $ChkParentPID   ParentPID = $ParentPID" ; echo
     fi
-    kill "$ChkPID" 2>/dev/null
-    [[ $ChkParentPID != "$ParentPID" ]] && kill "$ChkParentPID" 2>/dev/null
+    kill -15 "$ChkPID" 2>/dev/null
+    [[ $ChkParentPID != "$ParentPID" ]] && kill -15 "$ChkParentPID" 2>/dev/null
   fi
 done
 
