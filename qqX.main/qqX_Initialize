@@ -199,7 +199,6 @@ if [[ $InputFilePath ]] && [[ -e "$InputFilePath" ]]; then
       printf "\nXDG_MimeType_is_QCOW: \n\n"
       echo "In D $QCOW_Input_Dir  Conf D $QCOW_Input_Conf_Dir"
       echo "VDN  $QCOW_Input_VM_Dir_Name  N  $QCOW_Input_DiskName "
-      echo "VDN  $QCOW_Input_VM_Dir_Name  N  $QCOW_Input_DiskName "
       echo "VM_qqX = $XDG_Input_VM_qqX  NON_qqX = $XDG_Input_NON_qqX "
       echo "pwd  $(pwd)"
       echo; sleep "$Trace_InputVars"

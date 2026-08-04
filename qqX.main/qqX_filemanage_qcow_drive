@@ -271,6 +271,9 @@ while true; do
 
   printColor "\n\n  Selected = %s " "$TargetName"
 
+  # QF is a separate process so checking drives needs its own 'check_disk_is_okay' routine here too,
+  # but would have been pre-checked before calling this, so ...  REVIEW
+
   if [[ $TargetName != All* ]]; then
    if [[ $TargetAvailable ]]; then printf " '%s'"  "$TargetDrive" ; else printf "  UNAVAILABLE or NOT LINKED to this VM" ; fi
   fi

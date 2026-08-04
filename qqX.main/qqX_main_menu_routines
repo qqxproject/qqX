@@ -230,6 +230,8 @@ check_disk_is_okay () {
     esac
   fi
 
+  [[ $Trace_InputVars ]] && printf "\n\n  Check Disk Is Okay:\n\n  %s\n\n Status: %s\n\n" "$Selected_ChkDrive" "$DiskChkStatus"
+
   if [[ $RunSnapChk ]] && [[ $DiskChkStatus == "Okay" ]]; then
     # at least one recent snap should be present (if disk is of sufficient size)
     local NoSnapsYet=

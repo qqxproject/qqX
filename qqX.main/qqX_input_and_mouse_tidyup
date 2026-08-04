@@ -87,15 +87,13 @@ fi
 
 if [[ $XDG_MimeType_is_QCOW ]]; then
 
-  if ps -ef | grep -q nbd0 ; then  DiskChkStatus="Okay"  # as has already been checked, and where nbd0 is reserved for spot input drives
-  else
-    check_disk_is_okay "$QCOW_Input_Dir"  "$QCOW_Input_DiskName"
-  fi
+  check_disk_is_okay "$QCOW_Input_Dir"  "$QCOW_Input_DiskName"
+
   if [[ $DiskChkStatus ]] && [[ $DiskChkStatus != "Okay" ]]; then printColor "\n\n DISK.QCOW2 ERROR  %s \n"  "$DiskChkStatus"
   fi
 
   if ps -ef | grep nbd | grep -q qcow ; then
-    printColor  "\n\n  QEMU qcow2 drive/s ARE ALREADY CONNECTED and may create 'write locks'"
+    printColor  "\n\n  Caution QEMU qcow2 drive/s MAY already BE CONNECTED and may create 'write locks'"
     printf "\n\n  May be left connected, or to disconnect use the 'qf' utility \n"
   fi
 
