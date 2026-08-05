@@ -722,6 +722,18 @@ if [[ -e  "$XDG_GUI_desktop_PathName" ]] ; then
 
   printColor "\n\n  A desktop launcher already exists >> "
 
+  if grep -qs Exec "$XDG_GUI_desktop_Folder/qqX.desktop"; then
+    CurrentTerm="$(grep Exec "$XDG_GUI_desktop_Folder/qqX.desktop" | cut -d' ' -f1 | cut -d= -f2  2>/dev/null)"
+    if [[ $CurrentTerm ]]; then
+      printf "\n\n  The current qqX launcher is using '%s'" "$CurrentTerm"
+      if [[ $CurrentTerm == "gnome-terminal" ]] && ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry ; then
+        printf "\n\n  however some distros are aliasing 'gnome-terminal' as a call to kgx / gnome console"
+        printf "\n\n  whilst newer moving ones are switching to using 'ptyxis' which is the new replacement"
+        printf "\n\n  From Gnome 50 onwards select ptyxis, for older versions either select 'kgx' or install the non-aliased version"
+      fi
+    fi
+  fi
+
   ForceReconfigure=
   if ! grep -qs 'x-cd-image' "$XDG_GUI_desktop_PathName" ; then ForceReconfigure=1
   fi
@@ -754,17 +766,6 @@ if [[ ! $SkipMkLauncher ]]; then
     # $UserTerm and $CustomTerminalProfile, if present
     if grep -sq 'UserTerm' "$HOME/.qqX/qqX_term.conf"; then
       printColor "\n\n  Terminal Emulator '%s' has been found in the qqX config files ..." "$UserTerm"
-    fi
-  fi
-
-  if grep -qs Exec "$XDG_GUI_desktop_Folder/qqX.desktop"; then
-    CurrentTerm="$(grep Exec "$XDG_GUI_desktop_Folder/qqX.desktop" | cut -d' ' -f1 | cut -d= -f2  2>/dev/null)"
-    if [[ $CurrentTerm ]]; then
-      printf "\n\n  The current qqX launcher is using '%s'" "$CurrentTerm"
-      if [[ $CurrentTerm == "gnome-terminal" ]] && ! gnome-terminal --help-window-options 2>/dev/null | grep -qs geometry ; then
-        printf "\n\n  however some distros are aliasing 'gnome-terminal' as a call to kgx / gnome console"
-        printf "\n\n  CAUTION:  either select 'kgx' or install the non-aliased version"
-      fi
     fi
   fi
 
