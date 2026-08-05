@@ -264,15 +264,15 @@ function show_qqX_general_help {
 
     elif [[ $HelpSelect == "f" ]]; then
       printf "\n  Hot-Swappable from all main menus:  [FS] FreeSpirit  [FB] FreeBird  [HB]  [Cust]  [Dev] \n\n"
-      grep -m 1 -A 100  'named as follows' "$qqX_SettingsFile" | grep -m 1 -B 100 '# FreeBird or FreeSpirit are recommended'| tr '#' ' '
+      grep -m 1 -A 100  'named as follows' "$qqX_SettingsFile" | grep -m 1 -B 100 '# qqX remains fully compatibile'| tr '#' ' '
 
       printf "\n  HotSwaps should be problem free and full reboot not required."
 
       if [[ -e "$Default_VM_Folder/qqX.custom/QE.Custom/quickemu" ]]; then
-        printf "\n\n  Custom =   Default_VM_Folder > qqX.custom  > %s " "$("$Default_VM_Folder/qqX.custom/QE.Custom/quickemu" --version)"
+        printf "\n\n  Custom =   Default_VM_Folder > qqX.custom  %s " "$("$Default_VM_Folder/qqX.custom/QE.Custom/quickemu" --version | grep -sv ERROR)"
       fi
       if [[ -e "$QE_DevPath/quickemu" ]]; then
-        printf "\n\n  Dev =   %s  > %s " "$QE_DevPath"  "$("$QE_DevPath/quickemu" --version)"
+        printf "\n\n  Dev =   %s  %s " "$QE_DevPath"  "$("$QE_DevPath/quickemu" --version | grep -sv ERROR)"
       fi
 
       printf "\n\n  [enter] to return \n\n"
