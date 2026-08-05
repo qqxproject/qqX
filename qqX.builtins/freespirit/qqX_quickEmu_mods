@@ -44,7 +44,7 @@
 
 ##########################################
 
-QE_ModsNumber="v2.2"  # For 4.99 @ jan to mar 2026
+QE_ModsNumber="v2.3"  # For 4.99.01 @ aug 2026
 
 if [[ $PathDiagnostics ]]; then
 printColor "\n\n  Start of Mod's script %s'" "$QE_ModsNumber"

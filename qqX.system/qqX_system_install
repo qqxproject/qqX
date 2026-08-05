@@ -792,7 +792,7 @@ if [[ ! $SkipMkLauncher ]]; then
       i=0 ; n=1
       while [[ "${TermChooseArr[i]}" ]]; do
         printf "\n\n  %s  %s" "$n" "${TermChooseArr[i]}"
-        [[ ${TermChooseArr[i]} == "alacritty" ]] && printf "  -  works well with Tiling WMs but some may need a custom profile and .toml file"
+        [[ ${TermChooseArr[i]} == "alacritty" ]] && printf "  -  works well with Tiling WMs but some standard desktops may need a custom profile and .toml file"
         [[ ${TermChooseArr[i]} == "ptyxis" ]] && printf "  -  much improved at mid 2026 with ver 50.1 but may still need manual size setting"
         ((i+=1))
         ((n+=1))

@@ -56,7 +56,7 @@
 
 ##########################################
 
-QG_ModsNumber="v7.0"
+QG_ModsNumber="v7.2"  #  for quickGet 4.99.01 at aug 2026
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -93,7 +93,7 @@ osGamingList+=" popos sparkylinux "
 osGamingList="${osGamingList//'  '/' '}"
 osGamingList="${osGamingList//'  '/' '}"
 
-osUsbList=" alpine freedos kolibrios "
+osUsbList=" alpine freedos kolibrios porteus"
 osUsbList+=" slax slitaz tinycore "
 osUsbList="${osUsbList//'  '/' '}"
 osUsbList="${osUsbList//'  '/' '}"
@@ -191,6 +191,7 @@ function distro_release_notes {
         oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         parrotsec)        RelNotes="KDE becomes the default desktop from v7.0 onwards. 'Home' is a base non-technical version. MATE spins may still be available > See Website";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
+        porteus)          RelNotes="07/2026 > Slick distro worth trying, but last release 09/2023 ... " ;;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install. Also see https://wiki.almalinux.org/Comparison.html";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is up to around 230Mb. Select Pure for 64 bit.";;
