@@ -37,7 +37,11 @@
 
 # Run once:
 
-qqX_SessionID="$(uuidgen -7)"
+if grep -qs 'time-v7' <<< "$(uuidgen --help)"; then
+  qqX_SessionID="$(uuidgen -7)"
+  # v7 is better but not available on slower moving distros like linux mint ...
+else  qqX_SessionID="$(uuidgen -t)"
+fi
 qqX_SessionFile="/tmp/qqX_session_$qqX_SessionID"
 printf '#!/bin/bash' > "$qqX_SessionFile"
 chmod +x "$qqX_SessionFile"
@@ -237,16 +241,19 @@ function multi_instance_checks {
 
       [[ $ShowProcesses ]] && printf "\n\n MULTI_INSTANCE_CHECKS > Messaging and Options > Current Process PID: %s\n\n" "$CurrentQQ"
 
-      qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running: "
+      qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running "
       printf "\n\n"
-      printf "\n\n  Current Session is  %s \n\n  Other Sessions: \n\n" "$qqX_SessionID"
+      printf "\n\n  Current Session  %s  is:" "$qqX_SessionID"
+      printf "\n\n   %s" "$(ps --no-header -fo pid,cmd "$CurrentQQ_Terminal")"
+      printf "\n\n  Other Sessions: \n"
       for Other in "${AnotherQQ_MainArr[@]}"; do
         OtherTxt="$(ps --no-header -fo pid,cmd "$Other")"
         OtherTxt="${OtherTxt/'/tmp'/}"
         printf "\n  %s \n" "$OtherTxt"
       done
       printf "\n\n  If running VMs, QEMU will lock protect key files and will prevent things being run simultaneously"
-      printf "\n\n  but be aware that minor cross-linking problems can occur, even if simple multi-instance usage is still possible"
+      printf "\n\n  but be aware that minor cross-linking problems can occur, even if simple multi-instance usage is still possible,"
+      printf "\n\n  and that killing other instances could force-close or CRASH other VMs or processes"
       printf "\n\n\n  If qqX upgrading or installing, it may be best to close > some desktop environments can keep an excess numbers of windows open"
       printf "\n\n  OR, this may just be a false alarm ..."
       printf "\n\n\n  [enter] to continue with all   [r] re-check   [k] kill other instances and continue with just this one "
