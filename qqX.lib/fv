@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
 # source instead of link, as some distros have Access Control limitations
+# should work if placed next the full script
 
 source floatversion

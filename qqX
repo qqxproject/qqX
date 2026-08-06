@@ -34,10 +34,10 @@
 # and SC1090,SC1091,SC2024, SC2154 for necessity of dynamic file sourcing
 #  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154,SC2009
 
-# Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
-# Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
-# but minor numbers remain padded to 2dp
-  qqX_Version="1.16.00.RC.01"
+# Beta version notation changes @ 2024/11 with intro of 'floatversion' and improved sorting abilities
+# Suffixes closely follow 'semantic versioning' of x.x.xx-suffix as in: major.minor.point and hyphened optional -beta.01 etc
+# however point numbers are padded to 2dp for better file-manager indexing
+  qqX_Version="1.16.00-rc.02"
 
 # Allow Posix sub-shell checks (without -t 1) eg. qqX_Version="$(./qqX --version 2>/dev/null)"
 if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit ; fi

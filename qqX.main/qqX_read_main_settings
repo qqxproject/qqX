@@ -304,9 +304,9 @@ find_quick_version_numbers
 
 ## Analyse qqX Current Version  (Latest version is carried out in the updater function)
 
-# Beta version notation changes @ 24/11 with intro of 'floatversion' and improved sorting abilities
-# Suffixes more closely follow 'semantic versioning' x.x.xx-suffix > major.minor.point and with optional as -beta.01 etc
-# but minor numbers remain padded to 2dp
+# Beta version notation changes @ 2024/11 with intro of 'floatversion' and improved sorting abilities
+# Suffixes closely follow 'semantic versioning' of x.x.xx-suffix as in: major.minor.point and hyphened optional -beta.01 etc
+# however point numbers are padded to 2dp for better file-manager indexing
 
 if [[ $qqX_Version == *[[:alpha:]]* ]] ; then  qqX_Current_ReleaseType="beta"
 else qqX_Current_ReleaseType="release"
