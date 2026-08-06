@@ -4,7 +4,7 @@ SPIN-OFF NEXT LEVEL QUICKEMU / QUICKGET
 
 Adds fixes, tools and improvements to the popular [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) system
 
-But starved of oxygen by upstream, for being too critical .....
+And starved of oxygen by upstream, for being too critical .....
 
 -----
 
@@ -56,7 +56,7 @@ RECENT HIGHLIGHTS include:
 
 -----
 
-qqX used to be listed upstream and needs your support:
+Community support welcome:
 
 ![qqX-part-of-quickemu-edited3b](https://github.com/user-attachments/assets/3322789f-ed89-4b6c-90b3-630958860b2f)
 
