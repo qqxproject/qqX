@@ -18,11 +18,11 @@ CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 - Installable on all versions of standard Linux
 
-- Rapid development, simplified interface system based on Qemu / KVM
+- Rapid development, simplified system based on Qemu / KVM
 
 ![qqX-vmm](https://github.com/qqxproject/qqX/assets/3956806/18e5c495-8072-49a5-8b9c-e1302549efcf)
 
-- Ideal for distro testing and developer VM collections
+- Great for distro testing and developer VM collections
 
 - Extra extended range of _installation-ready_ distros and desktops with built-in improvements for Windows and MacOS
 
