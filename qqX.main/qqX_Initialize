@@ -36,7 +36,7 @@ if [[ ! $(command -v wget) ]] && [[ $(command -v wget2) ]]; then
   wget () { wget2 "$@" ; }
 fi
 
-if grep -qs 'driver=virtio' <<< "$(lshw 2>/dev/null)" ; then RunningAsNested=1
+if grep -s 'VGA' <<< "$(lspci 2>/dev/null)" | grep -qi 'Virtio' ; then RunningAsNested=1
 else RunningAsNested=
 fi
 
