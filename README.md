@@ -4,7 +4,7 @@ SPIN-OFF NEXT LEVEL QUICKEMU / QUICKGET
 
 Adds fixes, tools and improvements to the popular [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) system
 
-But starved of oxygen by upstream, for being too critical .....
+And starved of oxygen for adding them ....
 
 -----
 
@@ -12,33 +12,29 @@ But starved of oxygen by upstream, for being too critical .....
 
 -----
 
-CAREFULLY WRITTEN AND CAREFULLY CHECKED
-
-- See DeepWiki for impartial analysis and [explainations of how qqX works under the hood](https://deepwiki.com/qqxproject/qqX/1.1-architecture-overview)
+- Simple system using basic Qemu/KVM
 
 - Installable on all versions of standard Linux
 
-- Rapid development, simplified interface system based on Qemu / KVM
-
 ![qqX-vmm](https://github.com/qqxproject/qqX/assets/3956806/18e5c495-8072-49a5-8b9c-e1302549efcf)
 
-- Ideal for distro testing and developer VM collections
+- Extended range of _installation-ready_ distros and desktops
 
-- Extra extended range of _installation-ready_ distros and desktops with built-in improvements for Windows and MacOS
+- Great for distro testing and developer VM collections
 
 - Quickemu and Quickgui compatible
 
 -----
 
-See [qqxproject.org](https://qqxproject.org/) for user help, details and FAQ's
+See announcements for the latest on [what's happening behind the scenes](https://github.com/qqxproject/qqX/discussions/categories/announcements) and [qqxproject.org](https://qqxproject.org/) for user help, details and FAQ's
 
-See announcements for [what's happening behind the scenes](https://github.com/qqxproject/qqX/discussions/categories/announcements)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qqxproject/qqX) ... for explainations of how qqX works under the hood
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qqxproject/qqX)
+CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 -----
 
-RECENT HIGHLIGHTS include:
+Recent highlights include:
 
 - qqX exclusive macOS runtimes with faster performance and range of CPU option adjusters
 
@@ -56,7 +52,7 @@ RECENT HIGHLIGHTS include:
 
 -----
 
-qqX used to be listed upstream and needs your support:
+Your support is welcomed:
 
 ![qqX-part-of-quickemu-edited3b](https://github.com/user-attachments/assets/3322789f-ed89-4b6c-90b3-630958860b2f)
 
