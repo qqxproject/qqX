@@ -261,7 +261,7 @@ VM_SelectorStyle="A"
 #
 
 # SDL vs SPICY highlighting  (default is SDL)
-# Set (="spicy") if Spicy is preferred, or if SDL is not possible (as can be the case with openSUSE, for example)
+# Set (="spicy") if Spicy is preferred, or if SDL is not possible (as has been the case with openSUSE, for example)
   SpicySDL_HL=
 
 # NETWORK and INTERNET  are by default "on" (set blank)  *May be toggled* in the main boot menu,

@@ -313,8 +313,8 @@ function  main_menu_actions {
     if [[ -e "$VM_InstanceName/${VM_InstanceName}.pid" ]]; then show_msg_pid_found
     elif ! grep -sqi sdl <<< "$(qemu-system-x86_64 -display help)" ; then
       printColor "\n\n  SDL cannot be found:"
-      printf "\n\n  OpenSUSE distros lack -official- support for 'qemu-ui-sdl' "
-      printf "\n\n  See the installation pdf/wiki for more details"
+      printf "\n\n  OpenSUSE distros may need 'qemu-ui-sdl' and 'qemu-audio-sdl' to be separately added:"
+      printf "\n\n  Should be available @ 08/2026 with TumbleWeed. See the installation pdf/wiki for more details."
       printf "\n\n  Community packages might be available for different distros."
       printf "\n\n  [enter] to return \n\n"
       read -rp "  >  "
