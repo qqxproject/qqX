@@ -294,6 +294,9 @@ while true ; do
       printColor "\n\n  Debian KDE 13.2.0"
       printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
 
+      printColor "\n\n  openSUSE Tumbleweed (08/2026)"
+      printf "\n  myrlyn > bc qemu qemu-ui-sdl qemu-audio-sdl spice-gtk"
+
       printColor "\n\n  Pop! OS 24.04 Cosmic "
       printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
       printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"

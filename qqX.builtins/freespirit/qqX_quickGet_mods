@@ -187,7 +187,7 @@ function distro_release_notes {
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
-        opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus. [w] check website for Leap and other developments.";;
+        opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus, TW Slow is Multi Edition experimental  [w] check website for Leap and other developments.";;
         oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         parrotsec)        RelNotes="KDE becomes the default desktop from v7.0 onwards. 'Home' is a base non-technical version. MATE spins may still be available > See Website";;
         popos)            RelNotes="Generic was introduced with 24.04, has newer builds than the older 'Intel' plus features AMD and Nvidia 10";;
