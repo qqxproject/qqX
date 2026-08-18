@@ -111,12 +111,12 @@ else
       fi
 
     else
-      printColor "\n  ----------------------------------------------------------------------------"
+      printColor   "\n  ----------------------------------------------------------------------------"
       printf "\n\n  File Manager: '%s'  Text Editor: '%s'  Browser: '%s' " "$FileManager" "$TextEditor" "$WebBrowser"
 
+      printColor "\n\n  ----------------------------------------------------------------------------"
       printf "\n\n  [del] delete selected VM   [mv] move, rename or [ln] link"
       printColor  "    [u] hide utils & technical"
-
       printf "\n\n  [2c]  create [2d] delete a second virtual hard-drive   [3c] create [3m] "
       if [[ $SharedDriveArgs ]]; then printf "unmount"; else printf "mount"
       fi

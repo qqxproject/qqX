@@ -95,7 +95,8 @@ print_quickget_and_folder_choices () {
   # listing function, originally for use inside 'function_quick_get_wrap'
   # adapted with $2 EITHER as number per line OR for alpha zooming filter
   # and for use for listing target folder selections for installing or moving VM's
-  # OR with highlighter, giving $2 as 'HL' and $3 as known valid integer
+  # OR with highlighter: giving $2 as 'HL' and $3 as known valid array [0 to n] reference integer
+  # plus $4 now as optional number per line
 
   declare -n  QGW_List_ArrName="$1"
   [[ $ShowQGetLists ]] && { printf "\n print choices transfer arr: "; printf "\n %s" "${QGW_List_ArrName[@]}"; printf "\n\n"; }
