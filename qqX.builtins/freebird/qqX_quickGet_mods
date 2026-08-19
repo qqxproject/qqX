@@ -528,12 +528,12 @@ function releases_fedora() {
     web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
 }
 
-## FIX & UPDATE to new mirrors
+## FIX & UPDATE to new cdn (08/2026)
 function get_gentoo() {
     local HASH= ; local ISO= ; local Branch= ; local RelDataTarget= ; local RelData=
-    local BaseUrl="https://distfiles.gentoo.org/releases/amd64/autobuilds"
+    local BaseUrl="https://distfiles-cdn-origin.gentoo.org/releases/amd64/autobuilds"
     find_data () {
-        RelDataTarget="$(web_pipe "$BaseUrl/$Branch" | grep -s sha256 | tr '"' '\n' | grep sha256 | grep -v align)"
+        RelDataTarget="$(web_pipe "$BaseUrl/$Branch" | grep -s sha256 | tr '"' '\n' | grep sha256 | grep -m 1 -v class)"
         RelData="$(web_pipe "$BaseUrl/$Branch/$RelDataTarget" | grep -s iso)"
         ISO="$(awk '{print $2}' <<< "$RelData")"
         HASH="$(awk '{print $1}' <<< "$RelData")"
