@@ -453,6 +453,22 @@ function get_debian() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## UPDATE and fix Deepin (08/2026)
+function releases_deepin() {
+   # web_pipe "https://cdimage.deepin.com/releases/" | grep -s href | tr '"' '\n' | fv -Q -M 5
+   web_pipe "https://www.deepin.org/en/download/" | grep -s href | tr '"' '\n' | grep cdimage | grep -v live | fv -Q -M 3
+}
+function get_deepin() {
+    local HASH=""
+    local URL="https://cdimage.deepin.com/releases/${RELEASE}"
+    # Correct URL for 23-RC onwards which has architecture directories
+    if [ "${RELEASE}" != "20.9" ]; then URL+="/amd64"
+    fi
+    local ISO="deepin-desktop-community-${RELEASE}-amd64.iso"
+    HASH=$(web_pipe "${URL}/SHA256SUMS" | grep "${ISO}" | cut -d' ' -f1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIXES for Devuan - make dynamic     #echo daedalus chimaera beowulf
 function releases_devuan() {
     local ReadMeTxt= ; ReadMeTxt=$(web_pipe "https://files.devuan.org/README.txt")
