@@ -851,6 +851,24 @@ function editions_popos() {
    fi
 }
 
+## UPDATE to new storage  (08/2026)
+function releases_pureos() {
+    echo latest
+}
+function editions_pureos() {
+    echo gnome plasma
+}
+function get_pureos() {
+    local HASH="" ISO="" PureChk="" PureData=""
+    local BaseUrl="https://storage.puri.sm/pureos/images/current/latest/$EDITION"
+    PureChk="$(web_pipe "$BaseUrl" | tr '=' '\n' | grep -e checksums_sha | cut -d '"' -f2)"
+    PureData="$(web_pipe "$BaseUrl/$PureChk" | grep -v zsync | grep -v pack)"
+    HASH="$(awk '{print $1}' <<< "$PureData")"
+    ISO="$(awk '{print $2}' <<< "$PureData")"
+    IsoTrimmed="${ISO/./}"
+    echo "${BaseUrl}${IsoTrimmed} ${HASH}"
+}
+
 ## UPDATE and FIX
 function releases_rockylinux() {
     local BaseGrep= ; local ReleasesList=
