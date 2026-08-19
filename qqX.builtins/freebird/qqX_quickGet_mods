@@ -821,19 +821,19 @@ function get_parrotsec() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## FIX hash, update url and make dynamic
+## FIX hash, update url and make dynamic (update mirror 08/2026)
 function releases_pclinuxos() {
-    local RelData= ; RelData="$(web_pipe "https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso/")"
+    local RelData= ; RelData="$(web_pipe "https://mirror.math.princeton.edu/pub/pclinuxos/iso/")"
     echo "$RelData" > "$ReleaseDataLog"
     # show nominal 'latest' > slight variations can exist
-    grep -s darkstar <<< "$RelData" |  tr '=' '\n' | grep -s title | fv -Q -M
+    grep -s darkstar <<< "$RelData" |  tr '=' '\n' | grep -s md5sum | fv -Q -M
 }
 function editions_pclinuxos() {
-    echo kde kde-darkstar mate xfce
+    echo kde kde-darkstar MATE XFCE
 }
 function get_pclinuxos() {
     local HASH= ; local ISO= ; local URL= ; local RelMax= ; local RelChk="${EDITION}-2"
-    URL="https://ftp.nluug.nl/os/Linux/distr/pclinuxos/pclinuxos/iso"
+    URL="https://mirror.math.princeton.edu/pub/pclinuxos/iso"
     RelMax="$(grep -s -e "$RelChk" "$ReleaseDataLog" | tr '=' '\n' | grep iso | fv -M -Q)"
     HASH="$(web_pipe "${URL}/pclinuxos64-${EDITION}-${RelMax}.md5sum" | cut -d' ' -f1)"
     ISO="pclinuxos64-${EDITION}-${RelMax}.iso"
