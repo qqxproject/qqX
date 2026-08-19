@@ -185,6 +185,7 @@ function distro_release_notes {
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
+        manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others are community. Sway is git release 'unstable' https://github.com/manjaro-sway";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
         opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus, TW Slow is Multi Edition experimental  [w] check website for Leap and other developments.";;
@@ -663,27 +664,31 @@ function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
 }
 
-## FIX manjaro sway
+## FIX manjaro sway (again, 08/2026) https://github.com/manjaro-sway/manjaro-sway
+function editions_manjaro() {
+    if [[ $RELEASE == "sway" ]]; then echo full ; else echo full minimal; fi
+}
+function releases_manjaro() {
+    echo plasma xfce gnome cinnamon i3 sway
+}
 function get_manjaro() {
     local HASH="" ; local ISO="" ; local MANIFEST="" ; local URL="" ; local TYPE="official"
     MANIFEST="$(web_pipe https://gitlab.manjaro.org/web/iso-info/-/raw/master/file-info.json)"
     case "${RELEASE}" in
-        sway) MANIFEST="$(web_pipe https://mirror.manjaro-sway.download/manjaro-sway/release.json)" ; TYPE="sway" ;;
+        sway) MANIFEST="$(web_pipe https://manjaro-sway.download/)" ; TYPE="sway" ;;
         cinnamon|i3) TYPE="community";;
     esac
     if [ "${EDITION}" == "minimal" ] && [ "${TYPE}" != "sway" ]; then EDITION=".minimal"
     else EDITION=""
     fi
-    if [ "${RELEASE}" == "sway" ]; then
-        URL=$(echo "${MANIFEST}" | jq -r '.[] | select(.name|test("^manjaro-sway-.*[.]iso$")) | .url' | grep -v 'unstable')
-    else
-        URL="$(echo "${MANIFEST}" | jq -r ."${TYPE}.${RELEASE}${EDITION}".image)"
+    if [ "${RELEASE}" == "sway" ]; then URL=$(grep iso <<<"$MANIFEST" | tr '"' '\n' | grep http | grep -v 'iso.')
+    else URL="$(echo "${MANIFEST}" | jq -r ."${TYPE}.${RELEASE}${EDITION}".image)"
     fi
     HASH=$(web_pipe "${URL}.sha512" | cut -d' ' -f1)
     echo "${URL} ${HASH}"
 }
 
-## UPDATE to FIX release numbers varying with flavor
+## UPDATE to FIX release numbers varying with flavor (07/2025)
 function releases_mxlinux() {
     echo latest
 }
