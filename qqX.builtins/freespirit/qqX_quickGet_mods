@@ -56,7 +56,7 @@
 
 ##########################################
 
-QG_ModsNumber="v7.2"  #  for quickGet 4.99.01 at aug 2026
+QG_ModsNumber="v7.3"  #  for quickGet 4.99.01 at aug 2026
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -930,6 +930,18 @@ function get_slint() {
     local URL="https://slackware.uk/slint/x86_64/slint-${RELEASE}/iso"
     HASH=$(web_pipe "${URL}/${ISO}.sha256" | cut -d' ' -f1)
     echo "${URL}/${ISO}" "${HASH}"
+}
+
+## FIX releases (08/2026)
+function releases_slitaz() {
+    web_pipe "https://mirror.slitaz.org/iso/rolling/" | tr ' ' '\n' | grep iso | cut -d'>' -f2 | cut -d'<' -f1 | cut -d'-' -f2- | cut -d'.' -f1 | paste -s -d ' '
+}
+function get_slitaz() {
+    local HASH=""
+    local ISO="slitaz-${RELEASE}"
+    local URL="http://mirror.slitaz.org/iso/rolling"
+    HASH=$(web_pipe "${URL}/${ISO}.md5" | cut -d' ' -f1)
+    echo "${URL}/${ISO}.iso ${HASH}"
 }
 
 ## UPDATE and FIX (again at 08/2026)
