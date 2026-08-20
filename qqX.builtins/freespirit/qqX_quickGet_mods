@@ -615,13 +615,19 @@ function get_guix() {
 
 ## FIX iso url (and update releases 08/2026)
 function releases_kdeneon() {
-    echo bigscreen desktop
+    echo bigscreen desktop dev-unstable
 }
 function get_kdeneon() {
     local HASH= ; local ISO= ; local URL=
-    URL="https://files.kde.org/neon/images/${RELEASE}/user/current"
-    ISO="neon-user-${RELEASE}-current.iso"
-    HASH=$(web_pipe "${URL}/neon-user-${RELEASE}-current.sha256sum" | cut -d' ' -f1)
+    if [[ $RELEASE == "dev-unstable" ]]; then
+        URL="https://files.kde.org/neon/images/dev/unstable/current"
+        ISO="neon-unstable-dev-current.iso"
+        HASH=$(web_pipe "${URL}/neon-unstable-dev-current.sha256sum" | cut -d' ' -f1)
+    else
+        URL="https://files.kde.org/neon/images/${RELEASE}/user/current"
+        ISO="neon-user-${RELEASE}-current.iso"
+        HASH=$(web_pipe "${URL}/neon-user-${RELEASE}-current.sha256sum" | cut -d' ' -f1)
+    fi
     echo "${URL}/${ISO} ${HASH}"
 }
 
