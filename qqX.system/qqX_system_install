@@ -301,6 +301,9 @@ while true ; do
       printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
       printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
 
+      printColor "\n\n  Solus (08/2026) "
+      printf "\n  sudo eopkg install  socat jq 7zip cdrtools spice-gtk  qemu"
+
     fi
 
     if grep -s 'VGA' <<< "$(lspci 2>/dev/null)" | grep -qi 'Virtio' ; then
