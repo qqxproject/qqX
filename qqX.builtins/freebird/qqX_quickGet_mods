@@ -932,17 +932,17 @@ function get_slint() {
     echo "${URL}/${ISO}" "${HASH}"
 }
 
-## UPDATE and FIX
+## UPDATE and FIX (again at 08/2026)
 function releases_solus() {
     echo latest
 }
 function editions_solus() {
-    web_pipe "https://getsol.us/download/" | grep iso | tr ':' '\n' | grep Release | awk '{print $1}' | cut -d'-' -f3- | grep iso | cut -d'-' -f2 | sort -u | paste -s -d ' '
+    web_pipe "https://getsol.us/download/" | grep -s iso | tr ':' '\n' | grep Release | awk '{print $1}' | grep sign | tr '/' '\n' | grep -e ^Solus | cut -d'-' -f2 | paste -s -d ' '
 }
 function get_solus() {
-    # eg https://downloads.getsol.us/isos/2025-11-29/Solus-Budgie-Release-2025-11-29.iso.sha256sum.sign
+    # eg https://downloads.getsol.us/isos/2025-11-29/Solus-Budgie-Release-2025-11-29.iso.sha256sum.sign as '.sign' is more unique and easy to grep
     local HASH= ; local BaseUrl= ; local URL=
-    BaseUrl="https:""$(web_pipe "https://getsol.us/download/" | grep iso | tr ':' '\n' | grep Release | awk '{print $1}' | grep "$EDITION" | grep sign)"
+    BaseUrl="https:""$(web_pipe "https://getsol.us/download/" | grep -s iso | tr ':' '\n' | grep Release | awk '{print $1}' | grep "$EDITION" | grep sign)"
     HASH="${BaseUrl/.sign/}"
     URL="${HASH/.sha256sum/}"
     HASH="$(web_pipe "$HASH" | cut -d' ' -f1)"
