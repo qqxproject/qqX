@@ -61,7 +61,7 @@ QG_ModsNumber="v7.3"  #  for quickGet 4.99.01 at aug 2026
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
-osAddList=" anduinos athenaos bluestar "
+osAddList=" athenaos bluestar "
 #osAddList+=" another "
 
 # osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
@@ -141,7 +141,6 @@ function os_info {
     local INFO=
     case "$1" in
         #name)            INFO="PrettyName|Credentials|Homepage|Info";;
-        anduinos)         INFO="Anduin OS|-|https://www.anduinos.com/|Ubuntu-based Linux distribution that aims to facilitate developers transitioning from Windows.";;
         archlinux)        INFO="Arch Linux|-|https://archlinux.org/|The definitive rolling release, the base of so many other Linux distros, or as the base of your own ...";;
         archcraft)        INFO="Archcraft|-|https://archcraft.io/|Arch based collection of minimal Linux desktop solutions";;
         athenaos)         INFO="Athena OS|-|https://athenaos.org/|NixOS based pentesting distribution using BlackArch package repo";;
@@ -217,7 +216,7 @@ function distro_release_notes {
 # the last lines of Quickget where distro editions are handled.
 
 # TRANSFER FILES may also be implemented:
-# See 'editions_anduinos' for a more complex example script and 'get_pclinuxos' for simpler cases
+# See 'get_pclinuxos' for simpler case
     ReleaseDataLog="/tmp/qGet.Mods.REL.data.txt"
     EditionsDataLog="/tmp/qGet.Mods.ED.data.txt"
     GetDataLog="/tmp/qGet.Mods.GET.data.txt"
@@ -278,54 +277,6 @@ function get_alpine() {
     ISO="alpine-virt-${VERSION}-${QEMU_ARCH}.iso"
     HASH=$(web_pipe "${URL}/latest-releases.yaml" | awk '/"Xen"/{found=0} {if(found) print} /"Virtual"/{found=1}' | grep 'sha256:' | head -1 | awk '{print $2}')
     echo "${URL}/${ISO} ${HASH}"
-}
-
-## ADD
-function releases_anduinos {
-    echo "LTS Standard"
-}
-function editions_anduinos {
-    if [[ ! $RELEASE ]]; then
-        echo "ar_SA de_DE en_GB en_US es_ES fr_FR it_IT ja_JP ko_KR nl_NL pl_PL pt_BR pt_PT ru_RU sv_SE th_TH tr_TR vi_VN zh_CN zh_HK zh_TW"
-        return 0  # Stock List @ June 2025
-    fi
-    # Otherwise check for editions per release
-    while true ; do
-        if ! { grep -qs "$OS" "$ReleaseDataLog" && grep -s 'ReleaseName=' "$ReleaseDataLog" | grep -qs "$RELEASE"; } ; then
-            printf "qGetDistro=\"%s\"\nReleaseName=\"%s\"" "$OS" "$RELEASE" > "$ReleaseDataLog"
-            if [[ $RELEASE == "LTS" ]]; then ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" | tr '>' '\n' | grep '</td' | grep LTS | fv -M -Q)"
-            else ReleaseNumber="$(web_pipe "https://docs.anduinos.com/VERSIONS.html" | tr '>' '\n' | grep '</td' | grep -v LTS | fv -M -Q)"
-            fi
-            [[ ! $ReleaseNumber ]] && break
-            ReleasePoint="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/" | grep -e 'href="./'| fv -M -Q )"
-            [[ ! $ReleasePoint ]] && break
-            ReleaseEditions="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}" \
-            | grep -v sha256 | grep -v torrent | tr '>' '\n' | grep iso | grep -v '<a' | cut -d'<' -f1 | cut -d'-' -f3 | cut -d'.' -f1 | paste -s -d' ')"
-            printf "\nReleaseName=\"%s\"\nReleaseNumber=\"%s\"\nReleasePoint=\"%s\"\nReleaseEditions=\"%s\"" "$RELEASE" "$ReleaseNumber" "$ReleasePoint" "$ReleaseEditions" > "$ReleaseDataLog"
-            [[ ! $ReleaseEditions ]] && break
-            sleep 1
-        fi
-        ReleaseName= ; ReleaseNumber= ; ReleasePoint= ; ReleaseEditions=
-        source "$ReleaseDataLog"
-        if [[ $ReleaseName && $ReleaseNumber && $ReleasePoint && $ReleaseEditions ]] ; then break
-        else printf "" > "$ReleaseDataLog"
-        fi
-    done
-    printf "%s" "$RELEASE" > "$EditionsDataLog"
-    printf "" > "$GetDataLog"
-    [[ ! $ReleaseEditions ]] && source "$ReleaseDataLog"
-    [[ ! $ReleaseEditions ]] && return 1
-    echo "$ReleaseEditions"
-}
-function get_anduinos {
-    source "$ReleaseDataLog"
-    # for looping through test-all
-    sleep 0.5
-    AnduinIso="https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}/AnduinOS-${ReleasePoint}-${EDITION}.iso"
-    AnduinHash="$(web_pipe "https://download.anduinos.com/${ReleaseNumber}/${ReleasePoint}/AnduinOS-${ReleasePoint}-${EDITION}.sha256" \
-    | cut -d':' -f2 | tr -cd '[:graph:]')"
-    echo "$AnduinIso $AnduinHash"
-    printf "%s" "$EDITION" > "$GetDataLog"
 }
 
 ## Re-ADD upstream deletion
