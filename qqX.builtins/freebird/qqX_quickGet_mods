@@ -61,7 +61,7 @@ QG_ModsNumber="v7.3"  #  for quickGet 4.99.01 at aug 2026
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
-osAddList=" anduinos athenaos bluestar truenas-scale "
+osAddList=" anduinos athenaos bluestar "
 #osAddList+=" another "
 
 # osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
@@ -84,7 +84,7 @@ mapfile -t -d ' ' osRemoveArr <<< "$osRemoveList"
 # The call will cause a defined list to be shown by triggering a controlled error state in Quickget ...
 
 osServersList=" alpine azurelinux centos-stream netboot freedos proxmox-ve "
-osServersList+=" truenas-scale ubuntu-server windows-server "
+osServersList+=" ubuntu-server windows-server "
 osServersList="${osServersList//'  '/' '}"
 osServersList="${osServersList//'  '/' '}"
 
@@ -161,7 +161,6 @@ function os_info {
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
-        truenas-scale)    INFO="TrueNAS Scale|-|https://www.truenas.com/truenas-scale/|Open Source Hyperconverged Infrastructure (HCI) solution. In addition to powerful scale-out storage capabilities, SCALE adds Linux Containers and VMs (KVM) so apps run closer to data.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
         void)             INFO="Void Linux|anon:voidlinux|https://voidlinux.org/|Non-Systemd desktop operating system based on Runit. Software is provided in binary packages or can be built directly from sources.";;
     esac
@@ -1049,22 +1048,6 @@ function get_trisquel() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-
-## IMPROVE make dynamic
-function releases_truenas-scale() {
-    web_pipe "https://www.truenas.com/download-truenas-community-edition/" | tr '<' '\n' | grep -s href | grep releasenotes |  grep NAS | cut -d'>' -f2 | fv -M -Q
-}
-# and restore from 4.99.01 removal
-function get_truenas-scale() {
-    local HASH=""
-    local ISO=""
-    local URL=""
-    local DLINFO="https://www.truenas.com/download-truenas-scale/"
-    URL=$(web_pipe "${DLINFO}" | grep -o "\"https://.*${RELEASE}.*\.iso\"" | cut -d'"' -f 2)
-    HASH=$(web_pipe "${URL}.sha256" | cut -d' ' -f1)
-    echo "${URL} ${HASH}"
-}
-
 ## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
 function get_ubuntu-server() {
     local HASH="" ; local ISO="" ; local NAME="live-server" ; local URL="" ; local DATA="" ; local RelMax=
@@ -1193,9 +1176,6 @@ function get_zorin() {
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "mods_guest_type_${OS} ()"
 
-mods_guest_type_truenas-scale () {
-    GUEST="truenas" ; IMAGE_TYPE="iso"
-}
 
 ##########################################
 
@@ -1205,9 +1185,6 @@ mods_guest_type_truenas-scale () {
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "mods_config_${OS} ()"
 
-mods_config_truenas-scale () {
-    echo "boot=\"legacy\"" >> "${CONF_FILE}"
-}
 
 ##########################################
 
