@@ -385,9 +385,17 @@ if [[ $XDG_MimeType_is_ISO || $XDG_ISO_Name ]] && [[ $XDG_MimeType_Recognised ]]
         VM_Conf_Dir="$QWG_Conf_Dir"
         VM_Conf_File="$QWG_NewVM_Name.conf"
         VM_InstanceName="$QWG_NewVM_Name"
+        printf "\n\n  Folder:  %s "  "$VM_InstanceName"
+        printf "\n .conf file created:  %s "  "$VM_Conf_File"
         cd "$QWG_Conf_Dir" || printColor "\n\n  ERROR changing to New VM Location"
         Current_VM_Folder="$Default_VM_Folder"
-        refresh_sources_and_load_VM_arrays
+        #refresh_sources_and_load_VM_arrays
+        printf "\n\n  Tuning up .... \n"
+        function_config_tune_up  "$VM_Conf_Dir/$VM_Conf_File"
+        # make sure values have been read, and at the least basic in case the tune up utility gets skipped
+        refresh_conf_vars_and_values
+        NewFileTuneUp=
+        NewFileTuneUp_JustDone=1
         break
 
       fi
