@@ -305,7 +305,7 @@ function download_new_release {
         AboutWidth="$(tput cols)"
         printf "\n  %s\n\n" "$qqX_Latest_ReleaseNumber"
         #shellcheck disable=SC2059
-        printf -v BodyTxt "$(grep -s body "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4)"
+        printf -v BodyTxt %b "$(grep -s body "$qqX_Latest_ReleaseFile" | cut -d'"' -f 4)"
         mapfile -t AboutReleaseArray  <<< "$BodyTxt"
         for Line in "${AboutReleaseArray[@]}" ; do
           if [[ "$Line" != *'+1'* ]] ; then printColor "  %s\n" "$(fmt -uw "$AboutWidth" <<< "$Line")" ; fi
