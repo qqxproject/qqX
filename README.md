@@ -36,19 +36,21 @@ CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 Recent highlights include:
 
+- Improved session control for KDE Konsole and Gnome Ptyxis
+
+- New Main Menu style options and general UI updates
+
 - qqX exclusive macOS runtimes with faster performance and range of CPU option adjusters
 
-- A further improved qqX Windows installer, with improved reliability and security
+- qqX tweaked Windows installer, with improved reliability and security
 
 - An upgraded drive/VM snapshot system
 
+- Extended Distro Test Suite and Range of qqX exclusive updates for QuickGet
+
+- VM network isolation toggle options and improvements to VM nesting
+
 - qqX enhanced CPU pinning configurations
-
-- New Main Menu style options
-
-- Range of qqX exclusive updates for QuickGet
-
-- Extended Distro Test Suite with multiple fixes for upstream
 
 -----
 
