@@ -97,16 +97,18 @@ if [ -z "$(command -v bash)" ] || [ "$(echo "$BASH_VERSION" | cut -d. -f1)" -lt 
   fi
 fi
 
-##  Check we are in the right place
-if [[ ! -d "$(pwd)/qqX.system" ]]; then
-  printf  "\n\n  ERROR  qqX install script must be run from inside the original qqX folder \n\n"
-  sleep 8  ; exit 1
-fi
-
-# Posix caller in the main folder will look in the system folder for this script
-# but the installer was originally designed to work from the main folder, so move there:
+# Check we are in the right place:
+# The Posix caller in the main folder will look in the system folder for this script
+# BUT as the system_installer was originally designed to work from the main folder, we need to move there if calling it directly
 if [[ ! -d "./qqX.system" ]]; then
-  cd .. || echo "  Problems switching to main folder"
+  cd .. || printf "\n\n  Problems switching to main folder \n"
+fi
+if [[ ! -d "./qqX.system" ]]; then
+  printf "\n\n  ERROR:  The qqX_system_install script is designed to be called from the original top level qqX folder"
+  printf "\n\n  Current location: %s" "$(pwd)"
+  printf "\n\n  Change your current working folder and try: ./qqX.system/qqX_system_install "
+  printf "\n\n  Press [enter] to exit, or if needed manually close the terminal .... \n\n"
+  read -rp "  >  " ; exit 1
 fi
 
 #  Chrome up the display

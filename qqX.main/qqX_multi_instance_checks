@@ -15,9 +15,9 @@
 
 #  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154
 
-# Tries to make sure that all current processes have been statted properly and that conlflicts are not there
-# Standard command line Qemu (and Quickemu) likes one VM at a time
-# Otherwise, libvirt/virsh is needed, and things no longer stay relatively simple ...
+# Tries to make sure that all current processes have been statted properly and that conflicts are not there:
+# Standard COMMAND LINE QEMU (and Quickemu) likes one VM at a time,
+# otherwise libvirt/virsh is needed and things no longer stay relatively simple ...
 
 # 2026 changes to the way Gnome and KDE run have complicated process tracing,
 # in particular with Gnome where the replacement gnome-terminal 'ptyxis' is still finding its feet.
