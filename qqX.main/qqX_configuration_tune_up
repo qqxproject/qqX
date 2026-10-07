@@ -433,6 +433,7 @@ function_config_tune_up ()  {
       [[ "$Line" == '# For Windows'* ]] && continue
       [[ "$Line" == '# for Windows'* ]] && Line=
       [[ "$Line" == '# although early'* ]] && continue
+      [[ "$Line" == '# although for pre-25H2'* ]] && continue
       # ver 1.14 - enhance allowing through commented lines containing '=' and other characters
       # also see 'refresh_conf_vars_and_values' and 'ConfClearanceLog'
       [[ "$(tr -cd "[:graph:]" <<< "$Line" | head -c 1)" == '#' ]] && printf "\n" >> "$TuneUpTargetDraft"
@@ -482,11 +483,15 @@ function_config_tune_up ()  {
     printf "\nboot=\"legacy\"\n"  >> "$TuneUpTargetDraft"
   fi
 
+  TuneUpEdited=
+
   while true; do
 
     printColor "\n  CHECK ME: \n\n"
     cat "$TuneUpTargetDraft"
     TuneUpConfConfirm=
+
+    [[ $TuneUpEdited ]] && printf "\n\n  > > > > > EDITED > > > > >  \n\n" && TuneUpEdited=
 
     if [[ $guest_os == "macos" ]]; then
       ConfLine="$(grep -s 'macos_release=' "$TuneUpTmpCopy")"
@@ -560,6 +565,8 @@ function_config_tune_up ()  {
 
       printf "\n# To restore use name:   %s \n" "$TuneUpTargetFile" >> "$TuneUpOldFile"
       qqX_edit_settings  "tune-up"
+      TuneUpEdited=1
+      printf "\n\n  > > > > > EDITED > > > > >  \n\n"
 
     elif [[ $TuneUpConfConfirm == "r" ]]; then
 

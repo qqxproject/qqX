@@ -110,9 +110,9 @@ function  main_menu_actions {
 
     QL_LogView=
     printf "\n\n"
-    if [[ $(cat "$QemuErrorLog" 2>/dev/null) ]] ; then
-      cat "$QemuErrorLog"
-      printf "\n\n  This log gets cleared when you run the VM, or it can be cleared now."
+    if [[ $QemuErrorAlert ]] ; then
+      cat "$QemuErrorLog" 2>/dev/null ; echo ; cat "$VM_Conf_Dir/$VM_InstanceName/$VM_InstanceName.log" 2>/dev/null
+      printf "\n\n  The error logs get cleared when you run the VM, or they can be cleared now."
       printf "\n\n  For permanent adjustments, see the 'QemuErrorFilter' notes in the main settings."
     else  printf "  No qemu errors were present on the last VM load ...  ?? "
     fi
@@ -124,7 +124,7 @@ function  main_menu_actions {
     read -rp "  >  "  QL_LogView
 
     [[ $QL_LogView  == "w" ]] && QemuError_VM_Filter+=("warning" "deprecated" "info:" "usb_desc_get_descriptor") && QemuErrorAlert=
-    [[ $QL_LogView  == "c" ]] && printf "" > "$QemuErrorLog" && QemuErrorAlert=
+    [[ $QL_LogView  == "c" ]] && printf "" > "$QemuErrorLog" && printf "" > "$VM_Conf_Dir/$VM_InstanceName/$VM_InstanceName.log" && QemuErrorAlert=
 
   elif [[ $MainMenuChoice == "f" ]] ; then
 

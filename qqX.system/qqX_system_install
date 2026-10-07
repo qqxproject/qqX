@@ -265,6 +265,11 @@ while true ; do
       InstallationAlert=1
     fi
   done
+  # and tpm as an optional
+  if [[ ! $(type -p swtpm) ]]; then
+    printColor "\n\n  >>  OPTIONAL: 'swtpm' is currently needed for Microsoft Windows and Ubuntu Server ... "
+    InstallationAlert=1
+  fi
 
   if [[ $InstallationAlert ]]; then
 

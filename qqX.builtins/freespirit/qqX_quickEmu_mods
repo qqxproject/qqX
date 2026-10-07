@@ -572,7 +572,7 @@ function configure_cpu() {
                 fi
             fi
             # Disable S3 support in the VM to ensure Windows can boot with SecureBoot enabled
-            #  - https://wiki.archlinux.org/title/QEMU#VM_does_not_boot_when_using_a_Secure_Boot_enabled_OVMF
+            #  - https://wiki.archlinux.org/title/QEMU/Troubleshooting#Virtual_machine_not_booting_when_using_a_Secure_Boot_enabled_OVMF
             GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1"
 
             # Disable High Precision Timer
@@ -971,10 +971,31 @@ function configure_display() {
     fi
 }
 
-## Fix ovmfs array parse but @ feb 2026 SUSPEND due to upstream changes and improvements in 4.99  REVIEW
-#  Of interest (lol) @ july 2026 > a quickemu PR  (via AI ... ) https://github.com/quickemu-project/quickemu/pull/1938
+## MOD ###  tidy up code and send tpm general warnings to the log files instead of screen
+# plus add error grep of log to function 'filter_and_flag_qemu_errors'
+# REVIEW renaming the upstream '*.log' to '*.error.log'
+configure_tpm() {
+    if [ "${tpm}" == "on" ]; then
+        local tpm_args=()
+        tpm_args+=(socket --ctrl "type=unixio,path=${VMDIR}/${VMNAME}.swtpm-sock")
+        tpm_args+=(--tpmstate "dir=${VMDIR}"  --terminate --tpm2)
+        echo "${SWTPM} ${tpm_args[*]} &" >> "${VMDIR}/${VMNAME}.sh"
+        # Start TPM
+        ${SWTPM} "${tpm_args[@]}" 2>>"${VMDIR}/${VMNAME}.log" &
+        echo " - TPM:      ${VMDIR}/${VMNAME}.swtpm-sock (${!})"
+        sleep 0.25
+    fi
+}
 
-function xxconfigure_xxbios() {
+## FIX Tiano Bios OVMFS ARRAY PARSE
+# @ feb 2026 suspended due to upstream changes and improvements in 4.99
+# but at oct 2026 added back in due to serious errors found in upstream quickemu logic
+# where the 4M secureboot, or any other selected vars set, were not ever being loaded ....
+# Investigation prompted by https://github.com/stefanberger/swtpm/issues/1069#issuecomment-3528911969
+# Also see late to the parse critiquing party (lol) @ july 2026, the quickemu PR  (via AI ... )
+# https://github.com/quickemu-project/quickemu/pull/1938
+
+configure_bios() {
 
     # Always Boot macOS using EFI
     if [ "${guest_os}" == "macos" ]; then
@@ -1024,21 +1045,15 @@ function xxconfigure_xxbios() {
         # does not support SMM.
 
         local SHARE_PATH="/usr/share"
-        if [ "${OS_KERNEL}" == "Darwin" ]; then
-            # Do not assume brew; quickemu could have been installed via Nix
-            if command -v brew &>/dev/null; then
-                SHARE_PATH="$(brew --prefix qemu)/share"
-            fi
-        fi
 
-        # https://bugzilla.redhat.com/show_bug.cgi?id=1929357#c5
-        # TODO: Check if macOS should use 'edk2-i386-vars.fd'
-
-        # qqX: arrays re-ordered into better priority and a break added, for when found, instead of continuing to the end ...
+        ###### MODS qqX:
+        # Arrays re-ordered into better priority. Instead of searching whole list, when item found, break instead ...
 
         if [ -n "${EFI_CODE}" ] || [ ! -e "${EFI_CODE}" ]; then
             case ${secureboot} in
-                on) # shellcheck disable=SC2054,SC2140
+                on)
+                    #echo " - Secure Boot is ON"
+                    # shellcheck disable=SC2054,SC2140
                     ovmfs=("${SHARE_PATH}/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2","${SHARE_PATH}/edk2/ovmf/OVMF_VARS_4M.secboot.qcow2" \
                         "${SHARE_PATH}/edk2/x64/OVMF_CODE.secboot.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd" \
                         "${SHARE_PATH}/OVMF/OVMF_CODE_4M.secboot.fd","${SHARE_PATH}/OVMF/OVMF_VARS_4M.ms.fd" \
@@ -1049,7 +1064,9 @@ function xxconfigure_xxbios() {
                         "${SHARE_PATH}/qemu/edk2-x86_64-secure-code.fd","${SHARE_PATH}/qemu/edk2-x86_64-code.fd" \
                         "${SHARE_PATH}/edk2-ovmf/x64/OVMF_CODE.secboot.fd","${SHARE_PATH}/edk2-ovmf/x64/OVMF_VARS.fd" \
                     );;
-                *)  # shellcheck disable=SC2054,SC2140
+                *)
+                    #echo " - Secure Boot is OFF"
+                    # shellcheck disable=SC2054,SC2140
                     ovmfs=("${SHARE_PATH}/edk2/ovmf/OVMF_CODE_4M.qcow2","${SHARE_PATH}/edk2/ovmf/OVMF_VARS_4M.qcow2" \
                         "${SHARE_PATH}/edk2/x64/OVMF_CODE.4m.fd","${SHARE_PATH}/edk2/x64/OVMF_VARS.4m.fd" \
                         "${SHARE_PATH}/OVMF/OVMF_CODE_4M.fd","${SHARE_PATH}/OVMF/OVMF_VARS_4M.fd" \
@@ -1065,10 +1082,14 @@ function xxconfigure_xxbios() {
             # qqX: Note the upstream version of these arrays get grepped by 'read_x86_tiano_vars_list' in main menu routines
             # and the function's -A nn may need adjusting if adding lines
             # However, 'read_x86_tiano_vars_list' will work with the mods list if it is pointed to here
-            # Lists all files and all vars, from both secure and from non-secure ...
+            # Lists all files and all vars, from both secure and from non-secure
+            #
+            # At 10/2026 this needed changing and now points here
+            # PLUS whole of this clunky vars routine is NOW subject to REVIEW and probable refactoring ....
 
             # Attempt each EFI_CODE file one by one, selecting the corresponding code and vars
             # when an existing file is found.
+
             _IFS=$IFS
             IFS=","
             for f in "${ovmfs[@]}"; do
@@ -1081,10 +1102,8 @@ function xxconfigure_xxbios() {
             IFS=$_IFS
         fi
         if [ -z "${EFI_CODE}" ] || [ ! -e "${EFI_CODE}" ]; then
-            if [ "${secureboot}" == "on" ]; then
-                echo "ERROR! SecureBoot was requested but no SecureBoot capable firmware was found."
-            else
-                echo "ERROR! EFI boot requested but no EFI firmware found."
+            if [ "${secureboot}" == "on" ]; then echo "ERROR! SecureBoot was requested but no SecureBoot capable firmware was found."
+            else echo "ERROR! EFI boot requested but no EFI firmware found."
             fi
             echo "       Please install OVMF firmware."
             exit 1
@@ -1096,13 +1115,16 @@ function xxconfigure_xxbios() {
             fi
             # Write destination vars file with correct extension
             # based on source format of the EFI_EXTRA_VARS file
-            # Use modified true flag method to maintain 'vm_boot' upstream compatibility
-            # if is_firmware_qcow2 "${EFI_EXTRA_VARS}" ; then
-            if [[ $(is_firmware_qcow2 "${EFI_EXTRA_VARS}") == "true" ]]; then
-                EFI_VARS="${VMDIR}/OVMF_VARS.qcow2"
-            else
-                EFI_VARS="${VMDIR}/OVMF_VARS.fd"
-            fi
+            #######
+            # Use MODIFIED true flag method to maintain 'vm_boot' upstream compatibility,
+            # also with modded function 'is_firmware_qcow2' (to fix null byte errors)
+            # BUT @ 10/2026 remove whole test, complete with upstream spaghetti logic VAR names,
+            # to FIX error where vars set is not matching the code set, as it wasn't actually needed to start with ...
+            ######
+            #if [[ $(is_firmware_qcow2 "${EFI_EXTRA_VARS}") == "true" ]]; then EFI_VARS="${VMDIR}/OVMF_VARS.qcow2"
+            #else EFI_VARS="${VMDIR}/OVMF_VARS.fd"
+            #fi
+            EFI_VARS="${VMDIR}/$(basename "$EFI_EXTRA_VARS")"
             # if ! -e $2 then cp $1 >
             efi_vars "${EFI_EXTRA_VARS}" "${EFI_VARS}"
         fi

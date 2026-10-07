@@ -57,18 +57,35 @@ else
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
           check_screen_percentage_and_output
-          printf "\n\n\n"
+          printf "\n\n\n  From qqX 1.14 onwards, ALL the Windows drivers should be autodetected and should autoinstall"
+          printf "\n\n"
           [[ $WebBrowser ]] && printf "  [qW]"
-          printf "  From qqX 1.14 onwards, ALL the Windows drivers should be autodetected and should autoinstall"
-          printf "\n\n  An overview guide is available at https://qqxproject.org/Guides/Windows-OS if needed"
-          [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT"
-          [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT"
+          printf "  An overview guide is available at https://qqxproject.org/Guides/Windows-OS if needed"
           printf "\n"
           CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
           if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
             printColor "\n\n  WARNING: this CPU is unable to support current versions of Windows."
             printf "\n\n  As 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
             printf "\n  the installation is unlikely to be successful, or to be reliable. \n\n"
+          fi
+          # du -k unattended.iso | tr -cd '[:digit:]'  788  # du -m virtio-win.iso | tr -cd '[:digit:]'  837  @ 10/2026
+          # live boot only
+          DL_Size_Virtio="$(du -m "$VM_Conf_Dir/$VM_InstanceName/virtio-win.iso" 2>/dev/null | tr -cd '[:digit:]')"
+          DL_Size_UnAtnd="$(du -k "$VM_Conf_Dir/$VM_InstanceName/unattended.iso" 2>/dev/null | tr -cd '[:digit:]')"
+          if [[ $(type -p xdg-mime) ]]; then
+            Virtio_MimeType="$(xdg-mime query filetype "$VM_Conf_Dir/$VM_InstanceName/virtio-win.iso" 2>/dev/null)"
+            UnAtnd_MimeType="$(xdg-mime query filetype "$VM_Conf_Dir/$VM_InstanceName/unattended.iso" 2>/dev/null)"
+          elif [[ $(type -p mimetype) ]]; then
+            Virtio_MimeType="$(mimetype "$VM_Conf_Dir/$VM_InstanceName/virtio-win.iso" 2>/dev/null)"
+            UnAtnd_MimeType="$(mimetype "$VM_Conf_Dir/$VM_InstanceName/unattended.iso" 2>/dev/null)"
+          fi
+          if [[ "$Virtio_MimeType" == *'application/x-cd-image' || "$Virtio_MimeType" == *'application/vnd.efi.iso' ]]; then
+            ((DL_Size_Virtio < 700)) && printf "\n\n  The Virtio ISO looks a BIT SMALL ?"
+          else printf "\n\n  The Virtio ISO appears to be INCORRECT or missing"
+          fi
+          if [[ "$UnAtnd_MimeType" == *'application/x-cd-image' || "$UnAtnd_MimeType" == *'application/vnd.efi.iso' ]]; then
+            ((DL_Size_UnAtnd < 600)) && printf "\n\n  The 'Unattended' ISO looks a BIT SMALL ?"
+          else printf "\n\n  The 'Unattended' ISO appears to be INCORRECT or missing"
           fi
         elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
           printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
@@ -97,17 +114,20 @@ else
         printf "\n"
       elif [[ "${VM_InstanceName,,}" == *windows* ]]; then
         if [[ $WindowsMissingIso ]]; then
-          printColor "\n\n\n  [wd] to manually download a Windows ISO"
-          printf "\n\n  Select 64 bit. Save the downloaded ISO to the VM folder. Update the .conf references.\n"
+          printf "\n\n\n"
+          [[ $WebBrowser ]] && printColor "  [wd] to"
+          printColor "  MANUALLY DOWNLOAD a Windows ISO from  > >  https://www.microsoft.com/en-us/software-download/  < < < < <"
+          printf "\n\n  Select 64 bit. Save to the VM folder. Change the iso name to '%s' as in the .conf file and press refresh.\n" "$(basename "$iso")"
         elif [[ "$Mounted_ISO" == *virtio* ]]; then
-          printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
+          printColor "\n\n\n  SETUP: " ; printf "When everything is working and booting correctly,"
           # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
-          printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
-          printColor "\n\n  The Windows ISO is unlikely to be needed so may be archived."
+          printf "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
+          printf "\n\n  The Windows ISO may also be archived."
           printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
           [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
           printf "\n"
         fi
+        [[ ! $(type -p swtpm) ]] && printColor "\n\n\n  SWTPM not found and is needed to run Windows: open another terminal, install 'swtpm' then press refresh   < < < IMPORTANT \n"
       fi
 
     else
@@ -357,7 +377,6 @@ else
     printf  "\n\n"
 
     filter_and_flag_qemu_errors
-
     if [[ $QemuErrorAlert ]]; then
       printColor "  [ql]  show qemu error log"
     elif [[ $FileManager ]]; then

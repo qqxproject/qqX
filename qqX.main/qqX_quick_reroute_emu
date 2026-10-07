@@ -218,21 +218,23 @@ function quickemu {
       fi
 
       # For 1.16 windows tweaks and with the addition of controlled restarts, needed to ensure refinds of boot ISO's
-      if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]] && [[ $secureboot == "on" || $ControlledRestart == "on" ]]; then
+      if [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *windows* ]]; then
         local SecureBootStatus="$secureboot"
         [[ ! $SecureBootStatus ]] && secureboot="off" && SecureBootStatus="off"
         printf "  CONTROLLED RESTARTS are best DISABLED for Windows Live ISO combos, so the various drive refs can be maintained"
         printf "\n\n  Whilst tests have shown SECURE BOOT to be BEST AS INITIALLY OFF but set to 'on' in the .conf file"
         printf "\n\n  Situations can change ..."
         printf "\n\n  Currently  "" CRS: '%s'  SB: '%s'" "$ControlledRestart" "$SecureBootStatus"
-        printColor "\n\n  [enter] to continue with both off  "; printf " [c] to continue with current settings  [b] to go back \n\n\n"
+        printColor "\n\n  [enter] to continue with both off   "; printf "[s] try secure boot on  [c] to continue with current settings  [b] to go back \n\n\n"
         read -rp "  >  "  LiveBootControlOptions
-        if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
-        elif [[ $LiveBootControlOptions != "c" ]]; then
-          secureboot="off"; ControlledRestart="off"
-          printf "\n  Set CRS: '%s'  SB: '%s' \n\n" "$ControlledRestart" "$SecureBootStatus"
-        else  printf "\n\n"
+        if [[ ! $LiveBootControlOptions ]]; then secureboot="off"; SecureBootStatus="off" ; ControlledRestart="off"
+        elif [[ $LiveBootControlOptions == "s" ]]; then secureboot="on"; SecureBootStatus="on" ; ControlledRestart="off"
+        elif [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
         fi
+        if [[ ! $Mounted_ISO_Return ]]; then
+          printf "\n  Set CRS: '%s'  SB: '%s' \n\n" "$ControlledRestart" "$SecureBootStatus" ; sleep 1.4
+        fi
+
       elif [[ $LiveBoot && $img ]] && [[ $ControlledRestart == "on" ]]; then
         printf "  This installation is being carried out from a '.img' file and usually indicates a combination boot setup"
         printf "\n  For LIVE BOOT COMBOS, controlled restarts are best DISABLED, so the various drive refs can be maintained"
@@ -276,6 +278,7 @@ function quickemu {
         # whether the run is made as [v] verbose & terminated
         printf "" > "/tmp/qqX_echo_output.log"
         printf "" > "$QemuErrorLog"
+        printf "" > "$VM_Conf_Dir/$VM_InstanceName/$VM_InstanceName.log"
         [[ $Loop_Diagnostics ]] && printf "\n\n pre-sourcing qmod-boot :" &&  main_loop_diagnostics && printf "\n\n"
         # Run BOOT SEQUENCE via modded function vm_boot from pre-sourced file 'qmod-function-vm_boot-new-temp'
         # which also includes verbose load routines and break sequence

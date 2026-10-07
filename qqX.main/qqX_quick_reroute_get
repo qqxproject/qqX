@@ -1790,11 +1790,29 @@ function_quick_get_wrap ()  {
           fi
         fi
         if [[ $DL_PercentageDone ]] && [[ $DL_PercentageDone != "0" ]]; then printf "\n  %s Percent appears to be downloaded"  "$DL_PercentageDone"
-        else printf "\n  Percent downloaded not known"
+        else printf "\n  Percent downloaded not available"
         fi
         if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]] ; then
-          printf "\n\n  If WINDOWS download failed, but the other elements succeeded,"
-          printf "\n  conclude the process and Manual Download links will given from the Main Menu \n"
+          # du -k unattended.iso | tr -cd '[:digit:]'  788  # du -m virtio-win.iso | tr -cd '[:digit:]'  837  @ 10/2026
+          DL_Size_Virtio="$(du -m "$QWG_Conf_Dir/$QWG_FinalName/virtio-win.iso" 2>/dev/null | tr -cd '[:digit:]')"
+          DL_Size_UnAtnd="$(du -k "$QWG_Conf_Dir/$QWG_FinalName/unattended.iso" 2>/dev/null | tr -cd '[:digit:]')"
+          if [[ $(type -p xdg-mime) ]]; then
+            Virtio_MimeType="$(xdg-mime query filetype "$QWG_Conf_Dir/$QWG_FinalName/virtio-win.iso" 2>/dev/null)"
+            UnAtnd_MimeType="$(xdg-mime query filetype "$QWG_Conf_Dir/$QWG_FinalName/unattended.iso" 2>/dev/null)"
+          elif [[ $(type -p mimetype) ]]; then
+            Virtio_MimeType="$(mimetype "$QWG_Conf_Dir/$QWG_FinalName/virtio-win.iso" 2>/dev/null)"
+            UnAtnd_MimeType="$(mimetype "$QWG_Conf_Dir/$QWG_FinalName/unattended.iso" 2>/dev/null)"
+          fi
+          if [[ "$Virtio_MimeType" == *'application/x-cd-image' || "$Virtio_MimeType" == *'application/vnd.efi.iso' ]]; then
+            ((DL_Size_Virtio > 700)) && printf "\n\n  The Virtio ISO looks OKAY" || printf "\n\n  The Virtio ISO looks a BIT SMALL ?"
+          else printf "\n\n  The Virtio ISO appears to be INCORRECT"
+          fi
+          if [[ "$UnAtnd_MimeType" == *'application/x-cd-image' || "$UnAtnd_MimeType" == *'application/vnd.efi.iso' ]]; then
+            ((DL_Size_UnAtnd > 600)) && printf "\n\n  The 'Unattended' ISO looks OKAY" || printf "\n\n  The 'Unattended' ISO looks a BIT SMALL ?"
+          else printf "\n\n  The 'Unattended' ISO appears to be INCORRECT"
+          fi
+          printColor "\n\n  If WINDOWS download was not possible but the two build iso's look okay,"
+          printColor "\n  conclude the process and Manual Download links will given from the Main Menu \n"
         fi
         printf "\n\n  Completed (or Stopped):"
         printColor "  [c] to conclude  [r] to resume, retry or re-check \n\n"

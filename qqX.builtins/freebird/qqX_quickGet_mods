@@ -56,7 +56,7 @@
 
 ##########################################
 
-QG_ModsNumber="v7.3"  #  for quickGet 4.99.01 at aug 2026
+QG_ModsNumber="v7.4"  #  for quickGet 4.99.01 at oct 2026
 
 ## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
 
@@ -1169,7 +1169,93 @@ mods_finalize_batocera () {
 # For special and oversized 'get' functions or "get_${OS} ()" overwrites, eg Windows or Mac
 # Normally place 'get' functions next to releases and editions
 
-function download_windows_workstation() {
+## SORT, fix and tidy D/L that goes with main d/l function to work better with qqX
+
+get_windows() {
+
+    if [ "${OS}" == "windows-server" ]; then download_windows_server "windows-server-${RELEASE}"
+    else  download_windows_workstation "${RELEASE}"
+    fi
+    if [ "${OPERATION}" == "download" ]; then exit 0
+    fi
+
+    echo "Downloading VirtIO drivers..."
+    web_get "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso" "${VM_PATH}" "virtio-win.iso"
+
+    rm -f "${VM_PATH}/unattended.iso"
+    unattended_windows "${VM_PATH}"
+
+    if [ -n "${FILE_NAME}" ]; then make_vm_config "${FILE_NAME}" "virtio-win.iso"
+    else make_vm_config "windows-${RELEASE}.iso" "virtio-win.iso"
+    fi
+}
+
+create_config() {
+
+    local VM_PATH="${1}" INPUT="${2}" FIXED_ISO=""
+
+    OS="custom"
+    if ! mkdir "${VM_PATH}" 2>/dev/null; then
+        echo "ERROR! Could not create directory: ${VM_PATH}. Please verify that it does not already exist"
+        exit 1
+    fi
+
+    if [[ "${INPUT}" == "http://"* ]] || [[ "${INPUT}" == "https://"* ]]; then
+        INPUT="$(web_redirect "${INPUT}")"
+        if [[ "${INPUT}" == *".iso" ]] || [[ "${INPUT}" == *".img" ]]; then
+            web_get "${INPUT}" "${VM_PATH}"
+            INPUT="${INPUT##*/}"
+        else
+            echo "ERROR! Only ISO,IMG and QCOW2 file types are supported for --create-config"
+            exit 1
+        fi
+    fi
+
+    if [ ! -f "${INPUT}" ]; then
+        echo "ERROR! The input must be a valid URL or path to an ISO, IMG, or QCOW2 file."
+        exit 1
+    elif [[ "${INPUT}" == *".iso" ]]; then
+        echo "Moving image to VM dir" && mv "${INPUT}" "${VM_PATH}"
+        CUSTOM_IMAGE_TYPE="iso"
+    elif [[ "${INPUT}" == *".img" ]]; then
+        echo "Moving image to VM dir" && mv "${INPUT}" "${VM_PATH}"
+        CUSTOM_IMAGE_TYPE="img"
+    elif [[ "${INPUT}" == *".qcow2" ]]; then
+        echo "Moving image to VM dir" && mv "${INPUT}" "${VM_PATH}/disk.qcow2"
+        CUSTOM_IMAGE_TYPE="qcow2"
+    else
+        echo "ERROR! Only ISO,IMG and QCOW2 file types are supported for --create-config"
+        exit 1
+    fi
+    INPUT="$(basename "${INPUT}")"
+
+    echo "Creating custom VM config for ${INPUT##*/}."
+    case "${INPUT,,}" in
+        *freebsd*) CUSTOM_OS="freebsd";;
+        *kolibrios*) CUSTOM_OS="kolibrios";;
+        *reactos*) CUSTOM_OS="reactos";;
+        *windows-server*|*eval_oemret_x*|*eval_x*) CUSTOM_OS="windows-server";;
+        *windows*|win*)
+            CUSTOM_OS="windows"
+            # Older windows 10 ISOs use the year followed by the month rather than the year & half). Match any text for language.
+            if [ "${3}" != "--disable-unattended" ] && ( [ "${3}" == "--unattended" ] || grep -E -q 'Win(10|11)_([0-9]{2}H(1|2)|[0-9]{4})_[^.]*?(x64|x32)(v[0-9])?.iso' <<< "${INPUT}" ); then
+                echo "Creating unattended Windows installation files. To disable, pass --disable-unattended"
+                echo
+                echo "Downloading VirtIO drivers..."
+                web_get "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso" "${VM_PATH}" "virtio-win.iso"
+                FIXED_ISO="virtio-win.iso"
+                rm -f "${VM_PATH}/unattended.iso"
+                unattended_windows "${VM_PATH}"
+            fi
+            ;;
+
+        *) CUSTOM_OS="linux";;
+    esac
+    echo -e "Selecting OS: ${CUSTOM_OS}. If this is incorrect, please modify the config file to include the correct OS.\n"
+    make_vm_config "${INPUT}" "${FIXED_ISO}"
+}
+
+download_windows_workstation() {
 
     local HASH="" session_id="" iso_download_page_html="" product_edition_id=""
     local language_skuid_table_cmd="" language_skuid_table_json="" sku_id=""
@@ -1190,171 +1276,187 @@ function download_windows_workstation() {
         10) url="${url}ISO";;
     esac
 
-    # Make log for dev analysis
-    { echo; date; echo; echo "$url"; echo
-    } >  "/tmp/qe_win_dl_log.txt"
+    # Dev setting, if code currently has problems
+    local Windows_DL_NOT_Working="not-working-at-10-2026"
 
-    { echo "I18N Lang: $I18N"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+    if [[ $Windows_DL_NOT_Working ]]; then
 
-    # MOD update to 04/2026 versions  (needs to match the user agent in function web_get)
-    local user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
-    # Microsoft Edge:
-    # local user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
-    # Google Chrome:
-    # local user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        printf   "\n   MICROSOFT DOWNLOADS ARE CURRENTLY NOT WORKING any further:"
+        printf "\n\n   The easiest method for now is to CONTINUE WITH THE VM CREATION PROCESS, then"
+        printf   "\n   manually download the Windows %s ISO using a web browser from:" "${windows_version}"
+        printf "\n\n   %s" "${url}"
+        printf "\n\n   Select 64 bit. Save the downloaded ISO to:"
+        printf "\n\n   %s" "$(realpath "${VM_PATH}")"
+        printf "\n\n   You can do this LATER ON, after the 'tune-up' when you will be given further instructions"
+        printf "\n\n   on renaming the download to match the iso name in the .conf file \n\n"
 
-    session_id="$(uuidgen)"
+    else
 
-    { echo "$user_agent"; echo; uuidparse "$session_id"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+        # Make log for dev analysis
+        { echo; date; echo; echo "$url"; echo
+        } >  "/tmp/qe_win_dl_log.txt"
 
-    # Get product edition ID for latest release of given Windows version
-    # Product edition ID: This specifies both the Windows release (e.g. 22H2) and edition ("multi-edition" is default, either Home/Pro/Edu/etc., we select "Pro" in the answer files) in one number
-    # This is the *only* request we make that Fido doesn't. Fido manually maintains a list of all the Windows release/edition product edition IDs in its script (see: $WindowsVersions array). This is helpful for downloading older releases (e.g. Windows 10 1909, 21H1, etc.) but we always want to get the newest release which is why we get this value dynamically
-    # Also, keeping a "$WindowsVersions" array like Fido does would be way too much of a maintenance burden
-    # Remove "Accept" header that curl sends by default
-    echo " - Parsing download page: ${url}"
-    iso_download_page_html="$(curl --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --user-agent "$user_agent" --header "Accept:" --max-filesize 1M --proto =https --tlsv1.2 --http1.1 -- "$url")" || {
-        handle_curl_error $?
-        return $?
-    }
+        { echo "I18N Lang: $I18N"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
 
-    # Slow down the 'bot' behaviour, make it seem more human, so the anti-ddos routines don't block us:
+        # MOD update to 04/2026 versions  (needs to match the user agent in function web_get)
+        local user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+        # Microsoft Edge:
+        # local user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
+        # Google Chrome:
+        # local user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
 
-    local RndNum=
-    RndNum="1""$( (tr -cd '1-4' | head -c 1) < /dev/urandom )"
-    echo " - Taking a few human seconds to appear to 'read' the download page ... " ; sleep "$RndNum"
-    echo "   ... to hopefully stop any now or future anti-ddos and anti-bot routines from blocking us"
-    echo
-    echo "   This is becoming increasingly difficult or impossible to achieve:" ; echo
+        session_id="$(uuidgen)"
 
-    # @ 04/2026 further ddos problems
+        { echo "$user_agent"; echo; uuidparse "$session_id"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
 
-    { echo; date; echo "iso_download_page_html:"; echo; echo "$iso_download_page_html"; echo ; echo "End of Page"; echo
-    } >  "/tmp/qe_win_dl_page_html.txt"
+        # Get product edition ID for latest release of given Windows version
+        # Product edition ID: This specifies both the Windows release (e.g. 22H2) and edition ("multi-edition" is default, either Home/Pro/Edu/etc., we select "Pro" in the answer files) in one number
+        # This is the *only* request we make that Fido doesn't. Fido manually maintains a list of all the Windows release/edition product edition IDs in its script (see: $WindowsVersions array). This is helpful for downloading older releases (e.g. Windows 10 1909, 21H1, etc.) but we always want to get the newest release which is why we get this value dynamically
+        # Also, keeping a "$WindowsVersions" array like Fido does would be way too much of a maintenance burden
+        # Remove "Accept" header that curl sends by default
+        echo " - Parsing download page: ${url}"
+        iso_download_page_html="$(curl --disable -sf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --user-agent "$user_agent" --header "Accept:" --max-filesize 1M --proto =https --tlsv1.2 --http1.1 -- "$url")" || {
+            handle_curl_error $?
+            return $?
+        }
 
-    echo -n " - Getting Product edition ID: "
-    # tr: Filter for only numerics to prevent HTTP parameter injection
-    # head -c was recently added to POSIX: https://austingroupbugs.net/view.php?id=407
-    product_edition_id="$(echo "$iso_download_page_html" | grep -Eo '<option value="[0-9]+">Windows' | cut -d '"' -f 2 | head -n 1 | tr -cd '0-9' | head -c 16)"
-    echo "$product_edition_id"
+        # Slow down the 'bot' behaviour, make it seem more human, so the anti-ddos routines don't block us:
 
-    { echo "product_edition_id:"; echo; echo "$product_edition_id"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+        local RndNum=
+        RndNum="1""$( (tr -cd '1-4' | head -c 1) < /dev/urandom )"
+        echo " - Taking a few human seconds to appear to 'read' the download page ... " ; sleep "$RndNum"
+        echo "   ... to hopefully stop any now or future anti-ddos and anti-bot routines from blocking us"
+        echo
+        echo "   This is becoming increasingly difficult or impossible to achieve:" ; echo
 
-    echo " - Permit Session ID: $session_id"
-    # Permit Session ID
-    # "org_id" is always the same value
-    curl -qsf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - -o /dev/null --user-agent "$user_agent" --header "Accept:" --max-filesize 100K --proto =https --tlsv1.2 --http1.1 -- "https://vlscppe.microsoft.com/tags?org_id=y6jn8c31&session_id=$session_id" || {
-        # This should only happen if there's been some change to how this API works
-        handle_curl_error $?
-        return $?
-    }
+        # @ 04/2026 further ddos problems
 
-    RndNum="$( (tr -cd '3-6' | head -c 1) < /dev/urandom )"
-    echo " - A few human seconds here too ...." ; sleep "$RndNum"
+        { echo; date; echo "iso_download_page_html:"; echo; echo "$iso_download_page_html"; echo ; echo "End of Page"; echo
+        } >  "/tmp/qe_win_dl_page_html.txt"
 
-    local profile="606624d44113"
+        echo -n " - Getting Product edition ID: "
+        # tr: Filter for only numerics to prevent HTTP parameter injection
+        # head -c was recently added to POSIX: https://austingroupbugs.net/view.php?id=407
+        product_edition_id="$(echo "$iso_download_page_html" | grep -Eo '<option value="[0-9]+">Windows' | cut -d '"' -f 2 | head -n 1 | tr -cd '0-9' | head -c 16)"
+        echo "$product_edition_id"
 
-    { echo "profile:"; echo; echo "$profile"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+        { echo "product_edition_id:"; echo; echo "$product_edition_id"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
 
-    echo -n " - Getting language SKU ID: "
-    # Get language -> skuID association table
-    language_skuid_table_cmd="curl -qsf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --max-filesize 100K --proto =https --tlsv1.2 --http1.1 \"https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_edition_id}&SKU=undefined&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}\""
-    language_skuid_table_json="$(eval "$language_skuid_table_cmd")" || {
-        handle_curl_error $?
-        return $?
-    }
+        echo " - Permit Session ID: $session_id"
+        # Permit Session ID
+        # "org_id" is always the same value
+        curl -qsf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - -o /dev/null --user-agent "$user_agent" --header "Accept:" --max-filesize 100K --proto =https --tlsv1.2 --http1.1 -- "https://vlscppe.microsoft.com/tags?org_id=y6jn8c31&session_id=$session_id" || {
+            # This should only happen if there's been some change to how this API works
+            handle_curl_error $?
+            return $?
+        }
 
-    { echo; date; echo "language_skuid_table_json - FULL "; echo; echo "$language_skuid_table_json"; echo ; echo "End of Page"; echo
-    } >  "/tmp/qe_win_dl_lang_table full.txt"
+        RndNum="$( (tr -cd '3-6' | head -c 1) < /dev/urandom )"
+        echo " - A few human seconds here too ...." ; sleep "$RndNum"
 
-    { echo "language_skuid_table_cmd:"; echo; echo "$language_skuid_table_cmd"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+        local profile="606624d44113"
 
-    { echo "language_skuid_table_json:"; echo; echo "$language_skuid_table_json"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+        { echo "profile:"; echo; echo "$profile"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
 
-    sku_id="$(echo "${language_skuid_table_json}" | jq -r '.Skus[] | select(.LocalizedLanguage=="'"${I18N}"'" or .Language=="'"${I18N}"'").Id')"
-    echo "$sku_id"
+        echo -n " - Getting language SKU ID: "
+        # Get language -> skuID association table
+        language_skuid_table_cmd="curl -qsf --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --max-filesize 100K --proto =https --tlsv1.2 --http1.1 \"https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_edition_id}&SKU=undefined&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}\""
+        language_skuid_table_json="$(eval "$language_skuid_table_cmd")" || {
+            handle_curl_error $?
+            return $?
+        }
 
-    RndNum="$( (tr -cd '3-6' | head -c 1) < /dev/urandom )"
-    echo " - And a few human seconds here .... " ; sleep "$RndNum"
+        { echo; date; echo "language_skuid_table_json - FULL "; echo; echo "$language_skuid_table_json"; echo ; echo "End of Page"; echo
+        } >  "/tmp/qe_win_dl_lang_table full.txt"
 
-    { echo "sku_id:"; echo; echo "$sku_id"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+        { echo "language_skuid_table_cmd:"; echo; echo "$language_skuid_table_cmd"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
 
-    echo " - Getting ISO download link..."
+        { echo "language_skuid_table_json:"; echo; echo "$language_skuid_table_json"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
 
-    # Get ISO download link
-    # If any request is going to be blocked by Microsoft it's always this last one (the previous requests always seem to succeed)
-    # --referer: Required by Microsoft servers to allow request
+        sku_id="$(echo "${language_skuid_table_json}" | jq -r '.Skus[] | select(.LocalizedLanguage=="'"${I18N}"'" or .Language=="'"${I18N}"'").Id')"
+        echo "$sku_id"
 
-    iso_download_link_cmd="curl -qsLf --location-trusted --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --referer \"$url\" \"https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${sku_id}&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}\""
+        RndNum="$( (tr -cd '3-6' | head -c 1) < /dev/urandom )"
+        echo " - And a few human seconds here .... " ; sleep "$RndNum"
 
-    iso_download_link_json="$(eval "$iso_download_link_cmd")"
+        { echo "sku_id:"; echo; echo "$sku_id"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
 
-    RndNum="$( (tr -cd '5-8' | head -c 1) < /dev/urandom )"
-    echo " - And some more, hopefully successful, human seconds before we start .... " ; sleep "$RndNum"
+        echo " - Getting ISO download link..."
 
-    { echo "iso_download_link_cmd:"; echo; echo "$iso_download_link_cmd"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
+        # Get ISO download link
+        # If any request is going to be blocked by Microsoft it's always this last one (the previous requests always seem to succeed)
+        # --referer: Required by Microsoft servers to allow request
 
-    { echo "iso_download_link_json:"; echo; echo "$iso_download_link_json"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
 
-    local failed=0
-    if ! [ "$iso_download_link_json" ]; then
-        # This should only happen if there's been some change to how this API works
-        echo; echo " - Microsoft servers gave us an empty response to our request for an automated download."
-        failed=1
+
+        iso_download_link_cmd="curl -qsLf --location-trusted --retry 5 --retry-max-time 3 --retry-delay 2 --max-time 20 --continue-at - --referer \"$url\" \"https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${sku_id}&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}\""
+
+        iso_download_link_json="$(eval "$iso_download_link_cmd")"
+
+        RndNum="$( (tr -cd '5-8' | head -c 1) < /dev/urandom )"
+        echo " - And some more, hopefully successful, human seconds before we start .... " ; sleep "$RndNum"
+
+        { echo "iso_download_link_cmd:"; echo; echo "$iso_download_link_cmd"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
+
+        { echo "iso_download_link_json:"; echo; echo "$iso_download_link_json"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
+        local failed=0
+        if ! [ "$iso_download_link_json" ]; then
+            # This should only happen if there's been some change to how this API works
+            echo; echo " - Microsoft servers gave us an empty response to our request for an automated download."
+            failed=1
+        fi
+        if echo "$iso_download_link_json" | grep -q "Sentinel marked this request as rejected."; then
+            echo; echo " - UNFORTUNATELY: Microsoft blocked the download request "; echo
+            failed=1
+        fi
+        if echo "$iso_download_link_json" | grep -q "We encountered a problem processing your request. Please try again later."; then
+            echo; echo " - UNFORTUNATELY: Microsoft blocked the request and is saying to try again later"; echo
+            failed=1
+        fi
+        if [ "${failed}" -eq 1 ]; then
+            printf "\n   RETRY in an hour's time .... ?"
+            printf "\n\n   Reboot your connection to get a new IP address ? \n"
+            printf "\n\n   OR the easiest method for now is to CONTINUE WITH THE VM CREATION PROCESS, then"
+            printf   "\n   manually download the Windows %s ISO using a web browser from:" "${windows_version}"
+            printf "\n\n   %s" "${url}"
+            printf "\n\n   Select 64 bit. Save the downloaded ISO to:"
+            printf "\n\n   %s" "$(realpath "${VM_PATH}")"
+            printf "\n\n   You can do this LATER ON, after the 'tune-up' when you will be given further instructions"
+            printf "\n\n   on renaming the download to match the iso name in the .conf file \n\n"
+            return 1
+        fi
+
+        # Filter for 64-bit ISO download URL
+        iso_download_link="$(echo "${iso_download_link_json}" | jq -r '.ProductDownloadOptions[].Uri' | grep x64)"
+
+        { echo "iso_download_link - filtered:"; echo; echo "$iso_download_link"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
+
+        if ! [ "$iso_download_link" ]; then
+            # This should only happen if there's been some change to the download endpoint web address
+            echo " - Microsoft servers gave us no download link to our request for an automated download."; echo "   Please manually download this ISO in a web browser:"; echo "   $url"
+            return 1
+        fi
+
+        echo " - URL: ${iso_download_link%%\?*}"
+
+        # Download ISO
+
+        FILE_NAME="$(echo "$iso_download_link" | cut -d'?' -f1 | cut -d'/' -f5)"
+        { echo "FILE_NAME"; echo; echo "$FILE_NAME"; echo
+        } >>  "/tmp/qe_win_dl_log.txt"
+
+        web_get "${iso_download_link}" "${VM_PATH}" "${FILE_NAME}"
     fi
-
-    if echo "$iso_download_link_json" | grep -q "Sentinel marked this request as rejected."; then
-        echo; echo " - UNFORTUNATELY: Microsoft blocked the download request "; echo
-        failed=1
-    fi
-
-    if echo "$iso_download_link_json" | grep -q "We encountered a problem processing your request. Please try again later."; then
-        echo; echo " - UNFORTUNATELY: Microsoft blocked the request and is saying to try again later"; echo
-        failed=1
-    fi
-
-    if [ "${failed}" -eq 1 ]; then
-        echo "   RETRY in an hour's time .... ?" ; echo
-        echo "   Reboot your connection to get a new IP address ?" ; echo
-        echo "   OR, probably easiest, continue with the VM creation process, then"
-        echo "   manually download the Windows ${windows_version} ISO using a web browser from:"
-        echo "   ${url}"
-        echo "   Select 64 bit. Save the downloaded ISO to: $(realpath "${VM_PATH}")"
-        echo "   and update the .conf file. "; echo
-        echo "   (more instructions later on)"; echo
-        return 1
-    fi
-
-    # Filter for 64-bit ISO download URL
-    iso_download_link="$(echo "${iso_download_link_json}" | jq -r '.ProductDownloadOptions[].Uri' | grep x64)"
-
-    { echo "iso_download_link - filtered:"; echo; echo "$iso_download_link"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
-    if ! [ "$iso_download_link" ]; then
-        # This should only happen if there's been some change to the download endpoint web address
-        echo " - Microsoft servers gave us no download link to our request for an automated download."; echo "   Please manually download this ISO in a web browser:"; echo "   $url"
-        return 1
-    fi
-
-    echo " - URL: ${iso_download_link%%\?*}"
-
-    # Download ISO
-
-    FILE_NAME="$(echo "$iso_download_link" | cut -d'?' -f1 | cut -d'/' -f5)"
-    { echo "FILE_NAME"; echo; echo "$FILE_NAME"; echo
-    } >>  "/tmp/qe_win_dl_log.txt"
-
-    web_get "${iso_download_link}" "${VM_PATH}" "${FILE_NAME}"
 }
 
 
@@ -1535,7 +1637,7 @@ function unattended_windows() {
     <component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <!--
            This makes the VirtIO drivers available to Windows, assuming that
-           the VirtIO driver disk is available as drive F: (keep as in qqX 1.12 fix)
+           the VirtIO driver disk is available as drive E: to keep in line with upstream (10/2026)
            https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/README.md
 
            Also see: https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/data/virtio-win-pre-installable-drivers-win-11.xml
@@ -1550,10 +1652,10 @@ EOF
         cat << 'EOF' >> "${1}/unattended/autounattend.xml"
         <DriverPaths>
             <PathAndCredentials wcm:action="add" wcm:keyValue="1">
-            <Path>F:\vioscsi\w11\amd64</Path>
+            <Path>E:\vioscsi\w11\amd64</Path>
             </PathAndCredentials>
             <PathAndCredentials wcm:action="add" wcm:keyValue="2">
-            <Path>F:\viostor\w11\amd64</Path>
+            <Path>E:\viostor\w11\amd64</Path>
             </PathAndCredentials>
         </DriverPaths>
 EOF
@@ -1561,10 +1663,10 @@ EOF
         cat << 'EOF' >> "${1}/unattended/autounattend.xml"
       <DriverPaths>
         <PathAndCredentials wcm:action="add" wcm:keyValue="1">
-          <Path>F:\vioscsi\w10\amd64</Path>
+          <Path>E:\vioscsi\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="2">
-          <Path>F:\viostor\w10\amd64</Path>
+          <Path>E:\viostor\w10\amd64</Path>
         </PathAndCredentials>
       </DriverPaths>
 EOF
@@ -1672,7 +1774,12 @@ EOF
     # Note that the virtio-win.iso does NOT have an available checksum, nor the msi
 
     echo "Making unattended.iso"
-    mkisofs -quiet -J -R -input-charset utf-8 -o "${VM_PATH}/unattended.iso" "${VM_PATH}/unattended/"
+    if grep -qsi xorriso <<< "$(mkisofs --version)" ;then
+        # xorriso is -R rockridge / utf8 by default and issues helpful warnings if these are used when in 'mkisofs' mode
+        mkisofs -quiet -J -o "${VM_PATH}/unattended.iso" "${VM_PATH}/unattended/"
+    else
+        mkisofs -quiet -J -R -input-charset utf-8 -o "${VM_PATH}/unattended.iso" "${VM_PATH}/unattended/"
+    fi
 }
 
 ##########################################
@@ -1914,10 +2021,16 @@ function web_get() {
     if [[ ! $Curl_NoPara ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
         CurlParallel="--parallel" ; printf "  qqX multiplexed parallel download: \n\n"
     fi
-    if ! curl -qLf $CurlParallel --location-trusted --retry 500 --retry-connrefused --retry-max-time 3 --retry-delay 1 --progress-bar --continue-at - \
-    --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
-        # qqX needs to take control here, use exit instead  # $CurlParallel - unquoted
-        if pgrep qqX >/dev/null ; then echo ; tput cnorm ; exit
+    if [[ ${HEADERS[*]} ]] && ! curl -qLf $CurlParallel --location-trusted --retry 500 --retry-connrefused --retry-max-time 5 --retry-delay 1 \
+    --progress-bar --continue-at -  --output "${DIR}/${FILE}" --user-agent "${USER_AGENT}" "${HEADERS[@]}" -- "${URL}"; then
+        # qqX needs to take control here  # $CurlParallel - unquoted
+        if pgrep qqX >/dev/null ; then echo "Download stopped, failed or disconnected ..." ; tput cnorm ; return
+        else echo "ERROR: Failed to download ${URL} with curl." ; tput cnorm ; echo ; rm -f "${DIR}/${FILE}"
+        fi
+    elif ! curl -qLf $CurlParallel --location-trusted --retry 500 --retry-connrefused --retry-max-time 5 --retry-delay 1 \
+    --progress-bar --continue-at -  --output "${DIR}/${FILE}" -- "${URL}"; then
+        # headers and agent only if present, empty user-agent can cause d/l failure
+        if pgrep qqX >/dev/null ; then echo "Download stopped, failed or disconnected ..." ; tput cnorm ; return
         else echo "ERROR: Failed to download ${URL} with curl." ; tput cnorm ; echo ; rm -f "${DIR}/${FILE}"
         fi
     fi

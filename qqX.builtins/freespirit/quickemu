@@ -831,7 +831,7 @@ function configure_cpu() {
                 fi
             fi
             # Disable S3 support in the VM to ensure Windows can boot with SecureBoot enabled
-            #  - https://wiki.archlinux.org/title/QEMU#VM_does_not_boot_when_using_a_Secure_Boot_enabled_OVMF
+            #  - https://wiki.archlinux.org/title/QEMU/Troubleshooting#Virtual_machine_not_booting_when_using_a_Secure_Boot_enabled_OVMF
             GUEST_TWEAKS+=" -global ICH9-LPC.disable_s3=1"
 
             # Disable High Precision Timer
@@ -2107,7 +2107,7 @@ function vm_boot() {
                 args+=(-drive media=cdrom,index=2,file="${VMDIR}/unattended.iso")
             else
                 echo; echo "ERROR!  Windows download incomplete:"
-                echo "Required ISO files 'virtio-win.iso' and 'unattended.iso' not found."
+                echo "Required ISO files 'virtio-win.iso' and/or 'unattended.iso' not found."
                 exit 1
             fi
         else
@@ -2278,7 +2278,7 @@ function vm_boot() {
     if [ -z "${VM_PID}" ]; then
         echo "${QEMU}" "${SHELL_ARGS}" "2>/dev/null" >> "${VMDIR}/${VMNAME}.sh"
         sed -i -e 's/ -/ \\\n    -/g' "${VMDIR}/${VMNAME}.sh"
-        ${QEMU} "${args[@]}" &> "${VMDIR}/${VMNAME}.log" &
+        ${QEMU} "${args[@]}" &>> "${VMDIR}/${VMNAME}.log" &
         VM_PID=$!
         sleep 0.25
         if kill -0 "${VM_PID}" 2>/dev/null; then
