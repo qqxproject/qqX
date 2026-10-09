@@ -247,6 +247,18 @@ function quickemu {
           printf "\n  Set CRS: '%s' \n\n" "$ControlledRestart"
         else  printf "\n\n"
         fi
+      elif [[ $LiveBoot ]] && [[ "${VM_InstanceName,,}" == *nitrux* ]] && [[ $ControlledRestart == "on" ]]; then
+        printf "  Tests @ 10/2026 show Nitrux Installations need controlled restarts to be DISABLED"
+        ControlledRestart="off"
+        printf "\n\n  CRS has been set to 'off'"
+        printColor "\n\n  [enter] to continue with CRS off  "; printf " [c] to change this to 'on'  [b] to go back \n\n\n"
+        read -rp "  >  "  LiveBootControlOptions
+        if [[ $LiveBootControlOptions == "b" ]]; then Mounted_ISO_Return=1
+        elif [[ $LiveBootControlOptions != "c" ]]; then
+          ControlledRestart="on"
+          printf "\n  Set CRS: '%s' \n\n" "$ControlledRestart"
+        else  printf "\n\n"
+        fi
       elif [[ $LiveBoot ]] && [[ $ControlledRestart == "on" ]]; then
         printf "  This appears to be a standard live iso ..."
         printColor "\n\n\n  [enter] continue with CRS (recommended)"; printf "   [c] set CRS to 'off'  [b] to go back \n\n\n"

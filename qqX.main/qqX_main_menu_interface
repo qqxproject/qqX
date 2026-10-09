@@ -57,7 +57,7 @@ else
       if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
         if [[ "${VM_InstanceName,,}" == *windows* ]]; then
           check_screen_percentage_and_output
-          printf "\n\n\n  From qqX 1.14 onwards, ALL the Windows drivers should be autodetected and should autoinstall"
+          printf "\n\n\n  ALL the Windows drivers should be autodetected and should auto-install ...."
           printf "\n\n"
           [[ $WebBrowser ]] && printf "  [qW]"
           printf "  An overview guide is available at https://qqxproject.org/Guides/Windows-OS if needed"
@@ -111,6 +111,9 @@ else
       elif [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
         printColor "\n\n\n  Live BOOT ISO NOT FOUND"
         [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+        printf "\n"
+      elif [[ "${VM_InstanceName,,}" == *nitrux* ]]; then
+        printf "\n\n  See https://github.com/orgs/Nitrux/discussions/236  TO RUN OR INSTALL"
         printf "\n"
       elif [[ "${VM_InstanceName,,}" == *windows* ]]; then
         if [[ $WindowsMissingIso ]]; then
