@@ -156,7 +156,7 @@ function os_info {
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
         netboot)          INFO="netboot.xyz|-|https://netboot.xyz/|Bootable Iso with collection distro net-installation boots.";;
-        nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative Linux distro powered by the Cachy kernel with NX AppHub, Hyprland, Waybar and Crystal dock.";;
+        nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative immutable with KDE Maui, Hyprland, Cachy kernel and optional Steam installer. Robust system protections and Flatpak software focus.";;
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
@@ -185,7 +185,7 @@ function distro_release_notes {
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
         manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others are community. Sway is git release 'unstable' https://github.com/manjaro-sway";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
-        nitrux)           RelNotes="11/2025 https://nxos.org/changelog/release-announcement-nitrux-5-0-0/";;
+        nitrux)           RelNotes="TO RUN OR INSTALL: see https://github.com/orgs/Nitrux/discussions/236";;
         opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus, TW Slow is Multi Edition experimental  [w] check website for Leap and other developments.";;
         oraclelinux)      RelNotes="Compare to Rocky/Alma/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         parrotsec)        RelNotes="KDE becomes the default desktop from v7.0 onwards. 'Home' is a base non-technical version. MATE spins may still be available > See Website";;
