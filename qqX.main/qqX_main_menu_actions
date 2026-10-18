@@ -367,6 +367,12 @@ function  main_menu_actions {
       printf "\n\n  whilst small differences may be ignored and will later become self adjusted ..."
       printColor "\n\n  Use the qqX disk utility to resize and tidy."
     fi
+
+    # shellcheck disable=SC2009
+    if ps -ef | grep nbd | grep -qi "$VM_InstanceName" ; then
+      printColor "\n\n\n  A MOUNT CONFLICT may exist ...  NBD drives may be viewed with the QF utility but must be disconnected to use the 'info' function"
+    fi
+
     if [[ $SharedDriveArgs || $SecondDriveArgs ]]; then
       [[ ! $LiveBoot ]] && printColor "\n\n  Scroll to View "
       printf "\n\n  [enter] to return to menu \n\n"

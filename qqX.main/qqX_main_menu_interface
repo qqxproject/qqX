@@ -179,9 +179,9 @@ else
     fi
 
     if [[ ! $LiveBootMissing ]]; then
-      [[ -e $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
-      [[ -e $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
-      [[ -e $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
+      [[ -e $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -lq "$MainDrive" 2>/dev/null | grep -c '[0-9][0-9]:')"
+      [[ -e $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -lq "$SharedDrive" 2>/dev/null | grep -c '[0-9][0-9]:')"
+      [[ -e $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -lq "$SecondDrive" 2>/dev/null | grep -c '[0-9][0-9]:')"
 
       printColor  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
       if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
@@ -508,7 +508,7 @@ else
       fi
 
       if ps -ef | grep nbd | grep -qi "$VM_InstanceName" ; then
-        printf "\n\n  A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
+        printf "\n\n  [qf] A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
       fi
 
       ## Resolve the original distro OS name so a quickget look up can be made:

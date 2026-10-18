@@ -215,7 +215,7 @@ check_disk_is_okay () {
     # Disk won't exist if VM is newly downloaded or live, so only check or return Status, if disk is present.
     # Qemu-img with '-q' should only output if error & only outputs on stderr   The exit status remains separately recorded.
     # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
-    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive" 2>/dev/null
+    if [[ $PrintErrors ]]; then "$QEMU_IMG" check -q "$Selected_ChkDrive"
     else "$QEMU_IMG" check -q "$Selected_ChkDrive"  2>/dev/null
     fi
     # NB: "Okay"  is also used as a global flag  > caution if changing

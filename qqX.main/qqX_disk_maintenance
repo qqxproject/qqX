@@ -47,11 +47,11 @@ drives_and_snapshots() {
       if [[ ! -e "$SecondDrive" ]]; then printf "   ERROR - Drive not found"
       else
         printf "\n\n"
-        if ! "$QEMU_IMG" snapshot -l "$SecondDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+        if ! "$QEMU_IMG" snapshot -l "$SecondDrive" 2>/dev/null | grep -qs 'Snapshot list:' ; then printf "  Snapshots not listed \n\n"
         else
           if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SecondDrive"; echo
           elif [[ ! $Selected_DrivePreset ]]; then
-            "$QEMU_IMG" snapshot -l "$SecondDrive"; echo
+            "$QEMU_IMG" snapshot -l "$SecondDrive" 2>/dev/null ; echo
           fi
         fi
         if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SecondDrive" ; echo
@@ -72,11 +72,11 @@ drives_and_snapshots() {
       if [[ ! -e "$SharedDrive" ]]; then printf "   ERROR - Drive not found"
       else
         printf "\n\n"
-        if ! "$QEMU_IMG" snapshot -l "$SharedDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+        if ! "$QEMU_IMG" snapshot -l "$SharedDrive" 2>/dev/null | grep -qs 'Snapshot list:' ; then printf "  Snapshots not listed \n\n"
         else
-          if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SharedDrive"; echo
+          if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$SharedDrive" 2>/dev/null ; echo
           elif [[ ! $Selected_DrivePreset ]]; then
-            "$QEMU_IMG" snapshot -l "$SharedDrive"; echo
+            "$QEMU_IMG" snapshot -l "$SharedDrive" 2>/dev/null ; echo
           fi
         fi
         if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$SharedDrive" ; echo ; else check_disk_is_okay "$SharedDrive"
@@ -105,11 +105,11 @@ drives_and_snapshots() {
       if [[ $SharedDriveArgs || $SecondDriveArgs ]]; then printColor "\n  Main Drive: \n\n"
       else printColor "\n  One Main Drive: \n\n"
       fi
-      if ! "$QEMU_IMG" snapshot -l "$MainDrive" | grep -s -q 'Snapshot list:' ; then printf "  No Snaphots \n\n"
+      if ! "$QEMU_IMG" snapshot -l "$MainDrive"  2>/dev/null | grep -qs 'Snapshot list:' ; then printf "  Snapshots not listed \n\n"
       else
         if [[ $1 == "info" ]]; then "$QEMU_IMG" info "$MainDrive"; echo
         elif [[ !  $Selected_DrivePreset ]]; then
-          "$QEMU_IMG" snapshot -l "$MainDrive"; echo
+          "$QEMU_IMG" snapshot -l "$MainDrive" 2>/dev/null ; echo
         fi
       fi
       if [[ $2 == "as_disk_util" ]]; then  check_disk_is_okay PrintErrors "$MainDrive" ; echo
@@ -181,8 +181,8 @@ drives_and_snapshots() {
   if [[ $1 == "select" ]] && [[ -e "$Selected_Drive" ]] ; then
 
     printColor "\n\n  Selected Drive = %s \n\n"  "$Selected_DriveName"
-    if [[ $2 == "snaps" ]]; then  "$QEMU_IMG" snapshot -l "$Selected_Drive"
-    else "$QEMU_IMG" info "$Selected_Drive"
+    if [[ $2 == "snaps" ]]; then  "$QEMU_IMG" snapshot -l "$Selected_Drive" 2>/dev/null
+    else "$QEMU_IMG" info "$Selected_Drive" 2>/dev/null
     fi
     check_disk_is_okay "$Selected_Drive"
     Selected_DriveSize="$("$QEMU_IMG" info "$Selected_Drive" | grep -m 1 'disk size' | cut -d: -f2)"
