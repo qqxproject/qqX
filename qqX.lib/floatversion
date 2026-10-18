@@ -198,7 +198,7 @@ floatversion ()  {
       -h|--help)
         show_help ; return 0 ;;
       -V|--version)
-        CurrentVersion="1.7.01"
+        CurrentVersion="1.7.02"
         printf "\n CurrentVersion: %s" "$CurrentVersion"
         if [[ $(type -t 'fv') == "function" ]]; then
           printf "\n\n Checking for updates....   "

@@ -12,7 +12,7 @@ See DeepWiki for floatversion structural details at [deepwiki.com/Alex-Genovese/
 
 References based on **qqX 1.6.01**
 
-Floatversion's integration starts out in the main title script `qqX` where the locations of the key folders are established. The floatversion script is placed in the qqX library folder, along with an `fv` symlink. The library location routine takes place at line 130, about a third of the way through:
+Floatversion's integration starts out in the main title script `qqX` where the locations of the key folders are established. The floatversion script is placed in the qqX library folder, along with the `fv` shortcut. The library location routine takes place at line 130, about a third of the way through:
 
 ```bash
 if [[ -d "./qqX.lib" ]]; then qqX_LibraryFolder="$(realpath "./qqX.lib")"
@@ -104,7 +104,7 @@ function releases_slint() {
 }
 ```
 
-plus in this case, as we are using the standalone, can pipe directly through to the `fv` symlink and to full code `floatversion`
+plus in this case, as we are using the standalone, can pipe directly through to the `fv` shortcut and to full code `floatversion`
 
 ### Method 2
 
