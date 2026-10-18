@@ -225,8 +225,8 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
-    printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for some distro downloads ... "
-    printColor "\n\n      For some host distros also/instead will need 'p7zip-plugins' "
+    printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for a few of the distro downloads ... "
+    printColor "\n\n      Some host distros will need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p unzip) ]]; then
@@ -238,11 +238,12 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p mkisofs) ]]; then
-    printColor "\n\n  >>  For some downloads, installation of 'mkisofs' (via: genisoimage, cdrtools, cdrkit or xorriso) is required "
+    printColor "\n\n  >>  For Windows downloads, an installation of 'mkisofs' via: genisoimage, cdrtools, cdrkit or xorriso is required "
     InstallationAlert=1
   fi
   if [[ ! $(type -p spicy) ]]; then
-    printColor "\n\n  >>  Check for 'spice' installations: 'spice-gtk'/'spice-client-gtk'/'spice-gtk-tools' "
+    printColor "\n\n  >>  Spice GTK is needed for all three of the quickemu host display methods:"
+    printColor "  \n      Package names include 'spice-gtk' 'spice-client-gtk' and 'spice-gtk-tools' ...."
     InstallationAlert=1
   fi
   if [[ ! $(type -p qemu-system-x86_64) ]] || [[ ! $(type -p qemu-img) ]] || [[ ! $(type -p qemu-nbd) ]]; then
