@@ -225,7 +225,8 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p 7z) ]]; then
-    printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for a few of the distro downloads ... "
+    printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for one or two of the distro downloads ... "
+    printColor "\n\n      A pre-download warning for specific distros will normally be given."
     printColor "\n\n      Some host distros will need 'p7zip-plugins' "
     InstallationAlert=1
   fi
@@ -234,7 +235,8 @@ while true ; do
     InstallationAlert=1
   fi
   if [[ ! $(type -p bzip2) ]]; then
-    printColor "\n\n  >>  A command line 'bzip2' installation is needed for some distro downloads ... "
+    printColor "\n\n  >>  A command line 'bzip2' installation is needed for for one or two of the distro downloads ... "
+    printColor "\n\n      A pre-download warning for specific distros will normally be given "
     InstallationAlert=1
   fi
   if [[ ! $(type -p mkisofs) ]]; then

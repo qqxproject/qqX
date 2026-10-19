@@ -855,6 +855,19 @@ function_quick_get_wrap ()  {
             fi
           fi
 
+          if [[ "$QGW_OS_Arr_NameSelected" == "kolibri"* ]] && [[ ! $(type -p 7z) ]]; then
+            printColor "\n\n  >>  WARNING:  A command line '7zip'/'p7zip' installation is needed for this distro download ... "
+            printColor "\n\n  >>  Some host distros will need 'p7zip-plugins' \n"
+          fi
+
+          if [[ "$QGW_OS_Arr_NameSelected" == "dragonflybsd"* ]] && [[ ! $(type -p bzip2) ]]; then
+            printColor "\n\n  >>  WARNING:  A command line 'bzip2' installation is needed for this distro download ... \n"
+          fi
+
+          if [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && [[ ! $(type -p mkisofs) ]]; then
+            printColor "\n\n  >>  WARNING:  For Windows downloads, an installation of 'mkisofs' via: genisoimage, cdrtools, cdrkit or xorriso is required \n"
+          fi
+
           QGW_OS_HomePage_Working=
           if [[ $QGW_OS_HomePage ]]; then
             printColor "\n  ---------------------------------------------------------------------------- "
