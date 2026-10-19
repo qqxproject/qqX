@@ -659,6 +659,7 @@ move_rename_Selected_VM () {
           mv "$2"  "${Mv_NewName}.conf" || MoveFail=1
         fi
         if [[ ! $MoveFail ]] ; then function_rename_conf_dirnames "${Mv_NewName}.conf"  "$1"  "$Mv_NewName" ; fi
+        # should keep selinux attribs if they were initially present (shows -e if using lsattr or with a dot at end if using ls -la)
       fi
     fi
 
