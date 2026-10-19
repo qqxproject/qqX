@@ -265,7 +265,13 @@ while true; do
   fi
 
 
-  printf "\n\n\n  [1] Main Drive   [2] Second Drive  [3] Shared Drive   [i] Input Drive  [A] All Drives  [a] all Non-Shared Drives "
+  printf "\n\n\n"
+  [[ "$MainAvailable" ]] && printf "  [1] Main Drive   "
+  [[ "$SecondPathName" ]] && printf "[2] Second Drive  "
+  [[ "$SharedPathName" ]] && printf "[3] Shared Drive   "
+  [[ "$qqf_Input_Drivepath" ]] && printf "[i] Input Drive  "
+  printf "[A] All Drives  "
+  [[ "$SharedPathName" ]] && printf "[a] all Non-Shared Drives "
 
   printf "\n\n  See main utilities for general disk tools and for disk creation"
 
@@ -323,7 +329,9 @@ while true; do
   else
 
     printf "\n\n  %s: \n\n" "$TargetName"
-    printColor "  [c] connect"
+    if [[ "$TargetName" == All* ]]; then printColor "  [c] connect"
+    else ! ps -ef | grep "${TargetDevice/'/dev/'/}" | grep -qs qcow && printColor "  [c] connect"
+    fi
     printColor "  [d] disconnect current and unmount"
     printColor "  [enter] [r] to reselect or return"
     printf "\n\n  Connected drives may be mounted as standard in the file-manager"
@@ -340,7 +348,7 @@ while true; do
           printf "\n\n  Kernel module WARNING: 'nbd' NOT found. But may be present. "
           printf "\n\n  Try 'modinfo -n nbd' at a terminal & Check your distro repositories for 'linux-modules' ...  "
         fi
-        printf "checking mounts ... \n\n"
+        printf "  Checking mounts ... \n\n"
         if [[ "$TargetName" == All* ]]; then
           [[ $MainMountPoint ]] && umount "$MainMountPoint"
           [[ $SecondMountPoint ]] && umount "$SecondMountPoint"
