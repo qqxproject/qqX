@@ -138,21 +138,28 @@ check_sudo_nbd_active () {
 
 load_qf_defaults () {
 
-  if [[ $MainDrive ]]; then  MainPathName="$VM_Conf_Dir/$MainDrive" ; fi
-  if [[ -e "$MainPathName" ]] && [[ ! $LiveBoot ]]; then  MainAvailable=1 ; else MainAvailable= ; fi
+  if [[ $MainDrive ]]; then  MainPathName="$VM_Conf_Dir/$MainDrive"
+  fi
+  if [[ -e "$MainPathName" ]] && [[ ! $LiveBoot ]]; then  MainAvailable=1 ; else MainAvailable=
+  fi
 
-  if [[ $SecondDrive ]]; then SecondPathName="$VM_Conf_Dir/$SecondDrive" ; fi
+  if [[ $SecondDrive ]]; then SecondPathName="$VM_Conf_Dir/$SecondDrive"
+  fi
   if [[ -e "$SecondPathName" ]]; then  SecondAvailable=1
-    if  [[ ! $(du -b -t 1000000 "$SecondPathName" 2>/dev/null) ]]; then Empty2nd=1 ; else Empty2nd= ; fi
+    if  [[ ! $(du -b -t 1000000 "$SecondPathName" 2>/dev/null) ]]; then Empty2nd=1 ; else Empty2nd=
+    fi
   else SecondAvailable=
   fi
+
   SharedPathName="$SharedDrive"
-  if [[ -e "$SharedPathName" ]]; then  SharedAvailable=1
-    if  [[ ! $(du -b -t 1000000 "$SharedPathName" 2>/dev/null) ]]; then EmptyShared=1 ; else EmptyShared= ; fi
-  else SharedAvailable=
+  if [[ $SharedDrive_Mount ]] && [[ -e "$SharedPathName" ]]; then  SharedAvailable=1
+    if  [[ ! $(du -b -t 1000000 "$SharedPathName" 2>/dev/null) ]]; then EmptyShared=1 ; else EmptyShared=
+    fi
+  else SharedAvailable= ; SharedPathName=
   fi
   if [[ "$qqf_Input_Drivepath" ]]; then  InputAvailable=1
-    if  [[ ! $(du -b -t 1000000 "$qqf_Input_Drivepath" 2>/dev/null) ]]; then EmptyInput=1 ; else EmptyInput= ; fi
+    if  [[ ! $(du -b -t 1000000 "$qqf_Input_Drivepath" 2>/dev/null) ]]; then EmptyInput=1 ; else EmptyInput=
+    fi
   else InputAvailable=
   fi
 
@@ -168,7 +175,8 @@ load_qf_defaults () {
     TargetPathName="$SharedDrive"
     TargetName="Shared Drive"
     TargetDevice="/dev/nbd3"
-    if [[ $SharedAvailable ]]; then TargetAvailable=1 ; else TargetAvailable= ; fi
+    if [[ $SharedAvailable ]]; then TargetAvailable=1 ; else TargetAvailable=
+    fi
   fi
 }
 

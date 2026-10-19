@@ -829,6 +829,7 @@ qcow2_filemanagement_launcher () {
       printf "\n MainDrive=\"%s\"" "$MainDrive"
       printf "\n SecondDrive=\"%s\"" "$SecondDrive"
       printf "\n SharedDrive=\"%s\"" "$SharedDrive"
+      printf "\n SharedDrive_Mount=\"%s\"" "$SharedDrive_Mount"
       printf "\n UserTerm=\"%s\"" "$UserTerm"
       printf "\n Terminal_Start=\"%s\"" "$Terminal_Start"
       printf "\n NoClear=\"%s\"" "$NoClear"

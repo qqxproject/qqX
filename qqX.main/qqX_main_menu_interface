@@ -377,6 +377,11 @@ else
     printf "ISO's: %s (%s)  "  "${InstanceISO_Sizes}G" "$InstanceISO_SizesCount"
     [[ $(ls "$VM_InstanceName"/*.OLD.qcow2 2>/dev/null) ]] && printColor "(backup disk present)"
 
+    if [[ $SharedDrive ]]; then
+      [[ $SharedDrive_Mount ]] && printColor "  Shared Drive Mounted"
+      [[ $SharedDrive_Conf == "no-shared" ]] && printColor "  Shared Drive Disabled"
+    fi
+
     printf  "\n\n"
 
     filter_and_flag_qemu_errors
