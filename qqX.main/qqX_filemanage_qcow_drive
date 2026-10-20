@@ -152,7 +152,7 @@ load_qf_defaults () {
   fi
 
   SharedPathName="$SharedDrive"
-  if [[ $SharedDrive_Mount ]] && [[ -e "$SharedPathName" ]]; then  SharedAvailable=1
+  if [[ $SharedAvailableAtBase ]] && [[ -e "$SharedPathName" ]]; then  SharedAvailable=1
     if  [[ ! $(du -b -t 1000000 "$SharedPathName" 2>/dev/null) ]]; then EmptyShared=1 ; else EmptyShared=
     fi
   else SharedAvailable= ; SharedPathName=
@@ -307,7 +307,7 @@ while true; do
   fi
 
   printColor "\n\n\n  [enter] to change %s connections   or  [option] for different selection"  "${TargetName^^}"
-  printf "\n\n  [r] to refresh vars  [f] open drive in file-manager  [h] help   [q] to quit "
+  printf "\n\n  [r] attempt drive vars refresh   [f] open drive in file-manager  [h] help   [q] to quit "
 
   printf "\n\n"
   read -rp "  >  " qf_DriveSelect
@@ -338,9 +338,9 @@ while true; do
 
     printf "\n\n  %s: \n\n" "$TargetName"
     if [[ "$TargetName" == All* ]]; then printColor "  [c] connect"
-    else ! ps -ef | grep "${TargetDevice/'/dev/'/}" | grep -qs qcow && printColor "  [c] connect"
+    else ! ps -ef | grep "${TargetDevice/'/dev/'/}" | grep -qs qcow && [[ $TargetAvailable ]] && printColor "  [c] connect"
     fi
-    printColor "  [d] disconnect current and unmount"
+    [[ "$TargetName" == All* ]] || [[ $TargetAvailable ]] && printColor "  [d] disconnect current and unmount"
     printColor "  [enter] [r] to reselect or return"
     printf "\n\n  Connected drives may be mounted as standard in the file-manager"
     printf "\n\n  External formats are not always readable using the ndb method ..."  # REVIEW  is a conversion possible ?

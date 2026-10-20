@@ -810,6 +810,11 @@ qcow2_filemanagement_launcher () {
 
   if [[ $qqf_Skip_SetVars ]]; then qqf_Skip_SetVars=
   else
+    # check shared drive availability
+    if [[ $SharedDrive ]] && [[ $SharedDrive_Mount ]]; then SharedAvailableAtBase=1
+    elif [[ $SharedDrive ]] && [[ $SharedDrive_Conf != "no-shared" ]] ; then SharedAvailableAtBase=1
+    else SharedAvailableAtBase=
+    fi
     # Needs to run script in a separate terminal to ensure qqX main does NOT get elevated permissions
     { printf "\n qqX_MainFolder=\"%s\"" "$qqX_MainFolder"
       printf "\n qqX_CustomFolder=\"%s\"" "$qqX_CustomFolder"
@@ -829,7 +834,7 @@ qcow2_filemanagement_launcher () {
       printf "\n MainDrive=\"%s\"" "$MainDrive"
       printf "\n SecondDrive=\"%s\"" "$SecondDrive"
       printf "\n SharedDrive=\"%s\"" "$SharedDrive"
-      printf "\n SharedDrive_Mount=\"%s\"" "$SharedDrive_Mount"
+      printf "\n SharedAvailableAtBase=\"%s\"" "$SharedAvailableAtBase"
       printf "\n UserTerm=\"%s\"" "$UserTerm"
       printf "\n Terminal_Start=\"%s\"" "$Terminal_Start"
       printf "\n NoClear=\"%s\"" "$NoClear"
