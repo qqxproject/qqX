@@ -147,7 +147,7 @@ function os_info {
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
         crunchbang++)     INFO="Crunchbangplusplus|-|https://www.crunchbangplusplus.org/|The classic minimal crunchbang feel, now with Debian base.";;
         edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
-        elementary)       INFO="Elementary OS|-|https://elementary.io/|Streamlined Gnome/Vala/Flatpak distro: Thoughtful, capable, and ethical replacement for Windows and macOS.";;
+        elementary)       INFO="Elementary OS|-|https://elementary.io/| Home to the Pantheon desktop, a streamlined Gnome/Vala/Flatpak distro targeting basic needs and new users.";;
         endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
         fedora)           INFO="Fedora|-|https://www.fedoraproject.org/|Innovative Linux community distros for desktops, clouds, and containers. Security focused and enterprise funded by RedHat and others ...";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
@@ -178,7 +178,7 @@ function distro_release_notes {
         alma)             RelNotes="Compare to Rocky/Oracle/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
         batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
-        elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
+        elementary)       RelNotes="10/2026 Although \$0 is possible, a donation request paywall is also present > See website ....";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
@@ -459,16 +459,18 @@ function releases_easyos() {
 }
 
 ## make dynamic for latest (and fix hash)
+# @ 10/2026 updated for new servers and add a tweak for the base64 that has crept in
 function releases_elementary() {
     echo latest
 }
 function get_elementary() {
-    local HASH= ; local ISO= ; local BaseUrl= ; local RelData=
+    local HASH= ; local ISO= ; local BaseUrl= ; local RelData="" Base64Bit=""
     RelData="$(web_pipe "https://elementary.io/docs/installation")"
-    HASH="$(grep -s bash <<< "$RelData" | grep code | grep -v iso | tail -n 1 | tr '>' '\n' | grep -e '</code' | cut -d '<' -f1)"
-    ISO="$(grep -s bash <<< "$RelData" | grep code | grep iso | tail -n 1 | tr ' ' '\n' | grep iso | cut -d '<' -f1)"
-    BaseUrl="https://ams3.dl.elementary.io/download"
-    echo "${BaseUrl}/$(date +%s | base64)/${ISO} ${HASH}"
+    HASH="$(grep -s bash <<< "$RelData" | grep code | grep -A1 amd64 | grep -v iso | tail -n 1 | tr '>' '\n' | grep -e '</code' | cut -d '<' -f1)"
+    ISO="$(grep -s bash <<< "$RelData" | grep code | grep amd64 | grep iso | tail -n 1 | tr ' ' '\n' | grep iso | cut -d '<' -f1)"
+    BaseUrl="https://dl.elementaryos.org"
+    Base64Bit="$(date +%s | base64)" ; Base64Bit="${Base64Bit/'o='/==}"
+    echo "${BaseUrl}/$Base64Bit/${ISO} ${HASH}"
 }
 
 ## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
@@ -1861,7 +1863,7 @@ function validate_release() {
 }
 
 ## TWEAK
-# A lot of these have already been modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
+# A lot of these have already been modded in the Quickemu FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
 
 # Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get' and NOT to use on binaries)
 function web_pipe {
@@ -1881,11 +1883,11 @@ function web_pipe_json {
 
 ## TWEAK
 function web_check {
-    local HEADERS=() ; local URL="${1}"
+    local HEADERS=() ; local URL=""
     # Normally just a URL. Mac OS has URL as $1 then followed by repeated headers requests.
     while (( "$#" )); do
         if [ "${1}" == "--header" ]; then HEADERS+=("${1}" "${2}") ; shift 2
-        else shift
+        else URL="${1}" ; shift
         fi
     done
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
@@ -1970,6 +1972,7 @@ function web_get() {
     HEADERS=()
     # REVIEW  https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Browser_detection_using_the_user_agent  (macos UA is from upstream)
     # Windows download has already set itself up as 'FireFox' but without this if-then we would suddenly switch to 'Chrome'
+    # Note: in the following, the rendering engine is Gecko, and the "gecko-Trail" is the fixed string 20100101, which means "desktop"
     if [[ $OS == "macos" ]]; then USER_AGENT="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
     else USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
     fi
