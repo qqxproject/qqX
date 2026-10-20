@@ -510,6 +510,7 @@ VM_SelectorStyle="A"
 # to re-snapshot before making experimental changes.
 # Controlled Qemu shutdown design still allows the 'Do not turn off your computer' to function
 # without conflict. However, set ="off" if a load-up of auto-restart is preferred.
+# May be individually controlled in the distro .conf file
   VM_ControlledRestart_Default="on"
 
 #  -------------------------------------------------------------------------------------------------------------------

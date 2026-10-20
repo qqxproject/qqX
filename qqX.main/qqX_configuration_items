@@ -22,17 +22,20 @@ custom_conf_notes () {
 
   printf "
 
-    '#!/usr/bin/qqX --vm'               (unquoted)  for qqX direct start
+    '#!/usr/bin/qqX --vm'               (unquoted)  for qqX direct start (where possible)
 
-    qqX only:
+    QQX ONLY:
     Custom_SDL_ScreenPercent=\"xx\"      (integer from 25 to 99)
     Custom_SDL_ScreenSize=\"WxH\"        (eg 2560x1440)
     HeadlessDisplay=\"true\"
+
     SecondDrive=\"My_Folder/My_VM/disk2.qcow2\"
     SharedDrive_Conf=\"no-shared\"
+    ControlledRestart=\"on|off\"        override qqX main settings
+
     cpu_pins=\"x,x\"      give pairs of host cpu numbers, and where total number of elements match number of 'cpu_cores'
 
-    Other:
+    OTHER:
     disk_size=\"xxxG\"    (integer) used once only, for first build, may be later discarded
     cpu_cores=\"x\"       (even integer)  = number of guest processor virtual *threads*
     ram=\"xG\"            (integer)  odd or even numbers allowed
@@ -577,7 +580,7 @@ function refresh_conf_vars_and_values {
     while grep -qs "$ConfClearanceLog" <<< "$(ps aux)" ; do sleep 1 ; done
     source "$ConfClearanceLog"
 
-    # Clear any qqX specifics
+    # Clear or default any qqX specifics
     SecondDrive=
     SharedDrive=
     DriveLocationError=
@@ -594,6 +597,7 @@ function refresh_conf_vars_and_values {
     QemuErrorLog=
     cpu_pins=
     DisplayConf_Mods=
+    ControlledRestart="$VM_ControlledRestart_Default"
 
     ## Make sure any Quickemu boot vars get set to default and don't inherit' from a running a previous VM
 
