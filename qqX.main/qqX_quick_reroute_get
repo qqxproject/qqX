@@ -882,7 +882,7 @@ function_quick_get_wrap ()  {
               else
                 printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
                 if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
-                  printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the page"
+                  printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the homepage   [t] test distro availability"
                 fi
               fi
             } >> "/tmp/qmod-dl-homepage-report.txt"
@@ -1006,7 +1006,8 @@ function_quick_get_wrap ()  {
         printf "\n\n  Linux ISO's: Try downloading directly from the distro's Web Pages .... \n"
       elif [[ ${#QGW_Releases_Array[@]} -eq 1 ]] ; then
         if [[ ${QGW_Releases_Array[0]} == "latest" ]]; then
-          printColor "  The Latest Release is available"
+          #printColor "  The Latest Release is available"
+          printf "  THE LATEST RELEASE IS AVAILABLE"
         else
           printColor "  Release '%s' is available" "${QGW_Releases_Array[0]}"
         fi
@@ -1031,7 +1032,7 @@ function_quick_get_wrap ()  {
       else QGW_List_NumSelected_Previous="${#QGW_OS_Array[@]}"
       fi
 
-      printf "\n\n  [s] scroll to next listing  [p] to previous  [r] reload/refresh/retry/check-internet  [t] test distro \n\n"
+      printf "\n\n  [s] scroll to next listing  [p] to previous  [r] reload/refresh/retry/check-internet  [t] test distro availability \n\n"
 
       if [[ $WebBrowser ]]; then
         [[ $QGW_OS_HomePage ]] && printf "  [w] to open listed page with web browser"
