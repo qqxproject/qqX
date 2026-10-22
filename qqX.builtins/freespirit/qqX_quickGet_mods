@@ -459,7 +459,7 @@ function releases_easyos() {
 }
 
 ## make dynamic for latest (and fix hash)
-# @ 10/2026 updated for new servers and add a tweak for the base64 that has crept in
+# @ 10/2026 updated for new servers and add a tweak for the base64 changes that crept in
 function releases_elementary() {
     echo latest
 }
@@ -469,7 +469,7 @@ function get_elementary() {
     HASH="$(grep -s bash <<< "$RelData" | grep code | grep -A1 amd64 | grep -v iso | tail -n 1 | tr '>' '\n' | grep -e '</code' | cut -d '<' -f1)"
     ISO="$(grep -s bash <<< "$RelData" | grep code | grep amd64 | grep iso | tail -n 1 | tr ' ' '\n' | grep iso | cut -d '<' -f1)"
     BaseUrl="https://dl.elementaryos.org"
-    Base64Bit="$(date +%s | base64)" ; Base64Bit="${Base64Bit/'o='/==}"
+    Base64Bit="$(date +%s | basenc -i --base64url)" ; Base64Bit="${Base64Bit/'o='/==}"
     echo "${BaseUrl}/$Base64Bit/${ISO} ${HASH}"
 }
 
@@ -565,20 +565,24 @@ function get_guix() {
     echo "${URL}/${ISO}"
 }
 
-## FIX iso url (and update releases 08/2026)
+## FIX iso url, update releases 08/2026, update folder naming 10/2026
 function releases_kdeneon() {
     echo bigscreen desktop dev-unstable
 }
 function get_kdeneon() {
     local HASH= ; local ISO= ; local URL=
-    if [[ $RELEASE == "dev-unstable" ]]; then
+    if [[ $RELEASE == "bigscreen" ]]; then
+        URL="https://files.kde.org/neon/images/big/user/current"
+        ISO="neon-user-big-current.iso"
+        HASH=$(web_pipe "${URL}/neon-user-big-current.sha256sum" | cut -d' ' -f1)
+    elif [[ $RELEASE == "desktop" ]]; then
+        URL="https://files.kde.org/neon/images/desk/user/current"
+        ISO="neon-user-desk-current.iso"
+        HASH=$(web_pipe "${URL}/neon-user-desk-current.sha256sum" | cut -d' ' -f1)
+    elif [[ $RELEASE == "dev-unstable" ]]; then
         URL="https://files.kde.org/neon/images/dev/unstable/current"
         ISO="neon-unstable-dev-current.iso"
         HASH=$(web_pipe "${URL}/neon-unstable-dev-current.sha256sum" | cut -d' ' -f1)
-    else
-        URL="https://files.kde.org/neon/images/${RELEASE}/user/current"
-        ISO="neon-user-${RELEASE}-current.iso"
-        HASH=$(web_pipe "${URL}/neon-user-${RELEASE}-current.sha256sum" | cut -d' ' -f1)
     fi
     echo "${URL}/${ISO} ${HASH}"
 }
