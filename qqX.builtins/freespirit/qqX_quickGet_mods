@@ -702,6 +702,20 @@ function get_mxlinux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## 10/2026 FIX for URL, for release numbers -gt 9.9  and FIX hash
+function releases_netbsd() {
+   #web_pipe "https://cdn.netbsd.org/pub/NetBSD/iso/" | grep href | fv -Q -M 6
+   web_pipe "https://archive.netbsd.org/pub/NetBSD-archive/images/" | grep href | fv -Q -M 6
+}
+
+function get_netbsd() {
+    local HASH=""
+    local ISO="NetBSD-${RELEASE}-amd64.iso"
+    local URL="https://archive.netbsd.org/pub/NetBSD-archive/images/${RELEASE}"
+    HASH=$(web_pipe "${URL}/SHA512" | grep "amd64.iso" | cut -d' ' -f4)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIX hash check and use CORRECT iso
 function get_nitrux() {
     local HASH="" URLBASE="" URL="" ISO="" IsoLink=""
