@@ -183,7 +183,7 @@ function distro_release_notes {
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
-        manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others are community. Sway is git release 'unstable' https://github.com/manjaro-sway";;
+        manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others community. Sway is git 'unstable' at https://github.com/manjaro-sway";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="TO RUN OR INSTALL: see https://github.com/orgs/Nitrux/discussions/236";;
         opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus, TW Slow is Multi Edition experimental  [w] check website for Leap and other developments.";;
@@ -643,27 +643,38 @@ function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
 }
 
-## FIX manjaro sway (again, 08/2026) https://github.com/manjaro-sway/manjaro-sway
+## FIX manjaro sway (again, 08/2026 and 10/2026) https://github.com/manjaro-sway/manjaro-sway
+# https://manjaro-sway.download/iso/202610180719/manjaro-sway-26.1.3-unstable-261018-linux72.iso
 function editions_manjaro() {
     if [[ $RELEASE == "sway" ]]; then echo full ; else echo full minimal; fi
 }
 function releases_manjaro() {
-    echo plasma xfce gnome cinnamon i3 sway
+    echo kde xfce gnome cinnamon i3 sway
 }
 function get_manjaro() {
-    local HASH="" ; local ISO="" ; local MANIFEST="" ; local URL="" ; local TYPE="official"
-    MANIFEST="$(web_pipe https://gitlab.manjaro.org/web/iso-info/-/raw/master/file-info.json)"
+    local HASH="" ISO=""  MANIFEST=""  URL=""  TYPE="official" SwayStub="" SwayShaLink="" SwayShaData=""
+    # 10/2026 gitlab is recording poor uptimes https://status.manjaro.org/history/manjaro-git-lab
+    # MANIFEST="$(web_pipe https://gitlab.manjaro.org/web/iso-info/-/raw/master/file-info.json)"
+    MANIFEST="$(web_pipe https://manjaro.org/products/download/x86 | tr '<' '\n' | grep href | grep iso)"
+    # eg. a href="https://download.manjaro.org/kde/26.1.0/manjaro-kde-26.1.0-260812-linux71.iso" rel="noopener noreferrer"> and 4 more
     case "${RELEASE}" in
-        sway) MANIFEST="$(web_pipe https://manjaro-sway.download/)" ; TYPE="sway" ;;
+        sway) MANIFEST="$(web_pipe https://manjaro-sway.download/iso)" ; TYPE="sway" ;;
         cinnamon|i3) TYPE="community";;
     esac
     if [ "${EDITION}" == "minimal" ] && [ "${TYPE}" != "sway" ]; then EDITION=".minimal"
     else EDITION=""
     fi
-    if [ "${RELEASE}" == "sway" ]; then URL=$(grep iso <<<"$MANIFEST" | tr '"' '\n' | grep http | grep -v 'iso.')
-    else URL="$(echo "${MANIFEST}" | jq -r ."${TYPE}.${RELEASE}${EDITION}".image)"
+    if [ "${RELEASE}" == "sway" ]; then
+        SwayStub="https://manjaro-sway.download"
+        SwayShaLink="$(grep href <<<"$MANIFEST" | grep -m2 span | grep SHA | tr '"' '\n' | grep iso )"
+        SwayShaData="$(web_pipe "${SwayStub}$SwayShaLink")"
+        HASH="$(cut -d' ' -f1 <<<"$SwayShaData")"
+        URL="$(cut -d' ' -f2 <<<"$SwayShaData")" ; URL="${URL/./}" ; URL="${SwayStub}$URL"
+    else
+        # URL="$(echo "${MANIFEST}" | jq -r ."${TYPE}.${RELEASE}${EDITION}".image)"
+        URL="$(grep "$RELEASE" <<<"$MANIFEST" | cut -d'"' -f2)"
+        HASH=$(web_pipe "${URL}.sha512" | cut -d' ' -f1)
     fi
-    HASH=$(web_pipe "${URL}.sha512" | cut -d' ' -f1)
     echo "${URL} ${HASH}"
 }
 
