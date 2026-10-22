@@ -157,6 +157,7 @@ function os_info {
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
         netboot)          INFO="netboot.xyz|-|https://netboot.xyz/|Bootable Iso with collection distro net-installation boots.";;
         nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative immutable with KDE Maui, Hyprland, Cachy kernel and optional Steam installer. Robust system protections and Flatpak software focus.";;
+        peppermint)       INFO="PeppermintOS|-|https://peppermintos.com/|Bare-bones XFCE, no firewall, browser, office or media player; based on either Devuan or Debian, for EOL older computers";;
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
@@ -855,6 +856,32 @@ function get_pclinuxos() {
     ISO="pclinuxos64-${EDITION}-${RelMax}.iso"
     echo "${URL}/${ISO} ${HASH}"
 }
+
+## 10/2026 UPDATE and FIX (only xfce now)
+function releases_peppermint() {
+    echo latest
+}
+function editions_peppermint() {
+    echo "debian-xfce devuan-xfce"
+}
+function get_peppermint() {
+    local HASH="" ISO="" FilesData="" ShaLink="" ShaData=""
+    local URL="https://sourceforge.net/projects/peppermintos/files/isos/XFCE"
+    # https://sourceforge.net/projects/peppermintos/files/isos/XFCE/peppermint_devuan-amd64.iso
+    # https://sourceforge.net/projects/peppermintos/files/isos/XFCE/PeppermintOS-Debian-64.iso
+    # Note naming inconsistencies which may cause future problems, since 2026 edition slim-down,
+    # and probable future removal of XFCE folder as Gnome option is now not there ...
+    FilesData="$(web_pipe "$URL" | grep href | grep sha | grep headers)"
+    case ${EDITION} in
+        devuan-xfce) ShaLink="$(grep evuan <<<"$FilesData" | cut -d'"' -f6)" ;;
+        debian-xfce) ShaLink="$(grep ebian <<<"$FilesData" | cut -d'"' -f6)" ;;
+    esac
+    ShaData="$(web_pipe "$ShaLink")"
+    ISO="$(awk '{print $2}' <<<"$ShaData")"
+    HASH="$(awk '{print $1}' <<<"$ShaData")"
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 
 ## UPDATE and tweak
 function releases_popos() {
