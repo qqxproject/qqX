@@ -728,6 +728,23 @@ function get_nitrux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## UPDATE 10/2026
+function releases_nobara() {
+    echo "latest"
+}
+function editions_nobara() {
+    echo "Official GNOME KDE Steam-HTPC Steam-Handheld"
+}
+function get_nobara() {
+    local HASH= ; local URL= ; local IsoRefs="" ShaLink=""
+    # eg https://nobara-images.nobaraproject.org/Nobara-44-Official-2026-10-13.iso.sha256sum
+    IsoRefs="$(web_pipe "https://nobaraproject.org/download.html#standard" | grep sha | cut -d'"' -f2)"
+    ShaLink="$(grep "$EDITION" <<<"$IsoRefs")"
+    HASH="$(web_pipe "$ShaLink" | cut -d' ' -f1)"
+    URL="${ShaLink/'.sha256sum'/}"
+    echo "${URL} ${HASH}"
+}
+
 ## FIX HASH
 function get_openindiana() {
     local HASH="" ; local ISO="" ; local URL=""
