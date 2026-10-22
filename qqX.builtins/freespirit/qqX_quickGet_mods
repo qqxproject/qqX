@@ -944,15 +944,25 @@ function get_rockylinux() {
 }
 
 ## FIX url and hash, plus make dynamic (if list happens to show up)
+# 10/2026 UPDATE md5 to sha256
+function releases_siduction() {
+    echo latest
+}
+function editions_siduction() {
+    local NAME=""
+    NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
+    web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/" | grep folder | cut -d'"' -f8 | tr -d '/' | sort -u
+}
 function get_siduction() {
-    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ; local Data=
+    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ShaLink="" ShaData=""
     NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
     URL="https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/${EDITION}"
-    Data="$(web_pipe "${URL}"| grep .iso.md5)"
-    VERSION="$(cut -d'-' -f2 <<< "$Data" | fv -M)"
-    DATE="$(grep "${VERSION}" <<< "$Data" | cut -d'-' -f6 | cut -d'.' -f1)"
-    ISO="siduction-${VERSION}-${NAME}-${EDITION}-amd64-${DATE}.iso"
-    HASH=$(web_pipe "${URL}/${ISO}.md5" | cut -d' ' -f1)
+    # 10/2026 eg https://mirror.math.princeton.edu/pub/siduction/iso/Big_Crime/kde/siduction-2026.1.0-Big_Crime-kde-amd64-202610181233.iso.sha256
+    # BUT https://mirror.math.princeton.edu/pub/siduction/iso/Big_Crime/lxqt/siduction-2024.1.0-Shine_on-lxqt-amd64-202412261736.iso
+    ShaLink="$(web_pipe "${URL}" | grep href | grep sha256 | tr '"' '\n' | grep sha256 | grep -v '>')"
+    ShaData="$(web_pipe "$URL/$ShaLink")"
+    ISO="$(awk '{print $2}' <<<"$ShaData")" ; ISO="${ISO/'*'/}"
+    HASH="$(awk '{print $1}' <<<"$ShaData")"
     echo "${URL}/${ISO} ${HASH}"
 }
 
