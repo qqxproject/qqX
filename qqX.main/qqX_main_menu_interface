@@ -25,6 +25,12 @@ else
 
   function main_menu_interface {
 
+    # EpochDateNow is set by main loop at start of each interface load up, use this to hide on-load notices from every refresh
+    InterfaceRefreshSecsNow="$(date +%s)"
+    if (((InterfaceRefreshSecsNow - EpochDateNow) > 300 )); then HideLoadUpNotices=1
+    else HideLoadUpNotices=
+    fi
+
     if [[ ! $ShowUtilsMenu ]]; then
 
       printf  "\n\n"
@@ -395,78 +401,31 @@ else
       fi
     fi
 
-    if [[ "$VM_InstanceName" == *'daily'* || "$VM_InstanceName" == "ubuntustudio-dvd" ]] && [[ $(ls "$VM_InstanceName/"*devel.iso 2>/dev/null) ]]; then
-      # @ feb 2025 note that 'ubuntustudio-dvd' is now in the standard cdimages repo and has no dvd suffix  REVIEW
-      # record d/l data for daily-live alerts
-
-      LastZsync=
-      Curr_Zsync_SHA=
-      New_Zsync_SHA=
-      if [[ $(cat "$VM_InstanceName/dl-url.txt" 2>/dev/null) ]]; then
-        Zsync_URL="$(awk '/http/{print $2}' "$VM_InstanceName/dl-url.txt")"
-        Zsync_SHA_URL="$(dirname "$Zsync_URL")""/SHA256SUMS"
-        New_Zsync_SHA="$(curl -sf --max-time 3 "$Zsync_SHA_URL" | grep -s amd64 | cut -d' ' -f1 &)"
+    if [[ ! $HideLoadUpNotices ]] && [[ "$VM_InstanceName" == *'daily'* ]] && [[ "$VM_InstanceName" == *'buntu'* ]]; then
+      # 10/2026 Remove Zsync from dailies as too problematic - Also see quick_reroute_get where there is similar
+      DailyData= ; LatestDailyUpdate=
+      printf "\n\n\n  Checking for updates ... "
+      DailyName="${VM_InstanceName/'-daily'/@/}" ; DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
+      DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${DailyName}.json")"
+      sleep 2
+      if [[ ! $DailyData ]]; then
+        DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:ubuntu.json")"
+        sleep 2
       fi
-
-      #  Live VMs where zsync updates the iso file.
-      if [[ "$(tr -cd '[:digit:]' 2>/dev/null < "$VM_InstanceName/zsync.date.txt")" ]]; then
-        SyncDateOld="$(tr -cd '[:digit:]' 2>/dev/null < "$VM_InstanceName/zsync.date.txt")"
-        LastZsync="$((EpochDateNow - SyncDateOld))"
-        printf "\n\n"
-        if [[ $LastZsync -gt 259200 ]]; then  printf "  [z]   daily-live - last zsync over %d hrs ago"  "$((LastZsync/3600))"
-        else  printf "  [z]   daily-live - last zsync %d hrs ago"  "$((LastZsync/3600))"
-        fi  #  older than 3 days (in epoch seconds)  REVIEW
-        if [[ $LastZsync -gt 864000 ]]; then printColor "  (out-of-date)"  # 10 days  (NB: esp. important at change of url naming at xx.04 etc)
-        elif [[ $New_Zsync_SHA ]] && [[ $(cat "$VM_InstanceName/dl-sha.txt") ]]; then
-          Curr_Zsync_SHA="$(awk '{print $1}' "$VM_InstanceName/dl-sha.txt")"
-          if [[ ${Curr_Zsync_SHA// /} == "${New_Zsync_SHA// /}"  ]]; then printf "  (up-to-date)"; else printColor "  (update available)"
-          fi
-        else
-          # if check is not yet available
-          printf "  (refresh to check)"
-        fi
-      else  date +%s > "$VM_InstanceName/zsync.date.txt"
+      if [[ ! $DailyData ]]; then printf " Ubuntu Server not reached ..."
+      else
+        # with help from Claude on this little bit ....
+        LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
+        | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
+        | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
+        | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData" 2>/dev/null)"
       fi
-
-      ##  ZSYNC   See  functions 'get_ubuntu' & 'list_csv' in quickget
-
-        # qqX: NB: only the iso gets dubbed with 'devel' suffix, otherwise VMs they keep their names
-        # eg  'ubuntu-mate-daily-live' 'ubuntustudio-dvd' 'ubuntu-daily-canary'
-        # An actual 'ubuntu-devel' release or folder doesn't seem to ever get created or offered.
-        # Presume release=devel (@2023/07) has now been superseded, or was merely intended as an indicative name only ...
-        # Also note that quickget includes code to remove 'zs.old' files, which may or may not have been needed,
-        # but Zsync can now give these files root protection so this removal may not work ...   REVIEW  Add a qqX copying mechanism?
-
-      # Sort out the quickget / function_quick_get_wrap  call & the var/flags
-      # Expect these to need updating from time to time ...
-
-      # @ feb 2025 improve for ubuntu variants, for daily-live, and for renamed instances
-
-      if [[ $(cat "$VM_InstanceName/dl-url.txt" 2>/dev/null) ]]; then
-        Zsync_RecordedName="$(awk '/http/{print $1}' "$VM_InstanceName/dl-url.txt")"
-      elif [[ $(cat "$VM_InstanceName/QemuVirtHardwareRecord.txt" 2>/dev/null) ]]; then
-        Zsync_RecordedName="$(grep -sm1 -e '-name' "$VM_InstanceName/QemuVirtHardwareRecord.txt" | cut -d'=' -f2)"
-      else Zsync_RecordedName="$VM_InstanceName"
+      if [[ $LatestDailyUpdate ]]; then
+        printf "\n\n  Latest Ubuntu 'daily' update is"
+        printf "\n  %s " "$LatestDailyUpdate"
+        printf "\n  Use [gt] to download a new spin, leave this one here, or [del] to delete ...\n"
+      else printf "\n\n  Latest Ubuntu 'daily' update data not available ...\n"
       fi
-      Zsync_OS_Name="${Zsync_RecordedName,,}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-daily'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-live'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-canary'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-legacy'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-jammy'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-dvd'/}"
-      Zsync_Release_Name="${Zsync_RecordedName,,}"
-      Zsync_Release_Name="${Zsync_Release_Name/"${Zsync_OS_Name}-"/}"
-      Zsync_Updatable_ISO=1
-      # zero main menu flag that sets only if updater run from main
-      MainMenuZsync=
-
-    else
-
-      Zsync_Updatable_ISO=
-      Zsync_OS_Name=
-      Zsync_Release_Name=
-
     fi
 
     if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"

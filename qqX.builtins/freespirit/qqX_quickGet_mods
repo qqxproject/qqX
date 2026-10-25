@@ -153,6 +153,7 @@ function os_info {
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         linuxlite)        INFO="Linux Lite|-|https://www.linuxliteos.com/|Lightweight XFCE distro built on Ubuntu LTS.";;
+        lubuntu)          INFO="Lubuntu|-|https://lubuntu.me/|Lightweight LXDE Operating System that ships the essential apps and services for daily use: office applications, PDF reader, image editor, music and video players, etc.";;
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
         netboot)          INFO="netboot.xyz|-|https://netboot.xyz/|Bootable Iso with collection distro net-installation boots.";;
@@ -196,6 +197,7 @@ function distro_release_notes {
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
         tails)            RelNotes="Checksum not given... only pgp sigs - If security is critical, see https://tails.net/install/expert/index.en.html#install";;
         tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is up to around 230Mb. Select Pure for 64 bit.";;
+        *buntu*)          RelNotes="Even number .04's are Long Term Support for Ubuntu supported software.  Daily-live is development from the latest version. See Archives for older versions.";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
     esac
     echo "$RelNotes"
@@ -1109,87 +1111,82 @@ function get_trisquel() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
-function get_ubuntu-server() {
-    local HASH="" ; local ISO="" ; local NAME="live-server" ; local URL="" ; local DATA="" ; local RelMax=
-    if [[ "${RELEASE}" == "daily"* ]]; then URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
-    else URL="https://releases.ubuntu.com/${RELEASE}"
+## 10/2026 REFACTOR for errors where versions are missing
+# Upstream use of https://api.launchpad.net/devel/ubuntu/series makes big presumption that everything follows the main pattern
+# But it doesn't, eg. Mate 26.04 .... So grep each OS individually, and FOR FAIRLY RECENT ONLY, not some huge archiving ....
+# AND for Ubuntu itself; 'cdimage.ubuntu.com' has become neglected with many folders missing the important iso's
+# which now seem to be located at 'releases.ubuntu.com' eg https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ has NO AMD iso's
+function releases_ubuntu() {
+    local UbuntuRecentVersions="" DailyData="" LatestDailyVer="" LatestOfficialVer=""
+    # daily-live gets similar repeat in 'get_ubuntu' as calls to Quickget are separate ...
+    # eg http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:ubuntu-mate.json
+    DailyData="$(web_pipe "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${OS}.json")"
+    LatestDailyVer="$(jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live").version' <<< "$DailyData" | fv -M -Q)"
+    # 'dailies' are available for all recent versions ...
+    UbuntuRecentVersions="$(jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live").version' <<< "$DailyData" | fv -qs)"
+    if [[ $OS == "ubuntu-server" ]]; then
+        LatestOfficialVer="$(web_pipe "https://ubuntu.com/download/server" | grep thank | grep amd | grep -v lts | fv -Q)"
+    else LatestOfficialVer="$(web_pipe "https://ubuntu.com/download/desktop" | grep thank | grep amd | grep -v lts | fv -Q)"
     fi
-    case "${RELEASE}" in 14*|16*) NAME="server";;
-    esac
-    if web_check "${URL}/SHA256SUMS"; then
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso  | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    else
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/MD5SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
-        ISO=$(cut -d' ' -f3 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    fi
-    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
-        make_vm_config "${OS}-devel.iso"
-    else
-        web_get "${URL}/${ISO}" "${VM_PATH}"
-        check_hash "${ISO}" "${HASH}"
-        make_vm_config "${ISO}"
-    fi
-}
-## FIX remove beta from stable
-function releases_ubuntu-server() {
-    local ALL_VERSIONS=
-    ALL_VERSIONS="$(web_pipe http://releases.ubuntu.com/streams/v1/com.ubuntu.releases:ubuntu-server.json | jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="live-server") | .version' \
-    | sort -rV | paste -d' ' -s)"
-    echo daily-live "${ALL_VERSIONS}"
+    # remove any possible daily that is newer than the newest official, ie testing dev pre-release
+    fv -qg "$LatestDailyVer $LatestOfficialVer" && UbuntuRecentVersions="${UbuntuRecentVersions/$LatestDailyVer /}"
+    echo "$UbuntuRecentVersions daily-live"
 }
 
+## 10/2026 General FIXES, FIX daily-live grep, tidy-up of hardcoded obsolete tests eg 'jammy-live' and 'md5'
+# plus ubuntu server can now be integrated
 function get_ubuntu() {
-    local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
-    if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
-        # Ubuntu Studio daily-live images are in the dvd directory  @ feb 2025 no longer the case
-        RELEASE="dvd"
-    fi
-    if [[ "${RELEASE}" == "jammy-daily" ]]; then
-        if [[ "${OS}" == "ubuntustudio" ]]; then URL="https://cdimage.ubuntu.com/${OS}/jammy/dvd/current"
-        else URL="https://cdimage.ubuntu.com/${OS}/jammy/daily-live/current"
+    local ISO="" HASH="" URL="" RelData="" RelMax=""  DailyData="" LatestDailyVer="" LatestDailyName=""
+    VM_PATH="${OS}-${RELEASE}"
+    if [[ $RELEASE == "daily-live" ]]; then
+        # use json to get latest folder and matching codename (where daily files are stored)
+        # > cannot be done with 'sort' as when head/tail picking order would be difficult at Z to A points
+        DailyData="$(web_pipe "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${OS}.json")"
+        LatestDailyVer="$(jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live").version' <<< "$DailyData" | fv -M -Q)"
+        LatestDailyName="$(jq --arg Latest "$LatestDailyVer" -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live") | select(.release_title==$Latest).release' <<< "$DailyData")"
+        # eg http://cdimage.ubuntu.com/ubuntu-mate/stonking/daily-live/current/SHA256SUMS
+        URL="http://cdimage.ubuntu.com/$OS/$LatestDailyName/daily-live/current"
+        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep server | grep 'amd64.iso' | grep -v beta)
+        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep desktop | grep 'amd64.iso' | grep -v beta)
         fi
-        VM_PATH="${OS}-jammy-live"
-    elif [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
-        VM_PATH="${OS}-${RELEASE}"
-    elif [ "${OS}" == "ubuntu" ]; then
-        URL="https://releases.ubuntu.com/${RELEASE}"
+        ISO=$(cut -d'*' -f2 <<<"$RelData")
+        HASH=$(cut -d' ' -f1 <<<"$RelData")
+        VM_PATH="${VM_PATH}-$(date +%Y-%b-%d)"
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+        # 10/2026  REMOVE zsync as getting too problematic ... zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}" # make_vm_config "${OS}"
     else
-        URL="https://cdimage.ubuntu.com/${OS}/releases/${RELEASE}/release"
-    fi
-    if web_check "${URL}/SHA256SUMS"; then
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    else
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/MD5SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    fi
-    if [ -z "${ISO}" ] || [ -z "${HASH}" ]; then
-        echo "$(pretty_name "${OS}") ${RELEASE} is currently unavailable. Please select other OS/Release combination"
-        exit 1
-    fi
-    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
-        make_vm_config "${OS}-devel.iso"
-    elif [[ "${RELEASE}" == "jammy-daily" ]]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-jammy-live.iso"
-        make_vm_config "${OS}-jammy-live.iso"
-    else
+        # find the latest in the series eg. fv -F '24.04' gives: 24.04  24.04.1  24.04.2  24.04.3  24.04.4  24.04.5
+        # Use 'releases' not 'cdimage' for Ubuntu itself:
+        if [[ $OS == "ubuntu" ]] || [[ $OS == "ubuntu-server" ]]; then  URL="https://releases.ubuntu.com/$RELEASE"
+        else URL="https://cdimage.ubuntu.com/${OS}/releases/$RELEASE/release"
+        fi
+        # avoiding v3 and the would be needed v3 cpu tests, as it's only a VM
+        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep server | grep 'amd64.iso' | grep -v beta)
+        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep desktop | grep 'amd64.iso' | grep -v beta)
+        fi
+        RelMax="$(cut -d '*' -f2 <<<"$RelData" | tr '-' '\n' | fv -M -Q)"
+        ISO=$(grep "$RelMax" <<<"$RelData" | cut -d'*' -f2)
+        HASH=$(grep "$RelMax" <<<"$RelData" | cut -d' ' -f1)
         web_get "${URL}/${ISO}" "${VM_PATH}"
         check_hash "${ISO}" "${HASH}"
         make_vm_config "${ISO}"
     fi
+}
+
+## 10/2026 General FIXES and tidy-up
+function get_ubuntu-server() {
+    #printf "\n\n  INTERNAL ERROR - 'get_ubuntu-server' functions should now be integrated into 'get_ubuntu' \n\n"
+    get_ubuntu "$*"
+}
+function releases_ubuntu-server() {
+    #printf "\n\n  INTERNAL ERROR - 'releases_ubuntu-server' functions should now be integrated into 'releases_ubuntu' \n\n"
+    releases_ubuntu "$*"
+}
+## 10/2026 remove zsync
+function zsync_get() {
+    printf "\n\n  INTERNAL ERROR - 'zsync_get' functions have now been discontinued \n\n"
 }
 
 ## FIX invalid VOID folders (use 'current' only as some folders have variants)
@@ -1906,10 +1903,6 @@ EOF
 function error_specify_release {
     show_os_info "${OS}"
     case ${OS} in
-        *ubuntu-server*)
-            echo -en " - Releases:\t"
-            releases_ubuntu-server &
-            wait "$!" ;;
         *ubuntu*)
             echo -en " - Releases:\t"
             releases_ubuntu &
@@ -1943,6 +1936,11 @@ function error_specify_release {
 # 'case ${OS}' was a repeat as it was already checked during the initial case grep of the cmd args, found at the end of the script
 # Plus, not all calls to 'validate' will have had the release_* function evaluated ...
 
+# 10/2026 remove this altogether ??
+
+function xx_validate_release() {
+    return
+}
 function validate_release() {
     local DISPLAY_NAME= ; DISPLAY_NAME="$(pretty_name "${OS}")"
     local ReleaseList="$1"
@@ -2094,7 +2092,7 @@ function web_get() {
         # Those without, go through web_CHECK.
         # CARE is also needed so that distro checks don't trigger background downloads.
         # The QuickGet VARIANT CONVOLUTIONS can have lots of twists and turns ....
-        if [[ "$OS" != *ubuntu* ]]; then
+        if [[ "$OS" != *'ubuntu'* ]]; then
             local HASH="" GetLine="" ; GetLine=$(get_"${OS}" "$RELEASE" "$EDITION")
             # 'get_$OS' should output two args; a filepath URL, followed a checksum number
             #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
@@ -2209,7 +2207,7 @@ function test_all {
         [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" && return
     fi
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
-    [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
+    [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "xxubuntu-server" ]] &&  FUNC="ubuntu"
 
     if [[ $(type -t "releases_${FUNC}") == function ]]; then
         SECONDS=0
@@ -2235,7 +2233,9 @@ function test_all {
                     printf "" > "/tmp/qGet-test-all-GetLine.txt"
                     SECONDS=0
                     while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]] ; do
-                        GetLine=$(get_"${OS}" "$RELEASE")
+                        if [[ $OS == "ubuntu-server" ]]; then GetLine=$(get_ubuntu-server "$RELEASE")
+                        else GetLine=$(get_"${OS}" "$RELEASE")
+                        fi
                         printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                     done
                     if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
@@ -2277,9 +2277,7 @@ function test_all {
                 # Caution here, the get_$OS routines must run in subshells in order to loop properly
             elif [[ "${OS}" == "macos" ]]; then
                 (get_macos)
-            elif [ "${OS}" == "ubuntu-server" ]; then
-                (get_ubuntu-server)
-            elif [[ "${OS}" == *ubuntu* ]]; then
+            elif [[ "${OS}" == *'ubuntu'* ]]; then
                 (get_ubuntu)
             else
                 URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)

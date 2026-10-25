@@ -320,8 +320,27 @@ function test_iso_url {
         printf "\n\n"
         iso_get_message ; show_distro_homepage_check_results
       fi
+      if [[ "$QGW_DownloadSelection" == *'daily'* ]] && [[ "$QGW_DownloadSelection" == *'buntu'* ]]; then
+        # 10/2026 Also See the routine in QGet Mods on which this is based
+        DailyData= ; LatestDailyUpdate=
+        printf "\n\n\n  Checking for version/date references ... "
+        DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${QGW_OS_Arr_NameSelected}.json")"
+        sleep 4
+        [[ ! $DailyData ]] && printf " Ubuntu Server not reached ..."
+        # with help from Claude on this little bit ....
+        LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
+        | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
+        | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
+        | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData"  2>/dev/null)"
+        if [[ $LatestDailyUpdate ]]; then
+          printf "\n\n  Latest main Ubuntu 'daily' update was "
+          printf "\n  %s \n" "$LatestDailyUpdate"
+        else printf "\n\n  Latest main Ubuntu 'daily' update data not available ...\n"
+        fi
+      fi
     fi
   fi
+
   # clear any accidental initial double pressing of the enter key
   read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
 
@@ -455,7 +474,7 @@ function show_hot_swap_line {
 function clear_main_gt_start_vars {
 
   # Main vars, other clearances will need less,
-  # Zsync needs special treatment, as does QGW_List_NumSelected_Next
+  # QGW_List_NumSelected_Next needs special treatment
   QGW_List_NumSelected=
   QGW_VerifiedList_NumSelected=
   QGW_OS_Arr_NumSelected=
@@ -467,13 +486,9 @@ function clear_main_gt_start_vars {
   QGW_DownloadStart=
   QGW_DownloadSelection=
   QGW_Download_BadLink=
-  if [[ $MainMenuZsync ]]; then
-    Current_VM_Folder="$(pwd)"
-  else
-    QWG_Conf_Dir="$Default_VM_Folder"
-    cd "$QWG_Conf_Dir" || { printColor "  ERROR changing to the General VM Location"; sleep 3; }
-    Current_VM_Folder="$QWG_Conf_Dir"
-  fi
+  QWG_Conf_Dir="$Default_VM_Folder"
+  cd "$QWG_Conf_Dir" || { printColor "  ERROR changing to the General VM Location"; sleep 3; }
+  Current_VM_Folder="$QWG_Conf_Dir"
 }
 
 function refresh_QWG_selector {
@@ -525,7 +540,8 @@ run_distro_tests_UI () {
     printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
     printf "\n\n  and the TEST ALL report file in the downloaded release folder"
     printColor "\n\n  [enter] to start (in compact mode)  "
-    printf "[v] verbose mode (needs large screen)  [vm] show mirrors   [b] to go back"
+    printf "[v] verbose mode (needs large screen)  [vm] show mirrors   "
+    printColor "[b] to go back"
     [[ $1 ]] && printf "  [B] to main menu"
     printf "\n\n"
     read -rp "  >  " TestDistros
@@ -626,7 +642,7 @@ function_quick_get_wrap ()  {
     show_QWG_header
   done
 
-  if [[ $MainMenuZsync ]] && [[ $Zsync_Updatable_ISO && $Zsync_OS_Name && $Zsync_Release_Name ]] ; then
+  if [[ $xxMainMenuZsync ]] && [[ $xxZsync_Updatable_ISO && $Zsync_OS_Name && $Zsync_Release_Name ]] ; then
 
     QGW_OS_Arr_NameSelected="$Zsync_OS_Name"
     QGW_Release_Arr_NameSelected="$Zsync_Release_Name"
@@ -871,7 +887,7 @@ function_quick_get_wrap ()  {
           QGW_OS_HomePage_Working=
           if [[ $QGW_OS_HomePage ]]; then
             printColor "\n  ---------------------------------------------------------------------------- "
-            printf "\n\n  Checking Distro Home Page (max 6 tries)  \n\n"
+            printf "\n\n  Checking Distro HOME PAGE (max 6 tries)  \n\n"
             printf "" > "/tmp/qmod-dl-homepage-report.txt"
             {
               printf "  HomePage = %s"  "$QGW_OS_HomePage"
@@ -997,7 +1013,7 @@ function_quick_get_wrap ()  {
   function choose_QGW_release {
 
     [[ $GT_Exit ]] && return
-    [[ $MainMenuZsync ]] && return
+    [[ $xxMainMenuZsync ]] && return
 
     while true ; do
 
@@ -1108,7 +1124,7 @@ function_quick_get_wrap ()  {
   function choose_QGW_edition {
 
     [[ $GT_Exit ]] && return
-    [[ $MainMenuZsync ]] && return
+    [[ $xxMainMenuZsync ]] && return
 
     if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
 
@@ -1233,7 +1249,7 @@ function_quick_get_wrap ()  {
             printf "  This distro is single release option only .... "
             printColor "\n\n  [enter] to check details and continue   [r] return to view web page or to test   [b] back to main menu \n\n"
           fi
-          read -rp "  >  "  QGW_List_NumSelected
+          read -t 7 -rp "  >  "  QGW_List_NumSelected
 
         elif [[ ${#QGW_Editions_Array[@]} -eq 1 ]] ; then
           printf "  One edition found: %s \n\n" "${QGW_Editions_Array[0]}"
@@ -1329,7 +1345,7 @@ function_quick_get_wrap ()  {
     else test_iso_url
     fi
 
-    if [[ $MainMenuZsync && $Zsync_Updatable_ISO ]]; then
+    if [[ $xxxxMainMenuZsync && $xxZsync_Updatable_ISO ]]; then
 
       if [[ ! $Zsync_OS_Name || ! $Zsync_Release_Name  ]]; then
         printColor "\n\n  ERROR  Variables for OS Name &/or Release NOT found \n\n"
@@ -1351,14 +1367,14 @@ function_quick_get_wrap ()  {
         ZsyncDownload=1
       fi
 
-    elif [[ "$QGW_DownloadSelection" == *'ubuntu'* ]] && [[ "$QGW_DownloadSelection" == *'daily'* ]]; then
+    elif [[ "$QGW_DownloadSelection" == *'ubuntu'* ]] && [[ "$QGW_DownloadSelection" == *'xxdaily'* ]]; then
       printColor "\n\n  ** may download with some kind of NAMING variance ** "
       ZsyncDownload=1
 
     else  ZsyncDownload=
     fi
 
-    if [[ $MainMenuZsync ]] && [[ $Zsync_Updatable_ISO && $Zsync_OS_Name ]]; then
+    if [[ $xxMainMenuZsync ]] && [[ $xxZsync_Updatable_ISO && $Zsync_OS_Name ]]; then
         QWG_Conf_Dir="$VM_Conf_Dir"
         ZsyncDownload=1
     else
@@ -1378,7 +1394,7 @@ function_quick_get_wrap ()  {
 
       [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
-      if [[ $MainMenuZsync ]]; then
+      if [[ $xxMainMenuZsync ]]; then
         QGW_OverWriteAlert=1
       elif [[ ! $QGW_Download_BadLink ]]; then
         printf "  ---------------------------------------------------------------------------- \n\n"
@@ -1404,7 +1420,7 @@ function_quick_get_wrap ()  {
         HyphenatedNewname=
         check_new_vm_folder_name  "$QWG_NewVM_Name"
         # and display download method / options where available
-        if [[ ! $MainMenuZsync ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
+        if [[ ! $xxMainMenuZsync ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
           printf "\n\n  [sp] for serial/parallel toggle"
           if grep -qs 'curl-no-para' "$QG_Modpath"; then
             if [[ $Curl_NoPara ]]; then printf "  > Downloads are set to serial mode"
@@ -1444,7 +1460,7 @@ function_quick_get_wrap ()  {
       else
 
         if [[ $QGW_OverWriteAlert ]];then
-          [[ ! $MainMenuZsync ]] && printColor "\n\n  Files are present. Resume download or overwrite? "
+          [[ ! $xxMainMenuZsync ]] && printColor "\n\n  Files are present. Resume download or overwrite? "
           if [[ "$(ls -oh "$QWG_Conf_Dir/$QWG_NewVM_Name" 2>/dev/null)" ]]; then
             printColor "\n\n  Folder: %s \n\n" "$QWG_NewVM_Name"
             ls -oh "$QWG_Conf_Dir/$QWG_NewVM_Name"
@@ -1475,11 +1491,8 @@ function_quick_get_wrap ()  {
           read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
           printf  "\n\n  [enter] Start the download  "
           if [[ $DL_PercentageDone == "100.00" ]]; then printColor " ?? BACKUP ??  "
-          else
-            if [[ $MainMenuZsync ]]; then  printf "> Zsync     "  ; else printf "> resume     "
-            fi
+          else printf "> resume     "
           fi
-
         else
           # clear any accidental initial double pressing of the enter key
           read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2 ; read -r -t 0.2
@@ -1491,10 +1504,7 @@ function_quick_get_wrap ()  {
             else printf  "\n\n  [enter] Start the download  " ; fi
           fi
         fi
-
-        if [[ $ZsyncDownload ]]; then
-          [[ ! $(type -p zsync) ]] && printf "\n\n  WARNING 'zsync' not found.  Screen output may vary. Quickget should hopefully revert to using curl ...\n\n "
-        elif [[ "${#VM_Folder_List[@]}" -gt 1 ]]; then
+        if [[ "${#VM_Folder_List[@]}" -gt 1 ]]; then
           if [[ $QGW_OverWriteAllow ]]; then printColor "[number] select a DIFFERENT FOLDER  "
           else printf "[number] select a different (preset or current) folder  "
           fi
@@ -1511,8 +1521,8 @@ function_quick_get_wrap ()  {
         b)
           clear_main_gt_start_vars
           QGW_List_NumSelected_Next=
-          if [[ $MainMenuZsync ]]; then
-            MainMenuZsync=
+          if [[ $xxMainMenuZsync ]]; then
+            xxMainMenuZsync=
           else
             Zsync_OS_Name=
             Zsync_Release_Name=
@@ -1565,7 +1575,6 @@ function_quick_get_wrap ()  {
           printf "\n\n  For new preset folders, edit the main settings.\n"
 
           printf "\n\n  Part downloads can usually be re-started, if stopped."
-          printf "\n\n  Zsync Iso Updates may leave residual rcksum files, if stopped, and may need removing."
           printf "\n\n  But, if an iso.part file has been started, a restart is possible, after doing a re-sync."
           printf "\n\n  If re-syncing, the rcksum files will be auto-removed.\n"
 
@@ -1588,7 +1597,7 @@ function_quick_get_wrap ()  {
           if [[ $QGW_Download_BadLink ]]; then
             QGW_BadLink_ReTest=1 ; test_iso_url
           else
-            if [[ $QGW_OverWriteAlert ]] && [[ ! $MainMenuZsync ]]; then
+            if [[ $QGW_OverWriteAlert ]] && [[ ! $xxMainMenuZsync ]]; then
               printf "  RECONFIRMATION is required  >>  %s"  "$QWG_NewVM_Name"
               printf "\n\n  [enter] to go back" ; printColor "   [yes] to confirm \n\n"
               read -rp "  >  "  ISO_OvWr
@@ -1635,42 +1644,9 @@ function_quick_get_wrap ()  {
     QGW_List_NumSelected_Next=
     QGW_List_NumSelected_Previous=
 
-    if [[ $ZsyncDownload ]]; then
-      # printf "  If stopped, Zsync Iso Updates may leave residual rcksum files that qqX will remove."
-      printf "\n\n  To resume stopped downloads, any \".iso.part\" files should be retained."
-      # https://bugs.launchpad.net/ubuntu/+source/zsync/+bug/477551
-
-      # @ feb 2025 rcksum files no longer seem to be present.
-      # The source at https://github.com/cph6/zsync/tree/master/c remains quite old
-      # BUT, for example, https://git.launchpad.net/ubuntu/+source/zsync/commit/?h=applied/ubuntu/plucky
-      # shows that zsync is being actively maintained by Debian and Ubuntu ....
-      # There is also reference to zsync-curl as a repo but this now appears to have been abandoned.
-
-      function remove_old_rcksum_files {
-        if [[ $(ls "$VM_Conf_Dir/"rcksum* 2> /dev/null) ]]; then
-          mapfile -t RckSumArray <<< "$(ls "$VM_Conf_Dir/"rcksum* 2> /dev/null)"
-          for RckItem in "${RckSumArray[@]}"; do rm "$RckItem"; done
-        fi
-      }
-      remove_old_rcksum_files
-    else
-      printf "  Once a download and initial setup up has finished, the new folder and .conf file MAY BE EASILY MOVED"
-      printf "\n\n  and/or edited before running. Part downloads CAN USUALLY BE RE-STARTED."
-      [[ $DL_HumanSize ]] && printf "\n\n  Download Size: %s" "$DL_HumanSize"
-    fi
-
-    function show_rcksum_progress {
-
-      RckFile="$(ls "$VM_Conf_Dir/"rcksum* 2> /dev/null)"
-      while [[ -e "$RckFile" ]]; do
-        RckDone="$(du -a "$RckFile" 2> /dev/null)"
-        RckDone="${RckDone/"$RckFile"/}"
-        # gives some kind of rough indication that work is in progress  (percentages don't seem to be possible)
-        printf "\n\n  Comparing images >    %s "  "$RckDone"
-        sleep 2
-        printf "\e[2K\r"
-      done
-    }
+    printf "  Once a download and initial setup up has finished, the new folder and .conf file MAY BE EASILY MOVED"
+    printf "\n\n  and/or edited before running. Part downloads CAN USUALLY BE RE-STARTED."
+    [[ $DL_HumanSize ]] && printf "\n\n  Download Size: %s" "$DL_HumanSize"
 
     # clear any accidental initial double pressing of the enter key
 		read -r -t 0.2
@@ -1679,7 +1655,7 @@ function_quick_get_wrap ()  {
 
     printf "\n\n\n  May take a moment to start and pauses may occur if servers are slow"
     printf "\n\n  Parallel downloads are only possible where upstream server multiplexing is supplied\n"
-    [[ ! $MainMenuZsync ]] && printf "\n\n  The downloader has been set to AUTO-RESUME and to pick up where it left off \n"
+    [[ ! $xxMainMenuZsync ]] && printf "\n\n  The downloader has been set to AUTO-RESUME and to pick up where it left off \n"
     printColor "\n\n  Use [c] to STOP ALL current downloads, [d] to delete "
     printColor "\n\n  Or  [c] then [r] to force a restart on a new server or to force a download re-check ..."
     if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
@@ -1715,13 +1691,6 @@ function_quick_get_wrap ()  {
       else  quickget "$QGW_DownloadSelection" &
       fi
       qGetPid="$!"
-
-      # zsync:
-      # @ feb 2025 rcksum files no longer seem to be present. See notes at function 'show_rcksum_progress' > REVIEW removal?
-      if [[ $(ls "$VM_Conf_Dir/"rcksum* 2>/dev/null) ]]; then  show_rcksum_progress &
-      elif [[ $ZsyncDownload || $MainMenuZsync ]]; then
-        printf "\n  Zsync is a multi-stage process >  monitor the hard drive activity light ... \n\n"
-      fi
 
       # WAIT HERE for finish, or  key to stop
 
@@ -1764,13 +1733,12 @@ function_quick_get_wrap ()  {
       fi
 
       # tidy up other possible background processes started by quickget ...
-      if [[  $(pgrep curl) || $(pgrep zsync) ]]; then
+      if [[  $(pgrep curl) ]]; then
         # The use of aria2 and wget has been dropped from quickget since april 2024
         while true; do
           pkill curl   2>/dev/null
-          pkill zsync  2>/dev/null
           sleep 1
-          if [[ ! $(pgrep curl) ]] && [[ ! $(pgrep zsync) ]]; then
+          if [[ ! $(pgrep curl) ]]; then
             QGW_DownloadStopped=1
             sleep 1 ; break
           fi
@@ -1885,52 +1853,6 @@ function_quick_get_wrap ()  {
     fi
   fi
 
-  ## Determine output cases:
-
-  # ZSYNC
-  if [[ $ZsyncDownload || $MainMenuZsync ]] && [[ $(cat "/tmp/qmod-dl-url") ]]; then
-    # record d/l data for daily-live alerts
-    Zsync_URL="$(awk '/http/{print $2}' "/tmp/qmod-dl-url")"
-    ZsyncDL_Name="$(awk '/http/{print $1}' "/tmp/qmod-dl-url")"
-    Zsync_SHA_URL="$(dirname "$Zsync_URL")""/SHA256SUMS"
-    Zsync_SHA="$(curl -sf --max-time 5 "$Zsync_SHA_URL" | grep -s amd64 )"
-    if [[ $MainMenuZsync ]] && [[ -d "$VM_Conf_Dir/$VM_InstanceName" ]]; then
-      cp "/tmp/qmod-dl-url" "$VM_Conf_Dir/$VM_InstanceName/dl-url.txt"
-      printf "%s\n" "$Zsync_SHA" > "$VM_Conf_Dir/$VM_InstanceName/dl-sha.txt"
-      date +%s 2>/dev/null  > "$VM_Conf_Dir/$VM_InstanceName/zsync.date.txt"
-    elif [[ $ZsyncDownload ]] && [[ -d "$QWG_Conf_Dir/$ZsyncDL_Name" ]]; then
-      cp "/tmp/qmod-dl-url" "$QWG_Conf_Dir/$ZsyncDL_Name/dl-url.txt"
-      printf "%s\n" "$Zsync_SHA" > "$QWG_Conf_Dir/$ZsyncDL_Name/dl-sha.txt"
-      date +%s 2>/dev/null  > "$QWG_Conf_Dir/$ZsyncDL_Name/zsync.date.txt"
-    fi
-    LastZsync="0"
-  fi
-  if  [[ $ZsyncDownload ]]; then
-    if [[ $QGW_DownloadStopped ]]; then
-      printf "\n  Download Stopped > Residual files may be present"
-      printf "\n\n  Removal of any residual files & folders has to be completed manually"
-      if [[ $Zsync_Updatable_ISO ]]; then
-        printf "\n\n  Part downloads can usually be re-started if the .iso.part file is retained."
-      else
-        printf "\n\n  Part downloads can usually be re-started if the folder is retained."
-        printf "\n\n  Dev downloads usually undergo some kind of NAMING variance"
-      fi
-    else
-      if [[ ! $Zsync_Updatable_ISO ]]; then
-        printf   "\n  End of Quickget processes ..."
-        printf "\n\n  as Dev downloads usually undergo some kind of NAMING variance"
-        printf "\n\n  checking of files & folders should to be completed manually"
-      fi
-    fi
-
-    # Note (@2023/07) that quickget includes code to remove 'zs.old' files, which may or may not have been needed,
-    # but Zsync can now give these files root protection so this removal may not work ...
-    # REVIEW Deletion and re-download may be the simpler way to go.  Zsync has a lot of code to keep maintained ...
-    printf "\n\n"
-
-  fi
-
-  # STANDARD
   if [[ -d "$NewVM_InstanceName" ]]; then
 
     printColor "  Folder:  %s "  "$NewVM_InstanceName"
@@ -2018,8 +1940,8 @@ function_quick_get_wrap ()  {
     NewFileTuneUp_JustDone=1
   elif [[ $QGW_FolderDelete == "d" ]]; then  sleep 1
   else
-    [[ $Zsync_Updatable_ISO ]] && printf "\e[3A\r"
-    if [[ ! $MainMenuZsync ]] && [[ ! $ZsyncDownload ]]; then
+    [[ $xxZsync_Updatable_ISO ]] && printf "\e[3A\r"
+    if [[ ! $xxMainMenuZsync ]] && [[ ! $ZsyncDownload ]]; then
       printColor "\n\n  [enter] to continue or return \n\n" ; read -rp "  > "
     fi
     printf "\n\n"

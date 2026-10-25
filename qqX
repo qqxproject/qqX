@@ -250,6 +250,7 @@ tput civis
 while true ; do
   [[ $Loop_Diagnostics ]] && printf "\n\n Main Loop, start:" &&  main_loop_diagnostics
 
+  # Epoch Seconds is 'now' at start of each interface load up
   EpochDateNow="$(date +%s)"
 
   # Where 'ByPass_VM_Array_Selector' implies run the loader section only

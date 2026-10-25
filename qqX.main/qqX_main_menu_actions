@@ -225,43 +225,6 @@ function  main_menu_actions {
     Run_GT=1
     return
 
-  elif [[ $MainMenuChoice == "z" ]] ; then
-
-    if [[ $Zsync_Updatable_ISO && $Zsync_OS_Name && $Zsync_Release_Name ]]; then
-      printf "\n\n  Updating the live boot development iso with any changes"
-      # check name can be found for updates
-      if ! grep -qs "  ${Zsync_OS_Name})" "$QG_SourcePath" ; then
-        printColor "\n\n  Naming ERROR  >  Can't find '%s' as a Quickget listed distro?  Try a re-install? \n\n\n" "$Zsync_OS_Name"
-      else
-        if [[ $LastZsync -lt 360000 ]]; then
-          printColor "\n\n  Normally only takes a few moments to compare & synchronize"
-          printf " - Last updated only %d hrs ago"  "$((LastZsync/3600))"
-        fi
-        if [[ $LastZsync -gt 2000000 ]]; then
-          printColor "\n\n  May take a while to compare & synchronize"
-          printColor " - last updated over %d days ago"  "$((LastZsync/86400))"
-          printf "\n\n  Deletion and re-download can sometimes be quicker ...."
-        fi
-        printf "\n\n  [enter] to continue "
-        if [[ $LastZsync -gt 3600000 ]]; then printColor "  (out-of-date)"
-        elif [[ $New_Zsync_SHA ]] && [[ $(cat "$VM_InstanceName/dl-sha.txt") ]]; then
-          Curr_Zsync_SHA="$(awk '{print $1}' "$VM_InstanceName/dl-sha.txt")"
-          if [[ ${Curr_Zsync_SHA// /} == "${New_Zsync_SHA// /}" ]]; then printf "  (up-to-date)"; else printf "  (update available)"
-          fi
-        fi
-      fi
-      printf "  [b] to go back \n\n"
-      read -rp "  >  "  ZsyncRemind
-      if [[ $ZsyncRemind ]]; then ZsyncRemind=
-      else MainMenuZsync=1 ; function_quick_get_wrap ; refresh_conf_vars_and_values
-      fi
-    else
-      printColor "\n\n  %s is not being recognised as Zsync updatable Release"   "$VM_InstanceName"
-      printf "\n\n  Note: only daily-live iso's are zsync updateable ..."
-      printf "\n\n  [enter] to return \n\n"
-      read -rp "  >  "
-    fi
-
   elif [[ $MainMenuChoice == "m" ]] ; then
 
     select_msr_config
