@@ -540,7 +540,7 @@ run_distro_tests_UI () {
     printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
     printf "\n\n  and the TEST ALL report file in the downloaded release folder"
     printColor "\n\n  [enter] to test or to re-test  "
-    printColor "[d] to download   "
+    printColor "[d] back to downloads   "
     printf "[v] to test using verbose mode (needs large screen)  [vm] show mirrors"
     [[ $1 ]] && printf "  [B] back to main menu"
     printf "\n\n"
