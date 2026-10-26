@@ -538,7 +538,7 @@ else
         CodingHotSwapShow=
         printf "\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file. \n\n"
 
-      elif [[ $qqX_LatestNewsTitle ]] ; then
+      elif [[ ! $HideLoadUpNotices ]] && [[ $qqX_LatestNewsTitle ]] ; then
 
         local LastNewsReading="" HideNewsAlert="" MuteNewsAlert="" HighlightNewsAlert="" LatestEpochNewsDate=""
         LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"
