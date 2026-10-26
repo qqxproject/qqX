@@ -56,9 +56,21 @@
 
 ##########################################
 
+##    INDEX
+## 1: LISTS and FILTERS
+## 2: INFO and NOTES (distro oneliners)
+## 3: RELEASES, EDITIONS and DOWNLOAD URLS
+## 4: GUEST TYPES
+## 5: CONFIGURATION
+## 6: FINALIZING
+## 7: DOWNLOAD XL (special cases)
+##    OTHER FUNCTIONS
+
+##########################################
+
 QG_ModsNumber="v7.4"  #  for quickGet 4.99.01 at oct 2026
 
-## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
+## 1:  LISTS and FILTERS   (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
 osAddList=" athenaos bluestar "
@@ -134,7 +146,7 @@ function os_support { echo " $osSupported " ; }
 
 ##########################################
 
-## 2: INFO
+## 2: INFO and NOTES
 # Needed for new qqX listed distros or use for INFO overwrites
 
 function os_info {
@@ -205,7 +217,7 @@ function distro_release_notes {
 
 ##########################################
 
-## 3: RELEASES, EDITIONS and DOWNLOAD URL
+## 3: RELEASES, EDITIONS and DOWNLOAD URLS
 # Needed for new qqX listed distros or use for "releases_${OS} ()" and "editions_${OS} ()" overwrites.
 
 # Quickget's behaviour is to continually exit on error until the correct input combination is made.
@@ -1227,7 +1239,7 @@ function get_zorin() {
 
 ##########################################
 
-## 4: GUEST TYPE
+## 4: GUEST TYPES
 
 # Needed only for special case instructions, such as non-iso
 # Use for new qqX listed distros or for case overwrites
