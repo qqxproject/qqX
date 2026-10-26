@@ -357,13 +357,6 @@ function get_azurelinux() {
     echo "${URL} $HASH"
 }
 
-## UPDATE url
-function get_blendos() {
-    local HASH=""
-    local URL="https://at.blendos.niranjan.co/blendOS.iso"
-    echo "${URL} ${HASH}"
-}
-
 ## ADD
 function releases_bluestar {
     echo "latest"
