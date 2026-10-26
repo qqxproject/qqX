@@ -95,7 +95,7 @@ mapfile -t -d ' ' osRemoveArr <<< "$osRemoveList"
 ## For FILTER CALLS, see/add at start of quick_REROUTE_get
 # The call will cause a defined list to be shown by triggering a controlled error state in Quickget ...
 
-osServersList=" alpine azurelinux centos-stream netboot freedos proxmox-ve "
+osServersList=" alpine azurelinux centos-stream netboot proxmox-ve "
 osServersList+=" ubuntu-server windows-server "
 osServersList="${osServersList//'  '/' '}"
 osServersList="${osServersList//'  '/' '}"
@@ -195,6 +195,7 @@ function distro_release_notes {
         elementary)       RelNotes="10/2026 Although \$0 is possible, a donation request paywall is also present > See website ....";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
+        freedos)          RelNotes="A 'bonus' mountable iso, with extra software, can be dowloaded from the website. Also a legacy boot version, if needed, for older hardware installations.";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
         manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others community. Sway is git 'unstable' at https://github.com/manjaro-sway";;
@@ -509,6 +510,20 @@ function get_fedora() {
 ## FIX beta server variants are too problematic
 function releases_fedora() {
     web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
+}
+
+## FIX & UPDATE and make dynamic 10/2026
+function releases_freedos() {
+    echo latest
+}
+function get_freedos() {
+    local HASH="" ISO="" URL="" BASE_URL="" Data=""
+    BASE_URL="https://freedos.org/download"
+    Data="$(web_pipe "$BASE_URL" | grep -si -C 5 livecd.zip | grep zip | tr '"' '\n' | grep zip)"
+    URL="$(grep -svi bonus <<<"$Data")"
+    ISO="$(basename "$URL")"
+    HASH=$(web_pipe "${BASE_URL}/verify.txt" | grep -s -A 30 sha256 | grep -B 20 sha512 | grep "${ISO}" | cut -d ' ' -f1)
+    echo "${URL} ${HASH}"
 }
 
 ## FIX & UPDATE to new cdn (08/2026)
@@ -1255,7 +1270,7 @@ function get_zorin() {
 # Add in the format of "mods_config_${OS} ()"
 
 mods_config_dragonflybsd () {
-    echo "boot=\"\"" >> "${CONF_FILE}"
+    return
 }
 
 ##########################################
