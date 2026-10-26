@@ -539,13 +539,13 @@ run_distro_tests_UI () {
     fi
     printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
     printf "\n\n  and the TEST ALL report file in the downloaded release folder"
-    printColor "\n\n  [enter] to start (in compact mode)  "
-    printf "[v] verbose mode (needs large screen)  [vm] show mirrors   "
-    printColor "[b] to go back"
-    [[ $1 ]] && printf "  [B] to main menu"
+    printColor "\n\n  [enter] to test or to re-test  "
+    printColor "[d] to download   "
+    printf "[v] to test using verbose mode (needs large screen)  [vm] show mirrors"
+    [[ $1 ]] && printf "  [B] back to main menu"
     printf "\n\n"
     read -rp "  >  " TestDistros
-    if [[ $TestDistros == "b" ]]; then break
+    if [[ $TestDistros == "d" ]]; then break
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
     else
       test_internet_is_up
