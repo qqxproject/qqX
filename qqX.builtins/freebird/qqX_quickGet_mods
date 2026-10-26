@@ -56,9 +56,21 @@
 
 ##########################################
 
+##    INDEX
+## 1: LISTS and FILTERS
+## 2: INFO and NOTES (distro oneliners)
+## 3: RELEASES, EDITIONS and DOWNLOAD URLS
+## 4: GUEST TYPES
+## 5: CONFIGURATION
+## 6: FINALIZING
+## 7: DOWNLOAD XL (special cases)
+##    OTHER FUNCTIONS
+
+##########################################
+
 QG_ModsNumber="v7.4"  #  for quickGet 4.99.01 at oct 2026
 
-## 1:  LISTS & FILTERS (alphabetical, space separated and space isolated at each end)
+## 1:  LISTS and FILTERS   (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
 osAddList=" athenaos bluestar "
@@ -83,7 +95,7 @@ mapfile -t -d ' ' osRemoveArr <<< "$osRemoveList"
 ## For FILTER CALLS, see/add at start of quick_REROUTE_get
 # The call will cause a defined list to be shown by triggering a controlled error state in Quickget ...
 
-osServersList=" alpine azurelinux centos-stream netboot freedos proxmox-ve "
+osServersList=" alpine azurelinux centos-stream netboot proxmox-ve "
 osServersList+=" ubuntu-server windows-server "
 osServersList="${osServersList//'  '/' '}"
 osServersList="${osServersList//'  '/' '}"
@@ -134,7 +146,7 @@ function os_support { echo " $osSupported " ; }
 
 ##########################################
 
-## 2: INFO
+## 2: INFO and NOTES
 # Needed for new qqX listed distros or use for INFO overwrites
 
 function os_info {
@@ -147,16 +159,18 @@ function os_info {
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
         crunchbang++)     INFO="Crunchbangplusplus|-|https://www.crunchbangplusplus.org/|The classic minimal crunchbang feel, now with Debian base.";;
         edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
-        elementary)       INFO="Elementary OS|-|https://elementary.io/|Streamlined Gnome/Vala/Flatpak distro: Thoughtful, capable, and ethical replacement for Windows and macOS.";;
+        elementary)       INFO="Elementary OS|-|https://elementary.io/| Home to the Pantheon desktop, a streamlined Gnome/Vala/Flatpak distro targeting basic needs and new users.";;
         endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
         fedora)           INFO="Fedora|-|https://www.fedoraproject.org/|Innovative Linux community distros for desktops, clouds, and containers. Security focused and enterprise funded by RedHat and others ...";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         linuxlite)        INFO="Linux Lite|-|https://www.linuxliteos.com/|Lightweight XFCE distro built on Ubuntu LTS.";;
+        lubuntu)          INFO="Lubuntu|-|https://lubuntu.me/|Lightweight LXDE Operating System that ships the essential apps and services for daily use: office applications, PDF reader, image editor, music and video players, etc.";;
         manjaro)          INFO="Manjaro|-|https://manjaro.org/|Arch based, curated slow roll distro with lots of pre-supplied packaging, targetting personal or enterprise.";;
         mxlinux)          INFO="MX Linux|-|https://mxlinux.org/|Medium weight Debian Stable based distro with Systemd or sysVinit";;
         netboot)          INFO="netboot.xyz|-|https://netboot.xyz/|Bootable Iso with collection distro net-installation boots.";;
         nitrux)           INFO="Nitrux|-|https://nxos.org/|Innovative immutable with KDE Maui, Hyprland, Cachy kernel and optional Steam installer. Robust system protections and Flatpak software focus.";;
+        peppermint)       INFO="PeppermintOS|-|https://peppermintos.com/|Bare-bones XFCE, no firewall, browser, office or media player; based on either Devuan or Debian, for EOL older computers";;
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
@@ -178,12 +192,13 @@ function distro_release_notes {
         alma)             RelNotes="Compare to Rocky/Oracle/Cent etc > see https://wiki.almalinux.org/Comparison.html";;
         athenaos)         RelNotes="https://github.com/Athena-OS/athena/releases";;
         batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
-        elementary)       RelNotes="01/2026 Although \$0 is possible, a donation request paywall is normally present > consider making a donation .... See website.";;
+        elementary)       RelNotes="10/2026 Although \$0 is possible, a donation request paywall is also present > See website ....";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
+        freedos)          RelNotes="A 'bonus' mountable iso, with extra software, can be dowloaded from the website. Also a legacy boot version, if needed, for older hardware installations.";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
-        manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others are community. Sway is git release 'unstable' https://github.com/manjaro-sway";;
+        manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others community. Sway is git 'unstable' at https://github.com/manjaro-sway";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
         nitrux)           RelNotes="TO RUN OR INSTALL: see https://github.com/orgs/Nitrux/discussions/236";;
         opensuse)         RelNotes="04/2026 Tumbleweed is now the main focus, TW Slow is Multi Edition experimental  [w] check website for Leap and other developments.";;
@@ -193,7 +208,9 @@ function distro_release_notes {
         porteus)          RelNotes="07/2026 > Slick distro worth trying, but last release 09/2023 ... " ;;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install. Also see https://wiki.almalinux.org/Comparison.html";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
+        tails)            RelNotes="Checksum not given... only pgp sigs - If security is critical, see https://tails.net/install/expert/index.en.html#install";;
         tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is up to around 230Mb. Select Pure for 64 bit.";;
+        *buntu*)          RelNotes="Even number .04's are Long Term Support for Ubuntu supported software.  Daily-live is development from the latest version. See Archives for older versions.";;
         void)             RelNotes="To install the packages for the desktop environment, DON'T choose 'install from network' choose the 'local install' option.";;
     esac
     echo "$RelNotes"
@@ -201,7 +218,7 @@ function distro_release_notes {
 
 ##########################################
 
-## 3: RELEASES, EDITIONS and DOWNLOAD URL
+## 3: RELEASES, EDITIONS and DOWNLOAD URLS
 # Needed for new qqX listed distros or use for "releases_${OS} ()" and "editions_${OS} ()" overwrites.
 
 # Quickget's behaviour is to continually exit on error until the correct input combination is made.
@@ -340,13 +357,6 @@ function get_azurelinux() {
     echo "${URL} $HASH"
 }
 
-## UPDATE url
-function get_blendos() {
-    local HASH=""
-    local URL="https://at.blendos.niranjan.co/blendOS.iso"
-    echo "${URL} ${HASH}"
-}
-
 ## ADD
 function releases_bluestar {
     echo "latest"
@@ -440,10 +450,9 @@ function get_devuan() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## REDUCE release count - over 20 is too many!
+## REDUCE release count - over 20 is too many, and 10/2026 improve and FIX the grep
 function releases_dragonflybsd() {
-    # If you remove "".bz2" from the end of the searched URL, you will get only the current release
-   web_pipe "https://mirror-master.dragonflybsd.org/iso-images/" | grep -E -o '"dfly-x86_64-.*_REL.iso.bz2"' | grep -o -E '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | fv -M 5 -qs
+   web_pipe "https://mirror-master.dragonflybsd.org/iso-images/" | grep x86_64 | grep iso.bz2 | fv -M 5 -qs
 }
 
 ## FIX Easy OS release list
@@ -459,16 +468,18 @@ function releases_easyos() {
 }
 
 ## make dynamic for latest (and fix hash)
+# @ 10/2026 updated for new servers and add a tweak for the base64 changes that crept in
 function releases_elementary() {
     echo latest
 }
 function get_elementary() {
-    local HASH= ; local ISO= ; local BaseUrl= ; local RelData=
+    local HASH= ; local ISO= ; local BaseUrl= ; local RelData="" Base64Bit=""
     RelData="$(web_pipe "https://elementary.io/docs/installation")"
-    HASH="$(grep -s bash <<< "$RelData" | grep code | grep -v iso | tail -n 1 | tr '>' '\n' | grep -e '</code' | cut -d '<' -f1)"
-    ISO="$(grep -s bash <<< "$RelData" | grep code | grep iso | tail -n 1 | tr ' ' '\n' | grep iso | cut -d '<' -f1)"
-    BaseUrl="https://ams3.dl.elementary.io/download"
-    echo "${BaseUrl}/$(date +%s | base64)/${ISO} ${HASH}"
+    HASH="$(grep -s bash <<< "$RelData" | grep code | grep -A1 amd64 | grep -v iso | tail -n 1 | tr '>' '\n' | grep -e '</code' | cut -d '<' -f1)"
+    ISO="$(grep -s bash <<< "$RelData" | grep code | grep amd64 | grep iso | tail -n 1 | tr ' ' '\n' | grep iso | cut -d '<' -f1)"
+    BaseUrl="https://dl.elementaryos.org"
+    Base64Bit="$(date +%s | basenc -i --base64url)" ; Base64Bit="${Base64Bit/'o='/==}"
+    echo "${BaseUrl}/$Base64Bit/${ISO} ${HASH}"
 }
 
 ## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
@@ -492,6 +503,20 @@ function get_fedora() {
 ## FIX beta server variants are too problematic
 function releases_fedora() {
     web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
+}
+
+## FIX & UPDATE and make dynamic 10/2026
+function releases_freedos() {
+    echo latest
+}
+function get_freedos() {
+    local HASH="" ISO="" URL="" BASE_URL="" Data=""
+    BASE_URL="https://freedos.org/download"
+    Data="$(web_pipe "$BASE_URL" | grep -si -C 5 livecd.zip | grep zip | tr '"' '\n' | grep zip)"
+    URL="$(grep -svi bonus <<<"$Data")"
+    ISO="$(basename "$URL")"
+    HASH=$(web_pipe "${BASE_URL}/verify.txt" | grep -s -A 30 sha256 | grep -B 20 sha512 | grep "${ISO}" | cut -d ' ' -f1)
+    echo "${URL} ${HASH}"
 }
 
 ## FIX & UPDATE to new cdn (08/2026)
@@ -563,20 +588,24 @@ function get_guix() {
     echo "${URL}/${ISO}"
 }
 
-## FIX iso url (and update releases 08/2026)
+## FIX iso url, update releases 08/2026, update folder naming 10/2026
 function releases_kdeneon() {
     echo bigscreen desktop dev-unstable
 }
 function get_kdeneon() {
     local HASH= ; local ISO= ; local URL=
-    if [[ $RELEASE == "dev-unstable" ]]; then
+    if [[ $RELEASE == "bigscreen" ]]; then
+        URL="https://files.kde.org/neon/images/big/user/current"
+        ISO="neon-user-big-current.iso"
+        HASH=$(web_pipe "${URL}/neon-user-big-current.sha256sum" | cut -d' ' -f1)
+    elif [[ $RELEASE == "desktop" ]]; then
+        URL="https://files.kde.org/neon/images/desk/user/current"
+        ISO="neon-user-desk-current.iso"
+        HASH=$(web_pipe "${URL}/neon-user-desk-current.sha256sum" | cut -d' ' -f1)
+    elif [[ $RELEASE == "dev-unstable" ]]; then
         URL="https://files.kde.org/neon/images/dev/unstable/current"
         ISO="neon-unstable-dev-current.iso"
         HASH=$(web_pipe "${URL}/neon-unstable-dev-current.sha256sum" | cut -d' ' -f1)
-    else
-        URL="https://files.kde.org/neon/images/${RELEASE}/user/current"
-        ISO="neon-user-${RELEASE}-current.iso"
-        HASH=$(web_pipe "${URL}/neon-user-${RELEASE}-current.sha256sum" | cut -d' ' -f1)
     fi
     echo "${URL}/${ISO} ${HASH}"
 }
@@ -637,27 +666,38 @@ function releases_mageia() {
     web_pipe "https://www.mageia.org/en/downloads" | grep Download | grep strong | cut -d'M' -f2 | cut -d' ' -f2
 }
 
-## FIX manjaro sway (again, 08/2026) https://github.com/manjaro-sway/manjaro-sway
+## FIX manjaro sway (again, 08/2026 and 10/2026) https://github.com/manjaro-sway/manjaro-sway
+# https://manjaro-sway.download/iso/202610180719/manjaro-sway-26.1.3-unstable-261018-linux72.iso
 function editions_manjaro() {
     if [[ $RELEASE == "sway" ]]; then echo full ; else echo full minimal; fi
 }
 function releases_manjaro() {
-    echo plasma xfce gnome cinnamon i3 sway
+    echo kde xfce gnome cinnamon i3 sway
 }
 function get_manjaro() {
-    local HASH="" ; local ISO="" ; local MANIFEST="" ; local URL="" ; local TYPE="official"
-    MANIFEST="$(web_pipe https://gitlab.manjaro.org/web/iso-info/-/raw/master/file-info.json)"
+    local HASH="" ISO=""  MANIFEST=""  URL=""  TYPE="official" SwayStub="" SwayShaLink="" SwayShaData=""
+    # 10/2026 gitlab is recording poor uptimes https://status.manjaro.org/history/manjaro-git-lab
+    # MANIFEST="$(web_pipe https://gitlab.manjaro.org/web/iso-info/-/raw/master/file-info.json)"
+    MANIFEST="$(web_pipe https://manjaro.org/products/download/x86 | tr '<' '\n' | grep href | grep iso)"
+    # eg. a href="https://download.manjaro.org/kde/26.1.0/manjaro-kde-26.1.0-260812-linux71.iso" rel="noopener noreferrer"> and 4 more
     case "${RELEASE}" in
-        sway) MANIFEST="$(web_pipe https://manjaro-sway.download/)" ; TYPE="sway" ;;
+        sway) MANIFEST="$(web_pipe https://manjaro-sway.download/iso)" ; TYPE="sway" ;;
         cinnamon|i3) TYPE="community";;
     esac
     if [ "${EDITION}" == "minimal" ] && [ "${TYPE}" != "sway" ]; then EDITION=".minimal"
     else EDITION=""
     fi
-    if [ "${RELEASE}" == "sway" ]; then URL=$(grep iso <<<"$MANIFEST" | tr '"' '\n' | grep http | grep -v 'iso.')
-    else URL="$(echo "${MANIFEST}" | jq -r ."${TYPE}.${RELEASE}${EDITION}".image)"
+    if [ "${RELEASE}" == "sway" ]; then
+        SwayStub="https://manjaro-sway.download"
+        SwayShaLink="$(grep href <<<"$MANIFEST" | grep -m2 span | grep SHA | tr '"' '\n' | grep iso )"
+        SwayShaData="$(web_pipe "${SwayStub}$SwayShaLink")"
+        HASH="$(cut -d' ' -f1 <<<"$SwayShaData")"
+        URL="$(cut -d' ' -f2 <<<"$SwayShaData")" ; URL="${URL/./}" ; URL="${SwayStub}$URL"
+    else
+        # URL="$(echo "${MANIFEST}" | jq -r ."${TYPE}.${RELEASE}${EDITION}".image)"
+        URL="$(grep "$RELEASE" <<<"$MANIFEST" | cut -d'"' -f2)"
+        HASH=$(web_pipe "${URL}.sha512" | cut -d' ' -f1)
     fi
-    HASH=$(web_pipe "${URL}.sha512" | cut -d' ' -f1)
     echo "${URL} ${HASH}"
 }
 
@@ -685,6 +725,20 @@ function get_mxlinux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## 10/2026 FIX for URL, for release numbers -gt 9.9  and FIX hash
+function releases_netbsd() {
+   #web_pipe "https://cdn.netbsd.org/pub/NetBSD/iso/" | grep href | fv -Q -M 6
+   web_pipe "https://archive.netbsd.org/pub/NetBSD-archive/images/" | grep href | fv -Q -M 6
+}
+
+function get_netbsd() {
+    local HASH=""
+    local ISO="NetBSD-${RELEASE}-amd64.iso"
+    local URL="https://archive.netbsd.org/pub/NetBSD-archive/images/${RELEASE}"
+    HASH=$(web_pipe "${URL}/SHA512" | grep "amd64.iso" | cut -d' ' -f4)
+    echo "${URL}/${ISO} ${HASH}"
+}
+
 ## FIX hash check and use CORRECT iso
 function get_nitrux() {
     local HASH="" URLBASE="" URL="" ISO="" IsoLink=""
@@ -696,6 +750,24 @@ function get_nitrux() {
     HASH=$(web_pipe "${URLBASE}/SHA512/${ISO/'.iso'/}.sha512" | grep "${ISO}" | cut -d' ' -f1)
     echo "${URL}/${ISO} ${HASH}"
 }
+
+## UPDATE 10/2026
+function releases_nobara() {
+    echo "latest"
+}
+function editions_nobara() {
+    echo "Official GNOME KDE Steam-HTPC Steam-Handheld"
+}
+function get_nobara() {
+    local HASH= ; local URL= ; local IsoRefs="" ShaLink=""
+    # eg https://nobara-images.nobaraproject.org/Nobara-44-Official-2026-10-13.iso.sha256sum
+    IsoRefs="$(web_pipe "https://nobaraproject.org/download.html#standard" | grep sha | cut -d'"' -f2)"
+    ShaLink="$(grep "$EDITION" <<<"$IsoRefs")"
+    HASH="$(web_pipe "$ShaLink" | cut -d' ' -f1)"
+    URL="${ShaLink/'.sha256sum'/}"
+    echo "${URL} ${HASH}"
+}
+
 ## FIX HASH
 function get_openindiana() {
     local HASH="" ; local ISO="" ; local URL=""
@@ -807,6 +879,32 @@ function get_pclinuxos() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
+## 10/2026 UPDATE and FIX (only xfce now)
+function releases_peppermint() {
+    echo latest
+}
+function editions_peppermint() {
+    echo "debian-xfce devuan-xfce"
+}
+function get_peppermint() {
+    local HASH="" ISO="" FilesData="" ShaLink="" ShaData=""
+    local URL="https://sourceforge.net/projects/peppermintos/files/isos/XFCE"
+    # https://sourceforge.net/projects/peppermintos/files/isos/XFCE/peppermint_devuan-amd64.iso
+    # https://sourceforge.net/projects/peppermintos/files/isos/XFCE/PeppermintOS-Debian-64.iso
+    # Note naming inconsistencies which may cause future problems, since 2026 edition slim-down,
+    # and probable future removal of XFCE folder as Gnome option is now not there ...
+    FilesData="$(web_pipe "$URL" | grep href | grep sha | grep headers)"
+    case ${EDITION} in
+        devuan-xfce) ShaLink="$(grep evuan <<<"$FilesData" | cut -d'"' -f6)" ;;
+        debian-xfce) ShaLink="$(grep ebian <<<"$FilesData" | cut -d'"' -f6)" ;;
+    esac
+    ShaData="$(web_pipe "$ShaLink")"
+    ISO="$(awk '{print $2}' <<<"$ShaData")"
+    HASH="$(awk '{print $1}' <<<"$ShaData")"
+    echo "${URL}/${ISO} ${HASH}"
+}
+
+
 ## UPDATE and tweak
 function releases_popos() {
     echo "24.04 22.04"
@@ -868,15 +966,25 @@ function get_rockylinux() {
 }
 
 ## FIX url and hash, plus make dynamic (if list happens to show up)
+# 10/2026 UPDATE md5 to sha256
+function releases_siduction() {
+    echo latest
+}
+function editions_siduction() {
+    local NAME=""
+    NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
+    web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/" | grep folder | cut -d'"' -f8 | tr -d '/' | sort -u
+}
 function get_siduction() {
-    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ; local Data=
+    local HASH="" ; local DATE="" ; local ISO="" ; local NAME="" ; local URL="" ShaLink="" ShaData=""
     NAME=$(web_pipe "https://mirror.math.princeton.edu/pub/siduction/iso/" | grep folder | cut -d'"' -f8 | tr -d '/')
     URL="https://mirror.math.princeton.edu/pub/siduction/iso/${NAME}/${EDITION}"
-    Data="$(web_pipe "${URL}"| grep .iso.md5)"
-    VERSION="$(cut -d'-' -f2 <<< "$Data" | fv -M)"
-    DATE="$(grep "${VERSION}" <<< "$Data" | cut -d'-' -f6 | cut -d'.' -f1)"
-    ISO="siduction-${VERSION}-${NAME}-${EDITION}-amd64-${DATE}.iso"
-    HASH=$(web_pipe "${URL}/${ISO}.md5" | cut -d' ' -f1)
+    # 10/2026 eg https://mirror.math.princeton.edu/pub/siduction/iso/Big_Crime/kde/siduction-2026.1.0-Big_Crime-kde-amd64-202610181233.iso.sha256
+    # BUT https://mirror.math.princeton.edu/pub/siduction/iso/Big_Crime/lxqt/siduction-2024.1.0-Shine_on-lxqt-amd64-202412261736.iso
+    ShaLink="$(web_pipe "${URL}" | grep href | grep sha256 | tr '"' '\n' | grep sha256 | grep -v '>')"
+    ShaData="$(web_pipe "$URL/$ShaLink")"
+    ISO="$(awk '{print $2}' <<<"$ShaData")" ; ISO="${ISO/'*'/}"
+    HASH="$(awk '{print $1}' <<<"$ShaData")"
     echo "${URL}/${ISO} ${HASH}"
 }
 
@@ -978,6 +1086,18 @@ function get_spirallinux() {
     echo "${URL}/${ISO}" "${HASH}"
 }
 
+## 10/2026 UPDATE, FIX and make dynamic (no json now)
+function get_tails() {
+    local HASH="" URL="" LatestData="" LatestVer="" LatestBaseName=""
+    local  BaseUrl="https://download.tails.net/tails/stable"
+    LatestData="$(web_pipe "$BaseUrl")"
+    LatestVer="$(tr '>' '\n' <<<"$LatestData" | grep href | grep tails | fv -M -Q)"
+    # re-routes: eg https://archive.torproject.org/amnesia.boum.org/tails/stable/tails-amd64-7.15/
+    LatestBaseName="tails-amd64-$LatestVer"
+    # no checksum .... only a pgp sig ??
+    echo "$BaseUrl/$LatestBaseName/${LatestBaseName}.iso"
+}
+
 ## UPDATE, FIX and make dynamic
 function releases_tinycore() {
     web_pipe "http://www.tinycorelinux.net/downloads.html" | grep archive | tr '<' '\n' | tr '>' '\n' | grep -e '.x' | grep -v href | sort -nr | head -n 2 | paste -s -d ' '
@@ -1010,87 +1130,82 @@ function get_trisquel() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## FIX ubuntu multiple hash entries - but not using 'tail -n 1' as in upstream, as could fail if order not ascending
-function get_ubuntu-server() {
-    local HASH="" ; local ISO="" ; local NAME="live-server" ; local URL="" ; local DATA="" ; local RelMax=
-    if [[ "${RELEASE}" == "daily"* ]]; then URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
-    else URL="https://releases.ubuntu.com/${RELEASE}"
+## 10/2026 REFACTOR for errors where versions are missing
+# Upstream use of https://api.launchpad.net/devel/ubuntu/series makes big presumption that everything follows the main pattern
+# But it doesn't, eg. Mate 26.04 .... So grep each OS individually, and FOR FAIRLY RECENT ONLY, not some huge archiving ....
+# AND for Ubuntu itself; 'cdimage.ubuntu.com' has become neglected with many folders missing the important iso's
+# which now seem to be located at 'releases.ubuntu.com' eg https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ has NO AMD iso's
+function releases_ubuntu() {
+    local UbuntuRecentVersions="" DailyData="" LatestDailyVer="" LatestOfficialVer=""
+    # daily-live gets similar repeat in 'get_ubuntu' as calls to Quickget are separate ...
+    # eg http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:ubuntu-mate.json
+    DailyData="$(web_pipe "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${OS}.json")"
+    LatestDailyVer="$(jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live").version' <<< "$DailyData" | fv -M -Q)"
+    # 'dailies' are available for all recent versions ...
+    UbuntuRecentVersions="$(jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live").version' <<< "$DailyData" | fv -qs)"
+    if [[ $OS == "ubuntu-server" ]]; then
+        LatestOfficialVer="$(web_pipe "https://ubuntu.com/download/server" | grep thank | grep amd | grep -v lts | fv -Q)"
+    else LatestOfficialVer="$(web_pipe "https://ubuntu.com/download/desktop" | grep thank | grep amd | grep -v lts | fv -Q)"
     fi
-    case "${RELEASE}" in 14*|16*) NAME="server";;
-    esac
-    if web_check "${URL}/SHA256SUMS"; then
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep "${NAME}" | grep amd64 | grep iso  | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    else
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/MD5SUMS" | grep "${NAME}" | grep amd64 | grep iso | grep "$RelMax")
-        ISO=$(cut -d' ' -f3 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    fi
-    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
-        make_vm_config "${OS}-devel.iso"
-    else
-        web_get "${URL}/${ISO}" "${VM_PATH}"
-        check_hash "${ISO}" "${HASH}"
-        make_vm_config "${ISO}"
-    fi
-}
-## FIX remove beta from stable
-function releases_ubuntu-server() {
-    local ALL_VERSIONS=
-    ALL_VERSIONS="$(web_pipe http://releases.ubuntu.com/streams/v1/com.ubuntu.releases:ubuntu-server.json | jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="live-server") | .version' \
-    | sort -rV | paste -d' ' -s)"
-    echo daily-live "${ALL_VERSIONS}"
+    # remove any possible daily that is newer than the newest official, ie testing dev pre-release
+    fv -qg "$LatestDailyVer $LatestOfficialVer" && UbuntuRecentVersions="${UbuntuRecentVersions/$LatestDailyVer /}"
+    echo "$UbuntuRecentVersions daily-live"
 }
 
+## 10/2026 General FIXES, FIX daily-live grep, tidy-up of hardcoded obsolete tests eg 'jammy-live' and 'md5'
+# plus ubuntu server can now be integrated
 function get_ubuntu() {
-    local ISO="" ; local HASH="" ; local URL=""; local DATA="" ; local RelMax=
-    if [[ "${RELEASE}" == "daily"* ]] && [ "${OS}" == "xxubuntustudio" ]; then
-        # Ubuntu Studio daily-live images are in the dvd directory  @ feb 2025 no longer the case
-        RELEASE="dvd"
-    fi
-    if [[ "${RELEASE}" == "jammy-daily" ]]; then
-        if [[ "${OS}" == "ubuntustudio" ]]; then URL="https://cdimage.ubuntu.com/${OS}/jammy/dvd/current"
-        else URL="https://cdimage.ubuntu.com/${OS}/jammy/daily-live/current"
+    local ISO="" HASH="" URL="" RelData="" RelMax=""  DailyData="" LatestDailyVer="" LatestDailyName=""
+    VM_PATH="${OS}-${RELEASE}"
+    if [[ $RELEASE == "daily-live" ]]; then
+        # use json to get latest folder and matching codename (where daily files are stored)
+        # > cannot be done with 'sort' as when head/tail picking order would be difficult at Z to A points
+        DailyData="$(web_pipe "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${OS}.json")"
+        LatestDailyVer="$(jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live").version' <<< "$DailyData" | fv -M -Q)"
+        LatestDailyName="$(jq --arg Latest "$LatestDailyVer" -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live") | select(.release_title==$Latest).release' <<< "$DailyData")"
+        # eg http://cdimage.ubuntu.com/ubuntu-mate/stonking/daily-live/current/SHA256SUMS
+        URL="http://cdimage.ubuntu.com/$OS/$LatestDailyName/daily-live/current"
+        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep server | grep 'amd64.iso' | grep -v beta)
+        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep desktop | grep 'amd64.iso' | grep -v beta)
         fi
-        VM_PATH="${OS}-jammy-live"
-    elif [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        URL="https://cdimage.ubuntu.com/${OS}/${RELEASE}/current"
-        VM_PATH="${OS}-${RELEASE}"
-    elif [ "${OS}" == "ubuntu" ]; then
-        URL="https://releases.ubuntu.com/${RELEASE}"
+        ISO=$(cut -d'*' -f2 <<<"$RelData")
+        HASH=$(cut -d' ' -f1 <<<"$RelData")
+        VM_PATH="${VM_PATH}-$(date +%Y-%b-%d)"
+        web_get "${URL}/${ISO}" "${VM_PATH}"
+        check_hash "${ISO}" "${HASH}"
+        make_vm_config "${ISO}"
+        # 10/2026  REMOVE zsync as getting too problematic ... zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}" # make_vm_config "${OS}"
     else
-        URL="https://cdimage.ubuntu.com/${OS}/releases/${RELEASE}/release"
-    fi
-    if web_check "${URL}/SHA256SUMS"; then
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/SHA256SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    else
-        RelMax="$( web_pipe "$URL" | tr '>' '\n' | grep 'href=' | grep iso | tr -d '-' | fv -M -Q)"
-        DATA=$(web_pipe "${URL}/MD5SUMS" | grep 'desktop\|dvd\|install' | grep amd64 | grep iso | grep -v "+mac" | grep "$RelMax")
-        ISO=$(cut -d'*' -f2 <<<"${DATA}")
-        HASH=$(cut -d' ' -f1 <<<"${DATA}")
-    fi
-    if [ -z "${ISO}" ] || [ -z "${HASH}" ]; then
-        echo "$(pretty_name "${OS}") ${RELEASE} is currently unavailable. Please select other OS/Release combination"
-        exit 1
-    fi
-    if [[ "${RELEASE}" == "daily"* ]] || [ "${RELEASE}" == "dvd" ]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-devel.iso"
-        make_vm_config "${OS}-devel.iso"
-    elif [[ "${RELEASE}" == "jammy-daily" ]]; then
-        zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}-jammy-live.iso"
-        make_vm_config "${OS}-jammy-live.iso"
-    else
+        # find the latest in the series eg. fv -F '24.04' gives: 24.04  24.04.1  24.04.2  24.04.3  24.04.4  24.04.5
+        # Use 'releases' not 'cdimage' for Ubuntu itself:
+        if [[ $OS == "ubuntu" ]] || [[ $OS == "ubuntu-server" ]]; then  URL="https://releases.ubuntu.com/$RELEASE"
+        else URL="https://cdimage.ubuntu.com/${OS}/releases/$RELEASE/release"
+        fi
+        # avoiding v3 and the would be needed v3 cpu tests, as it's only a VM
+        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep server | grep 'amd64.iso' | grep -v beta)
+        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep desktop | grep 'amd64.iso' | grep -v beta)
+        fi
+        RelMax="$(cut -d '*' -f2 <<<"$RelData" | tr '-' '\n' | fv -M -Q)"
+        ISO=$(grep "$RelMax" <<<"$RelData" | cut -d'*' -f2)
+        HASH=$(grep "$RelMax" <<<"$RelData" | cut -d' ' -f1)
         web_get "${URL}/${ISO}" "${VM_PATH}"
         check_hash "${ISO}" "${HASH}"
         make_vm_config "${ISO}"
     fi
+}
+
+## 10/2026 General FIXES and tidy-up
+function get_ubuntu-server() {
+    #printf "\n\n  INTERNAL ERROR - 'get_ubuntu-server' functions should now be integrated into 'get_ubuntu' \n\n"
+    get_ubuntu "$*"
+}
+function releases_ubuntu-server() {
+    #printf "\n\n  INTERNAL ERROR - 'releases_ubuntu-server' functions should now be integrated into 'releases_ubuntu' \n\n"
+    releases_ubuntu "$*"
+}
+## 10/2026 remove zsync
+function zsync_get() {
+    printf "\n\n  INTERNAL ERROR - 'zsync_get' functions have now been discontinued \n\n"
 }
 
 ## FIX invalid VOID folders (use 'current' only as some folders have variants)
@@ -1132,7 +1247,7 @@ function get_zorin() {
 
 ##########################################
 
-## 4: GUEST TYPE
+## 4: GUEST TYPES
 
 # Needed only for special case instructions, such as non-iso
 # Use for new qqX listed distros or for case overwrites
@@ -1147,6 +1262,9 @@ function get_zorin() {
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "mods_config_${OS} ()"
 
+mods_config_dragonflybsd () {
+    return
+}
 
 ##########################################
 
@@ -1807,10 +1925,6 @@ EOF
 function error_specify_release {
     show_os_info "${OS}"
     case ${OS} in
-        *ubuntu-server*)
-            echo -en " - Releases:\t"
-            releases_ubuntu-server &
-            wait "$!" ;;
         *ubuntu*)
             echo -en " - Releases:\t"
             releases_ubuntu &
@@ -1844,6 +1958,11 @@ function error_specify_release {
 # 'case ${OS}' was a repeat as it was already checked during the initial case grep of the cmd args, found at the end of the script
 # Plus, not all calls to 'validate' will have had the release_* function evaluated ...
 
+# 10/2026 remove this altogether ??
+
+function xx_validate_release() {
+    return
+}
 function validate_release() {
     local DISPLAY_NAME= ; DISPLAY_NAME="$(pretty_name "${OS}")"
     local ReleaseList="$1"
@@ -1860,7 +1979,7 @@ function validate_release() {
 }
 
 ## TWEAK
-# A lot of these have already been modded in the FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
+# A lot of these have already been modded in the Quickemu FreeSpirit branch but move here as they're NOW MUCH EASIER TO ADJUST:
 
 # Download a SMALL file page, checksum etc from the web and pipe it to stdout  (not to confuse with 'web_get' and NOT to use on binaries)
 function web_pipe {
@@ -1880,11 +1999,11 @@ function web_pipe_json {
 
 ## TWEAK
 function web_check {
-    local HEADERS=() ; local URL="${1}"
+    local HEADERS=() ; local URL=""
     # Normally just a URL. Mac OS has URL as $1 then followed by repeated headers requests.
     while (( "$#" )); do
         if [ "${1}" == "--header" ]; then HEADERS+=("${1}" "${2}") ; shift 2
-        else shift
+        else URL="${1}" ; shift
         fi
     done
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
@@ -1969,6 +2088,7 @@ function web_get() {
     HEADERS=()
     # REVIEW  https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Browser_detection_using_the_user_agent  (macos UA is from upstream)
     # Windows download has already set itself up as 'FireFox' but without this if-then we would suddenly switch to 'Chrome'
+    # Note: in the following, the rendering engine is Gecko, and the "gecko-Trail" is the fixed string 20100101, which means "desktop"
     if [[ $OS == "macos" ]]; then USER_AGENT="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
     else USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
     fi
@@ -1994,7 +2114,7 @@ function web_get() {
         # Those without, go through web_CHECK.
         # CARE is also needed so that distro checks don't trigger background downloads.
         # The QuickGet VARIANT CONVOLUTIONS can have lots of twists and turns ....
-        if [[ "$OS" != *ubuntu* ]]; then
+        if [[ "$OS" != *'ubuntu'* ]]; then
             local HASH="" GetLine="" ; GetLine=$(get_"${OS}" "$RELEASE" "$EDITION")
             # 'get_$OS' should output two args; a filepath URL, followed a checksum number
             #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
@@ -2109,7 +2229,7 @@ function test_all {
         [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" && return
     fi
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
-    [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "ubuntu-server" ]] &&  FUNC="ubuntu"
+    [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "xxubuntu-server" ]] &&  FUNC="ubuntu"
 
     if [[ $(type -t "releases_${FUNC}") == function ]]; then
         SECONDS=0
@@ -2135,7 +2255,9 @@ function test_all {
                     printf "" > "/tmp/qGet-test-all-GetLine.txt"
                     SECONDS=0
                     while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]] ; do
-                        GetLine=$(get_"${OS}" "$RELEASE")
+                        if [[ $OS == "ubuntu-server" ]]; then GetLine=$(get_ubuntu-server "$RELEASE")
+                        else GetLine=$(get_"${OS}" "$RELEASE")
+                        fi
                         printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
                     done
                     if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
@@ -2177,9 +2299,7 @@ function test_all {
                 # Caution here, the get_$OS routines must run in subshells in order to loop properly
             elif [[ "${OS}" == "macos" ]]; then
                 (get_macos)
-            elif [ "${OS}" == "ubuntu-server" ]; then
-                (get_ubuntu-server)
-            elif [[ "${OS}" == *ubuntu* ]]; then
+            elif [[ "${OS}" == *'ubuntu'* ]]; then
                 (get_ubuntu)
             else
                 URL=$(get_"${OS}" | cut -d' ' -f1 | head -n 1)
