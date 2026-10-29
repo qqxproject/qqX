@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+
+##  qqX component to be located in folder 'qqX.main'
+
+##  Copyright (c)  Alex Genovese   https://github.com/qqxproject
+#   SMALL CODE SNIPPETS eg the function printColor MAY BE USED
+#   PERMISSIVELY in projects as MIT or similar, providing CLEAR ATTRIBUTIONS are shown.
+# 	Otherwise:
+#   Licence  GPL3   https://www.gnu.org/licenses
+##  qqX - quickemu quickget X terminal project
+
+## ShellCheck global disables:
+# https://www.shellcheck.net/wiki/SC2242 as it clashes with use of exit traps used to keep mouse click scripts open
+# And SC1090,SC1091,SC2024, SC2154 for necessity of dynamic file sourcing
+
+#  shellcheck disable=SC2242,SC1090,SC1091,SC2034,SC2154,SC2009
+
+main_menu_messages () {
+
+  # LIVE BOOT MESSAGES:
+  if [[ $LiveBoot ]]; then
+    if [[ $LiveBootMissing ]]; then
+      printColor "\n\n\n  Live BOOT ISO NOT FOUND"
+      [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+      printf "\n"
+    elif [[ ! $HideLoadUpNotices ]]; then
+      # BRIEF ADVISORIES
+      # potential host issues
+      if [[ $(type -p lsblk) ]] && grep -qs 'btrfs' <<< "$(lsblk -f -o FSTYPE)"; then
+        mapfile -t fsArrBtr <<< "$(lsblk -f -o FSTYPE,MOUNTPOINT | grep btrfs | grep -e '/[[:print:]]' | awk '{print $NF}')"
+        for Mount in "${fsArrBtr[@]}"; do
+          if [[ "$VM_Conf_Dir" == "$Mount"* ]]; then
+            printf "\n\n\n  BTRFS detected: Installing VM's on top of btrfs hosts, can cause slowdown issues"
+            printf "\n\n  [mv] Move the VM to an ext4 partion (simplest)"
+            printf "\n\n  [cc] try mitigation fixes using 'nocow' and qqX custom booting"
+            printf "\n\n  See https://www.qemu.org/docs/master/system/images.html#cmdoption-qcow2-arg-nocow"
+            printf "\n" ; break
+          fi
+        done
+      fi
+      # LIVE continued, by Instance name:
+      if [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
+        printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
+        printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
+      elif [[ "$VM_InstanceName" == *batocera* ]]; then
+        printf "\n\n  Use qqX .conf editor to set up game controllers as ps2 (?) etc."
+        printf "\n"
+      elif [[ "${VM_InstanceName,,}" == *nitrux* ]]; then
+      printf "\n\n  TO RUN, side step to workspace 2 - See https://github.com/orgs/Nitrux/discussions/236 for more details."
+        printf "\n"
+      elif [[ "${VM_InstanceName,,}" == *windows* ]]; then
+        # WINDOWS:
+        if [[ $WindowsMissingIso ]]; then
+          printf "\n\n\n"
+          [[ $WebBrowser ]] && printColor "  [wd] to"
+          printColor "  MANUALLY DOWNLOAD a Windows ISO from  > >  https://www.microsoft.com/en-us/software-download/  < < < < <"
+          printf "\n\n  Select 64 bit. Save to the VM folder. Change the iso name to '%s' as in the .conf file and press refresh.\n" "$(basename "$iso")"
+        else
+          printf "\n\n\n  ALL the Windows drivers should be autodetected and should auto-install ...."
+          printf "\n\n"
+        fi
+        [[ $WebBrowser ]] && printf "  [qW]"
+        printf "  An overview guide is available at https://qqxproject.org/Guides/Windows-OS if needed"
+        printf "\n"
+        CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
+        if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
+          printColor "\n\n  WARNING: this CPU is unable to support current versions of Windows."
+          printf "\n\n  As 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
+          printf "\n  the installation is unlikely to be successful, or to be reliable. \n\n"
+        fi
+        # check that the Windows installation iso's are in the expected size range:
+        # du -k unattended.iso | tr -cd '[:digit:]'  788  # du -m virtio-win.iso | tr -cd '[:digit:]'  837  @ 10/2026
+        DL_Size_Virtio="$(du -m "$VM_Conf_Dir/$VM_InstanceName/virtio-win.iso" 2>/dev/null | tr -cd '[:digit:]')"
+        DL_Size_UnAtnd="$(du -k "$VM_Conf_Dir/$VM_InstanceName/unattended.iso" 2>/dev/null | tr -cd '[:digit:]')"
+        if [[ $(type -p xdg-mime) ]]; then
+          Virtio_MimeType="$(xdg-mime query filetype "$VM_Conf_Dir/$VM_InstanceName/virtio-win.iso" 2>/dev/null)"
+          UnAtnd_MimeType="$(xdg-mime query filetype "$VM_Conf_Dir/$VM_InstanceName/unattended.iso" 2>/dev/null)"
+        elif [[ $(type -p mimetype) ]]; then
+          Virtio_MimeType="$(mimetype "$VM_Conf_Dir/$VM_InstanceName/virtio-win.iso" 2>/dev/null)"
+          UnAtnd_MimeType="$(mimetype "$VM_Conf_Dir/$VM_InstanceName/unattended.iso" 2>/dev/null)"
+        fi
+        if [[ "$Virtio_MimeType" == *'application/x-cd-image' || "$Virtio_MimeType" == *'application/vnd.efi.iso' ]]; then
+          ((DL_Size_Virtio < 700)) && printf "\n\n  The Virtio ISO looks a BIT SMALL ?"
+        else printf "\n\n  The Virtio ISO appears to be INCORRECT or missing"
+        fi
+        if [[ "$UnAtnd_MimeType" == *'application/x-cd-image' || "$UnAtnd_MimeType" == *'application/vnd.efi.iso' ]]; then
+          ((DL_Size_UnAtnd < 600)) && printf "\n\n  The 'Unattended' ISO looks a BIT SMALL ?"
+        else printf "\n\n  The 'Unattended' ISO appears to be INCORRECT or missing"
+        fi
+      fi
+    fi
+
+  # General - BRIEF load up advisory messages:
+  elif [[ ! $HideLoadUpNotices ]]; then
+    # By Instance name:
+    if [[ "${VM_InstanceName,,}" == *windows* ]]; then
+      if [[ "$Mounted_ISO" == *virtio* ]]; then
+        printColor "\n\n\n  SETUP: " ; printf "When everything is working and booting correctly,"
+        # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
+        printf "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
+        printf "\n\n  The Windows ISO may also be archived."
+        printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
+        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
+        printf "\n"
+      fi
+      [[ ! $(type -p swtpm) ]] && printColor "\n\n\n  SWTPM not found and is needed to run Windows: open another terminal, install 'swtpm' then press refresh   < < < IMPORTANT \n"
+    elif [[ "${VM_InstanceName,,}" == *nitrux* ]]; then
+      printf "\n\n  All DISPLAY MODES work but use gtk to set display sizes - More notes at https://github.com/orgs/Nitrux/discussions/236"
+      printf "\n"
+    fi
+
+  # Live Boot - PERMANENT messages
+  elif [[ $LiveBoot ]]; then true
+
+  # General - PERMANENT messages
+  else true
+
+  fi
+}
+
+daily_live_load_up_checks_and_messages () {
+
+  if [[ ! $HideLoadUpNotices ]]; then
+    DailyData= ; LatestDailyUpdate=
+    printf "\n\n\n  Checking for updates ... "
+    DailyName="${VM_InstanceName/'-daily'/@/}" ; DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
+    DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${DailyName}.json")"
+    sleep 2
+    if [[ ! $DailyData ]]; then
+      DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:ubuntu.json")"
+      sleep 2
+    fi
+    if [[ ! $DailyData ]]; then printf " Ubuntu Server not reached ..."
+    else
+      # with help from Claude on this little bit ....
+      LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
+      | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
+      | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
+      | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData" 2>/dev/null)"
+    fi
+    if [[ $LatestDailyUpdate ]]; then
+      printf "\n\n  Latest Ubuntu 'daily' update is"
+      printf "\n  %s " "$LatestDailyUpdate"
+      printf "\n  Use [gt] to download a new spin, leave this one here, or [del] to delete ...\n"
+    else printf "\n\n  Latest Ubuntu 'daily' update data not available ...\n"
+    fi
+  fi
+}
+
+show_latest_news () {
+
+  if [[ ! $HideLoadUpNotices ]]; then
+    local LastNewsReading="" HideNewsAlert="" MuteNewsAlert="" HighlightNewsAlert="" LatestEpochNewsDate=""
+    LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"
+    [[ -e "$HOME/.qqX/qqXnewsreader.log" ]] && LastNewsReading="$(cat "$HOME/.qqX/qqXnewsreader.log" | tr -cd '[:digit:]')"
+    # Hide old news
+    (( (EpochDateNow - LatestEpochNewsDate) < 1209600 )) && HighlightNewsAlert=1
+    (( (EpochDateNow - LatestEpochNewsDate) > 3628800 )) && HideNewsAlert=1
+    # Mute news if it has been recently read
+    if [[ $LastNewsReading ]]; then
+      (( (LastNewsReading+(3600*48)) < EpochDateNow )) && HideNewsAlert=1
+      (( (LastNewsReading+(3600*2)) < EpochDateNow )) && MuteNewsAlert=1
+    fi
+    # Where 1209600 = 14 days, to highlight newness, and beyond 3628800/42days is probably stale
+    # And where NewsAlert flag will mute news after 2hrs if it has been recently read, followed by hiding it after 2days
+    if [[ $HighlightNewsAlert ]] && [[ ! $HideNewsAlert && ! $MuteNewsAlert ]]; then
+      printColor "  [news] %s" "$qqX_LatestNewsTitle"
+      [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
+      printf "\n\n"
+    elif [[ ! $HideNewsAlert ]]; then
+      printf "\n  [news] %s" "$qqX_LatestNewsTitle"
+      [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
+      printf "\n\n"
+    elif [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]]; then
+      printf "\n  [tags] latest code %s > " "$qqX_Newest_Tag"
+      if ! fv -qg "$qqX_Newest_Tag $qqX_Version" ; then printf "up-to-date\n\n"
+      else printf "%s\n\n"  "$qqX_Newest_TagText"
+      fi
+    fi
+  fi
+}

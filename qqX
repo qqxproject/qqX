@@ -194,6 +194,7 @@ source "$qqX_MainFolder/qqX_selfcheck_and_update"
 source "$qqX_MainFolder/qqX_main_menu_routines"
 source "$qqX_MainFolder/qqX_main_menu_interface"
 source "$qqX_MainFolder/qqX_main_menu_actions"
+source "$qqX_MainFolder/qqX_main_menu_messages"
 
 [[ $Loop_Diagnostics ]] && printf "\n\n Source files done:" &&  main_loop_diagnostics
 
