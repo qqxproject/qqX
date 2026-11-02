@@ -46,7 +46,7 @@ if [ "$1" = '--version' ] || [ "$1" = '-V' ] ; then  echo "$qqX_Version" ; exit 
 if [ ! -t 1 ]; then exit 1 ; fi
 
 #  # Use C.UTF-8  where possible as has more locale https://wiki.archlinux.org/title/Locale (Also see qqX_Initialize)
-if  grep -sqi 'C.utf8' <<< "$(locale -a)"; then export "LC_NUMERIC=C.UTF-8" ; export "LC_COLLATE=C.UTF-8"
+if  grep -sqi -e ^'C.utf8' <<< "$(locale -a)"; then export "LC_NUMERIC=C.UTF-8" ; export "LC_COLLATE=C.UTF-8"
 else export "LC_NUMERIC=C" ; export "LC_COLLATE=C"
 fi
 
