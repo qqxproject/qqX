@@ -121,24 +121,28 @@ main_menu_messages () {
 daily_live_load_up_checks_and_messages () {
 
   if [[ ! $HideLoadUpNotices ]]; then
-    DailyData= ; LatestDailyUpdate=
-    printf "\n\n\n  Checking for updates ... "
-    DailyName="${VM_InstanceName/'-daily'/@/}" ; DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
-    DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${DailyName}.json")"
-    sleep 2
-    if [[ ! $DailyData ]]; then
-      DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:ubuntu.json")"
+    if [[ ! $LatestDailyUpdate ]]; then
+      # only check once, unless data was not available
+      DailyData= ; LatestDailyUpdate=
+      printf "\n\n\n  Checking for updates ... "
+      DailyName="${VM_InstanceName/'-daily'/@/}" ; DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
+      DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${DailyName}.json")"
       sleep 2
-    fi
-    if [[ ! $DailyData ]]; then printf " Ubuntu Server not reached ..."
-    else
-      # with help from Claude on this little bit ....
-      LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
-      | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
-      | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
-      | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData" 2>/dev/null)"
+      if [[ ! $DailyData ]]; then
+        DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:ubuntu.json")"
+        sleep 2
+      fi
+      if [[ ! $DailyData ]]; then printf " Ubuntu Server not reached ..."
+      else
+        # with help from Claude on this little bit ....
+        LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
+        | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
+        | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
+        | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData" 2>/dev/null)"
+      fi
     fi
     if [[ $LatestDailyUpdate ]]; then
+      # but still show results if menu is refreshed (until time-out is reached)
       printf "\n\n  Latest Ubuntu 'daily' update is"
       printf "\n  %s " "$LatestDailyUpdate"
       printf "\n  Use [gt] to download a new spin, leave this one here, or [del] to delete ...\n"
