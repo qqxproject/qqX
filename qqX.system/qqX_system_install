@@ -253,24 +253,23 @@ while true ; do
     printColor "\n\n  >>  Check for 'qemu' installations: qemu-system-x86_64 or qemu-full, qemu-system, and for qemu-utils etc "
     InstallationAlert=1
   fi
-  # add last as it's a bit longer on the notes
+  # last as these are mainly for Optionals and also a bit longer on the notes
   GnuList=("awk" "sed" "gzip" "tar")
   for GP in "${GnuList[@]}"; do
     GnuPath="$(type -p "$GP")"
-    [[ $GnuPath ]] && GnuRealPath="$(realpath "$GnuPath")"
     if [[ ! $GnuPath ]]; then
       printColor "\n\n  >>  Standard util '%s' should usually be present and is required by qqX"  "$GP"
       printColor   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
       InstallationAlert=1
     elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
-      printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
-      printColor   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+      printf "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
+      printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
       InstallationAlert=1
     fi
   done
   # and tpm as an optional
   if [[ ! $(type -p swtpm) ]]; then
-    printColor "\n\n  >>  OPTIONAL: 'swtpm' is currently needed for Microsoft Windows and Ubuntu Server ... "
+    printf "\n\n  >>  OPTIONAL: 'swtpm' is currently needed for Microsoft Windows and Ubuntu Server ... "
     InstallationAlert=1
   fi
 
@@ -322,7 +321,8 @@ while true ; do
 
     printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations  > return here to re-check"
 
-    printColor "\n\n  [e] toggle MORE EXAMPLES   [r] re-check   [c] move-on and continue   [q] to quit"
+    printColor "\n\n  [c] continue   "
+    printf "[r] re-check   [e] toggle more distro EXAMPLES   [q] to quit"
     printf "\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printf "  -  %s" "$(find_translate_text "Translate from English")"
     printf "\n\n"
