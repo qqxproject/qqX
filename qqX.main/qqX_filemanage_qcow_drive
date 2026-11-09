@@ -274,12 +274,12 @@ while true; do
 
 
   printf "\n\n\n"
-  [[ "$MainAvailable" ]] && printf "  [1] Main Drive   "
-  [[ "$SecondPathName" ]] && printf "[2] Second Drive  "
-  [[ "$SharedPathName" ]] && printf "[3] Shared Drive   "
-  [[ "$qqf_Input_Drivepath" ]] && printf "[i] Input Drive  "
-  printf "[A] All Drives  "
-  [[ "$SharedPathName" ]] && printf "[a] all Non-Shared Drives "
+  [[ "$MainAvailable" ]] && printf "  [1] Main Drive "
+  [[ "$SecondPathName" ]] && printf "  [2] Second Drive"
+  [[ "$SharedPathName" ]] && printf "  [3] Shared Drive"
+  [[ "$qqf_Input_Drivepath" ]] && printf "  [i] Input Drive"
+  printf "  [A] All Drives"
+  [[ "$SharedPathName" ]] && printf "  [a] all Non-Shared Drives "
 
   printf "\n\n  See main utilities for general disk tools and for disk creation"
 

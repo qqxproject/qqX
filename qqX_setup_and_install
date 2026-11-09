@@ -12,11 +12,9 @@
 
 #   IF your FILE MANAGER allows:
 
-#   Double mouse click  >  'run in terminal' or 'execute' ....
+#   Either Double mouse click  >  'run in terminal' or 'execute'  OR  Right click  >  'run as program'  or 'run in terminal' etc
 
-#   or     Right click  >  'run as program'  or 'run in terminal'  or 'run in konsole' ....
-
-#   or  Right click on Folder  >  'open in TERMINAL'  and  type "./qqX_setup_and_install"   (click on folder, not file, also note prefix ./)
+#   OR  RIGHT CLICK on FOLDER  >  'open in TERMINAL'  and  type "./qqX_setup_and_install"   (note prefix ./)
 
   #########################################################################################################################################
 
@@ -28,8 +26,8 @@
 
 #   shellcheck disable=SC2009,SC2034
 
-#   Terminal name may also be set here, for one-time usage, if '-e' exec functions are recognised:
-    UserTerm=
+#   Terminal name MAY ALSO BE SET HERE, for one-time usage, if '-e' exec functions are recognised:
+    UserTerm=""
 
 #########################################################################################################################################
 
@@ -39,6 +37,9 @@
 
 # At the beginning of 2026, 'qterminal' and' mate-terminal' are now being generally RECOMMENDED for qqX as they are
 # both lightweight and can both be easily installed as alternatives on almost any desktop or window manager, either X11 or Wayland
+
+# However, some Linux distros, especially those based on the Ubuntu LTS 2 year cycle, can often be behind the curve
+# and their supplied terminals can be quite out-of-date.
 
 # In 2024, 85% of users were probably covered by the first four: "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal"
 # Over 95% probably when "qterminal" and "alacritty" were added.
@@ -103,9 +104,9 @@ fi
 
 if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
   printf "\n\n  The new COSMIC terminal 'cosmic-term' has been detected on this system, "
-  printf "\n  however, at 12/2025 it is unfortunately problematic."
+  printf "\n  however, at 11/2026 it is still unfortunately problematic."
   printf "\n\n  Luckily, systems are fine with more than one terminal installed and present:"
-  printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+  printf "\n\n  Recommended general installations are 'mate-terminal' or possibly 'qterminal'"
   printf "\n  which are both lightweight and Wayland/X11/multi-DE compatible."
   printf "\n\n  If you wish to force cosmic-term, to see if changes make it now possible to use,"
   printf "\n  edit the entry for 'UserTerm' at the start of this script, and re-run."
@@ -136,8 +137,8 @@ elif [ "$UserTerm" = "mate-terminal" ]; then
 elif [ "$UserTerm" = "xfce4-terminal" ]; then
   "$UserTerm" --geometry=160x50 --hide-menubar --hide-toolbar  -e "./qqX.system/qqX_system_install"
 
-elif [ "$UserTerm" = "xxqterminal" ]; then
-  # create profile for geometry REVIEW
+elif [ "$UserTerm" = "qterminal" ]; then
+  # create profile for geometry (needs ver 2+) REVIEW
   # see https://github.com/lxqt/qterminal/issues/488
   # and QF 'qcow2_filemanagement_launcher'
   if [ -e "$HOME/.config/qterminal.org/qterminal.ini" ]; then
@@ -236,17 +237,28 @@ if [ -t 1 ] ; then
   printf "\n\n   Your terminal or distro/terminal combination may need, or may have needed "
   printf "\n\n   this window to stay open until qqX has completed its tasks ..."
   printf "\n"
-  printf "\n\n   [enter] to close \n\n  "
+  printf "\n\n   [enter] to close and refresh \n\n  "
   read -r reply
 fi
 
+printf "   Closing ... \n\n"
+sleep 1.2
+[ -n "$(command -v tput)" ] && tput cnorm  && tput clear
+
 # Exit the script. But also check whether it has been run with a --hold optioned terminal, as Dolphin does, for example.
 PidRun="$(ps -eF | grep sh | grep "$$" | grep "$0" | tr -cd '[:print:]' | awk '{print $3}')"
+
+# command line starts can leave the terminal window open
+if [ -n "$(command -v "$SHELL")" ]; then DistroShell="$(command -v "$SHELL")"
+else DistroShell="$(command -v "sh")"
+fi
+eval "$DistroShell"
 
 # Needs SIGHUP in KDE or logs out of desktop session... See https://en.wikipedia.org/wiki/Signal_(IPC)#Handling_signals
 if [ -n "$PidRun" ]; then  kill -s 1 "$PidRun"
 else exit
 fi
+
 
 # Licence  GPL3   https://www.gnu.org/licenses
 

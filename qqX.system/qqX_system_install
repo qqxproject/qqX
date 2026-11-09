@@ -151,7 +151,7 @@ while true ; do
   # until 'tput' has been validated, clear here using 'printf'
   printf "\033c"
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
-  InstallationAlert=
+  InstallationAlert= ; OptionalAlert=
 
   if [[ ! "$(type -p bash)" ]]; then
     printColor "\n\n  >>  Problem locating Bash. Please read the notes at the start of this installer script."
@@ -261,58 +261,60 @@ while true ; do
       printColor "\n\n  >>  Standard util '%s' should usually be present and is required by qqX"  "$GP"
       printColor   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
       InstallationAlert=1
-    elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version)"; then
+    elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version 2>/dev/null)"; then
       printf "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
       printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
-      InstallationAlert=1
+      OptionalAlert=1
     fi
   done
   # and tpm as an optional
   if [[ ! $(type -p swtpm) ]]; then
     printf "\n\n  >>  OPTIONAL: 'swtpm' is currently needed for Microsoft Windows and Ubuntu Server ... "
-    InstallationAlert=1
+    OptionalAlert=1
   fi
 
-  if [[ $InstallationAlert ]]; then
+  if [[ $InstallationAlert || $OptionalAlert || $ShowMoreExamples ]]; then
 
     [[ ! $(type -p qqX) ]] && printColor "\n\n  >>  Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
 
-    printf "\n\n\n  Example full sets:"
+    if [[ $ShowMoreExamples ]] || [[ ! $OptionalAlert ]]; then
 
-    printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
-    printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
+      printf "\n\n\n  Example full sets:"
 
-    printColor "\n\n  Fedora KDE (2026/07)"
-    printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
-    # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
+      printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
+      printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
-    printColor "\n\n  Ubuntu 26.04"
-    printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
-    printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice  mate-terminal"
-    # qemu-system-modules-spice > quickemu PR #1696
+      printColor "\n\n  Fedora KDE (2026/07)"
+      printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
+      # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
 
-    printColor "\n\n  LinuxMint 22.3 Cinnamon (2026/01)"
-    printf "\n  sudo apt install  jq  socat  spice-client-gtk  qemu-system-x86"
+      printColor "\n\n  Ubuntu 26.04"
+      printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
+      printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice  mate-terminal"
+      # qemu-system-modules-spice > quickemu PR #1696
 
-    if [[ $ShowMoreExamples ]]; then
+      printColor "\n\n  LinuxMint 22.3 Cinnamon (2026/01)"
+      printf "\n  sudo apt install  jq  socat  spice-client-gtk  qemu-system-x86"
 
-      printColor "\n\n  Fedora Workstation/Gnome (2026/07)"
-      printf "\n  sudo dnf install  mate-terminal  wayland-utils  p7zip-plugins  socat  spice-gtk-tools"
-      # @ 01/2025 seems to come with qemu ready installed
+      if [[ $ShowMoreExamples ]]; then
 
-      printColor "\n\n  Debian KDE 13.2.0"
-      printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
+        printColor "\n\n  Fedora Workstation/Gnome (2026/07)"
+        printf "\n  sudo dnf install  mate-terminal  wayland-utils  p7zip-plugins  socat  spice-gtk-tools"
+        # @ 01/2025 seems to come with qemu ready installed
 
-      printColor "\n\n  openSUSE Tumbleweed (08/2026)"
-      printf "\n  myrlyn > bc qemu qemu-ui-sdl qemu-audio-sdl spice-gtk"
+        printColor "\n\n  Debian KDE 13.2.0"
+        printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
 
-      printColor "\n\n  Pop! OS 24.04 Cosmic "
-      printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  qterminal"
-      printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
+        printColor "\n\n  openSUSE Tumbleweed (08/2026)"
+        printf "\n  myrlyn > bc qemu qemu-ui-sdl qemu-audio-sdl spice-gtk"
 
-      printColor "\n\n  Solus (08/2026) "
-      printf "\n  sudo eopkg install  socat jq 7zip cdrtools spice-gtk  qemu"
+        printColor "\n\n  Pop! OS 24.04 Cosmic "
+        printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  mate-terminal"
+        printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
 
+        printColor "\n\n  Solus (08/2026) "
+        printf "\n  sudo eopkg install  socat jq 7zip cdrtools spice-gtk  qemu"
+      fi
     fi
 
     if grep -s 'VGA' <<< "$(lspci 2>/dev/null)" | grep -qi 'Virtio' ; then
@@ -321,17 +323,17 @@ while true ; do
 
     printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations  > return here to re-check"
 
-    printColor "\n\n  [c] continue   "
-    printf "[r] re-check   [e] toggle more distro EXAMPLES   [q] to quit"
+    printColor "\n\n  [c] continue   [r] refresh and re-check  "
+    printf "[e] toggle more distro EXAMPLES   [q] to quit"
     printf "\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printf "  -  %s" "$(find_translate_text "Translate from English")"
     printf "\n\n"
 
-    read -rp  "  >  "   InstallationAlert
+    read -rp  "  >  "   AlertSelector
   else break
   fi
 
-  case "$InstallationAlert" in
+  case "$AlertSelector" in
     q)      exit ;;
     c|i)    break ;;
     tx)     sleep 0.6 ; open_installer_tx_screens_in_browser ;;
@@ -515,218 +517,214 @@ if [[ ! $LinuxType ]] || [[ "$LinuxType" != *Linux ]] && [[ $LinuxMachine != "x8
   read -rp "  Use 'ctrl-c' to exit or [enter] to continue > "
 fi
 
-if [[ -d "/mnt/c/Windows" ]]; then WSL_Install=1 ; else WSL_Install= ; fi
-
 # INITIAL MENU:
 
-tput clear
-echo
-qqX_logo_title  "quickemu quickget X terminal project - setup, install, uninstall & update script for qqX $New_qqX_Version "
+while true; do
+  tput clear
+  echo
+  qqX_logo_title  "quickemu quickget X terminal project - setup, install, uninstall & update script for qqX $New_qqX_Version "
 
-printColor "\n   [tx]  Translate from English"
-[[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
-printf "\n"
+  printColor "\n   [tx]  Translate from English"
+  [[ $ShowTxTexts ]] && printColor "  -  %s" "$(find_translate_text "Translate from English")"
+  printf "\n"
 
-if [[ ! -e "./qqX_settings" ]] && [[ ! -e "./qqX" ]] && [[ ! -d  "./qqX.system" ]] && [[ ! -d  "./qqX.main" ]] && [[ ! -d  "./qqX.builtins" ]]; then
+  if [[ ! -e "./qqX_settings" ]] && [[ ! -e "./qqX" ]] && [[ ! -d  "./qqX.system" ]] \
+    && [[ ! -d  "./qqX.main" ]] && [[ ! -d  "./qqX.builtins" ]]; then
+    printColor "\n\n  ERROR  qqX source files not found \n\n" ; sleep 5; exit 1
 
-  printColor "\n\n  ERROR  qqX source files not found \n\n" ; sleep 5; exit 1
+  else
+    if [[ $(type -p qqX) ]]; then
+      # do grep as older versions won't return 'qqX --version'
+      Current_qqX_Path="$(type -p qqX)"
+      Current_qqX_Version="$(grep -s -m 1 'qqX_Version=' "$Current_qqX_Path" | cut -d'"' -f2 2>/dev/null)"
+    else Current_qqX_Version=
+    fi
 
-else
+    if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then
+      printf  "\n   %s  >>  %s"  "$Current_qqX_Version"  "$New_qqX_Version"
+    fi
 
-  if [[ $(type -p qqX) ]]; then
-    # do grep as older versions won't return 'qqX --version'
-    Current_qqX_Path="$(type -p qqX)"
-    Current_qqX_Version="$(grep -s -m 1 'qqX_Version=' "$Current_qqX_Path" | cut -d'"' -f2 2>/dev/null)"
-  else Current_qqX_Version=
-  fi
+    cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
+    printf "\n  See https://github.com/qqxproject/qqX for latest releases and secure downloads"
 
-  if [[ $1 == "Upgrade" ]] || [[ -d "$HOME/.qqX" ]]; then
-    printf  "\n   %s  >>  %s"  "$Current_qqX_Version"  "$New_qqX_Version"
-  fi
+    InstallSelect=
+    printColor "\n\n  [r] refresh screen  [enter] to auto-install from this terminal"
 
-  cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
-
-  printf "\n  See https://github.com/qqxproject/qqX for latest releases and secure downloads"
-
-  InstallSelect=
-
-  while true; do
-    printColor "\n\n  [enter] to auto-install from this terminal"
     [[ $ShowTxTexts ]] && printColor "   [tx]  %s" "$(find_translate_text "Translate from English")"
-
     [[ $(type -p qqx) || $(type -p qqX) ]] &&  printf "\n\n  [u] un-install scripts and settings  [enter] re-install/upgrade"
+
     printf "   [m] use manual installation"
     printf "   [q] to quit \n\n"
-
     read -rp "   >  "  InstallSelect
 
     if [[ $InstallSelect == "tx" ]]; then
       sleep 0.6 ; open_installer_tx_screens_in_browser
       InstallSelect= ; printf "\n"
+    elif [[ $InstallSelect == "r" ]]; then true
     else break
     fi
+  fi
+done
 
-  done
+if [[ $InstallSelect == "q" ]]; then
 
-  if [[ $InstallSelect == "q" ]]; then
+  printf "\n\n  Closing ... \n\n"
+  sleep 0.8
+  exit
 
-    sleep 0.6 ; exit
+elif [[ $InstallSelect == "u" ]]; then
 
-  elif [[ $InstallSelect == "u" ]]; then
+  printf "\n\n"
+  print_manual_uninstall_notes
+  printColor "\n\n  Remove any pinned qqX taskbar icons BEFORE proceeding. Some distros may need this."
+  qqX_RemovalTarget="$(type -p qqx)"
+  qqX_RemovalTarget_X="$(type -p qqX)"
+  qqX_Remove=
+  printColor "\n\n  [y] SUDO AUTO REMOVAL of qqX scripts and settings and builtins."
+  printf "\n\n  All VM folders will be left as they are:"
+  printf "\n\n  The .conf files may need line 1 changing from qqX to quickemu ... "
+  printf "\n\n  [enter] to quit \n\n"
+  read -rp "  >  "  qqX_Remove
+  printf "\n\n"
 
+  if [[ $qqX_Remove == "y" ]]; then
+    [[ $qqX_RemovalTarget ]] && sudo rm "$qqX_RemovalTarget"
+    [[ $qqX_RemovalTarget_X ]] && sudo rm "$qqX_RemovalTarget_X"
+    [[ -d "/usr/share/qqX" ]] && sudo rm -r "/usr/share/qqX"
+    [[ -d "$HOME/.qqX" ]] && rm -r "$HOME/.qqX"
+    [[ -e "$XDG_GUI_desktop_Folder/qqX.desktop"  ]] && sudo rm "$XDG_GUI_desktop_Folder/qqX.desktop"
+    [[ $(type -p update-desktop-database) ]] && sudo update-desktop-database  "$XDG_GUI_desktop_Folder"
+    printColor "\n\n  Auto-closure of this script may not happen in some desktop environments ... "
+    printColor "\n\n  Removal processing complete \n\n"
+    read -rp "  [enter] to quit  >  "
     printf "\n\n"
-    print_manual_uninstall_notes
-    printColor "\n\n  Remove any pinned qqX taskbar icons BEFORE proceeding. Some distros may need this."
-    qqX_RemovalTarget="$(type -p qqx)"
-    qqX_RemovalTarget_X="$(type -p qqX)"
-    qqX_Remove=
-    printColor "\n\n  [y] SUDO AUTO REMOVAL of qqX scripts and settings and builtins."
-    printf "\n\n  All VM folders will be left as they are:"
-    printf "\n\n  The .conf files may need line 1 changing from qqX to quickemu ... "
-    printf "\n\n  [enter] to quit \n\n"
-    read -rp "  >  "  qqX_Remove
-    printf "\n\n"
+    tput cnorm
+    exit
+  else   sleep 0.6 ; exit
+  fi
 
-    if [[ $qqX_Remove == "y" ]]; then
-      [[ $qqX_RemovalTarget ]] && sudo rm "$qqX_RemovalTarget"
-      [[ $qqX_RemovalTarget_X ]] && sudo rm "$qqX_RemovalTarget_X"
-      [[ -d "/usr/share/qqX" ]] && sudo rm -r "/usr/share/qqX"
-      [[ -d "$HOME/.qqX" ]] && rm -r "$HOME/.qqX"
-      [[ -e "$XDG_GUI_desktop_Folder/qqX.desktop"  ]] && sudo rm "$XDG_GUI_desktop_Folder/qqX.desktop"
-      [[ $(type -p update-desktop-database) ]] && sudo update-desktop-database  "$XDG_GUI_desktop_Folder"
-      printColor "\n\n  Auto-closure of this script may not happen in some desktop environments ... "
-      printColor "\n\n  Removal processing complete \n\n"
-      read -rp "  [enter] to quit  >  "
-      printf "\n\n"
-      tput cnorm
-      exit
-    else   sleep 0.6 ; exit
-    fi
+else
+
+  # install / re-install  > includes option [r]
+  SeparateSudo=
+
+  if  [[ $InstallSelect == "m" ]] ; then
+
+    printf "\n\n  Open another terminal IN THE SOURCE FOLDER"
+    printf   "\n  where the following commands should be issued:"
+    printColor "\n\n  sudo cp \"qqX\" \"%s\" " "$qqX_Std_File_Path"
+    printColor "\n\n  sudo ln -s \"%s\" \"%s\" " "$qqX_Std_File_Path" "$qqX_Std_lc_Link_Path"
+    printf "\n\n  From qqX 1.6 onwards, a folder /usr/share/qqX should also be created"
+    printf   "\n  for the subfolders and files of qqX.main and from 1.8 onwards of qqX.builtins"
+    printf "\n\n  Existing builtin, main and lib folders should be cleaned. "
+    printf   "\n  Custom should be left as is."
+
+    # Using -p  to make sure that "$qqX_Std_Share_Path/qqX.custom" doesn't get overwritten
+    printColor "\n\n  sudo mkdir -p \"%s/qqX.custom\" " "$qqX_Std_Share_Path"
+    printColor "\n\n  sudo rm -r \"%s\" " "$qqX_Std_Share_Path/qqX.main"
+    printColor "\n\n  sudo rm -r \"%s\" " "$qqX_Std_Share_Path/qqX.builtins"
+    printColor "\n\n  sudo rm -r \"%s\" " "$qqX_Std_Share_Path/qqX.lib"
+    printf "\n"
+    printColor "\n\n  sudo cp -r \"./qqX.main\"  \"%s\" " "$qqX_Std_Share_Path"
+    printColor "\n\n  sudo cp -r \"./qqX.builtins\"  \"%s\" " "$qqX_Std_Share_Path"
+    printColor "\n\n  sudo cp -r \"./qqX.lib\"  \"%s\" " "$qqX_Std_Share_Path"
+    printf "\n"
+    printColor "\n\n  sudo chmod a+rx -R  \"%s/\" " "$qqX_Std_Share_Path"
+    printColor "\n\n  sudo chmod a+rx  \"%s/\" " "$qqX_Std_File_Path"
+    printColor "\n\n  sudo chmod a+rx  \"%s/\" " "$qqX_Std_lc_Link_Path"
+
+    printf "\n\n  NOTE command line installation only. "
+    printf "\n\n  Auto-install is needed for desktop launchers and shortcuts"
+    printf "\n"
+    printColor "\n  [enter] changed mind, use auto-install   [y] to confirm action completed   [q] to quit \n\n"
+    read -rp  "  >  "  SeparateSudo
+    printf "\n"
+
+  fi
+
+  [[  $SeparateSudo == "q" ]] && sleep 1 && exit
+
+  if [[  $SeparateSudo != "y" ]]; then
+    printColor "\n  Auto-Installing .... \n\n  "
+    sudo cp "qqX" "$qqX_Std_File_Path"
+    # make symbolic link lowercase 'qqx' , as in: ln -s  textfile.txt  my_link.
+    [[ ! -e "$qqX_Std_lc_Link_Path" ]]  &&  sudo ln -s "$qqX_Std_File_Path" "$qqX_Std_lc_Link_Path"
+    [[ ! -d "$qqX_Std_Share_Path/qqX.custom" ]] && sudo mkdir -p "$qqX_Std_Share_Path/qqX.custom"
+    # remove any old and possibly obsolete and unneeded files (make sure custom is not overwritten)
+    [[ -d "$qqX_Std_Share_Path/qqX.main" ]] && sudo rm -r "$qqX_Std_Share_Path/qqX.main"
+    [[ -d "$qqX_Std_Share_Path/qqX.builtins" ]] && sudo rm -r "$qqX_Std_Share_Path/qqX.builtins"
+    [[ -d "$qqX_Std_Share_Path/qqX.lib" ]] && sudo rm -r "$qqX_Std_Share_Path/qqX.lib"
+    # copy new file set
+    sudo cp -r "./qqX.main"  "$qqX_Std_Share_Path"
+    sudo cp -r "./qqX.builtins"  "$qqX_Std_Share_Path"
+    sudo cp -r "./qqX.lib"  "$qqX_Std_Share_Path"
+    sudo ln -f -s "$qqX_Std_Share_Path/qqX.lib/floatversion" "$qqX_Std_Share_Path/qqX.lib/fv"
+    sudo chmod a+rx -R  "$qqX_Std_Share_Path/"
+    sudo chmod a+rx "$qqX_Std_File_Path"
+    sudo chmod a+rx "$qqX_Std_lc_Link_Path"
+  fi
+
+  # Re-Check the terminal check list as needs to be available for the standard upgrader script and refreshed in case of side installs
+  ./qqX_setup_and_install MakeTermList || { printColor "\n\n  MakeTermList  >  a Restart is required \n\n" ; sleep 5; exit 1; }
+
+  # Check that the right version is there:
+  if [[ -e "$qqX_Std_File_Path" &&  -e "$qqX_Std_lc_Link_Path" ]] && [[ "$(qqx --version 2>/dev/null)" == "$New_qqX_Version" ]] ; then
+    printColor "\n  Files installed: "; printf " All good"
+  else  printColor "\n\n  ERROR qqX version %s not installed correctly. Check 'bin' path in installer script. Quit and retry." "$New_qqX_Version" ; sleep 2000
+  fi
+
+  Default_VM_Folder=
+
+  if grep -q -s Default_VM_Folder= "$HOME/.qqX/qqX_settings" ; then
+    TestDefVMs="$(grep -m 1 -s Default_VM_Folder= "$HOME/.qqX/qqX_settings")"
+    if [[ $TestDefVMs ]]; then eval "$TestDefVMs"; fi
+  fi
+
+  if [[ -d  "$HOME/VMQs" ]] ; then
+
+    printColor "\n\n\n  The default VM directory has been found >> "
+    printf "\n\n  %s " "$HOME/VMQs"
+
+  elif [[ -d "$Default_VM_Folder" ]]; then
+
+    printColor "\n\n\n  A Custom default VM directory has been found >> "
+    printf "\n\n  %s " "$Default_VM_Folder"
 
   else
 
-    # install / re-install  > includes option [r]
-    SeparateSudo=
+    MkDefDir=
+    printColor "\n\n\n  A default VM directory is required >> "
+    printf "\n\n  %s  is recommended for now" "$HOME/VMQs"
+    printf "\n\n  and can be easily moved and/or renamed later"
+    printColor "\n\n  [enter] make folder '%s'" "$HOME/VMQs"
+    printColor "  [n] not yet (advanced)\n\n"
+    read -rp "  >  "  MkDefDir
 
-    if  [[ $InstallSelect == "m" ]] ; then
-
-      printf "\n\n  Open another terminal IN THE SOURCE FOLDER"
-      printf   "\n  where the following commands should be issued:"
-      printColor "\n\n  sudo cp \"qqX\" \"%s\" " "$qqX_Std_File_Path"
-      printColor "\n\n  sudo ln -s \"%s\" \"%s\" " "$qqX_Std_File_Path" "$qqX_Std_lc_Link_Path"
-      printf "\n\n  From qqX 1.6 onwards, a folder /usr/share/qqX should also be created"
-      printf   "\n  for the subfolders and files of qqX.main and from 1.8 onwards of qqX.builtins"
-      printf "\n\n  Existing builtin, main and lib folders should be cleaned. "
-      printf   "\n  Custom should be left as is."
-
-      # Using -p  to make sure that "$qqX_Std_Share_Path/qqX.custom" doesn't get overwritten
-      printColor "\n\n  sudo mkdir -p \"%s/qqX.custom\" " "$qqX_Std_Share_Path"
-      printColor "\n\n  sudo rm -r \"%s\" " "$qqX_Std_Share_Path/qqX.main"
-      printColor "\n\n  sudo rm -r \"%s\" " "$qqX_Std_Share_Path/qqX.builtins"
-      printColor "\n\n  sudo rm -r \"%s\" " "$qqX_Std_Share_Path/qqX.lib"
-      printf "\n"
-      printColor "\n\n  sudo cp -r \"./qqX.main\"  \"%s\" " "$qqX_Std_Share_Path"
-      printColor "\n\n  sudo cp -r \"./qqX.builtins\"  \"%s\" " "$qqX_Std_Share_Path"
-      printColor "\n\n  sudo cp -r \"./qqX.lib\"  \"%s\" " "$qqX_Std_Share_Path"
-      printf "\n"
-      printColor "\n\n  sudo chmod a+rx -R  \"%s/\" " "$qqX_Std_Share_Path"
-      printColor "\n\n  sudo chmod a+rx  \"%s/\" " "$qqX_Std_File_Path"
-      printColor "\n\n  sudo chmod a+rx  \"%s/\" " "$qqX_Std_lc_Link_Path"
-
-      printf "\n\n  NOTE command line installation only. "
-      printf "\n\n  Auto-install is needed for desktop launchers and shortcuts"
-      printf "\n"
-      printColor "\n  [enter] changed mind, use auto-install   [y] to confirm action completed   [q] to quit \n\n"
-      read -rp  "  >  "  SeparateSudo
-      printf "\n"
-
+    if [[ ! $MkDefDir ]] && [[ ! -d "$HOME/VMQs" ]]; then  mkdir "$HOME/VMQs"  ||  printColor "\n\n  ERROR  making Default VM folder %s \n\n"
     fi
+    #  qqX default location: has to be slightly opinionated here (and at end of script) for the updater to work  REVIEW
 
-    [[  $SeparateSudo == "q" ]] && sleep 1 && exit
+  fi
 
-    if [[  $SeparateSudo != "y" ]]; then
-      printColor "\n  Auto-Installing .... \n\n  "
-      sudo cp "qqX" "$qqX_Std_File_Path"
-      # make symbolic link lowercase 'qqx' , as in: ln -s  textfile.txt  my_link.
-      [[ ! -e "$qqX_Std_lc_Link_Path" ]]  &&  sudo ln -s "$qqX_Std_File_Path" "$qqX_Std_lc_Link_Path"
-      [[ ! -d "$qqX_Std_Share_Path/qqX.custom" ]] && sudo mkdir -p "$qqX_Std_Share_Path/qqX.custom"
-      # remove any old and possibly obsolete and unneeded files (make sure custom is not overwritten)
-      [[ -d "$qqX_Std_Share_Path/qqX.main" ]] && sudo rm -r "$qqX_Std_Share_Path/qqX.main"
-      [[ -d "$qqX_Std_Share_Path/qqX.builtins" ]] && sudo rm -r "$qqX_Std_Share_Path/qqX.builtins"
-      [[ -d "$qqX_Std_Share_Path/qqX.lib" ]] && sudo rm -r "$qqX_Std_Share_Path/qqX.lib"
-      # copy new file set
-      sudo cp -r "./qqX.main"  "$qqX_Std_Share_Path"
-      sudo cp -r "./qqX.builtins"  "$qqX_Std_Share_Path"
-      sudo cp -r "./qqX.lib"  "$qqX_Std_Share_Path"
-      sudo ln -f -s "$qqX_Std_Share_Path/qqX.lib/floatversion" "$qqX_Std_Share_Path/qqX.lib/fv"
-      sudo chmod a+rx -R  "$qqX_Std_Share_Path/"
-      sudo chmod a+rx "$qqX_Std_File_Path"
-      sudo chmod a+rx "$qqX_Std_lc_Link_Path"
-    fi
+  if [[ ! -d "$HOME/.qqX" ]]; then mkdir "$HOME/.qqX" ||  printColor "\n\n  Settings folder ERROR creating \n\n"
+  fi
 
-    # Re-Check the terminal check list as needs to be available for the standard upgrader script and refreshed in case of side installs
-    ./qqX_setup_and_install MakeTermList || { printColor "\n\n  MakeTermList  >  a Restart is required \n\n" ; sleep 5; exit 1; }
+  if [[ -e "$HOME/.qqX/qqX_settings" ]]; then  update_old_settings_file_with_new_options  ""
+  else cp "qqX_settings" "$HOME/.qqX/qqX_settings"
+  fi
 
-    # Check that the right version is there:
-    if [[ -e "$qqX_Std_File_Path" &&  -e "$qqX_Std_lc_Link_Path" ]] && [[ "$(qqx --version 2>/dev/null)" == "$New_qqX_Version" ]] ; then
-      printColor "\n  Files installed: "; printf " All good"
-    else  printColor "\n\n  ERROR qqX version %s not installed correctly. Check 'bin' path in installer script. Quit and retry." "$New_qqX_Version" ; sleep 2000
-    fi
+  cp -r "qqX.system/icons"  "$HOME/.qqX"
+  printColor "\n\n  Running settings file and desktop icons routines ..."
 
-    Default_VM_Folder=
-
-    if grep -q -s Default_VM_Folder= "$HOME/.qqX/qqX_settings" ; then
-      TestDefVMs="$(grep -m 1 -s Default_VM_Folder= "$HOME/.qqX/qqX_settings")"
-      if [[ $TestDefVMs ]]; then eval "$TestDefVMs"; fi
-    fi
-
-    if [[ -d  "$HOME/VMQs" ]] ; then
-
-      printColor "\n\n\n  The default VM directory has been found >> "
-      printf "\n\n  %s " "$HOME/VMQs"
-
-    elif [[ -d "$Default_VM_Folder" ]]; then
-
-      printColor "\n\n\n  A Custom default VM directory has been found >> "
-      printf "\n\n  %s " "$Default_VM_Folder"
-
-    else
-
-      MkDefDir=
-      printColor "\n\n\n  A default VM directory is required >> "
-      printf "\n\n  %s  is recommended for now" "$HOME/VMQs"
-      printf "\n\n  and can be easily moved and/or renamed later"
-      printColor "\n\n  [enter] make folder '%s'" "$HOME/VMQs"
-      printColor "  [n] not yet (advanced)\n\n"
-      read -rp "  >  "  MkDefDir
-
-      if [[ ! $MkDefDir ]] && [[ ! -d "$HOME/VMQs" ]]; then  mkdir "$HOME/VMQs"  ||  printColor "\n\n  ERROR  making Default VM folder %s \n\n"
-      fi
-      #  qqX default location: has to be slightly opinionated here (and at end of script) for the updater to work  REVIEW
-
-    fi
-
-    if [[ ! -d "$HOME/.qqX" ]]; then mkdir "$HOME/.qqX" ||  printColor "\n\n  Settings folder ERROR creating \n\n"
-    fi
-
-    if [[ -e "$HOME/.qqX/qqX_settings" ]]; then  update_old_settings_file_with_new_options  ""
-    else cp "qqX_settings" "$HOME/.qqX/qqX_settings"
-    fi
-
-    cp -r "qqX.system/icons"  "$HOME/.qqX"
-    printColor "\n\n  Running settings file and desktop icons routines ..."
-
-    if [[ ! $(type -p qqx) ]] && [[ ! $(type -p qqX) ]] || [[ ! -e "$HOME/.qqX/qqX_settings" ]] || [[ ! -e "$HOME/.qqX/icons/qqX.std.logo.128.png" ]]; then
-      printColor "\n\n  ERROR  qqX files not installed correctly \n\n"
-      [[ ! $(type -p qqx) ]] && [[ ! $(type -p qqX) ]] && printf "\n\n The main qqX files in /usr/bin"
-      [[ ! -x $(type -p qqx) ]] || [[ ! -x $(type -p qqX) ]] && printf "\n\n The main qqX files in /usr/bin need chmod a+rx"
-      [[ ! -e "$HOME/.qqX/qqX_settings" ]] && printf "\n\n The hidden files .qqX/qqX_settings in the Home directory"
-      [[ ! -e "$HOME/.qqX/icons/qqX.std.logo.128.png" ]] && printf "\n\n The hidden icon files .qqX/icons/.. in the Home directory"
-      printf "\n\n  [enter] to close & investigate \n\n"
-      read -rp "  >  "
-      exit 1
-    fi
-
+  if [[ ! $(type -p qqx) ]] && [[ ! $(type -p qqX) ]] || [[ ! -e "$HOME/.qqX/qqX_settings" ]] || [[ ! -e "$HOME/.qqX/icons/qqX.std.logo.128.png" ]]; then
+    printColor "\n\n  ERROR  qqX files not installed correctly \n\n"
+    [[ ! $(type -p qqx) ]] && [[ ! $(type -p qqX) ]] && printf "\n\n The main qqX files in /usr/bin"
+    [[ ! -x $(type -p qqx) ]] || [[ ! -x $(type -p qqX) ]] && printf "\n\n The main qqX files in /usr/bin need chmod a+rx"
+    [[ ! -e "$HOME/.qqX/qqX_settings" ]] && printf "\n\n The hidden files .qqX/qqX_settings in the Home directory"
+    [[ ! -e "$HOME/.qqX/icons/qqX.std.logo.128.png" ]] && printf "\n\n The hidden icon files .qqX/icons/.. in the Home directory"
+    printf "\n\n  [enter] to close & investigate \n\n"
+    read -rp "  >  "
+    exit 1
   fi
 
 fi
@@ -1018,10 +1016,10 @@ if [[ ! $SkipMkLauncher ]]; then
   else  Icon_Var="std"; fi
 
 
-  ## RUN .desktop CREATOR
+  ## RUN .desktop CREATOR routine
 
-  if [[ ! $XDG_SESSION_DESKTOP ]] || [[ ! $XDG_CURRENT_DESKTOP ]] ; then
-
+  if [[ $XDG_SESSION_DESKTOP ]] || [[ $XDG_CURRENT_DESKTOP ]] ; then true
+  else
     printColor "\n\n  XDG desktop not fully set up or not found."
     UserLand_Name="$(users)"
     [[ ! $WSL_Install ]] && No_XDG=1
@@ -1029,7 +1027,6 @@ if [[ ! $SkipMkLauncher ]]; then
     if [[ "$(whoami)" == root ]]; then printf "\n\n  User-Interactive Scripts:  Root installation adds complications ... \n\n  Select a UserLand folder (%s) etc\n\n" "$UserLand_Name"
     else printf "\n\n  For menu links, only XDG desktop compliant OS's are supported. \n\n  Running from CLI may be possible.\n\n"
     fi
-
   fi
 
   while true; do
@@ -1175,7 +1172,7 @@ else
   printf "\n\n  OR start from here:"
 fi
 if [[ $UserTerm == "qterminal" ]]; then
-  printColor "\n\n  LXQT 'qterminal' does not have size commands BUT it may be resized quite easily \n\n  and should remember its sizes between uses. \n\n"
+  printColor "\n\n  Older versions of 'qterminal' do not have size commands BUT it may be resized quite easily \n\n  and should remember its sizes between uses. \n\n"
 fi
 if [[ $UserTerm == "urxvt" ]]; then
   printColor "\n\n  In tiling Window Managers the terminal sizes tend to be auto-regulated. \n\n"
