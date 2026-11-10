@@ -226,8 +226,7 @@ while true ; do
   fi
   if [[ ! $(type -p 7z) ]]; then
     printColor "\n\n  >>  A command line '7zip'/'p7zip' installation is needed for one or two of the distro downloads ... "
-    printColor "\n\n      A pre-download warning for specific distros will normally be given."
-    printColor "\n\n      Some host distros will need 'p7zip-plugins' "
+    printColor "\n\n      A pre-download warning for specific distros will normally be given. Some host distros will need 'p7zip-plugins' "
     InstallationAlert=1
   fi
   if [[ ! $(type -p unzip) ]]; then
@@ -262,60 +261,70 @@ while true ; do
       printColor   "\n      The Gnu version is expected but most versions should have sufficient compatibilities"
       InstallationAlert=1
     elif [[ $GnuPath ]] &&  ! grep -qs -e 'gnu.org' -e 'GNU' <<< "$("$GP" --version 2>/dev/null)"; then
-      printf "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
-      printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
-      OptionalAlert=1
+      if [[ $InstallationAlert ]]; then
+        printColor "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
+        printColor   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+      else
+        printf "\n\n  >>  OPTIONAL: Gnu '%s' is the usually supplied version but other versions should work ..."  "$GP"
+        printf   "\n      Installed version:  %s" "$("$GP" --version | head -n 1)"
+        OptionalAlert=1
+      fi
     fi
   done
   # and tpm as an optional
   if [[ ! $(type -p swtpm) ]]; then
-    printf "\n\n  >>  OPTIONAL: 'swtpm' is currently needed for Microsoft Windows and Ubuntu Server ... "
+    if [[ $InstallationAlert ]]; then printColor "\n\n  >>  OPTIONAL: 'swtpm' is currently needed for Microsoft Windows and Ubuntu Server ... "
+    else printf "\n\n  >>  OPTIONAL: 'swtpm' is currently needed for Microsoft Windows and Ubuntu Server ... "
+    fi
     OptionalAlert=1
   fi
 
-  if [[ $InstallationAlert || $OptionalAlert || $ShowMoreExamples ]]; then
+  if [[ $InstallationAlert || $ShowMoreExamples ]]; then
+
+    # not if only alerts are for optional items, except if show examples
 
     [[ ! $(type -p qqX) ]] && printColor "\n\n  >>  Install 'spice-vdagent' and 'spice-webdavd' later on, if required, inside the Linux GUEST VM's "
 
-    if [[ $ShowMoreExamples ]] || [[ ! $OptionalAlert ]]; then
+    printf "\n\n\n  Example full sets:"
 
-      printf "\n\n\n  Example full sets:"
+    printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
+    printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
 
-      printColor "\n\n  Arch (Endeavour) KDE (2026/01)"
-      printf "\n  sudo pacman -Syu  jq  bc  7zip  cdrtools  spice-gtk  qemu-desktop"
+    printColor "\n\n  Fedora KDE (2026/07)"
+    printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
+    # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
 
-      printColor "\n\n  Fedora KDE (2026/07)"
-      printf "\n  sudo dnf install  xorriso  qemu  spice-gtk-tools"
-      # needs 'spice-gtk-tools' for 'spicy' and 'qemu' for the utils (not 'qemu-system-x86')
+    printColor "\n\n  Ubuntu 26.04"
+    printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
+    printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice  mate-terminal"
+    # qemu-system-modules-spice > quickemu PR #1696
 
-      printColor "\n\n  Ubuntu 26.04"
-      printf "\n  sudo apt install  curl  7zip  bzip2  socat  mesa-utils  wayland-utils  genisoimage"
-      printf "\n  sudo apt install  spice-client-gtk  qemu-system-x86  qemu-system-modules-spice  mate-terminal"
-      # qemu-system-modules-spice > quickemu PR #1696
+    printColor "\n\n  LinuxMint 22.3 Cinnamon (2026/01)"
+    printf "\n  sudo apt install  jq  socat  spice-client-gtk  qemu-system-x86"
 
-      printColor "\n\n  LinuxMint 22.3 Cinnamon (2026/01)"
-      printf "\n  sudo apt install  jq  socat  spice-client-gtk  qemu-system-x86"
+    if [[ $ShowMoreExamples ]]; then
 
-      if [[ $ShowMoreExamples ]]; then
+      printColor "\n\n  Fedora Workstation/Gnome (2026/07)"
+      printf "\n  sudo dnf install  mate-terminal  wayland-utils  p7zip-plugins  socat  spice-gtk-tools"
+      # @ 01/2025 seems to come with qemu ready installed
 
-        printColor "\n\n  Fedora Workstation/Gnome (2026/07)"
-        printf "\n  sudo dnf install  mate-terminal  wayland-utils  p7zip-plugins  socat  spice-gtk-tools"
-        # @ 01/2025 seems to come with qemu ready installed
+      printColor "\n\n  Debian KDE 13.2.0"
+      printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
 
-        printColor "\n\n  Debian KDE 13.2.0"
-        printf "\n  sudo apt install  wget  genisoimage  desktop-file-utils  spice-client-gtk  qemu-system-x86"
+      printColor "\n\n  openSUSE Tumbleweed (08/2026)"
+      printf "\n  myrlyn > bc qemu qemu-ui-sdl qemu-audio-sdl spice-gtk"
 
-        printColor "\n\n  openSUSE Tumbleweed (08/2026)"
-        printf "\n  myrlyn > bc qemu qemu-ui-sdl qemu-audio-sdl spice-gtk"
+      printColor "\n\n  Pop! OS 24.04 Cosmic "
+      printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  mate-terminal"
+      printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
 
-        printColor "\n\n  Pop! OS 24.04 Cosmic "
-        printf "\n  sudo apt install  socat  uuid-runtime  mesa-utils  wayland-utils  mate-terminal"
-        printf "\n  sudo apt install  7zip  genisoimage  spice-client-gtk  qemu-system-x86"
-
-        printColor "\n\n  Solus (08/2026) "
-        printf "\n  sudo eopkg install  socat jq 7zip cdrtools spice-gtk  qemu"
-      fi
+      printColor "\n\n  Solus (11/2026) "
+      printf "\n  sudo eopkg install  socat  jq  wayland-utils  spice-gtk  qemu cdrtools 7zip "
     fi
+
+  fi
+
+  if [[ $InstallationAlert || $OptionalAlert ]]; then
 
     if grep -s 'VGA' <<< "$(lspci 2>/dev/null)" | grep -qi 'Virtio' ; then
       printf "\n\n\n  Nested installation detected, no problems"
@@ -324,12 +333,13 @@ while true ; do
     printf "\n\n\n  SOFTWARE: A second terminal can be opened for installations  > return here to re-check"
 
     printColor "\n\n  [c] continue   [r] refresh and re-check  "
-    printf "[e] toggle more distro EXAMPLES   [q] to quit"
+    printf "[e] toggle show/more distro EXAMPLES   [q] to quit"
     printf "\n\n  [tx]  Translate from English"
     [[ $ShowTxTexts ]] && printf "  -  %s" "$(find_translate_text "Translate from English")"
     printf "\n\n"
 
     read -rp  "  >  "   AlertSelector
+
   else break
   fi
 
