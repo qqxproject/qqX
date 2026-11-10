@@ -114,6 +114,7 @@ if [ -z "$UserTerm" ]; then TermGrep="$(pgrep -a term | grep qqX | tr -cd '[:pri
 fi
 
 # 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
+# 11/2026 cosmic-term still unable to spawn a new qf window, much is undocumented, plus window sizing is annoying ....
 
 if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
   printf "\n\n  The new COSMIC terminal 'cosmic-term' has been detected on this system, "

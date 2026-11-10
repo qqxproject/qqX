@@ -1108,7 +1108,7 @@ if [[ ! $SkipMkLauncher ]]; then
       if [[ $CustomTerminalProfile ]]; then
         echo "Exec=$UserTerm $CustomTerminalProfile " '"' "$qqX_Std_File_Path %f" '"'
       elif [[ $UserTerm == "ghostty" ]]; then
-        echo "Exec=$UserTerm +new-window -e sh -c " '"' "$qqX_Std_File_Path %f" '"'
+        echo "Exec=$UserTerm +new-window --title=qqX -e sh -c " '"' "$qqX_Std_File_Path %f" '"'
       elif [[ $UserTerm == "ptyxis" ]]; then
         echo "Exec=$UserTerm --title qqX -x " '"' "$qqX_Std_File_Path %f" '"'
       elif [[ $UserTerm == "kgx" ]]; then
