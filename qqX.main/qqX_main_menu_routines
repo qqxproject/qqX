@@ -52,7 +52,9 @@ vm_pid_kill_menu() {
   else
     configure_cpu_pinning
     [[ $UseCustomBootArgs ]] && printColor "  STARTING CUSTOM BOOT SEQUENCE:  \n"
-    if [[ $RunningAsNested ]]; then printf "\n  Nested running detected > Deny inhibit shortcuts \n"
+    if [[ $RunningAsNested ]]; then
+      printf "\n  Nested running detected > "
+      printColor "Deny inhibit "; printf "shortcuts \n"
     fi
     sleep  "$P_Kill_WaitSecs"
     printColor "\n  Quickemu instance %s on PID:  %s  %s"  "$VM_InstanceName"  "$InstancePID"  "$BootAlert"

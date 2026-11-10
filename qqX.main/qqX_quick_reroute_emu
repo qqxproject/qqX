@@ -130,7 +130,9 @@ function quickemu {
         if [[ ! $boot || $boot != "legacy" ]]; then  printf "  UEFI/BIOS mode = UEFI \n\n"
         else printf "  UEFI/BIOS mode = bios legacy \n\n"
         fi
-        if [[ $RunningAsNested ]]; then printf "  Nested running detected > Deny inhibit shortcuts \n\n\n"
+        if [[ $RunningAsNested ]]; then
+          printf "  Nested running detected > "
+          printColor "Deny inhibit "; printf "shortcuts \n\n\n"
         else printf "\n"
         fi
         # Can't find Wayland-0 error shows here on NESTED Ubuntu 26 when running LEGACY bios ??

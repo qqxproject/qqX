@@ -152,7 +152,9 @@ scan_folders_list_and_add_VMs () {
 
   if [[ ! ${VM_Array[0,0]} || "${VM_Array[0,1]}" == "empty" ]] ; then
     if [[ $CodingHotSwapShow ]]; then SelectArrayError=
-    elif [[ $NoVMsOkay ]]; then SelectArrayError= ; NoVMsOkay=
+    elif [[ $NoVMsOkay || $XDG_MimeType_is_ISO ]]; then
+      # also allow install from ISO when no VMs
+      SelectArrayError= ; NoVMsOkay=
     else
       function_conf_error  "No VMs"
     fi

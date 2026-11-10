@@ -603,6 +603,8 @@ function_config_tune_up ()  {
     VM_Conf_Dir="$TuneUp_Conf_Dir"
     VM_Conf_File="$(basename "$TuneUpTargetFile")"
     VM_InstanceName="$TuneUp_InstanceName"
+    printColor "\n\n  Refreshing the main arrays, may take a moment ...\n\n" ; sleep 0.7
+    refresh_sources_and_load_VM_arrays
 
   else
 
