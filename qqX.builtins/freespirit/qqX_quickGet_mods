@@ -312,16 +312,6 @@ function get_antix() {
     echo "${BaseUrl}${ISO} ${HASH}"
 }
 
-## FIX Arch - Pre-emptively for PR  https://github.com/quickemu-project/quickemu/pull/1709
-function get_archlinux() {
-    local HASH=""
-    local ISO=""
-    local URL="https://geo.mirror.pkgbuild.com"
-    ISO=$(web_pipe "https://archlinux.org/releng/releases/json/" | jq -r '.releases[0].iso_url')
-    HASH=$(web_pipe "https://archlinux.org/releng/releases/json/" | jq -r '.releases[0].sha256_sum')
-    echo "${URL}${ISO} ${HASH}"
-}
-
 ## FIX artix community editions and hash grep
 function get_artixlinux() {
     local HASH="" ; local ISO=""
@@ -334,7 +324,7 @@ function get_artixlinux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## UPDATE new repo
+## UPDATE to new repo
 function releases_athenaos() {
     web_pipe "https://github.com/Athena-OS/athena/releases" | grep 's/tag' | fv -Q -M 2
 }
@@ -357,7 +347,7 @@ function get_azurelinux() {
     echo "${URL} $HASH"
 }
 
-## ADD
+## ADD new distro
 function releases_bluestar {
     echo "latest"
 }
@@ -413,7 +403,7 @@ function get_debian() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## UPDATE and fix Deepin (08/2026)
+## UPDATE and FIX (08/2026)
 function releases_deepin() {
    # web_pipe "https://cdimage.deepin.com/releases/" | grep -s href | tr '"' '\n' | fv -Q -M 5
    web_pipe "https://www.deepin.org/en/download/" | grep -s href | tr '"' '\n' | grep cdimage | grep -v live | fv -Q -M 3
@@ -429,7 +419,7 @@ function get_deepin() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## FIXES for Devuan - make dynamic     #echo daedalus chimaera beowulf
+## FIX and make dynamic - remove hardcoded namings
 function releases_devuan() {
     local ReadMeTxt= ; ReadMeTxt=$(web_pipe "https://files.devuan.org/README.txt")
     mapfile -t  Dlist <<< "$(grep -s Devuan <<< "$ReadMeTxt" | grep -v archived | fv -c -M 3 -Q)"
@@ -468,7 +458,7 @@ function releases_easyos() {
 }
 
 ## make dynamic for latest (and fix hash)
-# @ 10/2026 updated for new servers and add a tweak for the base64 changes that crept in
+  # @ 10/2026 updated for new servers and add a tweak for the base64 changes that crept in
 function releases_elementary() {
     echo latest
 }
@@ -483,6 +473,7 @@ function get_elementary() {
 }
 
 ## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
+  # FIX beta server variants are too problematic  # TODO add Rawhide
 function get_fedora() {
     local HASH="" ; local ISO="" ; local JSON="" ; local URL="" ; local VARIANT=""
     case ${EDITION} in
@@ -499,12 +490,9 @@ function get_fedora() {
     HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n1)
     echo "${URL} ${HASH}"
 }
-
-## FIX beta server variants are too problematic
 function releases_fedora() {
     web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
 }
-
 ## FIX & UPDATE and make dynamic 10/2026
 function releases_freedos() {
     echo latest
@@ -631,7 +619,8 @@ function get_linuxmint() {
     HASH=$(web_pipe "${URL}/sha256sum.txt" | grep "${ISO}" | cut -d' ' -f1)
     echo "${URL}/${ISO} ${HASH}"
 }
-## FIX update mirror
+
+## FIX update mirror and make dynamic
 function get_lmde() {
     local HASH=""
     local ISO="lmde-${RELEASE}-${EDITION}-64bit.iso"
@@ -640,7 +629,6 @@ function get_lmde() {
     HASH=$(grep -s "${ISO}" "$ReleaseDataLog" | cut -d' ' -f1)
     echo "${URL}/${ISO} ${HASH}"
 }
-# make dynamic
 function releases_lmde() {
     local RelData= ; local Releases=
     RelData="$(web_pipe "https://mirror.rackspace.com/linuxmint/iso/debian/sha256sum.txt" | grep -s iso)"
@@ -650,7 +638,7 @@ function releases_lmde() {
 }
 
 # FIX the URL which, at 02/26 SourceForge has pointing to the wrong folder, the one with the old kernel,
-# and thus is breaking the hash check as the name is wrong
+  # and thus is breaking the hash check as the name is wrong
 function get_maboxlinux() {
     local HASH= ; local HashFile= ; IsoFile=
     RepoUrl="https://repo.maboxlinux.org/iso"
@@ -667,7 +655,7 @@ function releases_mageia() {
 }
 
 ## FIX manjaro sway (again, 08/2026 and 10/2026) https://github.com/manjaro-sway/manjaro-sway
-# https://manjaro-sway.download/iso/202610180719/manjaro-sway-26.1.3-unstable-261018-linux72.iso
+  # 10/2026 change repo: gitlab is recording poor uptimes https://status.manjaro.org/history/manjaro-git-lab
 function editions_manjaro() {
     if [[ $RELEASE == "sway" ]]; then echo full ; else echo full minimal; fi
 }
@@ -676,10 +664,10 @@ function releases_manjaro() {
 }
 function get_manjaro() {
     local HASH="" ISO=""  MANIFEST=""  URL=""  TYPE="official" SwayStub="" SwayShaLink="" SwayShaData=""
-    # 10/2026 gitlab is recording poor uptimes https://status.manjaro.org/history/manjaro-git-lab
     # MANIFEST="$(web_pipe https://gitlab.manjaro.org/web/iso-info/-/raw/master/file-info.json)"
     MANIFEST="$(web_pipe https://manjaro.org/products/download/x86 | tr '<' '\n' | grep href | grep iso)"
     # eg. a href="https://download.manjaro.org/kde/26.1.0/manjaro-kde-26.1.0-260812-linux71.iso" rel="noopener noreferrer"> and 4 more
+    # plus eg https://manjaro-sway.download/iso/202610180719/manjaro-sway-26.1.3-unstable-261018-linux72.iso
     case "${RELEASE}" in
         sway) MANIFEST="$(web_pipe https://manjaro-sway.download/iso)" ; TYPE="sway" ;;
         cinnamon|i3) TYPE="community";;
@@ -751,7 +739,7 @@ function get_nitrux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## UPDATE 10/2026
+## qqX added, plus UPDATE 10/2026
 function releases_nobara() {
     echo "latest"
 }
@@ -905,7 +893,7 @@ function get_peppermint() {
 }
 
 
-## UPDATE and tweak
+## UPDATE and tweak (correct @11/2026 but unstable site and not yet dynamic)
 function releases_popos() {
     echo "24.04 22.04"
 }
@@ -966,7 +954,7 @@ function get_rockylinux() {
 }
 
 ## FIX url and hash, plus make dynamic (if list happens to show up)
-# 10/2026 UPDATE md5 to sha256
+  # 10/2026 UPDATE md5 to sha256
 function releases_siduction() {
     echo latest
 }
@@ -988,7 +976,7 @@ function get_siduction() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## FIX  SLINT (only 15.0, and hopefully higher, has downloadable iso's)
+## FIX releases (only 15.0, and hopefully higher, has downloadable iso's)
 function releases_slint() {
     web_pipe "https://slackware.uk/slint/x86_64/" | grep -e '<a href=' | fv -M -Q
 }
@@ -1030,7 +1018,7 @@ function get_solus() {
     echo "${URL} ${HASH}"
 }
 
-## UPDATE
+## UPDATE (website subject to change)
 function releases_sparkylinux() {
     echo "Rolling Stable"
 }
@@ -1069,7 +1057,7 @@ function get_sparkylinux() {
     echo "${URL}/${ISO}" "${HASH}"
 }
 
-## TWEAK to avoid spamming on test_all
+## TWEAK to avoid spamming on test_all routine
 function releases_spirallinux() {
     Spiral_Latest="$(web_pipe "https://sourceforge.net/projects/spirallinux/files/" | grep -s 'class="name' | fv -M -Q)"
     echo latest
@@ -1131,10 +1119,7 @@ function get_trisquel() {
 }
 
 ## 10/2026 REFACTOR for errors where versions are missing
-# Upstream use of https://api.launchpad.net/devel/ubuntu/series makes big presumption that everything follows the main pattern
-# But it doesn't, eg. Mate 26.04 .... So grep each OS individually, and FOR FAIRLY RECENT ONLY, not some huge archiving ....
-# AND for Ubuntu itself; 'cdimage.ubuntu.com' has become neglected with many folders missing the important iso's
-# which now seem to be located at 'releases.ubuntu.com' eg https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ has NO AMD iso's
+  # General FIXES, FIX daily-live grep, tidy-up of hardcoded obsolete tests eg 'jammy-live' and 'md5'
 function releases_ubuntu() {
     local UbuntuRecentVersions="" DailyData="" LatestDailyVer="" LatestOfficialVer=""
     # daily-live gets similar repeat in 'get_ubuntu' as calls to Quickget are separate ...
@@ -1151,9 +1136,11 @@ function releases_ubuntu() {
     fv -qg "$LatestDailyVer $LatestOfficialVer" && UbuntuRecentVersions="${UbuntuRecentVersions/$LatestDailyVer /}"
     echo "$UbuntuRecentVersions daily-live"
 }
-
-## 10/2026 General FIXES, FIX daily-live grep, tidy-up of hardcoded obsolete tests eg 'jammy-live' and 'md5'
-# plus ubuntu server can now be integrated
+## 10/2026  # Upstream use of https://api.launchpad.net/devel/ubuntu/series makes big presumption that everything follows the main pattern
+  # But it doesn't, eg. Mate 26.04 .... So grep each OS individually, and FOR FAIRLY RECENT ONLY, not some huge archiving ....
+  # AND for Ubuntu itself; 'cdimage.ubuntu.com' has become neglected with many folders missing the important iso's
+  # which now seem to be located at 'releases.ubuntu.com' eg https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ has NO AMD iso's
+  # Plus ubuntu server can now be integrated
 function get_ubuntu() {
     local ISO="" HASH="" URL="" RelData="" RelMax=""  DailyData="" LatestDailyVer="" LatestDailyName=""
     VM_PATH="${OS}-${RELEASE}"
@@ -1224,9 +1211,7 @@ function get_void() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## ADD 18 as in https://github.com/quickemu-project/quickemu/pull/1761
-# but FIX discontinued 'lite64' with ver 18 and add missing hash check
-# REVIEW making dynamic?
+## FIX repo url and hash check  # To REVIEW making dynamic: (unstable site format)
 function releases_zorin() {
     echo 18 17 16
 }

@@ -848,8 +848,21 @@ function_quick_get_wrap ()  {
             if [[ $QGW_OS_RelNotes ]] ; then
               printColor "\n\n  Release Notes:"
               printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes"
-              printf "\n"
             fi
+            QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected}(" "$QG_Modpath" | grep '#' )"
+            if [[ $QGW_OS_Mod_Notes ]] ; then
+              printColor "\n\n  qqX Mods for quickGet:"
+              printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_Mod_Notes"
+            fi
+            # add general 10/2026 ubuntu refactor tweaks:
+            if [[ "$QGW_OS_Arr_NameSelected" == *'buntu'* ]] && [[ $QGW_OS_Arr_NameSelected != "ubuntu" ]]; then
+              QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "ubuntu(" "$QG_Modpath" | grep '#' )"
+              if [[ $QGW_OS_Mod_Notes ]] ; then
+                printColor "\n\n  qqX Mods for quickGet:"
+                printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_Mod_Notes"
+              fi
+            fi
+            [[ $QGW_OS_RelNotes || $QGW_OS_Mod_Notes ]] && printf "\n"
           fi
 
           if [[ "$QGW_OS_Arr_NameSelected" == "macos"* ]]; then
