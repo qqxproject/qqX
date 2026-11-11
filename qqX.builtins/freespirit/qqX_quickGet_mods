@@ -73,7 +73,7 @@ QG_ModsNumber="v7.4"  #  for quickGet 4.99.01 at oct 2026
 ## 1:  LISTS and FILTERS   (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
-osAddList=" athenaos bluestar "
+osAddList=" athenaos bluestar kde-linux"
 #osAddList+=" another "
 
 # osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
@@ -163,6 +163,8 @@ function os_info {
         endless)          INFO="Endless OS|-|https://www.endlessos.org/os|Gnome/Fedora/Debian immutable os-tree with Flatpak packaging. English/Spanish/Portuguese focus with special tools for Windows users.";;
         fedora)           INFO="Fedora|-|https://www.fedoraproject.org/|Innovative Linux community distros for desktops, clouds, and containers. Security focused and enterprise funded by RedHat and others ...";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
+        kdeneon)          INFO="KDE Neon|-|https://neon.kde.org/|The older official KDE development desktop on a Debian Stable base. See 'KDE Linux' for the newer version.";;
+        kde-linux)        INFO="KDE Linux|-|https://linux.kde.org/|The new official development KDE desktop and KDE software using KDE's own rolling Arch OS repo base.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         linuxlite)        INFO="Linux Lite|-|https://www.linuxliteos.com/|Lightweight XFCE distro built on Ubuntu LTS.";;
         lubuntu)          INFO="Lubuntu|-|https://lubuntu.me/|Lightweight LXDE Operating System that ships the essential apps and services for daily use: office applications, PDF reader, image editor, music and video players, etc.";;
@@ -197,6 +199,7 @@ function distro_release_notes {
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         freedos)          RelNotes="A 'bonus' mountable iso, with extra software, can be dowloaded from the website. Also a legacy boot version, if needed, for older hardware installations.";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
+        kde-linux)        RelNotes="11/2026 ISO's are large with possibly large (?) KDE Discover updates. Testing versions only BUT distro is close to official release and very usable.";;
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
         manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others community. Sway is git 'unstable' at https://github.com/manjaro-sway";;
         mxlinux)          RelNotes="For Community Spins and sysVinit variants, see website for direct download";;
@@ -324,7 +327,7 @@ function get_artixlinux() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## UPDATE to new repo
+## UPDATE to new repo (and add back after upstream removal)
 function releases_athenaos() {
     web_pipe "https://github.com/Athena-OS/athena/releases" | grep 's/tag' | fv -Q -M 2
 }
@@ -578,24 +581,39 @@ function get_guix() {
 
 ## FIX iso url, update releases 08/2026, update folder naming 10/2026
 function releases_kdeneon() {
-    echo bigscreen desktop dev-unstable
+    echo "bigscreen desktop dev-unstable"
 }
 function get_kdeneon() {
-    local HASH= ; local ISO= ; local URL=
+    local HASH="" ISO="" URL=""
     if [[ $RELEASE == "bigscreen" ]]; then
         URL="https://files.kde.org/neon/images/big/user/current"
         ISO="neon-user-big-current.iso"
-        HASH=$(web_pipe "${URL}/neon-user-big-current.sha256sum" | cut -d' ' -f1)
+        HASH="$(web_pipe "${URL}/neon-user-big-current.sha256sum" | cut -d' ' -f1)"
     elif [[ $RELEASE == "desktop" ]]; then
         URL="https://files.kde.org/neon/images/desk/user/current"
         ISO="neon-user-desk-current.iso"
-        HASH=$(web_pipe "${URL}/neon-user-desk-current.sha256sum" | cut -d' ' -f1)
+        HASH="$(web_pipe "${URL}/neon-user-desk-current.sha256sum" | cut -d' ' -f1)"
     elif [[ $RELEASE == "dev-unstable" ]]; then
         URL="https://files.kde.org/neon/images/dev/unstable/current"
         ISO="neon-unstable-dev-current.iso"
-        HASH=$(web_pipe "${URL}/neon-unstable-dev-current.sha256sum" | cut -d' ' -f1)
+        HASH="$(web_pipe "${URL}/neon-unstable-dev-current.sha256sum" | cut -d' ' -f1)"
     fi
     echo "${URL}/${ISO} ${HASH}"
+}
+
+## 11/2026 ADD new distro to qGet list ...
+function releases_kde-linux() {
+    echo testing
+}
+function get_kde-linux() {
+    local HASH="" ISO="" BaseUrl="" RelData=""
+    if [[ $RELEASE == "testing" ]]; then
+        BaseUrl="https://kde-linux-images.s3.kde.org/testing"
+        RelData="$(web_pipe "$BaseUrl/SHA256SUMS" | grep -s iso)"
+        ISO="$(awk '{print $2}' <<< "$RelData" | sort -r | head -n 1)"
+        HASH="$(grep -s "$ISO" <<< "$RelData" | cut -d ' ' -f1)"
+    fi
+    echo "${BaseUrl}/${ISO} ${HASH}"
 }
 
 ## FIX omit dirs only having an RC sub-folder
