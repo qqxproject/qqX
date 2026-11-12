@@ -32,7 +32,7 @@ CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
 Recent highlights include:
 
-- Improved session control for KDE Konsole and Gnome Ptyxis
+- Improved session control for KDE Konsole and Gnome Ptyxis and add Ghostty
 
 - New Main Menu style options and general UI updates
 
@@ -42,7 +42,7 @@ Recent highlights include:
 
 - An upgraded drive/VM snapshot system
 
-- Extended Distro Test Suite and Range of qqX _exclusive_ updates for QuickGet
+- Extended Distro Test Suite and Range of __qqX exclusive updates__ for QuickGet
 
 - VM network isolation toggle options and improvements to VM nesting
 
