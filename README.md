@@ -4,15 +4,11 @@ SPIN-OFF NEXT LEVEL QUICKEMU / QUICKGET
 
 Adds fixes, tools and improvements to the popular [Quickemu](https://github.com/quickemu-project/quickemu/wiki/07-Alternative-frontends/ae333717e9325b3e7d72766b746c47922e152002) system
 
-And starved of oxygen for adding them ....
-
 -----
 
 > After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
 
 -----
-
-- Simple system using basic Qemu/KVM
 
 - Installable on all versions of standard Linux
 
@@ -28,7 +24,7 @@ And starved of oxygen for adding them ....
 
 See announcements for the latest on [what's happening behind the scenes](https://github.com/qqxproject/qqX/discussions/categories/announcements) and [qqxproject.org](https://qqxproject.org/) for user help, details and FAQ's
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qqxproject/qqX) ... for explainations of how qqX works under the hood
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qqxproject/qqX) for explainations of how qqX works under the hood
 
 CAREFULLY WRITTEN AND CAREFULLY CHECKED
 
@@ -46,7 +42,7 @@ Recent highlights include:
 
 - An upgraded drive/VM snapshot system
 
-- Extended Distro Test Suite and Range of qqX exclusive updates for QuickGet
+- Extended Distro Test Suite and Range of qqX _exclusive_ updates for QuickGet
 
 - VM network isolation toggle options and improvements to VM nesting
 
@@ -57,6 +53,16 @@ Recent highlights include:
 Your support is welcomed:
 
 ![qqX-part-of-quickemu-edited3b](https://github.com/user-attachments/assets/3322789f-ed89-4b6c-90b3-630958860b2f)
+
+-----
+
+SIMPLY BETTER
+
+Runs using [straight forward easy-mod command line Qemu/KVM](https://qemu.readthedocs.io/en/master/system/invocation.html)
+
+Uses the same _simple_ quickemu scripts created upstream by Martin Wimpress
+
+But made better ....
 
 -----
 
