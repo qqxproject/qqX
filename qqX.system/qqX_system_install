@@ -151,6 +151,8 @@ while true ; do
   # until 'tput' has been validated, clear here using 'printf'
   printf "\033c"
   cat "qqX.system/icons/qqX.ascii.logo.8bit.25.txt"
+  printf "\n  Adds fixes, tools and improvements to the popular Quickemu system:"
+  printf "\n\n  The same simple easy-mod scripts, made better \n"
   InstallationAlert= ; OptionalAlert=
 
   if [[ ! "$(type -p bash)" ]]; then
