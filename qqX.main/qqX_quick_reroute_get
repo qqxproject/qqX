@@ -538,7 +538,7 @@ run_distro_tests_UI () {
       printf "\n\n  Most of the download formulas are dynamic, so most checks should include the latest version"
     fi
     printf "\n\n  See notes in qqX.builtins > 'freespirit/qqX_quickGet_mods' for more details"
-    printf "\n\n  and the TEST ALL report file in the downloaded release folder"
+    printf "\n\n  and the TEST ALL report file in the downloaded release folder   [M] to show list of Mods and Fixes added to quickGet"
     printColor "\n\n  [enter] to test or to re-test  "
     printColor "[d] back to downloads   "
     printf "[v] to test using verbose mode (needs large screen)  [vm] show mirrors"
@@ -547,6 +547,13 @@ run_distro_tests_UI () {
     read -rp "  >  " TestDistros
     if [[ $TestDistros == "d" ]]; then break
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
+    elif [[ $TestDistros == "M" ]]; then
+      printf "\n\n"
+      qGet_ModsListFile="/tmp/qGet.ModsList.@$(date +%s).$(date +%Y.%b.%d).txt"
+      printf "" > "$qGet_ModsListFile"
+      for D in "${QGW_OS_Array[@]}"; do grep -s -m 1 -B 3 "${D}(" "$QG_Modpath" | tee -a "$qGet_ModsListFile" 2>/dev/null ; done
+      printf "\n\n  Saved to:  %s" "$qGet_ModsListFile"
+      printf "\n\n"
     else
       test_internet_is_up
       ExitTestToMain= ; qGet_TestSynopis= ; qGet_TestSynopisTwo= ; qGet_TestSynopisRedux=

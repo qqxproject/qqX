@@ -1,0 +1,200 @@
+##########################################
+
+## UPDATE and make DYNAMIC
+function releases_alma() {
+}
+
+## Re-ADD upstream deletion
+function releases_antix() {
+}
+
+## FIX artix community editions and hash grep
+function get_artixlinux() {
+}
+
+## UPDATE to new repo (and add back after upstream removal)
+function releases_athenaos() {
+}
+
+## FIX bodhi editions
+function editions_bodhi() {
+}
+
+## FIX - make sure that 'live' is grepped (changes at jan 11 2026)
+function releases_debian() {
+}
+
+## UPDATE and FIX (08/2026)
+function releases_deepin() {
+}
+
+## FIX and make dynamic - remove hardcoded namings
+function releases_devuan() {
+}
+
+## REDUCE release count - over 20 is too many, and 10/2026 improve and FIX the grep
+function releases_dragonflybsd() {
+}
+
+## FIX Easy OS release list
+function releases_easyos() {
+
+## make dynamic for latest (and fix hash)
+  # @ 10/2026 updated for new servers and add a tweak for the base64 changes that crept in
+function releases_elementary() {
+
+## FIX Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
+  # FIX beta server variants are too problematic  # TODO add Rawhide
+function get_fedora() {
+    web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
+}
+## FIX & UPDATE and make dynamic 10/2026
+function releases_freedos() {
+}
+
+## FIX & UPDATE to new cdn (08/2026)
+function get_gentoo() {
+}
+
+## FIX & UPDATE to current format
+function releases_gnomeos() {
+}
+
+## FIX url and make dynamic (no hash available)
+function releases_guix() {
+}
+
+## 11/2026 ADD new distro to qGet list ...
+function releases_kde-linux() {
+}
+
+## FIX iso url, update releases 08/2026, update folder naming 10/2026
+function releases_kdeneon() {
+}
+
+## FIX omit dirs only having an RC sub-folder
+function releases_linuxlite() {
+}
+
+## FIX update mirror
+function get_linuxmint() {
+}
+
+## FIX update mirror and make dynamic
+function get_lmde() {
+
+# FIX the URL which, at 02/26 SourceForge has pointing to the wrong folder, the one with the old kernel,
+  # and thus is breaking the hash check as the name is wrong
+function get_maboxlinux() {
+}
+
+## UPGRADE only one release ... make dynamic
+function releases_mageia() {
+
+## FIX manjaro sway (again, 08/2026 and 10/2026) https://github.com/manjaro-sway/manjaro-sway
+  # 10/2026 change repo: gitlab is recording poor uptimes https://status.manjaro.org/history/manjaro-git-lab
+function editions_manjaro() {
+}
+
+## UPDATE to FIX release numbers varying with flavor (07/2025)
+function releases_mxlinux() {
+}
+
+## 10/2026 FIX for URL, for release numbers -gt 9.9  and FIX hash
+function releases_netbsd() {
+}
+
+## FIX hash check and use CORRECT iso
+function get_nitrux() {
+}
+
+## qqX added, plus UPDATE 10/2026
+function releases_nobara() {
+}
+
+## FIX HASH
+function get_openindiana() {
+}
+
+## FIX and UPDATE to new folder styles and names
+function releases_opensuse() {
+
+## FIX - make sure integers -gt 9 can be used ...
+# eg. 6.10 and 10.0 > OracleLinux-R6-U10-Server-x86_64-dvd.iso and OracleLinux-R10-U0-x86_64-dvd.iso
+function releases_oraclelinux() {
+}
+
+## FIX hashes and folders
+function releases_parrotsec() {
+}
+
+## FIX hash, update url and make dynamic (update mirror 08/2026)
+function releases_pclinuxos() {
+}
+
+## 10/2026 UPDATE and FIX (only xfce now)
+function releases_peppermint() {
+
+
+## UPDATE and tweak (correct @11/2026 but unstable site and not yet dynamic)
+function releases_popos() {
+}
+
+## UPDATE to new storage  (08/2026)
+function releases_pureos() {
+}
+
+## UPDATE and FIX
+function releases_rockylinux() {
+
+## FIX url and hash, plus make dynamic (if list happens to show up)
+  # 10/2026 UPDATE md5 to sha256
+function releases_siduction() {
+}
+
+## FIX releases (only 15.0, and hopefully higher, has downloadable iso's)
+function releases_slint() {
+}
+
+## FIX releases (08/2026)
+function releases_slitaz() {
+}
+
+## UPDATE and FIX (again at 08/2026)
+function releases_solus() {
+}
+
+## UPDATE (website subject to change)
+function releases_sparkylinux() {
+}
+
+## TWEAK to avoid spamming on test_all routine
+function releases_spirallinux() {
+}
+
+## 10/2026 UPDATE, FIX and make dynamic (no json now)
+function get_tails() {
+}
+
+## UPDATE, FIX and make dynamic
+function releases_tinycore() {
+}
+
+## FIX hash checker - base is now 256
+function get_trisquel() {
+
+## 10/2026 REFACTOR for errors where versions are missing
+  # General FIXES, FIX daily-live grep, tidy-up of hardcoded obsolete tests eg 'jammy-live' and 'md5'
+function releases_ubuntu() {
+}
+
+## FIX invalid VOID folders (use 'current' only as some folders have variants)
+function releases_void() {
+
+## SORT, fix and tidy D/L that goes with main d/l function to work better with qqX
+
+get_windows() {
+}
+
+## FIX repo url and hash check  # To REVIEW making dynamic: (unstable site format)
+function releases_zorin() {
