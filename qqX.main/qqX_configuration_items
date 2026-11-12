@@ -455,8 +455,9 @@ show_qqXmod_settings() {
 
 qqX_edit_settings() {
 
-  if [[ $TextEditor ]] && [[ ! $(type -p "$TextEditor") ]]; then texteditor_not_found_message
+  if [[ ! $(type -p "$TextEditor") ]]; then texteditor_not_found_message
   else
+    # TODO add flatpak support, and nano
     # Run the editor:
     if [[ $1 == "conf" ]]; then
 

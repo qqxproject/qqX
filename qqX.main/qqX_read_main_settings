@@ -136,6 +136,8 @@ function find_file_manager_browser()  {
 find_texteditor () {
 
   [[ $TextEditor ]] && [[ ! $(type -p "$TextEditor") ]] && texteditor_not_found_message && TextEditor=
+  # TODO add flatpak support, and nano
+
   if [[ ! $TextEditor ]]; then
     if [[ $(type -p gedit) ]] ; then  TextEditor="gedit"
     elif [[ $(type -p gnome-text-editor) ]] ; then  TextEditor="gnome-text-editor"
@@ -144,6 +146,7 @@ find_texteditor () {
     elif [[ $(type -p kwrite) ]] ; then   TextEditor="kwrite"
     elif [[ $(type -p mousepad) ]] ; then   TextEditor="mousepad"
     elif [[ $(type -p leafpad) ]] ; then   TextEditor="leafpad"
+    elif [[ $(type -p cosmic-edit) ]] ; then   TextEditor="cosmic-edit"
     else
       # mime test is not always reliable > REVIEW
       DefaultTextEditor="$(xdg-mime query default text/plain 2>/dev/null)"
