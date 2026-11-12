@@ -52,7 +52,9 @@ vm_pid_kill_menu() {
   else
     configure_cpu_pinning
     [[ $UseCustomBootArgs ]] && printColor "  STARTING CUSTOM BOOT SEQUENCE:  \n"
-    if [[ $RunningAsNested ]]; then printf "\n  Nested running detected > Deny inhibit shortcuts \n"
+    if [[ $RunningAsNested ]]; then
+      printf "\n  Nested running detected > "
+      printColor "Deny inhibit "; printf "shortcuts \n"
     fi
     sleep  "$P_Kill_WaitSecs"
     printColor "\n  Quickemu instance %s on PID:  %s  %s"  "$VM_InstanceName"  "$InstancePID"  "$BootAlert"
@@ -126,7 +128,7 @@ show_main_menu_header () {
   LiveBoot= ; WindowsMissingIso=
   if  [[  ! -e "$MainDrive" ]] && [[ ! -e "$IsoImg" ]]; then
     BootAlert="(Drives CHANGED or NOT FOUND - Reload VM?)"
-    [[ "${VM_InstanceName,,}" == *windows* ]] && WindowsMissingIso=1
+    [[ "${VM_InstanceName,,}" == *windows* ]] && WindowsMissingIso=1 && BootAlert="NEEDS WINDOWS ISO ..."
   elif  [[  ! -e "$MainDrive" ]]; then  BootAlert="(New: Std ISO Boot. Main Drive yet to be created)" ; LiveBoot=1
   elif  [[  ! $(du -b -t 1000000 "$MainDrive" 2>/dev/null) ]]; then
     if [[ ! "$IsoImg" ]] || [[ !  -e "$IsoImg" ]]; then
@@ -170,10 +172,10 @@ show_main_menu_header () {
     printf " ISO: %s \n" "$Mounted_ISO_DisplayName"
   fi
 
-  # Note .conf won't exist at first load, at VM selector menu
+  # Note .conf won't exist at first load, at VM selector menu  (windows has its own specific error handling)
 
   if [[ ! $NewFileTuneUp ]] && [[ ! $NewFileTuneUp_JustDone ]] && [[ -e $VM_Conf_File ]] && [[ ! -e "$MainDrive" ]] && [[ ! -e "$IsoImg" ]] ; then
-    printColor "\n    ERROR  Check .conf Drive & Iso Img settings against the VM folder contents \n"
+    [[ "${VM_InstanceName,,}" != *windows* ]] && printColor "\n    ERROR  Check .conf Drive & Iso Img settings against the VM folder contents \n"
   fi
 
   if stat "$VM_Conf_Dir/$VM_Conf_File" 2>/dev/null | grep -q "symbolic" ; then
@@ -215,7 +217,7 @@ check_disk_is_okay () {
     # Disk won't exist if VM is newly downloaded or live, so only check or return Status, if disk is present.
     # Qemu-img with '-q' should only output if error & only outputs on stderr   The exit status remains separately recorded.
     # https://qemu.readthedocs.io/en/v7.2.2/tools/qemu-img.html#cmdoption-qemu-img-commands-arg-check
-    if [[ $PrintErrors ]]; then  "$QEMU_IMG" check -q "$Selected_ChkDrive" 2>/dev/null
+    if [[ $PrintErrors ]]; then "$QEMU_IMG" check -q "$Selected_ChkDrive"
     else "$QEMU_IMG" check -q "$Selected_ChkDrive"  2>/dev/null
     fi
     # NB: "Okay"  is also used as a global flag  > caution if changing
@@ -312,6 +314,8 @@ check_if_disk_needs_a_cleanup  () {
 
 
 ## filter for 'ERRORS' that changes in QEMU might throw up and that WE WANT TO IGNORE  (see main settings)
+# @ 10/20206 the upstream "${VMDIR}/${VMNAME}.log" was added to the QL alert routines.
+# This is under REVIEW but instead does the opposite by issuing ALERTS for terms: error, fatal, critical and unknown, while ignoring others
 
 filter_and_flag_qemu_errors () {
 
@@ -330,6 +334,9 @@ filter_and_flag_qemu_errors () {
         if grep -q -s "$ErrChk" "$QemuErrorLog" ; then QemuErrorAlert= ; return ; fi
       done
     fi
+
+  elif grep -qs -i -e error -e fatal -e critical -e 'Unknown parameter' "$VM_Conf_Dir/$VM_InstanceName/$VM_InstanceName.log" ; then
+    QemuErrorAlert=1 ; return
 
   else  QemuErrorAlert=
   fi
@@ -654,6 +661,7 @@ move_rename_Selected_VM () {
           mv "$2"  "${Mv_NewName}.conf" || MoveFail=1
         fi
         if [[ ! $MoveFail ]] ; then function_rename_conf_dirnames "${Mv_NewName}.conf"  "$1"  "$Mv_NewName" ; fi
+        # should keep selinux attribs if they were initially present (shows -e if using lsattr or with a dot at end if using ls -la)
       fi
     fi
 
@@ -725,11 +733,15 @@ read_x86_tiano_vars_list () {
 
   # Current source list (-A nn may need adjusting if adding to qe arrays)
   # Also see quickEmu_mods, added 10/2025  - note that different built-ins could have different array lists
-  # Listing works on the upstream script "$QE_SourcePath" not on "$QE_Modpath"
-  # and it will list all files and all vars, from both secure and from non-secure
+  #
+  # Listing originally worked on the upstream script "$QE_SourcePath" not on "$QE_Modpath"
+  # to give consistency BUT at 10/2026 this needed changing
+  #
+  # Function will list all files and all vars, from both secure and from non-secure
+  # BUT whole vars routine is NOW subject to REVIEW and probable refactoring
 
   local String=
-  String="$(grep -s -A 32 -m 1 'ovmfs=' "$QE_SourcePath" | grep -B 32 'esac' | grep '"')"
+  String="$(grep -s -A 32 -m 1 'ovmfs=' "$QE_Modpath" | grep -B 32 'esac' | grep '"')"
   if [[ ! $String ]]; then  TianoVarsGrepError=1 ; return
   else TianoVarsGrepError=
   fi

@@ -260,8 +260,9 @@ VM_SelectorStyle="A"
   SetGL_DefaultAsOff=
 #
 
-# SDL vs SPICY highlighting  (default is SDL)
-# Set (="spicy") if Spicy is preferred, or if SDL is not possible (as has been the case with openSUSE, for example)
+# SDL vs SPICY highlighting
+# Default is SDL but will auto-set to spicy if SDL is not possible (as has been the case with openSUSE, for example)
+# Set (="spicy") if Spicy is preferred
   SpicySDL_HL=
 
 # NETWORK and INTERNET  are by default "on" (set blank)  *May be toggled* in the main boot menu,
@@ -381,13 +382,16 @@ VM_SelectorStyle="A"
 # @ 2023/12 Defaults:  # QemuErrorFilter=("gl_version" "signal 15 from pid")
 # 2024/07 add https://discussion.fedoraproject.org/t/selinux-alert-gst-plugin-scan-getattr-run-pcscd-pcscd-comm/79378
 # MacOS can often throw "usb_desc_get_descriptor" if the mouse/keyboard/sound setting is not quite right,
-# but these not always critical and can be session supressed in the [ql] menu,
+# but these are not always critical and can be session supressed in the [ql] menu,
 # or permanently in the .conf as eg QemuError_VM_Filter+=("usb_desc_get_descriptor") when the config is okay ...
 # Add any new values to the checking arrays as double quoted & space separated
 # AND  >>  use the '+=' for further lines  << including when used in the .conf file
   QemuErrorFilter=("gl_version" "signal 15 from pid" "gst-plugin-scan")
 # QemuErrorFilter+=("")
 
+# @ 10/20206 the upstream error log "${VMDIR}/${VMNAME}.log" was added to the QL alert routines
+# when the upstream TPM loader was upgraded in qqX Mods.
+# This is under REVIEW > QL currently ignores minor warnings but alerts for terms: error, fatal, critical and unknown
 
 # FIXES for QUICKEMU'S  QEMU  'args'
 # Selected fixes & hot-fixes for the quickemu code that gets passed to QEMU,
@@ -506,6 +510,7 @@ VM_SelectorStyle="A"
 # to re-snapshot before making experimental changes.
 # Controlled Qemu shutdown design still allows the 'Do not turn off your computer' to function
 # without conflict. However, set ="off" if a load-up of auto-restart is preferred.
+# May be individually controlled in the distro .conf file
   VM_ControlledRestart_Default="on"
 
 #  -------------------------------------------------------------------------------------------------------------------

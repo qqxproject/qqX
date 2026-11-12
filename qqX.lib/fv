@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
-# source instead of link, as some distros have Access Control limitations
-# should work if placed next the full script
+# Source instead of link, as some distros have Access Control limitations
+# Gives priority to adjacent full scripts
+# Make sure this loader has executable permissions, chmod +x ...
+# shellcheck disable=SC1090
 
-source floatversion
+FullSourcePath=
+if [[ ! -d "./floatversion" ]] && [[ -x "./floatversion" ]]; then FullSourcePath="$(realpath "./floatversion")"
+elif [[ $(type -p "floatversion") ]]; then FullSourcePath="$(type -p floatversion)"
+fi
+if [[ $FullSourcePath ]]; then source "$FullSourcePath"
+else  printf "\n\n  ERROR:  FloatVersion shortcut, source path NOT FOUND \n\n"
+fi

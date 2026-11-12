@@ -56,12 +56,6 @@ function_vm_folder_item_text () {
 
   if [[ $ArrayConf_Item_Listing == "empty" ]]; then ArrayConf_Item_Listing="EMPTY FOLDER or Bad Path"
 
-  elif [[ "${VM_Array[$i,1]}" == 'ubuntu'* ]] && [[ "${VM_Array[$i,1]}" == *'daily'* ]]; then
-
-    #  Are Live VMs only, as zsync only updates the iso file.
-    ArrayConf_Item_Listing+=" (Z)"
-    ZsyncDistrosFound=1
-
   elif [[ ! -e "${VM_Array[$i,0]}/$QcowTarget" ]]; then  ArrayConf_Item_Listing+=" (new)"
 
   elif [[ -h "$ArrayConf_Item" ]]; then  ArrayConf_Item_Listing+=" (s)" ; SymLinksPresent=1

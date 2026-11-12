@@ -271,7 +271,7 @@ function download_new_release {
       else printf "\n\n"
       fi
       printColor "  Pre-Release %s .... " "$qqX_Newest_PreRelease"
-      printColor "\n\n  See source releases and commits for more details"
+      printColor "\n\n  [w] See source releases and commits for more details"
       printf "\n\n  Pre-releases are generally stable and will have had some testing."
       printf "\n\n  They offer new features and bug-fixes but may be a little rough on the edges ...."
       printf "\n\n  Using the Beta Channel is on a per release-series basis. It may mean more frequent updates."
@@ -285,12 +285,14 @@ function download_new_release {
     if [[ ! $qqX_UpdateAvail ]] ; then
       [[ ! $UpdRechk ]] && printf "\n\n"
       if [[ $qqX_Current_ReleaseType == "beta" ]] && floatversion -Q --gt "$qqX_Newest_Tag  $qqX_Version" ; then
-        printf "  No new release found ...."
+        printf "  No new upgrades found ...."
         printf "\n\n  However an "
         printColor "ADD-ON %s" "$qqX_Newest_Tag"
         printf " is available at https://github.com/qqxproject/qqX/tags"
         [[ $qqX_Newest_TagText ]] && printf "\n\n  >  %s" "$qqX_Newest_TagText"
         UpdRechk="once" ; qqX_NewTagAlert=1
+      elif [[ $qqX_Current_ReleaseType == "release" ]] && [[ $Muted_BetaAlertPoint ]]; then
+        printf "  New Pre-release/Beta found ...."
       else
         printColor "  No new release found ...."
       fi

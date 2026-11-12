@@ -1,20 +1,31 @@
 
 
-FreeSpirit  Thu Aug 20 15:59:02 CEST 2026
+FreeSpirit  Mon Oct 26 15:19:59 CET 2026
 
-# re-checked and temporary server problems found on these three:
 
-ERROR: guix  >  Releases function FAIL
+ALL GOOD
 
-Checksum: n/a    Iso: FAIL   manjaro-plasma-full
-Checksum: n/a    Iso: FAIL   manjaro-i3-full
+Checksum: PASS   Iso: FAIL   nwg-shell-2025.06.08
+Checksum: PASS   Iso: FAIL   spirallinux-latest-Mate
+Checksum: PASS   Iso: FAIL   spirallinux-latest-LXQt
 
-Checksum: n/a    Iso: FAIL   ubuntu-server-daily-live
 
-ERROR: No URL > Possible initial lookup or server problem
-ERROR: Non Conformant URL > Possible initial lookup or server problem
+Servers Re-checked:
 
-# otherwise fine :
+Checksum: PASS   Iso: PASS   nwg-shell-2025.07.01            https://sourceforge.net/projects/nwg-iso/files/nwg-live-2025.07.01-x86_64.iso  67f9d6b7deef4c4bfaeb2b0d78af2c5c
+Checksum: PASS   Iso: PASS   nwg-shell-2025.06.08            https://sourceforge.net/projects/nwg-iso/files/nwg-live-2025.06.08-x86_64.iso  3073e804b098ce9166083c6f74ae907
+
+Checksum: PASS   Iso: PASS   spirallinux-latest-Plasma       https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_Plasma_12.231120_x86-64.iso  b4e9dfa2a7933f15335c611d56f36c1a
+Checksum: PASS   Iso: PASS   spirallinux-latest-XFCE         https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_XFCE_12.231120_x86-64.iso  deff3363994506315e9b3af6c617c31e
+Checksum: PASS   Iso: PASS   spirallinux-latest-Mate         https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_Mate_12.231120_x86-64.iso  394944170f36366f702d4a021980ba34
+Checksum: PASS   Iso: PASS   spirallinux-latest-LXQt         https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_LXQt_12.231120_x86-64.iso  51c4c2925df942c72f8957f8ddb218ad
+Checksum: PASS   Iso: PASS   spirallinux-latest-Gnome        https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_Gnome_12.231120_x86-64.iso  77490fa9495430a62cc029b5d64203dc
+Checksum: PASS   Iso: PASS   spirallinux-latest-Budgie       https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_Budgie_12.231120_x86-64.iso  2553233bcf01123f484ca96d91d16536
+Checksum: PASS   Iso: PASS   spirallinux-latest-Cinnamon     https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_Cinnamon_12.231120_x86-64.iso  3204fea27d394e6f71fc57d54c0604ff
+Checksum: PASS   Iso: PASS   spirallinux-latest-Builder      https://sourceforge.net/projects/spirallinux/files/12.231120/SpiralLinux_Builder_12.231120_x86-64.iso  7cf68bfb42ff61113b78b8ef003f8505
+
+ALL GOOD
+
 
 OS > ALMA:
 
@@ -55,6 +66,8 @@ Checksum: PASS   Iso: PASS   artixlinux-20260813-base-runit
 Checksum: PASS   Iso: PASS   artixlinux-20260813-base-s6
 Checksum: n/a    Iso: PASS   artixlinux-20260813-cinnamon-dinit
 Checksum: n/a    Iso: PASS   artixlinux-20260813-cinnamon-openrc
+Checksum: n/a    Iso: PASS   artixlinux-20260813-community-gtk-openrc
+Checksum: n/a    Iso: PASS   artixlinux-20260813-community-qt-openrc
 Checksum: n/a    Iso: PASS   artixlinux-20260813-lxqt-runit
 Checksum: PASS   Iso: PASS   artixlinux-20260813-mate-dinit
 Checksum: PASS   Iso: PASS   artixlinux-20260813-mate-openrc
@@ -89,13 +102,13 @@ Checksum: PASS   Iso: PASS   bazzite-latest-deck-plasma
 
 OS > BIGLINUX:
 
-Checksum: PASS   Iso: PASS   biglinux-2026-08-19-k618
-Checksum: PASS   Iso: PASS   biglinux-2026-08-19-k612
-Checksum: PASS   Iso: PASS   biglinux-2026-08-19-k71
+Checksum: PASS   Iso: PASS   biglinux-2026-10-03-k618
+Checksum: PASS   Iso: PASS   biglinux-2026-10-03-k612
+Checksum: PASS   Iso: PASS   biglinux-2026-10-03-k72
 
 OS > BLENDOS:
 
-Checksum: n/a    Iso: PASS   blendos-latest
+Checksum: PASS   Iso: PASS   blendos-latest
 
 OS > BLUESTAR:
 
@@ -141,15 +154,15 @@ Checksum: n/a    Iso: PASS   crunchbang++-9.0
 
 OS > DEBIAN:
 
-Checksum: PASS   Iso: PASS   debian-13.6.0-standard
-Checksum: PASS   Iso: PASS   debian-13.6.0-cinnamon
-Checksum: PASS   Iso: PASS   debian-13.6.0-gnome
-Checksum: PASS   Iso: PASS   debian-13.6.0-kde
-Checksum: PASS   Iso: PASS   debian-13.6.0-lxde
-Checksum: PASS   Iso: PASS   debian-13.6.0-lxqt
-Checksum: PASS   Iso: PASS   debian-13.6.0-mate
-Checksum: PASS   Iso: PASS   debian-13.6.0-xfce
-Checksum: PASS   Iso: PASS   debian-13.6.0-netinst
+Checksum: PASS   Iso: PASS   debian-13.7.0-standard
+Checksum: PASS   Iso: PASS   debian-13.7.0-cinnamon
+Checksum: PASS   Iso: PASS   debian-13.7.0-gnome
+Checksum: PASS   Iso: PASS   debian-13.7.0-kde
+Checksum: PASS   Iso: PASS   debian-13.7.0-lxde
+Checksum: PASS   Iso: PASS   debian-13.7.0-lxqt
+Checksum: PASS   Iso: PASS   debian-13.7.0-mate
+Checksum: PASS   Iso: PASS   debian-13.7.0-xfce
+Checksum: PASS   Iso: PASS   debian-13.7.0-netinst
 Checksum: PASS   Iso: PASS   debian-12.15.0-standard
 Checksum: PASS   Iso: PASS   debian-12.15.0-cinnamon
 Checksum: PASS   Iso: PASS   debian-12.15.0-gnome
@@ -198,6 +211,8 @@ OS > EDUBUNTU:
 
 Checksum: PASS   Iso: PASS   edubuntu-24.04
 Checksum: PASS   Iso: PASS   edubuntu-26.04
+Checksum: PASS   Iso: PASS   edubuntu-26.10
+Checksum: PASS   Iso: PASS   edubuntu-daily-live
 
 OS > ELEMENTARY:
 
@@ -205,10 +220,10 @@ Checksum: PASS   Iso: PASS   elementary-latest
 
 OS > ENDEAVOUROS:
 
+Checksum: PASS   Iso: PASS   endeavouros-2026.08.15
 Checksum: n/a    Iso: PASS   endeavouros-2026.04.27
 Checksum: n/a    Iso: PASS   endeavouros-2026.03.06
 Checksum: PASS   Iso: PASS   endeavouros-2026.01.12
-Checksum: PASS   Iso: PASS   endeavouros-2025.11.24
 
 OS > ENDLESS:
 
@@ -284,16 +299,14 @@ Checksum: PASS   Iso: PASS   freebsd-15.1-disc1
 Checksum: PASS   Iso: PASS   freebsd-15.1-dvd1
 Checksum: PASS   Iso: PASS   freebsd-15.0-disc1
 Checksum: PASS   Iso: PASS   freebsd-15.0-dvd1
+Checksum: PASS   Iso: PASS   freebsd-14.5-disc1
+Checksum: PASS   Iso: PASS   freebsd-14.5-dvd1
 Checksum: PASS   Iso: PASS   freebsd-14.4-disc1
 Checksum: PASS   Iso: PASS   freebsd-14.4-dvd1
-Checksum: PASS   Iso: PASS   freebsd-14.3-disc1
-Checksum: PASS   Iso: PASS   freebsd-14.3-dvd1
 
 OS > FREEDOS:
 
-Checksum: PASS   Iso: PASS   freedos-1.4
-Checksum: PASS   Iso: PASS   freedos-1.3
-Checksum: PASS   Iso: PASS   freedos-1.2
+Checksum: PASS   Iso: PASS   freedos-latest
 
 OS > GARUDA:
 
@@ -338,7 +351,8 @@ Checksum: n/a    Iso: PASS   gnomeos-48.0-alpha
 
 OS > GUIX:
 
-ERROR: guix  >  Releases function FAIL
+Checksum: n/a    Iso: PASS   guix-1.5.0
+Checksum: n/a    Iso: PASS   guix-1.4.0
 
 OS > HAIKU:
 
@@ -368,12 +382,10 @@ Checksum: n/a    Iso: PASS   kolibrios-latest-ru_RU
 
 OS > KUBUNTU:
 
-Checksum: PASS   Iso: PASS   kubuntu-16.04
-Checksum: PASS   Iso: PASS   kubuntu-18.04
-Checksum: PASS   Iso: PASS   kubuntu-20.04
-Checksum: PASS   Iso: PASS   kubuntu-22.04
 Checksum: PASS   Iso: PASS   kubuntu-24.04
 Checksum: PASS   Iso: PASS   kubuntu-26.04
+Checksum: PASS   Iso: PASS   kubuntu-26.10
+Checksum: PASS   Iso: PASS   kubuntu-daily-live
 
 OS > LINUXLITE:
 
@@ -410,12 +422,10 @@ Checksum: PASS   Iso: PASS   lmde-5-cinnamon
 
 OS > LUBUNTU:
 
-Checksum: PASS   Iso: PASS   lubuntu-16.04
-Checksum: PASS   Iso: PASS   lubuntu-18.04
-Checksum: PASS   Iso: PASS   lubuntu-20.04
-Checksum: PASS   Iso: PASS   lubuntu-22.04
 Checksum: PASS   Iso: PASS   lubuntu-24.04
 Checksum: PASS   Iso: PASS   lubuntu-26.04
+Checksum: PASS   Iso: PASS   lubuntu-26.10
+Checksum: PASS   Iso: PASS   lubuntu-daily-live
 
 OS > MABOXLINUX:
 
@@ -440,17 +450,15 @@ Checksum: PASS   Iso: PASS   mageia-10-Xfce
 
 OS > MANJARO:
 
-ERROR: No URL > Possible initial lookup or server problem
-
-Checksum: n/a    Iso: FAIL   manjaro-plasma-full
-Checksum: PASS   Iso: PASS   manjaro-plasma-minimal
+Checksum: PASS   Iso: PASS   manjaro-kde-full
+Checksum: PASS   Iso: PASS   manjaro-kde-minimal
 Checksum: PASS   Iso: PASS   manjaro-xfce-full
 Checksum: PASS   Iso: PASS   manjaro-xfce-minimal
 Checksum: PASS   Iso: PASS   manjaro-gnome-full
 Checksum: PASS   Iso: PASS   manjaro-gnome-minimal
 Checksum: PASS   Iso: PASS   manjaro-cinnamon-full
 Checksum: PASS   Iso: PASS   manjaro-cinnamon-minimal
-Checksum: n/a    Iso: FAIL   manjaro-i3-full
+Checksum: PASS   Iso: PASS   manjaro-i3-full
 Checksum: PASS   Iso: PASS   manjaro-i3-minimal
 Checksum: PASS   Iso: PASS   manjaro-sway-full
 
@@ -469,11 +477,13 @@ OS > NETBSD:
 Checksum: PASS   Iso: PASS   netbsd-11.0
 Checksum: PASS   Iso: PASS   netbsd-10.1
 Checksum: PASS   Iso: PASS   netbsd-10.0
+Checksum: PASS   Iso: PASS   netbsd-9.5
 Checksum: PASS   Iso: PASS   netbsd-9.4
+Checksum: PASS   Iso: PASS   netbsd-9.3
 
 OS > NITRUX:
 
-Checksum: n/a    Iso: PASS   nitrux-latest
+Checksum: PASS   Iso: PASS   nitrux-latest
 
 OS > NIXOS:
 
@@ -484,23 +494,20 @@ Checksum: PASS   Iso: PASS   nixos-26.05-graphical
 
 OS > NOBARA:
 
-Checksum: PASS   Iso: PASS   nobara-Standard-Official
-Checksum: PASS   Iso: PASS   nobara-Standard-GNOME
-Checksum: PASS   Iso: PASS   nobara-Standard-KDE
-Checksum: PASS   Iso: PASS   nobara-Standard-Steam-HTPC
-Checksum: PASS   Iso: PASS   nobara-Standard-Steam-Handheld
-Checksum: PASS   Iso: PASS   nobara-Nvidia-Official-NV
-Checksum: PASS   Iso: PASS   nobara-Nvidia-GNOME-NV
-Checksum: PASS   Iso: PASS   nobara-Nvidia-KDE-NV
-Checksum: PASS   Iso: PASS   nobara-Nvidia-Steam-HTPC-NV
+Checksum: PASS   Iso: PASS   nobara-latest-Official
+Checksum: PASS   Iso: PASS   nobara-latest-GNOME
+Checksum: PASS   Iso: PASS   nobara-latest-KDE
+Checksum: PASS   Iso: PASS   nobara-latest-Steam-HTPC
+Checksum: PASS   Iso: PASS   nobara-latest-Steam-Handheld
 
 OS > NWG-SHELL:
 
 Checksum: PASS   Iso: PASS   nwg-shell-2025.07.01
-Checksum: PASS   Iso: PASS   nwg-shell-2025.06.08
+Checksum: PASS   Iso: FAIL   nwg-shell-2025.06.08
 
 OS > OPENBSD:
 
+Checksum: PASS   Iso: PASS   openbsd-8.0
 Checksum: PASS   Iso: PASS   openbsd-7.9
 Checksum: PASS   Iso: PASS   openbsd-7.8
 Checksum: PASS   Iso: PASS   openbsd-7.7
@@ -550,24 +557,22 @@ Checksum: PASS   Iso: PASS   oraclelinux-9.8
 
 OS > PARROTSEC:
 
+Checksum: PASS   Iso: PASS   parrotsec-7.4-home
+Checksum: PASS   Iso: PASS   parrotsec-7.4-security
 Checksum: PASS   Iso: PASS   parrotsec-7.3-home
 Checksum: PASS   Iso: PASS   parrotsec-7.3-security
-Checksum: PASS   Iso: PASS   parrotsec-7.2-home
-Checksum: PASS   Iso: PASS   parrotsec-7.2-security
 
 OS > PCLINUXOS:
 
-Checksum: PASS   Iso: PASS   pclinuxos-2026.07.30-kde
-Checksum: PASS   Iso: PASS   pclinuxos-2026.07.30-kde-darkstar
-Checksum: PASS   Iso: PASS   pclinuxos-2026.07.30-MATE
-Checksum: PASS   Iso: PASS   pclinuxos-2026.07.30-XFCE
+Checksum: PASS   Iso: PASS   pclinuxos-2026.10-kde
+Checksum: PASS   Iso: PASS   pclinuxos-2026.10-kde-darkstar
+Checksum: PASS   Iso: PASS   pclinuxos-2026.10-MATE
+Checksum: PASS   Iso: PASS   pclinuxos-2026.10-XFCE
 
 OS > PEPPERMINT:
 
-Checksum: n/a    Iso: PASS   peppermint-latest-devuan-xfce
-Checksum: n/a    Iso: PASS   peppermint-latest-devuan-gnome
-Checksum: n/a    Iso: PASS   peppermint-latest-debian-xfce
-Checksum: n/a    Iso: PASS   peppermint-latest-debian-gnome
+Checksum: PASS   Iso: PASS   peppermint-latest-debian-xfce
+Checksum: PASS   Iso: PASS   peppermint-latest-devuan-xfce
 
 OS > POPOS:
 
@@ -684,8 +689,8 @@ OS > SPIRALLINUX:
 
 Checksum: PASS   Iso: PASS   spirallinux-latest-Plasma
 Checksum: PASS   Iso: PASS   spirallinux-latest-XFCE
-Checksum: PASS   Iso: PASS   spirallinux-latest-Mate
-Checksum: PASS   Iso: PASS   spirallinux-latest-LXQt
+Checksum: PASS   Iso: FAIL   spirallinux-latest-Mate
+Checksum: PASS   Iso: FAIL   spirallinux-latest-LXQt
 Checksum: PASS   Iso: PASS   spirallinux-latest-Gnome
 Checksum: PASS   Iso: PASS   spirallinux-latest-Budgie
 Checksum: PASS   Iso: PASS   spirallinux-latest-Cinnamon
@@ -693,7 +698,7 @@ Checksum: PASS   Iso: PASS   spirallinux-latest-Builder
 
 OS > TAILS:
 
-Checksum: PASS   Iso: PASS   tails-stable
+Checksum: n/a    Iso: PASS   tails-stable
 
 OS > TINYCORE:
 
@@ -725,72 +730,61 @@ Checksum: PASS   Iso: PASS   tuxedo-os-current
 
 OS > UBUNTU:
 
-Checksum: PASS   Iso: PASS   ubuntu-14.04
-Checksum: PASS   Iso: PASS   ubuntu-16.04
-Checksum: PASS   Iso: PASS   ubuntu-18.04
-Checksum: PASS   Iso: PASS   ubuntu-20.04
-Checksum: PASS   Iso: PASS   ubuntu-22.04
 Checksum: PASS   Iso: PASS   ubuntu-24.04
 Checksum: PASS   Iso: PASS   ubuntu-26.04
+Checksum: PASS   Iso: PASS   ubuntu-26.10
+Checksum: PASS   Iso: PASS   ubuntu-daily-live
 
 OS > UBUNTU-BUDGIE:
 
-Checksum: PASS   Iso: PASS   ubuntu-budgie-18.04
-Checksum: PASS   Iso: PASS   ubuntu-budgie-20.04
-Checksum: PASS   Iso: PASS   ubuntu-budgie-22.04
 Checksum: PASS   Iso: PASS   ubuntu-budgie-24.04
 Checksum: PASS   Iso: PASS   ubuntu-budgie-26.04
+Checksum: PASS   Iso: PASS   ubuntu-budgie-26.10
+Checksum: PASS   Iso: PASS   ubuntu-budgie-daily-live
 
 OS > UBUNTUCINNAMON:
 
 Checksum: PASS   Iso: PASS   ubuntucinnamon-24.04
 Checksum: PASS   Iso: PASS   ubuntucinnamon-26.04
+Checksum: PASS   Iso: PASS   ubuntucinnamon-26.10
+Checksum: PASS   Iso: PASS   ubuntucinnamon-daily-live
 
 OS > UBUNTUKYLIN:
 
-Checksum: PASS   Iso: PASS   ubuntukylin-16.04
-Checksum: PASS   Iso: PASS   ubuntukylin-18.04
-Checksum: PASS   Iso: PASS   ubuntukylin-20.04
-Checksum: PASS   Iso: PASS   ubuntukylin-22.04
 Checksum: PASS   Iso: PASS   ubuntukylin-24.04
 Checksum: PASS   Iso: PASS   ubuntukylin-26.04
+Checksum: PASS   Iso: PASS   ubuntukylin-26.10
+Checksum: PASS   Iso: PASS   ubuntukylin-daily-live
 
 OS > UBUNTU-MATE:
 
-Checksum: PASS   Iso: PASS   ubuntu-mate-16.04
-Checksum: PASS   Iso: PASS   ubuntu-mate-18.04
-Checksum: PASS   Iso: PASS   ubuntu-mate-20.04
-Checksum: PASS   Iso: PASS   ubuntu-mate-22.04
 Checksum: PASS   Iso: PASS   ubuntu-mate-24.04
+Checksum: PASS   Iso: PASS   ubuntu-mate-26.10
+Checksum: PASS   Iso: PASS   ubuntu-mate-daily-live
 
 OS > UBUNTU-SERVER:
 
-ERROR: Non Conformant URL > Possible initial lookup or server problem
-
-Checksum: n/a    Iso: FAIL   ubuntu-server-daily-live
-Checksum: PASS   Iso: PASS   ubuntu-server-26.04
-Checksum: PASS   Iso: PASS   ubuntu-server-25.10
 Checksum: PASS   Iso: PASS   ubuntu-server-24.04
-Checksum: PASS   Iso: PASS   ubuntu-server-22.04
-Checksum: PASS   Iso: PASS   ubuntu-server-20.04
-Checksum: PASS   Iso: PASS   ubuntu-server-18.04
+Checksum: PASS   Iso: PASS   ubuntu-server-26.04
+Checksum: PASS   Iso: PASS   ubuntu-server-26.10
+Checksum: PASS   Iso: PASS   ubuntu-server-daily-live
 
 OS > UBUNTUSTUDIO:
 
-Checksum: PASS   Iso: PASS   ubuntustudio-16.04
-Checksum: PASS   Iso: PASS   ubuntustudio-18.04
-Checksum: PASS   Iso: PASS   ubuntustudio-20.04
-Checksum: PASS   Iso: PASS   ubuntustudio-22.04
-Checksum: PASS   Iso: PASS   ubuntustudio-24.04
 Checksum: PASS   Iso: PASS   ubuntustudio-26.04
+Checksum: PASS   Iso: PASS   ubuntustudio-26.10
+Checksum: PASS   Iso: PASS   ubuntustudio-daily-live
 
 OS > UBUNTU-UNITY:
 
 Checksum: PASS   Iso: PASS   ubuntu-unity-24.04
 Checksum: PASS   Iso: PASS   ubuntu-unity-26.04
+Checksum: PASS   Iso: PASS   ubuntu-unity-26.10
+Checksum: PASS   Iso: PASS   ubuntu-unity-daily-live
 
 OS > VANILLAOS:
 
+Checksum: PASS   Iso: PASS   vanillaos-3.0
 Checksum: PASS   Iso: PASS   vanillaos-2.0
 
 OS > VOID:
@@ -908,12 +902,10 @@ Checksum: n/a    Iso: SKIP   windows-server-2016-Spanish
 
 OS > XUBUNTU:
 
-Checksum: PASS   Iso: PASS   xubuntu-16.04
-Checksum: PASS   Iso: PASS   xubuntu-18.04
-Checksum: PASS   Iso: PASS   xubuntu-20.04
-Checksum: PASS   Iso: PASS   xubuntu-22.04
 Checksum: PASS   Iso: PASS   xubuntu-24.04
 Checksum: PASS   Iso: PASS   xubuntu-26.04
+Checksum: PASS   Iso: PASS   xubuntu-26.10
+Checksum: PASS   Iso: PASS   xubuntu-daily-live
 
 OS > ZORIN:
 
@@ -927,13 +919,9 @@ Checksum: PASS   Iso: PASS   zorin-16-lite64
 Checksum: PASS   Iso: PASS   zorin-16-education64
 
 
-FreeSpirit  Thu Aug 20 15:59:02 CEST 2026
+FreeSpirit  Mon Oct 26 15:19:59 CET 2026
 
-ERROR: guix  >  Releases function FAIL
-Checksum: n/a    Iso: FAIL   manjaro-plasma-full
-Checksum: n/a    Iso: FAIL   manjaro-i3-full
-Checksum: n/a    Iso: FAIL   ubuntu-server-daily-live
-
-ERROR: No URL > Possible initial lookup or server problem
-ERROR: Non Conformant URL > Possible initial lookup or server problem
+Checksum: PASS   Iso: FAIL   nwg-shell-2025.06.08
+Checksum: PASS   Iso: FAIL   spirallinux-latest-Mate
+Checksum: PASS   Iso: FAIL   spirallinux-latest-LXQt
 

@@ -268,14 +268,14 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
       printf "\n\n %s "  "$ExtraArgs"  >> "$QemuArgsShortFile"
     fi
 
-    if [[ $SharedDriveArgs ]]; then
-      printf "\n\n  SharedDriveArgs: \n %s "  "$SharedDriveArgs"  >> "$QemuArgsFile"
-      printf "\n\n %s "  "$SharedDriveArgs"  >> "$QemuArgsShortFile"
-    fi
-
     if [[ $SecondDriveArgs ]]; then
       printf "\n\n  SecondDriveArgs: \n %s "  "$SecondDriveArgs"  >> "$QemuArgsFile"
       printf "\n\n %s "  "$SecondDriveArgs"  >> "$QemuArgsShortFile"
+    fi
+
+    if [[ $SharedDriveArgs ]]; then
+      printf "\n\n  SharedDriveArgs: \n %s "  "$SharedDriveArgs"  >> "$QemuArgsFile"
+      printf "\n\n %s "  "$SharedDriveArgs"  >> "$QemuArgsShortFile"
     fi
 
     if [[ $NoSmartcardSupport ]]; then  {

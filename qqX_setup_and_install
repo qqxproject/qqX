@@ -12,11 +12,9 @@
 
 #   IF your FILE MANAGER allows:
 
-#   Double mouse click  >  'run in terminal' or 'execute' ....
+#   Either Double mouse click  >  'run in terminal' or 'execute'  OR  Right click  >  'run as program'  or 'run in terminal' etc
 
-#   or     Right click  >  'run as program'  or 'run in terminal'  or 'run in konsole' ....
-
-#   or  Right click on Folder  >  'open in TERMINAL'  and  type "./qqX_setup_and_install"   (click on folder, not file, also note prefix ./)
+#   OR  RIGHT CLICK on FOLDER  >  'open in TERMINAL'  and  type "./qqX_setup_and_install"   (note prefix ./)
 
   #########################################################################################################################################
 
@@ -28,39 +26,55 @@
 
 #   shellcheck disable=SC2009,SC2034
 
-#   Terminal name may also be set here, for one-time usage, if '-e' exec functions are recognised:
-    UserTerm=
+#   Terminal name MAY ALSO BE SET HERE, for one-time usage, if '-e' exec functions are recognised:
+    UserTerm=""
 
 #########################################################################################################################################
 
 ## SELECTION OF TERMINAL:
 
-# Priority is given to main stream user bases and those offering geometry parameters
+# PRIORITY IS GIVEN TO MAIN STREAM USER BASES and those offering geometry parameters
 
-# At the beginning of 2026, 'qterminal' and' mate-terminal' are now being generally RECOMMENDED for qqX as they are
+# At the beginning of 2026, 'qterminal' and' mate-terminal' are being generally RECOMMENDED as they are
 # both lightweight and can both be easily installed as alternatives on almost any desktop or window manager, either X11 or Wayland
+
+# However, some Linux distros, especially those based on the Ubuntu LTS 2 year cycle, can often be behind the curve
+# and their supplied terminals can be quite out-of-date.
 
 # In 2024, 85% of users were probably covered by the first four: "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal"
 # Over 95% probably when "qterminal" and "alacritty" were added.
-# At 08/2025 a kgx check was included as some Gnome distros were using 'Gnome Console' aka 'kgx' as an alias call for Gnome Terminal ....
 
-# There are also several popular post-install terminals with various special feature sets.
-# However, it is very unlikely to find any of these alone and an underlying standard desktop environment terminal
-# can generally be expected to be available:
-#
-# Kitty, in 2024 was relatively stable and had a more or less standard behaviour, so it was added for good measure.
-#
-# On the other hand, many other leading edge, often cross-platform terminals were/are still in active development
-# and are liable to change. We need to view these as unstable BUT development should be encouraged and revisits made.
-#
-# Wezterm @ 01/2026, for example, has much potential. Its command line is now less idiosyncratic than two years ago,
-# but it now has 50% more open issues, now nearly 1,400 with which to contend ...
-#
-# The advent of Wayland has also seen other projects have being abandoned completely.
-# Termite, for example, now encourages the use of Alacritty ...
+# At 08/2025 a kgx check was included as some Gnome distros were using 'Gnome Console' aka 'kgx' as an alias call for Gnome Terminal
+# A year later, Gnome replaced this all with 'ptyxis' but titled it simply as 'Terminal' in user menus
+# Ptyxis needs the --maximize switch as geometry recall is still unstable
 
-# Users with Window Managers, not Desktop Envs will be familiar with terminals and settings at the cmd line
-# However add some well known interfaces where possible, eg. urxvt that comes with 'i3' as this helps with running of QF
+# There are several POPULAR POST-INSTALL, often CROSS-PLATFORM, terminals with various special feature sets.
+# However, it is VERY UNLIKELY TO FIND ANY OF THESE ON THEIR OWN, their behaviours in Linux are not always stable
+# and a standard desktop terminal can generally be expected to be available instead ...
+#
+# Kitty, in 2024 was relatively stable and had a more or less standard Linux behaviour, so it was added for good measure.
+#
+# Wezterm @ 11/2026 is now less idiosyncratic than two years ago but tends to be Windows and Mac focussed.
+# It now has 1.5k open issues. On tests, it failed to run compound commands, such as '-e sh -c nano --help' and gave
+# multiple errors. See this similar and unanswered issue from 2025 https://github.com/wezterm/wezterm/issues/7313
+
+# @ 10/2026 lib GHOSTTY seems to have matured:  https://news.ycombinator.com/item?id=50261998
+# Version 1.4 has been noted as a big step forward and seems to be creating huge changes to the landscape:
+#
+# A GUI terminal 'Ghostty' from the same author is now available as an option in many repos.
+# The project seems close to being stable. It has the standard '-e' parameter and it will open a 'new-window' cleanly.
+#
+# The libghostty post on ycombinator/hackernews prompted the announcement that KDE work was taking place
+# on 'Kwi' as an expected replacement for Konsole https://invent.kde.org/utilities/kwi
+# And a possible replacement for deepin-terminal also seems to be underway https://github.com/hualet/deepin-terminal-ghostty
+#
+# See the extensive list of projects at https://github.com/Uzaaft/awesome-libghostty
+
+# Some terminals have had to be discounted as too basic or non-standalone, such as drop-downs or 'Station' from the KDE Maui project.
+
+# The advent of WAYLAND has also seen projects being abandoned completely:
+# Termite, for example, now encourages the use of Alacritty, which tends to be found with Window Managers,
+# along with 'urxvt' that comes with 'i3'
 
 #########################################################################################################################################
 
@@ -74,7 +88,7 @@ fi
 # Use 'set' to make an array of usable terminals
 # See https://stackoverflow.com/questions/35385962/arrays-in-a-posix-compliant-shell#59353917
 set -- "gnome-terminal" "konsole" "mate-terminal" "xfce4-terminal" "qterminal" "lxterminal" "roxterm" "urxvt" "uxterm" "xterm"
-set -- "$@" "ptyxis" "kgx" "alacritty" "kitty" "foot"
+set -- "$@" "ptyxis" "kgx" "alacritty" "kitty" "ghostty" "foot"
 
 # Check through the array and output a list of those possibly found, using 'command -v'  (not 'type -p' which is Bash)
 while [ -n "$1" ] ; do
@@ -100,12 +114,13 @@ if [ -z "$UserTerm" ]; then TermGrep="$(pgrep -a term | grep qqX | tr -cd '[:pri
 fi
 
 # 10/2025 ptyxis resolved, hopefully, from ver 49.1 (tested on Fedora 43 beta)
+# 11/2026 cosmic-term still unable to spawn a new qf window, much is undocumented, plus window sizing is annoying ....
 
 if [ -z "$UserTerm" ] && [ -n "$(command -v = "cosmic-term")" ] ; then
   printf "\n\n  The new COSMIC terminal 'cosmic-term' has been detected on this system, "
-  printf "\n  however, at 12/2025 it is unfortunately problematic."
+  printf "\n  however, at 11/2026 it is still unfortunately problematic."
   printf "\n\n  Luckily, systems are fine with more than one terminal installed and present:"
-  printf "\n\n  Recommended general installations are 'mate-terminal' or 'qterminal'"
+  printf "\n\n  Recommended general installations are 'mate-terminal' or possibly 'qterminal'"
   printf "\n  which are both lightweight and Wayland/X11/multi-DE compatible."
   printf "\n\n  If you wish to force cosmic-term, to see if changes make it now possible to use,"
   printf "\n  edit the entry for 'UserTerm' at the start of this script, and re-run."
@@ -136,8 +151,8 @@ elif [ "$UserTerm" = "mate-terminal" ]; then
 elif [ "$UserTerm" = "xfce4-terminal" ]; then
   "$UserTerm" --geometry=160x50 --hide-menubar --hide-toolbar  -e "./qqX.system/qqX_system_install"
 
-elif [ "$UserTerm" = "xxqterminal" ]; then
-  # create profile for geometry REVIEW
+elif [ "$UserTerm" = "qterminal" ]; then
+  # create profile for geometry (needs ver 2+) REVIEW
   # see https://github.com/lxqt/qterminal/issues/488
   # and QF 'qcow2_filemanagement_launcher'
   if [ -e "$HOME/.config/qterminal.org/qterminal.ini" ]; then
@@ -236,17 +251,28 @@ if [ -t 1 ] ; then
   printf "\n\n   Your terminal or distro/terminal combination may need, or may have needed "
   printf "\n\n   this window to stay open until qqX has completed its tasks ..."
   printf "\n"
-  printf "\n\n   [enter] to close \n\n  "
+  printf "\n\n   [enter] to close and refresh \n\n  "
   read -r reply
 fi
 
+printf "   Closing ... \n\n"
+sleep 1.2
+[ -n "$(command -v tput)" ] && tput cnorm  && tput clear
+
 # Exit the script. But also check whether it has been run with a --hold optioned terminal, as Dolphin does, for example.
 PidRun="$(ps -eF | grep sh | grep "$$" | grep "$0" | tr -cd '[:print:]' | awk '{print $3}')"
+
+# command line starts can leave the terminal window open
+if [ -n "$(command -v "$SHELL")" ]; then DistroShell="$(command -v "$SHELL")"
+else DistroShell="$(command -v "sh")"
+fi
+eval "$DistroShell"
 
 # Needs SIGHUP in KDE or logs out of desktop session... See https://en.wikipedia.org/wiki/Signal_(IPC)#Handling_signals
 if [ -n "$PidRun" ]; then  kill -s 1 "$PidRun"
 else exit
 fi
+
 
 # Licence  GPL3   https://www.gnu.org/licenses
 

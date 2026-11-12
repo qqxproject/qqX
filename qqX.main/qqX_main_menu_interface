@@ -25,16 +25,17 @@ else
 
   function main_menu_interface {
 
-    #if [[ $LiveBoot ]] && [[ ! $SharedDrive_Mount ]]; then
-      #SharedDrive_Conf="no-shared"
-      #set_drive_paths
-    #fi
-    # ?? Default to off as can cause confusion when running certain distro installers as to which drive is being used
-    # But at 2026/07 leave active, as some distros, eg Fedora, will allow installs into the live boot,
-    # and other such, plus gives access to shared scripts etc ...  # REVIEW
+    check_screen_percentage_and_output
+
+    # EpochDateNow is set by main loop at start of each interface load up, use this to hide on-load notices from every refresh
+    InterfaceRefreshSecsNow="$(date +%s)"
+    if (((InterfaceRefreshSecsNow - EpochDateNow) > 300 )); then HideLoadUpNotices=1
+    else HideLoadUpNotices=
+    fi
 
     if [[ ! $ShowUtilsMenu ]]; then
 
+      # NORMAL FIRST LOAD UP:
       printf  "\n\n"
       if [[ ! $VM_InstanceName ]]; then printColor  "  [vm]  reselect " ; else   printf  "  [vm]  SELECT "
       fi
@@ -49,68 +50,14 @@ else
         printColor " boot menu enabled"
         printf "  (toggle)"
       fi
-
       if [[ $ControlledRestart == "on" ]]; then printf "   [crs] controlled restart = on  (toggle)"
       else printf "   [crs] controlled restart = OFF  (toggle)"
       fi
-
-      if [[ $LiveBoot ]] && [[ ! $LiveBootMissing ]]; then
-        if [[ "${VM_InstanceName,,}" == *windows* ]]; then
-          check_screen_percentage_and_output
-          printf "\n\n\n"
-          [[ $WebBrowser ]] && printf "  [qW]"
-          printf "  From qqX 1.14 onwards, ALL the Windows drivers should be autodetected and should autoinstall"
-          printf "\n\n  An overview guide is available at https://qqxproject.org/Guides/Windows-OS if needed"
-          [[ ! $(type -p swtpm) ]] && printf "\n\n  MAKE SURE to have followed the 'swtpm' setup  <<< IMPORTANT"
-          [[ ! $(type -p socat) ]] && printf "\n\n  Missing 'socat' >>> MAKE SURE to have followed the dependency setups  <<< IMPORTANT"
-          printf "\n"
-          CpuFlags="$(lscpu | grep Flags | tr ' ' '\n')"
-          if ! grep -q -e ^'popcnt' <<< "$CpuFlags" || ! grep -q -e ^'sse4_2' <<< "$CpuFlags" ; then
-            printColor "\n\n  WARNING: this CPU is unable to support current versions of Windows."
-            printf "\n\n  As 'lscpu' reports 'sse4_2' and/or 'popcnt' are not present,"
-            printf "\n  the installation is unlikely to be successful, or to be reliable. \n\n"
-          fi
-        elif [[ "${VM_InstanceName,,}" == *archlinux* ]]; then
-          printColor "\n\n  After booting, type 'archinstall' at the command prompt for easier installation ..."
-          printColor "\n\n  See https://github.com/archlinux/archinstall for more details"
-        fi
-        if [[ $(type -p lsblk) ]] && [[ $boot != "legacy" ]] && [[ "$VM_InstanceName" != *windows* ]] \
-        &&	[[ "$VM_InstanceName" != *macos* ]] && grep -qs 'btrfs' <<< "$(lsblk -f -o FSTYPE)"; then
-          mapfile -t fsArrBtr <<< "$(lsblk -f -o FSTYPE,MOUNTPOINT | grep btrfs | grep -e '/[[:print:]]' | awk '{print $NF}')"
-          for Mount in "${fsArrBtr[@]}"; do
-            if [[ "$VM_Conf_Dir" == "$Mount"* ]]; then
-              printf "\n\n\n  BTRFS detected: Installing VM's as btrfs, on top of btrfs hosts, can cause slowdown issues"
-              printf "\n\n  [mv] Move the VM to an ext4 partion (simplest)"
-              printf "\n\n  [cc] try mitigation fixes using 'nocow' and qqX custom booting"
-              printf "\n\n  See https://www.qemu.org/docs/master/system/images.html#cmdoption-qcow2-arg-nocow"
-              printf "\n" ; break
-            fi
-          done
-        fi
-        if [[ "$VM_InstanceName" == *batocera* ]]; then
-          printf "\n\n  Use qqX .conf editor to set up game controllers as ps2 (?) etc."
-          printf "\n"
-        fi
-      elif [[ $LiveBoot ]] && [[ $LiveBootMissing ]]; then
-        printColor "\n\n\n  Live BOOT ISO NOT FOUND"
-        [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
-        printf "\n"
-      elif [[ "${VM_InstanceName,,}" == *windows* ]]; then
-        if [[ $WindowsMissingIso ]]; then
-          printColor "\n\n\n  [wd] to manually download a Windows ISO"
-          printf "\n\n  Select 64 bit. Save the downloaded ISO to the VM folder. Update the .conf references.\n"
-        elif [[ "$Mounted_ISO" == *virtio* ]]; then
-          printColor "\n\n\n  Set up ISO's: When everything is working and booting correctly,"
-          # main menu routines will nullify any .conf 'fixed_iso' links to non-existent images
-          printColor "\n\n  the 'unattended' folder, the 'virtio' and 'unattended' ISO's may be safely removed."
-          printColor "\n\n  The Windows ISO is unlikely to be needed so may be archived."
-          printf "\n\n  For re-installation, remove only the 'disk.qcow2' drive ..."
-          [[ $FileManager ]] && printf "\n\n  Use [f] to open the VM folder in the system file manager"
-          printf "\n"
-        fi
-      fi
+      # show load up messages
+      main_menu_messages
 
     else
+      # Show Utils menu:
       printColor   "\n  ----------------------------------------------------------------------------"
       printf "\n\n  File Manager: '%s'  Text Editor: '%s'  Browser: '%s' " "$FileManager" "$TextEditor" "$WebBrowser"
 
@@ -156,9 +103,9 @@ else
     fi
 
     if [[ ! $LiveBootMissing ]]; then
-      [[ -e $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -l "$MainDrive" | grep -c '[0-9][0-9]:')"
-      [[ -e $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -l "$SharedDrive" | grep -c '[0-9][0-9]:')"
-      [[ -e $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -l "$SecondDrive" | grep -c '[0-9][0-9]:')"
+      [[ -e $MainDrive ]] && SnapCountMain="$("$QEMU_IMG" snapshot -lq "$MainDrive" 2>/dev/null | grep -c '[0-9][0-9]:')"
+      [[ -e $SharedDrive ]] && SnapCountShared="$("$QEMU_IMG" snapshot -lq "$SharedDrive" 2>/dev/null | grep -c '[0-9][0-9]:')"
+      [[ -e $SecondDrive ]] && SnapCountSecond="$("$QEMU_IMG" snapshot -lq "$SecondDrive" 2>/dev/null | grep -c '[0-9][0-9]:')"
 
       printColor  "\n\n  [sc]  create   [sd]  delete   [sa]  apply   [sl]  list   >  SNAPSHOTS"
       if [[ $SnapCountMain -gt 15 ]]; then  printColor "   main (%s)" "$SnapCountMain"
@@ -217,27 +164,31 @@ else
         fi
 
         # Auto Highlight Spicy if SDL is not installed, as can be the case with openSUSE, for example
-        [[ ! $SpicySDL_HL ]] && ! grep -sqi sdl <<< "$(qemu-system-x86_64 -display help)" && SpicySDL_HL="spicy"
+        SDL_Avail=1
+        ! grep -sqi sdl <<< "$(qemu-system-x86_64 -display help)" && SpicySDL_HL="spicy" && SDL_Avail=
 
-        if [[ $SpicySDL_HL == "spicy" ]]; then printf  "\n\n  [d]   start with SDL display"
+        if [[ ! $SDL_Avail ]]; then printf  "\n\n\n  Available displays:"
+        elif [[ $SpicySDL_HL == "spicy" ]]; then printf  "\n\n  [d]   start with SDL display"
         else  printColor  "\n\n  [d]   start with SDL display"
         fi
-        if [[ $guest_os == "windows" ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf "   (size as set by qqX and/or by Windows)"
-        elif [[ $guest_os == "windows" ]]; then printColor "   (size as set by qqX and/or by Windows)"
-        elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > see settings/help)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
-        elif [[ $SDL_ScreenPercent ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
-        elif [[ $SDL_ScreenPercent ]]; then printColor " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
-        elif [[ $guest_os == "macos" || $guest_os == "windows" ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf " (%s) "  "$SDL_ScreenSize"
-        elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
-        else
-          if [[ $SpicySDL_HL == "spicy" ]]; then printf " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
-          else printColor " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
+        if [[ $SDL_Avail ]]; then
+          if [[ $guest_os == "windows" ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf "   (size as set by qqX and/or by Windows)"
+          elif [[ $guest_os == "windows" ]]; then printColor "   (size as set by qqX and/or by Windows)"
+          elif [[ $SDL_ScreenSize_Error ]]; then printf " (%s%% %s > [set] or see settings/help)"  "$SDL_ScreenPercent"  "$SDL_ScreenSize_Error"
+          elif [[ $SDL_ScreenPercent ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
+          elif [[ $SDL_ScreenPercent ]]; then printColor " %-12s    [df]  97%% "  "($SDL_ScreenPercent%)"
+          elif [[ $guest_os == "macos" || $guest_os == "windows" ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf " (%s) "  "$SDL_ScreenSize"
+          elif [[ $guest_os == "macos" || $guest_os == "windows" ]]; then printColor " (%s) "  "$SDL_ScreenSize"
+          else
+            if [[ $SpicySDL_HL == "spicy" ]]; then printf " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
+            else printColor " %-11s     [df]  97%% "  "($SDL_ScreenSize)"
+            fi
           fi
+          if [[ ! $SDL_ScreenSize_Error ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf "  (ctrl-alt-f full screen toggle)"
+          else [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
+          fi
+          printf "\n"
         fi
-        if [[ ! $SDL_ScreenSize_Error ]] && [[ $SpicySDL_HL == "spicy" ]]; then printf "  (ctrl-alt-f full screen toggle)"
-        else [[ ! $SDL_ScreenSize_Error ]] && printColor "  (ctrl-alt-f full screen toggle)"
-        fi
-        printf "\n"
 
         if [[ $HeadlessDisplay ]]; then printColor 	"\n\n  [s]   start with Spice display (HEADLESS) "
         elif [[ $SpicySDL_HL == "spicy" ]]; then printColor 	"\n\n  [s]   start with Spice display (scaleable)   [sf]  spice full screen (shift F12 to exit)"
@@ -294,6 +245,9 @@ else
           # SyncDateOld="$(cat "$VM_InstanceName/rtv.date.txt" 2>/dev/null)"
         # (( (SyncDateNow - SyncDateOld) > 2592000 ))&& RtvUpd=1
       fi
+
+      # @ 10/2026 DEPRECATED and TO BE REFACTORED
+
       if [[ $RtvUpd ]]; then
         if [[ $RtvArm ]]; then
             printColor "\n\n  [rtv]  OVMF updates may be available > Last checked over 120 days ago ..."
@@ -354,10 +308,14 @@ else
     printf "ISO's: %s (%s)  "  "${InstanceISO_Sizes}G" "$InstanceISO_SizesCount"
     [[ $(ls "$VM_InstanceName"/*.OLD.qcow2 2>/dev/null) ]] && printColor "(backup disk present)"
 
+    if [[ $SharedDrive ]]; then
+      [[ $SharedDrive_Mount ]] && printColor "  Shared Drive Mounted"
+      [[ $SharedDrive_Conf == "no-shared" ]] && printColor "  Shared Drive Disabled"
+    fi
+
     printf  "\n\n"
 
     filter_and_flag_qemu_errors
-
     if [[ $QemuErrorAlert ]]; then
       printColor "  [ql]  show qemu error log"
     elif [[ $FileManager ]]; then
@@ -372,78 +330,9 @@ else
       fi
     fi
 
-    if [[ "$VM_InstanceName" == *'daily'* || "$VM_InstanceName" == "ubuntustudio-dvd" ]] && [[ $(ls "$VM_InstanceName/"*devel.iso 2>/dev/null) ]]; then
-      # @ feb 2025 note that 'ubuntustudio-dvd' is now in the standard cdimages repo and has no dvd suffix  REVIEW
-      # record d/l data for daily-live alerts
-
-      LastZsync=
-      Curr_Zsync_SHA=
-      New_Zsync_SHA=
-      if [[ $(cat "$VM_InstanceName/dl-url.txt" 2>/dev/null) ]]; then
-        Zsync_URL="$(awk '/http/{print $2}' "$VM_InstanceName/dl-url.txt")"
-        Zsync_SHA_URL="$(dirname "$Zsync_URL")""/SHA256SUMS"
-        New_Zsync_SHA="$(curl -sf --max-time 3 "$Zsync_SHA_URL" | grep -s amd64 | cut -d' ' -f1 &)"
-      fi
-
-      #  Live VMs where zsync updates the iso file.
-      if [[ "$(tr -cd '[:digit:]' 2>/dev/null < "$VM_InstanceName/zsync.date.txt")" ]]; then
-        SyncDateOld="$(tr -cd '[:digit:]' 2>/dev/null < "$VM_InstanceName/zsync.date.txt")"
-        LastZsync="$((EpochDateNow - SyncDateOld))"
-        printf "\n\n"
-        if [[ $LastZsync -gt 259200 ]]; then  printf "  [z]   daily-live - last zsync over %d hrs ago"  "$((LastZsync/3600))"
-        else  printf "  [z]   daily-live - last zsync %d hrs ago"  "$((LastZsync/3600))"
-        fi  #  older than 3 days (in epoch seconds)  REVIEW
-        if [[ $LastZsync -gt 864000 ]]; then printColor "  (out-of-date)"  # 10 days  (NB: esp. important at change of url naming at xx.04 etc)
-        elif [[ $New_Zsync_SHA ]] && [[ $(cat "$VM_InstanceName/dl-sha.txt") ]]; then
-          Curr_Zsync_SHA="$(awk '{print $1}' "$VM_InstanceName/dl-sha.txt")"
-          if [[ ${Curr_Zsync_SHA// /} == "${New_Zsync_SHA// /}"  ]]; then printf "  (up-to-date)"; else printColor "  (update available)"
-          fi
-        else
-          # if check is not yet available
-          printf "  (refresh to check)"
-        fi
-      else  date +%s > "$VM_InstanceName/zsync.date.txt"
-      fi
-
-      ##  ZSYNC   See  functions 'get_ubuntu' & 'list_csv' in quickget
-
-        # qqX: NB: only the iso gets dubbed with 'devel' suffix, otherwise VMs they keep their names
-        # eg  'ubuntu-mate-daily-live' 'ubuntustudio-dvd' 'ubuntu-daily-canary'
-        # An actual 'ubuntu-devel' release or folder doesn't seem to ever get created or offered.
-        # Presume release=devel (@2023/07) has now been superseded, or was merely intended as an indicative name only ...
-        # Also note that quickget includes code to remove 'zs.old' files, which may or may not have been needed,
-        # but Zsync can now give these files root protection so this removal may not work ...   REVIEW  Add a qqX copying mechanism?
-
-      # Sort out the quickget / function_quick_get_wrap  call & the var/flags
-      # Expect these to need updating from time to time ...
-
-      # @ feb 2025 improve for ubuntu variants, for daily-live, and for renamed instances
-
-      if [[ $(cat "$VM_InstanceName/dl-url.txt" 2>/dev/null) ]]; then
-        Zsync_RecordedName="$(awk '/http/{print $1}' "$VM_InstanceName/dl-url.txt")"
-      elif [[ $(cat "$VM_InstanceName/QemuVirtHardwareRecord.txt" 2>/dev/null) ]]; then
-        Zsync_RecordedName="$(grep -sm1 -e '-name' "$VM_InstanceName/QemuVirtHardwareRecord.txt" | cut -d'=' -f2)"
-      else Zsync_RecordedName="$VM_InstanceName"
-      fi
-      Zsync_OS_Name="${Zsync_RecordedName,,}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-daily'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-live'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-canary'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-legacy'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-jammy'/}"
-      Zsync_OS_Name="${Zsync_OS_Name/'-dvd'/}"
-      Zsync_Release_Name="${Zsync_RecordedName,,}"
-      Zsync_Release_Name="${Zsync_Release_Name/"${Zsync_OS_Name}-"/}"
-      Zsync_Updatable_ISO=1
-      # zero main menu flag that sets only if updater run from main
-      MainMenuZsync=
-
-    else
-
-      Zsync_Updatable_ISO=
-      Zsync_OS_Name=
-      Zsync_Release_Name=
-
+    if [[ "$VM_InstanceName" == *'daily'* ]] && [[ "$VM_InstanceName" == *'buntu'* ]]; then
+      # 10/2026 Zsync removed from dailies as too problematic - Also see quick_reroute_get where there is similar
+      daily_live_load_up_checks_and_messages
     fi
 
     if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
@@ -486,7 +375,7 @@ else
       fi
 
       if ps -ef | grep nbd | grep -qi "$VM_InstanceName" ; then
-        printf "\n\n  A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
+        printf "\n\n  [qf] A mount conflict may exist ...  NBD drives may be viewed but must be disconnected before starting the VM \n\n"
       fi
 
       ## Resolve the original distro OS name so a quickget look up can be made:
@@ -556,35 +445,9 @@ else
         CodingHotSwapShow=
         printf "\n  HotSwaps should be problem free and full reboot not required. To change the bootup version, edit the general settings file. \n\n"
 
-      elif [[ $qqX_LatestNewsTitle ]] ; then
+      elif [[ $qqX_LatestNewsTitle ]]; then
 
-        local LastNewsReading="" HideNewsAlert="" MuteNewsAlert="" HighlightNewsAlert="" LatestEpochNewsDate=""
-        LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"
-        [[ -e "$HOME/.qqX/qqXnewsreader.log" ]] && LastNewsReading="$(cat "$HOME/.qqX/qqXnewsreader.log" | tr -cd '[:digit:]')"
-        # Hide old news
-        (( (EpochDateNow - LatestEpochNewsDate) < 1209600 )) && HighlightNewsAlert=1
-        (( (EpochDateNow - LatestEpochNewsDate) > 3628800 )) && HideNewsAlert=1
-        # Mute news if it has been recently read
-        if [[ $LastNewsReading ]]; then
-          (( (LastNewsReading+(3600*48)) < EpochDateNow )) && HideNewsAlert=1
-          (( (LastNewsReading+(3600*2)) < EpochDateNow )) && MuteNewsAlert=1
-        fi
-        # Where 1209600 = 14 days, to highlight newness, and beyond 3628800/42days is probably stale
-        # And where NewsAlert flag will mute news after 2hrs if it has been recently read, followed by hiding it after 2days
-        if [[ $HighlightNewsAlert ]] && [[ ! $HideNewsAlert && ! $MuteNewsAlert ]]; then
-          printColor "  [news] %s" "$qqX_LatestNewsTitle"
-          [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
-          printf "\n\n"
-        elif [[ ! $HideNewsAlert ]]; then
-          printf "\n  [news] %s" "$qqX_LatestNewsTitle"
-          [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]] && printf "   [tags] latest code %s" "$qqX_Newest_Tag"
-          printf "\n\n"
-        elif [[ $qqX_Current_ReleaseType == "beta" ]] && [[ $qqX_Newest_Tag ]]; then
-          printf "\n  [tags] latest code %s > " "$qqX_Newest_Tag"
-          if ! fv -qg "$qqX_Newest_Tag $qqX_Version" ; then printf "up-to-date\n\n"
-          else printf "%s\n\n"  "$qqX_Newest_TagText"
-          fi
-        fi
+        show_latest_news
 
       fi
       printColor  "  [enter] refresh   "
