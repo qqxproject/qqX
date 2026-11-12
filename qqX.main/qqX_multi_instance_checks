@@ -244,7 +244,9 @@ function multi_instance_checks {
       qqX_logo_printf_title  "CAUTION: more than one instance of qqX appears to be running "
       printf "\n\n"
       printf "\n\n  Current Session  %s  is:" "$qqX_SessionID"
-      printf "\n\n   %s" "$(ps --no-header -fo pid,cmd "$CurrentQQ_Terminal")"
+      if [[ $CurrentQQ_Terminal ]]; then printf "\n\n   %s" "$(ps --no-header -fo pid,cmd "$CurrentQQ_Terminal" 2>/dev/null)"
+      else printf "\n\n   %s" "$(grep -s "$qqX_SessionID" <<< "$qqX_Session_List")"
+      fi
       printf "\n\n  Other Sessions: \n"
       for Other in "${AnotherQQ_MainArr[@]}"; do
         OtherTxt="$(ps --no-header -fo pid,cmd "$Other")"
