@@ -235,7 +235,8 @@ function show_qqX_general_help {
     tput clear
     printColor "\n\n  GENERAL HELP:"
     cat "$HOME/.qqX/icons/qqX.ascii.logo.8bit.25.txt"
-    printf "\n  [s] open general settings file for notes on the  SETTINGS, user modes, screen sizes etc"
+    printf "\n  Simply Better - the same simple easy-mod quickemu scripts, made better"
+    printf "\n\n\n  [s] open general settings file for notes on the  SETTINGS, user modes, screen sizes etc"
     printf  "\n\n  [f] see FreeBird notes  [c] command line & mouse notes"
 
     if [[ $WebBrowser ]]; then
