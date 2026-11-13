@@ -119,9 +119,14 @@ if [[ $XDG_MimeType_is_QCOW ]]; then
   fi
 
   if [[ $XDG_Input_NON_qqX ]]; then
-    if [[ $DiskChkStatus == "Okay" ]]; then printColor  "\n\n QEMU qcow2 disk found BUT not configured as qqX/quickemu bootable: \n\n"
-    else printColor  "\n\n QEMU qcow2 disk found \n\n BUT not configured as qqX/quickemu bootable \n\n AND has ERRORS .... \n\n"
+    if [[ $DiskChkStatus == "Okay" ]]; then printColor  "\n\n QEMU qcow2 disk found BUT not configured as qqX/quickemu bootable:"
+    else printColor  "\n\n QEMU qcow2 disk found \n\n BUT not configured as qqX/quickemu bootable \n\n AND has ERRORS .... "
     fi
+    printf "\n\n Downloaded qcow drives are usually aimed at libvirt and Gnome Boxes, and are Quickemu incompatible:"
+    printf "\n\n For known Quickemu drives, or for testing, use file manager to duplicate an existing VM instance"
+    printf   "\n to a different group folder, or to a temporary folder, then substitute the copied drive."
+    printf "\n\n Use the qqX rename utility on the original or both, and/or copy back or move as appropriate."
+    printf   "\n The rename utility will save having to edit the .conf file .... \n\n\n"
   else
     printColor  "\n\n  qqX/quickemu bootable: \n\n"
     if [[ $DiskChkStatus != "Okay" ]]; then
