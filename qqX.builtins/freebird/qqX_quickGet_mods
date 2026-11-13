@@ -68,7 +68,7 @@
 
 ##########################################
 
-QG_ModsNumber="v7.4"  #  for quickGet 4.99.01 at oct 2026
+QG_ModsNumber="v7.5"  #  for quickGet 4.99.01 at nov/dec 2026
 
 ## 1:  LISTS and FILTERS   (alphabetical, space separated and space isolated at each end)
 
@@ -164,6 +164,7 @@ function os_info {
         fedora)           INFO="Fedora|-|https://www.fedoraproject.org/|Innovative Linux community distros for desktops, clouds, and containers. Security focused and enterprise funded by RedHat and others ...";;
         garuda)           INFO="Garuda Linux|-|https://garudalinux.org/|Arch based Linux distribution. Minimal or opinionated Full styling with option packs.";;
         kdeneon)          INFO="KDE Neon|-|https://neon.kde.org/|The older official KDE development desktop on a Debian Stable base. See 'KDE Linux' for the newer version.";;
+        kali)             INFO="Kali|-|https://www.kali.org/|Probably the most famous of the available Penetration Testing Distributions ... ";;
         kde-linux)        INFO="KDE Linux|-|https://linux.kde.org/|The new official development KDE desktop and KDE software using KDE's own rolling Arch OS repo base.";;
         kolibrios)        INFO="KolibriOS|-|https://git.kolibrios.org/|Tiny yet incredibly powerful and fast operating system.";;
         linuxlite)        INFO="Linux Lite|-|https://www.linuxliteos.com/|Lightweight XFCE distro built on Ubuntu LTS.";;
@@ -199,6 +200,7 @@ function distro_release_notes {
         fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
         freedos)          RelNotes="A 'bonus' mountable iso, with extra software, can be dowloaded from the website. Also a legacy boot version, if needed, for older hardware installations.";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
+        kali)             RelNotes="11/2026 Current ISO's are installer only - for live-boot iso's use [w] for a torrent link, then qqX right-click on the ISO to setup an instance menu";;
         kde-linux)        RelNotes="11/2026 ISO's are large with possibly large (?) KDE Discover updates. Testing versions only BUT distro is close to official release and very usable.";;
         macos)            RelNotes="06/2026 Sequoia and general macOS CPU speed is now a lot better, due to qqX code improvements. Tahoe is still having issues with installation and slow running. See qqX issue #9";;
         manjaro)          RelNotes="Plasma(KDE), XFCE and Gnome are official, others community. Sway is git 'unstable' at https://github.com/manjaro-sway";;

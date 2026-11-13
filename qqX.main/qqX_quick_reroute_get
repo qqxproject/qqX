@@ -820,6 +820,8 @@ function_quick_get_wrap ()  {
           QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay^^}"
           [[ "$QGW_OS_Arr_NameDisplay" == 'TRUENAS'* ]] && QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay/TRUE/True}"
 
+          ## INFO TEXT
+
           QGW_OS_HomePage= ; QGW_OS_InfoText= ; QGW_OS_Info= ; QGW_OS_RelNotes= ; QGW_OS_Login=
           QGW_OS_Info_ARR=()
 
@@ -850,6 +852,8 @@ function_quick_get_wrap ()  {
           else printf "\n\n  Info not available .... ?? \n\n"
           fi
 
+          ## RELEASE NOTES (if present)
+
           if [[ $QG_Modpath ]]; then
             QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
             if [[ $QGW_OS_RelNotes ]] ; then
@@ -872,6 +876,8 @@ function_quick_get_wrap ()  {
             [[ $QGW_OS_RelNotes || $QGW_OS_Mod_Notes ]] && printf "\n"
           fi
 
+          ## Release note, EXTRA MESSAGES, web-scrapes and tests, where needed
+
           if [[ "$QGW_OS_Arr_NameSelected" == "macos"* ]]; then
             printColor "\n  [W] A Mac OS installation walk-thru is available via the qqX wiki \n"
             # Check for recurrent Ryzen problems, using GPU test from 'quickreport'
@@ -891,6 +897,11 @@ function_quick_get_wrap ()  {
             fi
           fi
 
+          if [[ "$QGW_OS_Arr_NameSelected" == "kali"* ]]; then
+            KaliTorrent="$(curl -qsLf https://kali.download/base-images/current/ | grep -s 'live-amd' | tr '"' '\n' | grep -m 1 torrent)"
+            [[ $KaliTorrent ]] && printf "  Or here >>  https://kali.download/base-images/current/%s \n\n" "$KaliTorrent"
+          fi
+
           if [[ "$QGW_OS_Arr_NameSelected" == "kolibri"* ]] && [[ ! $(type -p 7z) ]]; then
             printColor "\n\n  >>  WARNING:  A command line '7zip'/'p7zip' installation is needed for this distro download ... "
             printColor "\n\n  >>  Some host distros will need 'p7zip-plugins' \n"
@@ -903,6 +914,8 @@ function_quick_get_wrap ()  {
           if [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && [[ ! $(type -p mkisofs) ]]; then
             printColor "\n\n  >>  WARNING:  For Windows downloads, an installation of 'mkisofs' via: genisoimage, cdrtools, cdrkit or xorriso is required \n"
           fi
+
+          # End of extra messages
 
           QGW_OS_HomePage_Working=
           if [[ $QGW_OS_HomePage ]]; then
