@@ -322,6 +322,7 @@ function test_iso_url {
       fi
       if [[ "$QGW_DownloadSelection" == *'daily'* ]] && [[ "$QGW_DownloadSelection" == *'buntu'* ]]; then
         # 10/2026 Also See the routine in QGet Mods on which this is based
+        # 11/2026 re-checked and works for transistion from 'stonking' to 'tenacious' ...
         DailyData= ; LatestDailyUpdate=
         printf "\n\n\n  Checking for version/date references ... "
         DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${QGW_OS_Arr_NameSelected}.json")"
@@ -852,29 +853,32 @@ function_quick_get_wrap ()  {
           else printf "\n\n  Info not available .... ?? \n\n"
           fi
 
-          ## RELEASE NOTES (if present)
-
           if [[ $QG_Modpath ]]; then
+            QGW_OS_RelNotes= ; QGW_OS_Mod_Notes=
+            ## RELEASE NOTES (if present)
             QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
             if [[ $QGW_OS_RelNotes ]] ; then
               printColor "\n\n  Release Notes:"
               printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes"
             fi
-            QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected}(" "$QG_Modpath" | grep '#' )"
-            if [[ $QGW_OS_Mod_Notes ]] ; then
-              printColor "\n\n  qqX Mods for quickGet:"
-              printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_Mod_Notes"
-            fi
-            # add general 10/2026 ubuntu refactor tweaks:
-            if [[ "$QGW_OS_Arr_NameSelected" == *'buntu'* ]] && [[ $QGW_OS_Arr_NameSelected != "ubuntu" ]]; then
+            ## MOD NOTES (if present)
+            if [[ "$QGW_OS_Arr_NameSelected" == *'buntu'* ]]; then
+              # all ubuntu and variants use same the routine
               QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "ubuntu(" "$QG_Modpath" | grep '#' )"
-              if [[ $QGW_OS_Mod_Notes ]] ; then
-                printColor "\n\n  qqX Mods for quickGet:"
-                printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_Mod_Notes"
-              fi
+            else QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected}(" "$QG_Modpath" | grep '#' )"
+            fi
+            if [[ ! $QGW_OS_Mod_Notes ]]; then
+              # re-check in case function has bracket space
+              QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected} (" "$QG_Modpath" | grep '#' )"
+            fi
+            printColor "\n\n  qqX Mods given to upstream quickGet:"
+            if [[ $QGW_OS_Mod_Notes ]]; then printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_Mod_Notes"
+            else printf "\n\n  None made or Notes not present in file '%s'\n" ".../${QE_SourceVersion,,}/qqX_quickGet_mods"
             fi
             [[ $QGW_OS_RelNotes || $QGW_OS_Mod_Notes ]] && printf "\n"
           fi
+
+
 
           ## Release note, EXTRA MESSAGES, web-scrapes and tests, where needed
 
@@ -899,7 +903,7 @@ function_quick_get_wrap ()  {
 
           if [[ "$QGW_OS_Arr_NameSelected" == "kali"* ]]; then
             KaliTorrent="$(curl -qsLf https://kali.download/base-images/current/ | grep -s 'live-amd' | tr '"' '\n' | grep -m 1 torrent)"
-            [[ $KaliTorrent ]] && printf "  Or here >>  https://kali.download/base-images/current/%s \n\n" "$KaliTorrent"
+            [[ $KaliTorrent ]] && printf "  Mod: Use link here >>  https://kali.download/base-images/current/%s \n\n" "$KaliTorrent"
           fi
 
           if [[ "$QGW_OS_Arr_NameSelected" == "kolibri"* ]] && [[ ! $(type -p 7z) ]]; then

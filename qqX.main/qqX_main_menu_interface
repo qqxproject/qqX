@@ -332,6 +332,7 @@ else
 
     if [[ "$VM_InstanceName" == *'daily'* ]] && [[ "$VM_InstanceName" == *'buntu'* ]]; then
       # 10/2026 Zsync removed from dailies as too problematic - Also see quick_reroute_get where there is similar
+      # 11/2026 re-checked and works for transistion from 'stonking' to 'tenacious' ...
       daily_live_load_up_checks_and_messages
     fi
 
