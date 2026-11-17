@@ -310,7 +310,6 @@ function get_alpine() {
 function releases_antix() {
     echo latest
 }
-[[ $(declare -F editions_antix) ]] && unset -f editions_antix
 function get_antix() {
     local HASH= ; ISO= ; ReadMe=
     local BaseUrl="https://sourceforge.net/projects/antix-linux/files"
@@ -319,6 +318,7 @@ function get_antix() {
     HASH=$(web_pipe "$ReadMe" | grep 'x64-full' | tail -n 1 | cut -d' ' -f1)
     echo "${BaseUrl}${ISO} ${HASH}"
 }
+[[ $(declare -F editions_antix) ]] && unset -f editions_antix
 
 ## 06/2025 FIX artix community editions and hash grep
 function get_artixlinux() {
@@ -998,6 +998,33 @@ function get_siduction() {
     HASH="$(awk '{print $1}' <<<"$ShaData")"
     echo "${URL}/${ISO} ${HASH}"
 }
+
+## 11/2026 UPDATE for 2026 release
+function releases_slax() {
+    echo debian2026 debian2023 slackware2023
+}
+function get_slax() {
+    local HASH="" ISO="" URL=""
+    case ${RELEASE} in
+        debian2026)
+            URL="https://ftp.fi.muni.cz/pub/linux/slax/Slax-2026"
+            ISO="$(web_pipe "${URL}/" | tr '>' '\n' | grep 'iso<' | cut -d '<' -f1 | sort | tail -n 1)"
+            HASH="$(web_pipe "${URL}/${ISO}.sha256sum.txt" | cut -d ' ' -f1 )"
+            ;;
+        debian2023)
+            URL="https://ftp.fi.muni.cz/pub/linux/slax/Slax-12.x"
+            ISO="$(web_pipe "${URL}/md5.txt" | grep '64bit-' | cut -d ' ' -f3 | tail -n 1)"
+            HASH="$(web_pipe "${URL}/md5.txt" | grep '64bit-' | cut -d ' ' -f1 | tail -n 1)"
+            ;;
+        slackware2023)
+            URL="https://ftp.fi.muni.cz/pub/linux/slax/Slax-15.x"
+            ISO="$(web_pipe "${URL}/md5.txt" | grep '64bit-' | cut -d ' ' -f3 | tail -n 1)"
+            HASH="$(web_pipe "${URL}/md5.txt" | grep '64bit-' | cut -d ' ' -f1 | tail -n 1)"
+            ;;
+    esac
+    echo "${URL}/${ISO} ${HASH}"
+}
+[[ $(declare -F editions_slax) ]] && unset -f editions_slax
 
 ## 06/2025  FIX releases (only 15.0, and hopefully higher, has downloadable iso's)
 function releases_slint() {
