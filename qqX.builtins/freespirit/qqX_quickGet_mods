@@ -73,7 +73,7 @@ QG_ModsNumber="v7.5"  #  for quickGet 4.99.01 at nov/dec 2026
 ## 1:  LISTS and FILTERS   (alphabetical, space separated and space isolated at each end)
 
 # osAddList for new qqX listed distros
-osAddList=" athenaos bluestar kde-linux"
+osAddList=" aurora athenaos bluefin bluestar kde-linux"
 #osAddList+=" another "
 
 # osRemoveList for distros that are still listed upstream but are discontinued, problematic or no longer maintained
@@ -156,7 +156,9 @@ function os_info {
         archlinux)        INFO="Arch Linux|-|https://archlinux.org/|The definitive rolling release, the base of so many other Linux distros, or as the base of your own ...";;
         archcraft)        INFO="Archcraft|-|https://archcraft.io/|Arch based collection of minimal Linux desktop solutions";;
         athenaos)         INFO="Athena OS|-|https://athenaos.org/|NixOS based pentesting distribution using BlackArch package repo";;
-        bazzite)          INFO="Bazzite|-|https://github.com/ublue-os/bazzite/|UniversalBlue/Fedora - Container native gaming and a ready-to-game SteamOS like.";;
+        aurora)           INFO="Aurora|-|https://getaurora.dev/|UniversalBlue/Fedora - Atomic KDE with Auto-Updating";;
+        bazzite)          INFO="Bazzite|-|https://bazzite.gg/|UniversalBlue/Fedora - Container native gaming and a ready-to-game SteamOS like.";;
+        bluefin)           INFO="Bluefin|-|https://projectbluefin.io/|UniversalBlue/Fedora - Atomic Gnome with Auto-Updating";;
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
         crunchbang++)     INFO="Crunchbangplusplus|-|https://www.crunchbangplusplus.org/|The classic minimal crunchbang feel, now with Debian base.";;
         edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
@@ -198,7 +200,7 @@ function distro_release_notes {
         batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
         elementary)       RelNotes="10/2026 Although \$0 is possible, a donation request paywall is also present > See website ....";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
-        fedora)           RelNotes="Only KDE and Workstation/Gnome are official: use [w] for Beta versions and for finding any unlisted Spins .... (04/2026)";;
+        fedora)           RelNotes="11/2026 Only KDE and Workstation/Gnome are official: use [w] for finding unlisted Spins and Labs editions ....";;
         freedos)          RelNotes="A 'bonus' mountable iso, with extra software, can be dowloaded from the website. Also a legacy boot version, if needed, for older hardware installations.";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         kali)             RelNotes="11/2026 Current ISO's are installer only - for live-boot iso's use [w] for a torrent link, or below, right-click the ISO to setup a VM with qqX";;
@@ -345,6 +347,17 @@ function get_athenaos() {
     echo "${URL} ${HASH}"
 }
 
+## 11/2026 add distro to qqX
+function releases_aurora() {
+    echo latest
+}
+function get_aurora() {
+    local ISO="" HASH=""
+    ISO="https://dl.getaurora.dev/aurora-stable-x86_64.iso"
+    HASH="$(web_pipe "${ISO}-CHECKSUM" | cut -d' ' -f1)"
+    echo "${ISO} $HASH"
+}
+
 ## 02/2026 ADD HASH and ADJUST url fetch
 function get_azurelinux() {
     local QEMU_ARCH="x86_64" ; local URL= ; local HASH=
@@ -354,6 +367,17 @@ function get_azurelinux() {
     HASH="https://aka.ms/azurelinux-${RELEASE}-${QEMU_ARCH}-iso-checksum"
     HASH="$(web_pipe "${HASH}" | cut -d' ' -f1)"
     echo "${URL} $HASH"
+}
+
+## 11/2026 add distro to qqX
+function releases_bluefin() {
+    echo latest
+}
+function get_bluefin() {
+    local ISO="" HASH=""
+    ISO="https://download.projectbluefin.io/bluefin-stable-x86_64.iso"
+    HASH="$(web_pipe "${ISO}-CHECKSUM" | cut -d' ' -f1)"
+    echo "${ISO} $HASH"
 }
 
 ## 06/2025 ADD new distro
@@ -481,27 +505,50 @@ function get_elementary() {
     echo "${BaseUrl}/$Base64Bit/${ISO} ${HASH}"
 }
 
-## 06/2025  FIXED Cosmic Atomic - tested as ALL working @ 09/2025 but there are possibly new unlisted editions, see https://fedoraproject.org/
-  # FIXED beta server - variants are too problematic  # TODO add Rawhide and generally refactor
+## 11/2026 - REFACTORED with improved jq greps and new added releases and versions  # TODO add Rawhide
+  # Beta versions now show correctly, and only when the actual release is not present, but tests show beta mirrors may sometimes be out-of-date
+function releases_fedora() {
+    # d/l json once only per routine set
+    local FedJsonData=""
+    FedJsonData="$(web_pipe_json "https://getfedora.org/releases.json" | tee "/tmp/qGet_FedJsonData.json" )"
+    mapfile -t RelArray <<< "$(jq -r 'map(.version) | unique | .[]' <<< "$FedJsonData" | sort -nr | tr ' ' '-' )"
+    # From ver 41, the json naming of Beta with a space is problematic. By replacing this with an hyphen
+    # we make the VM name look prettier than with an underscore but we need to add a space back later when doing searches
+    [[ "${RelArray[0]}" == *'Beta'* ]] && grep -qs "${RelArray[1]}" <<< "${RelArray[1]}" && unset "RelArray[0]"
+    # eg. for 45-Beta 45 44 43 the beta is not needed as the release is now out, so make an array and unset the beta if a match is found
+    echo "${RelArray[*]}"
+}
+function editions_fedora() {
+    if [[ -z ${RELEASE} ]]; then
+        jq -r 'map(select(.arch=="x86_64" and .variant!="Labs" and .variant!="IoT"
+        and .variant!="Container" and .variant!="Cloud" and .variant!="Everything"  and .subvariant!="Security"
+        and .subvariant!="Server_KVM" and .subvariant!="SoaS")) | map(.subvariant) | unique | .[]' < "/tmp/qGet_FedJsonData.json" | paste -s -d' '
+        # 11/2026 Budgie Budgie-Atomic COSMIC COSMIC-Atomic Cinnamon KDE KDE_Mobile Kinoite LXDE LXQt Mate MiracleWM
+        # Onyx Sericea Server Silverblue Sway Sway-Atomic Workstation Xfce i3
+    else
+        [[ "${RELEASE}" == *"-"* ]] && RelSearch="${RELEASE/-/' '}" || RelSearch="$RELEASE"
+        jq -r 'map(select(.arch=="x86_64" and .version=="'"${RelSearch}"'"
+        and .variant!="Labs" and .variant!="IoT" and .variant!="Container" and .variant!="Cloud" and .variant!="Everything"
+        and .subvariant!="Security" and .subvariant!="Server_KVM"
+        and .subvariant!="SoaS")) | map(.subvariant) | unique | .[]' < "/tmp/qGet_FedJsonData.json" | paste -s -d' '
+        # 11/2026 ver 45 > Budgie Budgie-Atomic COSMIC COSMIC-Atomic Cinnamon KDE KDE_Mobile Kinoite LXDE LXQt Mate MiracleWM
+        # Server Silverblue Sway Sway-Atomic Workstation Xfce i3
+        # ver 44 >  Budgie COSMIC COSMIC-Atomic Cinnamon KDE KDE_Mobile Kinoite LXDE LXQt Mate MiracleWM
+        # Onyx Sericea Server Silverblue Sway Workstation Xfce i3
+    fi
+}
 function get_fedora() {
-    local HASH="" ; local ISO="" ; local JSON="" ; local URL="" ; local VARIANT=""
-    case ${EDITION} in
-        KDE) if [[ "${RELEASE}" == *"_Beta" ]] || [[ $RELEASE -ge 42 ]]; then VARIANT="${EDITION}"; else VARIANT="Spins"; fi ;;
-        Server|Kinoite|Onyx|Silverblue|Sericea|Workstation|COSMIC-Atomic) VARIANT="${EDITION}";;
-        *) VARIANT="Spins";;
-    esac
-    # The naming of 41 Beta with a space is problematic so we replaced it with an underscore but we need to convert it back to a space
-    # for the URL search in the JSON if RELEASE contains an underscore, replace it with a space
-    [[ "${RELEASE}" == *"_"* ]] && RELEASE="${RELEASE/_/ }"
-    # shellcheck disable=SC2086
-    JSON=$(web_pipe_json "https://getfedora.org/releases.json" | jq '.[] | select(.variant=="'${VARIANT}'" and .subvariant=="'"${EDITION}"'" and .arch=="x86_64" and .version=="'"${RELEASE}"'" and (.link | endswith(".iso")))')
-    URL=$(echo "${JSON}" | jq -r '.link' | head -n1)
-    HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n1)
+    local HASH="" ISO="" JSON="" URL="" RelSearch=""
+    [[ "${RELEASE}" == *"-"* ]] && RelSearch="${RELEASE/-/' '}" || RelSearch="$RELEASE"
+    JSON="$(jq '.[] | select(.version=="'"${RelSearch}"'" and .arch=="x86_64" and .subvariant=="'"${EDITION}"'" and (.link | endswith(".iso")))' < "/tmp/qGet_FedJsonData.json" )"
+    # jq '.[] | select(.version=="'"${RelSearch}"'" and .arch=="x86_64" and (.variant=="'"${EDITION}"'" or .subvariant=="'"${EDITION}"'") and (.link | endswith(".iso")))' <  "/tmp/qGet_FedJsonData.json"
+    # Using an 'or' removes the need for the upstream case VARIANT routine, but @2026 it seems that only subvariant is needed
+    # and now probably doesn't need the head -n 1 below either ...
+    URL=$(echo "${JSON}" | jq -r '.link' | head -n 1)
+    HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n 1)
     echo "${URL} ${HASH}"
 }
-function releases_fedora() {
-    web_pipe_json "https://getfedora.org/releases.json" | jq -r 'map(.version) | unique | .[]' | grep -vi beta |sort -nr | paste -s -d' '
-}
+
 ## 10/2026  FIXED, UPDATED and made dynamic
 function releases_freedos() {
     echo latest
