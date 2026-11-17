@@ -156,6 +156,7 @@ function os_info {
         archlinux)        INFO="Arch Linux|-|https://archlinux.org/|The definitive rolling release, the base of so many other Linux distros, or as the base of your own ...";;
         archcraft)        INFO="Archcraft|-|https://archcraft.io/|Arch based collection of minimal Linux desktop solutions";;
         athenaos)         INFO="Athena OS|-|https://athenaos.org/|NixOS based pentesting distribution using BlackArch package repo";;
+        bazzite)          INFO="Bazzite|-|https://github.com/ublue-os/bazzite/|UniversalBlue/Fedora - Container native gaming and a ready-to-game SteamOS like.";;
         bluestar)         INFO="Blue Star|-|https://sourceforge.net/projects/bluestarlinux/|Arch based, MacOS-like take on KDE Plasma that's easy to use.";;
         crunchbang++)     INFO="Crunchbangplusplus|-|https://www.crunchbangplusplus.org/|The classic minimal crunchbang feel, now with Debian base.";;
         edubuntu)         INFO="Edubuntu|-|https://www.edubuntu.org/|Stable, secure and privacy conscious option for schools.";;
