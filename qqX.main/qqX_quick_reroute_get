@@ -1225,7 +1225,7 @@ function_quick_get_wrap ()  {
           while true; do
             grep -qs 'not a supported' "/tmp/quickget-editions-data.txt" && QGW_EditionsError=1 && break
             if grep -qs 'ERROR! You must specify an edition' "/tmp/quickget-editions-data.txt"; then
-              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- | tr -cd '[:print:]')"
+              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- | paste -s -d ' ' )"
               break
             fi
             [[ $ShowQGetLists ]] && { echo "Check loop Editions $DataCount"; (ps -ef | grep bash | grep quickget); echo; }

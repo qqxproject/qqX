@@ -200,7 +200,7 @@ function distro_release_notes {
         batocera)         RelNotes="01/2026 UPSTREAM PROBLEMS with v42 > use v40 or v41 for now. Also NB, needs around 32G of disk space ...";;
         elementary)       RelNotes="10/2026 Although \$0 is possible, a donation request paywall is also present > See website ....";;
         endless)          RelNotes="08/2025 Difficult to grep for auto-downloads, due JS rendered webpages, so may not be the latest. See website, for more.";;
-        fedora)           RelNotes="11/2026 Only KDE and Workstation/Gnome are official: use [w] for finding unlisted Spins and Labs editions ....";;
+        fedora)           RelNotes="11/2026 Only KDE and Workstation/Gnome are official. Rawhide is the testing daily. Use [w] for finding unlisted Spins and Labs editions ....";;
         freedos)          RelNotes="A 'bonus' mountable iso, with extra software, can be dowloaded from the website. Also a legacy boot version, if needed, for older hardware installations.";;
         linuxlite)        RelNotes="01/2026 Servers can be slow ...";;
         kali)             RelNotes="11/2026 Current ISO's are installer only - for live-boot iso's use [w] for a torrent link, or below, right-click the ISO to setup a VM with qqX";;
@@ -505,7 +505,7 @@ function get_elementary() {
     echo "${BaseUrl}/$Base64Bit/${ISO} ${HASH}"
 }
 
-## 11/2026 - REFACTORED with improved jq greps and new added releases and versions  # TODO add Rawhide
+## 11/2026 - REFACTORED with improved jq greps and new added releases and versions, plus add Rawhide (testing)
   # Beta versions now show correctly, and only when the actual release is not present, but tests show beta mirrors may sometimes be out-of-date
 function releases_fedora() {
     # d/l json once only per routine set
@@ -516,17 +516,23 @@ function releases_fedora() {
     # we make the VM name look prettier than with an underscore but we need to add a space back later when doing searches
     [[ "${RelArray[0]}" == *'Beta'* ]] && grep -qs "${RelArray[1]}" <<< "${RelArray[1]}" && unset "RelArray[0]"
     # eg. for 45-Beta 45 44 43 the beta is not needed as the release is now out, so make an array and unset the beta if a match is found
-    echo "${RelArray[*]}"
+    echo "rawhide ${RelArray[*]}"
 }
 function editions_fedora() {
-    if [[ -z ${RELEASE} ]]; then
+    if [[ ! $RELEASE ]]; then
         jq -r 'map(select(.arch=="x86_64" and .variant!="Labs" and .variant!="IoT"
         and .variant!="Container" and .variant!="Cloud" and .variant!="Everything"  and .subvariant!="Security"
         and .subvariant!="Server_KVM" and .subvariant!="SoaS")) | map(.subvariant) | unique | .[]' < "/tmp/qGet_FedJsonData.json" | paste -s -d' '
         # 11/2026 Budgie Budgie-Atomic COSMIC COSMIC-Atomic Cinnamon KDE KDE_Mobile Kinoite LXDE LXQt Mate MiracleWM
         # Onyx Sericea Server Silverblue Sway Sway-Atomic Workstation Xfce i3
+    elif [[ $RELEASE == "rawhide" ]]; then
+        local Data=""
+        Data="$(web_pipe https://openqa.fedoraproject.org/nightlies.html | tee "/tmp/qGet_RawhideData.txt")"
+        tr '"' '\n' <<< "$Data" | grep -vi labs | grep -vi server | grep -vi every | grep -vi soas \
+        | grep -vi iot | grep -vi cloud | grep -vi container | tr '/' '\n' | grep -s 'x86_64.iso' \
+        | cut -d 'R' -f1 | cut -d '-' -f 2- | sort -uf | awk '{print substr($1, 1, length($1)-1)}' | paste -s -d' '
     else
-        [[ "${RELEASE}" == *"-"* ]] && RelSearch="${RELEASE/-/' '}" || RelSearch="$RELEASE"
+        [[ "$RELEASE" == *"-"* ]] && RelSearch="${RELEASE/-/' '}" || RelSearch="$RELEASE"
         jq -r 'map(select(.arch=="x86_64" and .version=="'"${RelSearch}"'"
         and .variant!="Labs" and .variant!="IoT" and .variant!="Container" and .variant!="Cloud" and .variant!="Everything"
         and .subvariant!="Security" and .subvariant!="Server_KVM"
@@ -539,14 +545,19 @@ function editions_fedora() {
 }
 function get_fedora() {
     local HASH="" ISO="" JSON="" URL="" RelSearch=""
-    [[ "${RELEASE}" == *"-"* ]] && RelSearch="${RELEASE/-/' '}" || RelSearch="$RELEASE"
-    JSON="$(jq '.[] | select(.version=="'"${RelSearch}"'" and .arch=="x86_64" and .subvariant=="'"${EDITION}"'" and (.link | endswith(".iso")))' < "/tmp/qGet_FedJsonData.json" )"
-    # jq '.[] | select(.version=="'"${RelSearch}"'" and .arch=="x86_64" and (.variant=="'"${EDITION}"'" or .subvariant=="'"${EDITION}"'") and (.link | endswith(".iso")))' <  "/tmp/qGet_FedJsonData.json"
-    # Using an 'or' removes the need for the upstream case VARIANT routine, but @2026 it seems that only subvariant is needed
-    # and now probably doesn't need the head -n 1 below either ...
-    URL=$(echo "${JSON}" | jq -r '.link' | head -n 1)
-    HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n 1)
-    echo "${URL} ${HASH}"
+    if [[ $RELEASE == "rawhide" ]]; then
+        tr '"' '\n' < "/tmp/qGet_RawhideData.txt" | grep -v Labs | grep -vi server | grep -vi every | grep -vi soas | grep 'x86_64.iso' \
+        | grep -m 1 -E "$EDITION"
+    else
+        [[ "$RELEASE" == *"-"* ]] && RelSearch="${RELEASE/-/' '}" || RelSearch="$RELEASE"
+        JSON="$(jq '.[] | select(.version=="'"${RelSearch}"'" and .arch=="x86_64" and .subvariant=="'"${EDITION}"'" and (.link | endswith(".iso")))' < "/tmp/qGet_FedJsonData.json" )"
+        # jq '.[] | select(.version=="'"${RelSearch}"'" and .arch=="x86_64" and (.variant=="'"${EDITION}"'" or .subvariant=="'"${EDITION}"'") and (.link | endswith(".iso")))' <  "/tmp/qGet_FedJsonData.json"
+        # Using an 'or' removes the need for the upstream case VARIANT routine, but @2026 it seems that only subvariant is needed
+        # and now probably doesn't need the head -n 1 below either ...
+        URL=$(echo "${JSON}" | jq -r '.link' | head -n 1)
+        HASH=$(echo "${JSON}" | jq -r '.sha256' | head -n 1)
+        echo "${URL} ${HASH}"
+    fi
 }
 
 ## 10/2026  FIXED, UPDATED and made dynamic
