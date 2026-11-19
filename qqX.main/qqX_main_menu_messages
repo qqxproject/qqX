@@ -118,7 +118,7 @@ main_menu_messages () {
   fi
 }
 
-daily_live_load_up_checks_and_messages () {
+buntu_daily_live_load_up_chk_and_msgs () {
 
   if [[ ! $HideLoadUpNotices ]]; then
     if [[ ! $LatestDailyUpdate ]]; then
@@ -126,6 +126,7 @@ daily_live_load_up_checks_and_messages () {
       DailyData= ; LatestDailyUpdate=
       printf "\n\n\n  Checking for updates ... "
       DailyName="${VM_InstanceName/'-daily'/@/}" ; DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
+      [[ "$DailyName" == *'-20'* ]] && DailyName="${DailyName/'-20'/@/}" &&  DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
       DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${DailyName}.json")"
       sleep 2
       if [[ ! $DailyData ]]; then

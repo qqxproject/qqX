@@ -1249,28 +1249,31 @@ function releases_ubuntu() {
   # But it doesn't, eg. Mate 26.04 .... So grep each OS individually, and FOR FAIRLY RECENT ONLY, not some huge archiving ....
   # AND for Ubuntu itself; 'cdimage.ubuntu.com' has become neglected with many folders missing the important iso's
   # which now seem to be located at 'releases.ubuntu.com' eg https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ has NO AMD iso's
+  # Also REMOVE zsync as getting too problematic ... zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}" # make_vm_config "${OS}"
   # Plus ubuntu server can now be integrated
 function get_ubuntu() {
     local ISO="" HASH="" URL="" RelData="" RelMax=""  DailyData="" LatestDailyVer="" LatestDailyName=""
     VM_PATH="${OS}-${RELEASE}"
     if [[ $RELEASE == "daily-live" ]]; then
         # use json to get latest folder and matching codename (where daily files are stored)
-        # > cannot be done with 'sort' as when head/tail picking order would be difficult at Z to A points
+        # > cannot be done with 'sort' as when head/tail picking, the order would be difficult at Z to A points
         DailyData="$(web_pipe "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${OS}.json")"
         LatestDailyVer="$(jq -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live").version' <<< "$DailyData" | fv -M -Q)"
         LatestDailyName="$(jq --arg Latest "$LatestDailyVer" -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live") | select(.release_title==$Latest).release' <<< "$DailyData")"
         # eg http://cdimage.ubuntu.com/ubuntu-mate/stonking/daily-live/current/SHA256SUMS
         URL="http://cdimage.ubuntu.com/$OS/$LatestDailyName/daily-live/current"
-        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep server | grep 'amd64.iso' | grep -v beta)
-        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep desktop | grep 'amd64.iso' | grep -v beta)
+        # using separate greps for 'amd' and 'iso' as can have versioning eg. 'amd64v3.iso'
+        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep -s server | grep amd64 | grep iso | grep -v beta)
+        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep -s desktop | grep amd64 | grep iso  | grep -v beta)
         fi
         ISO=$(cut -d'*' -f2 <<<"$RelData")
         HASH=$(cut -d' ' -f1 <<<"$RelData")
-        VM_PATH="${VM_PATH}-$(date +%Y-%b-%d)"
+        # add date to name
+        DailyDate="$(date +%Y-%b-%d)"
+        VM_PATH="${VM_PATH/'-daily'/-"$DailyDate"-daily}"
         web_get "${URL}/${ISO}" "${VM_PATH}"
         check_hash "${ISO}" "${HASH}"
         make_vm_config "${ISO}"
-        # 10/2026  REMOVE zsync as getting too problematic ... zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}" # make_vm_config "${OS}"
     else
         # find the latest in the series eg. fv -F '24.04' gives: 24.04  24.04.1  24.04.2  24.04.3  24.04.4  24.04.5
         # Use 'releases' not 'cdimage' for Ubuntu itself:

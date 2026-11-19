@@ -120,11 +120,9 @@ VM_loader_selector_and_menu () {
           [[ $CustomStyleList ]] && printf "[%s] "  "$CustomStyleList"
           printf " change menu style %s" "$VM_SelectorStyle"
 
-          if [[ $ZsyncDistrosFound || $LiveDistrosFound ]]; then
+          if [[ $LiveDistrosFound ]]; then
             printf "   ("
             [[ $LiveDistrosFound ]] && printf "L=LiveISO"
-            [[ $LiveDistrosFound && $ZsyncDistrosFound ]] && printf ") & ("
-            [[ $ZsyncDistrosFound ]] && printf "Z=Zsync"
             printf ")"
           fi
 

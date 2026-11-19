@@ -321,7 +321,7 @@ function test_iso_url {
         iso_get_message ; show_distro_homepage_check_results
       fi
       if [[ "$QGW_DownloadSelection" == *'daily'* ]] && [[ "$QGW_DownloadSelection" == *'buntu'* ]]; then
-        # 10/2026 Also See the routine in QGet Mods on which this is based
+        # 10/2026 Also See the routines in QGet Mods and main menu messages
         # 11/2026 re-checked and works for transistion from 'stonking' to 'tenacious' ...
         DailyData= ; LatestDailyUpdate=
         printf "\n\n\n  Checking for version/date references ... "
@@ -334,9 +334,9 @@ function test_iso_url {
         | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
         | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData"  2>/dev/null)"
         if [[ $LatestDailyUpdate ]]; then
-          printf "\n\n  Latest main Ubuntu 'daily' update was "
+          printf "\n\n  Latest 'daily' update was "
           printf "\n  %s \n" "$LatestDailyUpdate"
-        else printf "\n\n  Latest main Ubuntu 'daily' update data not available ...\n"
+        else printf "\n\n  Latest 'daily' update data not available ...\n"
         fi
       fi
     fi
@@ -650,407 +650,400 @@ function_quick_get_wrap ()  {
     show_QWG_header
   done
 
-  if [[ $xxMainMenuZsync ]] && [[ $xxZsync_Updatable_ISO && $Zsync_OS_Name && $Zsync_Release_Name ]] ; then
 
-    QGW_OS_Arr_NameSelected="$Zsync_OS_Name"
-    QGW_Release_Arr_NameSelected="$Zsync_Release_Name"
-    declare -ga QGW_Releases_Array=()
-    QGW_Releases_Array[0]="$QGW_Release_Arr_NameSelected"
-    declare -ga QGW_Editions_Array=()
-
-  else
-
-    VM_Conf_File=
-    VM_Conf_Dir=
-    VM_InstanceName=
-    MainDrive=
-    IsoImg=
-    [[ ! $VM_ListingFilter ]] && VM_ListingFilter="qqlist-desktop"
-
-    show_hot_swap_line
-    load_QGW_OS_Array ; print_quickget_and_folder_choices  "QGW_OS_Array"
+  ###############################################################################
 
 
-    while true ; do
+  VM_Conf_File=
+  VM_Conf_Dir=
+  VM_InstanceName=
+  MainDrive=
+  IsoImg=
+  [[ ! $VM_ListingFilter ]] && VM_ListingFilter="qqlist-desktop"
 
-      if [[ $QG_Modpath ]]; then
-        printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] back to main menus   [Q] quit"
-      else
-        printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH  [B] back to main menus   [Q] quit"
-      fi
-      printf "\n\n"
-
-      [[ $QGW_List_NumSelected_Next ]] && QGW_List_NumSelected="$QGW_List_NumSelected_Next"
-      QGW_VerifiedList_NumSelected=
-
-      [[ ! $QGW_List_NumSelected ]] && read -rp "  >  "  QGW_List_NumSelected
-
-      if [[ $QGW_List_NumSelected == "H" ]]; then  QGW_List_NumSelected= ; show_qqX_general_help ; GT_Help=1
-
-      elif [[ ${QGW_List_NumSelected^^} == "HF" ]]; then  QGW_List_NumSelected= ; show_qqX_general_help "f" ; GT_Help=1
-
-      elif [[ ${QGW_List_NumSelected,,} == "all" ]] && [[ $QG_Modpath ]]; then
-        refresh_load_listing_filters
-        VM_ListingFilter="all" ; FilterInfo=
-        load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
-      elif [[ ${QGW_List_NumSelected,,} == "fl" ]] && [[ $QG_Modpath ]]; then
-        refresh_load_listing_filters
-        while true ; do
-          qqLselect= ; local fNum=0 ; FilterInfo=
-          while [[ ${VM_ListingArray[fNum]} ]]; do
-            [[ ${VM_ListingArray[fNum]} == "${VM_ListingFilter,,}" ]] && break
-            ((fNum+=1))
-          done
-          printf "\n  FilterDefault (%s) is editable in the general settings file ... " "$VM_ListingFilterDefault_Display"
-          printf "\n\n  Some listed distros may have releases that offer other options. Some lists may overlap with others.\n\n"
-          print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
-          printf "\n\n  CURRENT FILTER  "
-          printColor "=  %s  =" "${VM_ListingFilter^^}"
-          printf "  %s" "${VM_Listing_Info[$VM_ListingFilter,info]}"
-          printColor "\n\n  [number] to reselect"
-          printf "   [enter] to return or continue"
-          printf "\n\n"
-          read -rp "  >  " qqLselect
-          VM_ListingArrayCount="${#VM_ListingArray[@]}"
-          if [[ $(tr -cd '[:digit:]' <<< "$qqLselect") ]] && (( 0 < qqLselect && qqLselect <= VM_ListingArrayCount )); then
-            VM_ListingFilter="${VM_ListingArray[qqLselect-1]}"
-          fi
-          if [[ ! $qqLselect ]]; then
-            [[ $VM_ListingFilter == "all" || $VM_ListingFilter == "desktop" ]] && break
-            FilterInfo="${VM_Listing_Info[$VM_ListingFilter,info]}" ; break
-          fi
-        done
-        load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
-
-      elif [[ $QGW_List_NumSelected == "B" ]] || [[ ${QGW_List_NumSelected,,} == "vm" ]]; then printf "\n\n" ; GT_Exit=1 ; break
-
-      elif [[ $QGW_List_NumSelected == "Q" ]]; then  sleep 0.3 ; exit directly
-
-      elif [[ ${QGW_List_NumSelected^^} == "FS" ]] ; then
-        CodingHotSwap="FreeSpirit" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
-      elif [[ ${QGW_List_NumSelected^^} == "FB" ]] ; then
-        CodingHotSwap="FreeBird" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
-      elif [[ ${QGW_List_NumSelected^^} == "HB" ]] ; then
-        CodingHotSwap="HomeBird" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
-      elif [[ "${QGW_List_NumSelected,,}" == cust* ]] ; then
-        CodingHotSwap="Custom" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
-      elif [[ "${QGW_List_NumSelected,,}" == dev* ]] ; then
-        CodingHotSwap="Dev" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
-
-      elif [[ $QGW_List_NumSelected == "R"  ]]; then  test_internet_is_up ; function_quick_get_wrap ; break
-
-      elif [[ $QGW_List_NumSelected == "T"  ]] && [[ $QG_Modpath ]] ; then
-        run_distro_tests_UI "test-all" ; function_quick_get_wrap ; break
-
-      elif [[ "$QGW_List_NumSelected" == [a-z] ]]; then
-
-        print_quickget_and_folder_choices  "QGW_OS_Array" "$QGW_List_NumSelected"
-
-        if [[ $QGW_List_NumSelected == "u" ]]; then
-          printf "  and ... \n\n"
-          print_quickget_and_folder_choices  "QGW_OS_Array" "UbuntuOthers"
-        fi
-
-        if [[ $QGW_List_NumSelected == "m" ]]; then
-          printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
-          i=1 ; M=
-          for M in "${QGW_OS_Array[@]}" ; do
-            if [[ "$M" == *"linuxmint"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$M" ; fi
-            if [[ "$M" == *"lmde"* ]]; then printf "    %s)  linuxmint debian" "$i" ; fi
-            ((i++))
-          done
-        fi
-        i= ; M=
-
-        if [[ $QGW_List_NumSelected == "s" ]]; then
-          printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
-          i=1 ; S=
-          for S in "${QGW_OS_Array[@]}" ; do
-            if [[ "$S" == *"opensuse"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$S" ; fi
-            ((i++))
-          done
-        fi
-        i= ; S=
-
-      else
-
-        # clean up and zero any unrecognised values eg. XYZ ... should only be integers left at this point
-        QGW_List_NumSelected="$(tr -cd "[:digit:]" <<< "$QGW_List_NumSelected")"
-
-        if [[ ! $QGW_List_NumSelected ]] || [[ $QGW_List_NumSelected -gt "${#QGW_OS_Array[@]}" ]]; then
-
-          printColor "\n\n  Request Not Recognised \n\n"
-          sleep 0.5
-          refresh_QWG_selector
-
-        else
-
-          QGW_VerifiedList_NumSelected="$QGW_List_NumSelected"
-          QGW_OS_Arr_NumSelected=$((QGW_List_NumSelected-1))
-          QGW_OS_Arr_NameSelected="${QGW_OS_Array[QGW_OS_Arr_NumSelected]}"
-
-          if [[ $QGW_OS_Arr_NameSelected == "freedos" ]]; then
-            QGW_OS_Arr_NameDisplay="free dos"
-          elif [[ ${QGW_OS_Arr_NameSelected: -3} == "-os" ]]; then
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%???}"
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} os"
-          elif [[ ${QGW_OS_Arr_NameSelected: -2} == "os" ]]; then
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%??}"
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} os"
-          elif [[ ${QGW_OS_Arr_NameSelected:0:4} == "open" ]]; then
-            # all openxxx, at 07/2024, don't have any spaces
-            QGW_OS_Arr_NameDisplay="$QGW_OS_Arr_NameSelected"
-          elif [[ ${QGW_OS_Arr_NameSelected: -3} == "bsd" ]]; then
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%???}"
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} bsd"
-          elif [[ ${QGW_OS_Arr_NameSelected: -5} == "linux" ]]; then
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%?????}"
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} linux"
-          elif [[ ${QGW_OS_Arr_NameSelected:0:5} == "linux" ]]; then
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected#?????}"
-            QGW_OS_Arr_NameDisplay="linux ${QGW_OS_Arr_NameDisplay}"
-          elif [[ ${QGW_OS_Arr_NameSelected:0:3} == "kde" ]]; then
-            QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected#???}"
-            QGW_OS_Arr_NameDisplay="kde ${QGW_OS_Arr_NameDisplay}"
-          else
-            QGW_OS_Arr_NameDisplay="$QGW_OS_Arr_NameSelected"
-          fi
-
-          iso_get_message ; printf "\n\n"
-
-          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay^^}"
-          [[ "$QGW_OS_Arr_NameDisplay" == 'TRUENAS'* ]] && QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay/TRUE/True}"
-
-          ## INFO TEXT
-
-          QGW_OS_HomePage= ; QGW_OS_InfoText= ; QGW_OS_Info= ; QGW_OS_RelNotes= ; QGW_OS_Login=
-          QGW_OS_Info_ARR=()
-
-          printColor "\n  INFO:"
-          printf  "  %s"  "$QGW_OS_Arr_NameDisplay"
-
-          if [[ $QG_Modpath ]]; then
-            QGW_OS_Info="$(quickget --info-line "$QGW_OS_Arr_NameSelected")"
-            QGW_OS_Info="$(tr '|' '\n' <<< "$QGW_OS_Info")"
-            mapfile -t QGW_OS_Info_ARR <<< "$QGW_OS_Info"
-            QGW_OS_Login= ; QGW_OS_HomePage= ; QGW_OS_InfoText=
-            [[ "${#QGW_OS_Info_ARR[@]}" != "4" ]] && printColor "\n\n  INTERNAL ERROR: QuickGet info-listing has incorrect element count ... "
-            QGW_OS_Login="${QGW_OS_Info_ARR[1]}"
-            QGW_OS_HomePage="${QGW_OS_Info_ARR[2]}"
-            QGW_OS_InfoText="${QGW_OS_Info_ARR[3]}"
-          fi
-
-          if [[ ! $QGW_OS_Info ]] && [[ "$QG_SourcePath" ]] ; then  #  REVIEW
-            printf "\n\n  Using Upstream Data .... \n\n"
-            "$QG_SourcePath" --show "$QGW_OS_Arr_NameSelected"
-          fi
-
-          if [[ $QGW_OS_InfoText ]]; then
-            if [[ ! $QGW_OS_Login ]] || [[ $QGW_OS_Login == "-" ]]; then printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_InfoText"
-            elif [[ $QGW_OS_Login ]]; then
-              printf "\n\n  Distro Login:  %s"  "$QGW_OS_Login" ; printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_InfoText"
-            fi
-          else printf "\n\n  Info not available .... ?? \n\n"
-          fi
-
-          if [[ $QG_Modpath ]]; then
-            QGW_OS_RelNotes= ; QGW_OS_Mod_Notes=
-            ## RELEASE NOTES (if present)
-            QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
-            if [[ $QGW_OS_RelNotes ]] ; then
-              printColor "\n\n  Release Notes:"
-              printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes"
-            fi
-            ## MOD NOTES (if present)
-            if [[ "$QGW_OS_Arr_NameSelected" == *'buntu'* ]]; then
-              # all ubuntu and variants use same the routine
-              QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "ubuntu(" "$QG_Modpath" | grep '#' )"
-            else QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected}(" "$QG_Modpath" | grep '#' )"
-            fi
-            if [[ ! $QGW_OS_Mod_Notes ]]; then
-              # re-check in case function has bracket space
-              QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected} (" "$QG_Modpath" | grep '#' )"
-            fi
-            printColor "\n\n  qqX Mods given to upstream quickGet:"
-            if [[ $QGW_OS_Mod_Notes ]]; then printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_Mod_Notes"
-            else printf "\n\n  None made or Notes not present in file '%s'\n" ".../${QE_SourceVersion,,}/qqX_quickGet_mods"
-            fi
-            [[ $QGW_OS_RelNotes || $QGW_OS_Mod_Notes ]] && printf "\n"
-          fi
+  show_hot_swap_line
+  load_QGW_OS_Array ; print_quickget_and_folder_choices  "QGW_OS_Array"
 
 
+  while true ; do
 
-          ## Release note, EXTRA MESSAGES, web-scrapes and tests, where needed
-
-          if [[ "$QGW_OS_Arr_NameSelected" == "macos"* ]]; then
-            printColor "\n  [W] A Mac OS installation walk-thru is available via the qqX wiki \n"
-            # Check for recurrent Ryzen problems, using GPU test from 'quickreport'
-            # Taken from report output in quickEmu Mac issue #1742
-            if [[ "$(lspci | grep -i vga | cut -d':' -f3)" == *'Ryzen 4000/5000 Mobile Series'* ]]; then
-              printColor "\n  WARNING  Ryzen 4000/5000 Mobile Series have been reported as unable to run MacOS (may affect this computer)"
-              printf "\n\n  qqX Conf Mods may help?  See upstream quickemu issue archives for more details ... \n\n"
-            fi
-            if ! check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
-              if ! check_cpu_flag sse4_1 ; then
-                printColor "\n\n\n  INSTALLATION NOT POSSIBLE: MacOS requires a CPU with at least SSE 4.1 support \n\n"
-              elif check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
-                printColor "\n\n  Try MacOS MONTEREY or BIG SUR, newer versions require at least AVX2\n\n"
-              elif check_cpu_flag sse4_1 ; then
-                printColor "\n\n  If downloadable, MacOS MOJAVE may still be possible ?\n\n"
-              fi
-            fi
-          fi
-
-          if [[ "$QGW_OS_Arr_NameSelected" == "kali"* ]]; then
-            KaliTorrent="$(curl -qsLf https://kali.download/base-images/current/ | grep -s 'live-amd' | tr '"' '\n' | grep -m 1 torrent)"
-            [[ $KaliTorrent ]] && printf "  Mod: Use link here >>  https://kali.download/base-images/current/%s \n\n" "$KaliTorrent"
-          fi
-
-          if [[ "$QGW_OS_Arr_NameSelected" == "kolibri"* ]] && [[ ! $(type -p 7z) ]]; then
-            printColor "\n\n  >>  WARNING:  A command line '7zip'/'p7zip' installation is needed for this distro download ... "
-            printColor "\n\n  >>  Some host distros will need 'p7zip-plugins' \n"
-          fi
-
-          if [[ "$QGW_OS_Arr_NameSelected" == "dragonflybsd"* ]] && [[ ! $(type -p bzip2) ]]; then
-            printColor "\n\n  >>  WARNING:  A command line 'bzip2' installation is needed for this distro download ... \n"
-          fi
-
-          if [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && [[ ! $(type -p mkisofs) ]]; then
-            printColor "\n\n  >>  WARNING:  For Windows downloads, an installation of 'mkisofs' via: genisoimage, cdrtools, cdrkit or xorriso is required \n"
-          fi
-
-          # End of extra messages
-
-          QGW_OS_HomePage_Working=
-          if [[ $QGW_OS_HomePage ]]; then
-            printColor "\n  ---------------------------------------------------------------------------- "
-            printf "\n\n  Checking Distro HOME PAGE (max 6 tries)  \n\n"
-            printf "" > "/tmp/qmod-dl-homepage-report.txt"
-            {
-              printf "  HomePage = %s"  "$QGW_OS_HomePage"
-              # note this 'HomePage =' line gets grepped (awk) for 'http' at a later point
-              if [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]]; then printf " (checks disabled to avoid anti-bot problems)"
-              elif curl --disable -sLf --retry 3 --retry-max-time 2 --retry-delay 0 --max-time 6 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working)"; QGW_OS_HomePage_Working=1
-              elif curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 1 --max-time 12 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working, slowly ...)"; QGW_OS_HomePage_Working=1
-              else
-                printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
-                if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
-                  printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the homepage   [t] test distro availability"
-                fi
-              fi
-            } >> "/tmp/qmod-dl-homepage-report.txt"
-          fi
-          show_distro_homepage_check_results
-          break
-
-        fi
-
-      fi
-
-      [[ $Loop_Diagnostics ]] && printf "\n\n End of Quickget first loop, stage 1:" &&  main_loop_diagnostics
-
-      if [[ $CodingHotSwapShow || $GT_Help ]]; then
-        show_QWG_header ; show_hot_swap_line
-        # different versions have different distro selections
-        load_QGW_OS_Array ; print_quickget_and_folder_choices  "QGW_OS_Array"
-        GT_Help=
-      fi
-
-      # End point of main OS selection loop
-      QGW_List_NumSelected=
-
-      [[ $Loop_Diagnostics ]] && printf "\n\n End of Quickget first loop, stage 2:" &&  main_loop_diagnostics
-
-    done
-
-
-    if [[ $GT_Exit ]]; then
-      Zsync_OS_Name=
-      Zsync_Release_Name=
-      QGW_List_NumSelected_Next=
-      clear_main_gt_start_vars
-      return
-    fi
-
-    printColor "\n\n  ---------------------------------------------------------------------------- "
-    printf "\n\n  Checking releases > may need to check on-line and may take time\n\n"
-
-    declare -ga QGW_Releases_Array=() ; declare -ga QGW_Editions_Array=() ; declare -ga QGW_StockEditions_Array=()
-    QGW_ReleasesEditions_ListRaw= ; QGW_Releases_ListRaw= ; QGW_Releases_List=
-    QGW_Editions_StockList= ; QGW_Editions_StockListRaw= ; QGW_Editions_StockListString= ; QGW_Editions_StockListTotal="0"
-
-    # Running checks in the background (&) means that we can stop the process if it hangs
-    # as some Quickget data is obtained dynamically using web checks ...
-    printf "" > "/tmp/quickget-releases-data.txt"
-    quickget "$QGW_OS_Arr_NameSelected" > "/tmp/quickget-releases-data.txt" &
-    sleep 0.5
-    [[ $ShowQGetLists ]] && { echo "Check 1"; (pgrep -af bash | grep quickget &); echo; }
-    DataPID="$(pgrep -af bash | grep quickget | head -n 1 | cut -d' ' -f1 2>/dev/null)"
-    [[ $ShowQGetLists ]] && { echo; echo "DataPID: '${DataPID}'"; echo; }
-    DataCount="0"
-    QGW_ChkLoop=
-    while true; do
-      if grep -qs 'ERROR' "/tmp/quickget-releases-data.txt"; then
-        QGW_ReleasesEditions_ListRaw="$(grep -A 10 Releases "/tmp/quickget-releases-data.txt" | grep -B 10 ERROR | grep -v ERROR )"
-        break
-      fi
-      [[ $ShowQGetLists ]] && { echo "Check loop Releases $DataCount"; (ps -ef | grep bash | grep quickget); echo; }
-      read -rt 0.5  QGW_ChkLoop
-      ((DataCount+=1))
-      [[ "$DataCount" == '20' ]] && printf "  Continuing to check ...\n\n"
-      [[ "$DataCount" == '40' ]] && printf "  Servers are busy or anti-bot slow-downs may be in place ...\n\n"
-      [[ "$DataCount" == '80' ]] && printf "  Continuing to try. Some distros may sometimes take a bit longer ... \n\n  [c] cancel now and retry later? \n\n  >  "
-      [[ "$DataCount" == '150' && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
-      # use posix '-n' test here or switching focus back from a dev side-terminal will trigger the read function
-      [[ -n $QGW_ChkLoop && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
-      [[ -n $QGW_ChkLoop ]] && break
-    done
-
-    [[ $ShowQGetLists ]] && { echo "Raw RE "; echo "$QGW_ReleasesEditions_ListRaw"; echo; }
-
-    QGW_EditionsFunction=
-    if [[ "$QGW_ReleasesEditions_ListRaw" == *'Languages'* ]]; then
-      # is Windows (has its own internal array)
-      QGW_Releases_ListRaw="$(grep -B 10  Languages  <<< "$QGW_ReleasesEditions_ListRaw" | grep -v Languages)"
-    elif [[ "$QGW_ReleasesEditions_ListRaw" == *'Editions'* ]]; then
-      QGW_Releases_ListRaw="$(grep -B 10  Editions  <<< "$QGW_ReleasesEditions_ListRaw" | grep -v Editions)"
-      # also get editions stock list for later > some releases have different editions available
-      QGW_Editions_StockListRaw="$(grep -A 10  Editions  <<< "$QGW_ReleasesEditions_ListRaw")"
-      [[ $QGW_Editions_StockListRaw ]] &&  QGW_EditionsFunction=1
-      # quickget will auto-start if no editions are available, so flag-up and only check if function is present
-      QGW_Editions_StockList="$(cut -f2- <<< "$QGW_Editions_StockListRaw"| tr ' ' '\n')"
-      # try to make sure the list is not just empty space
-      QGW_Editions_StockList="$(grep -E ^'[[:graph:]]' <<< "$QGW_Editions_StockList" )"
-      mapfile -t QGW_StockEditions_Array <<< "$QGW_Editions_StockList"
-      QGW_Editions_StockListString="${QGW_StockEditions_Array[*]}"
-      QGW_Editions_StockListTotal="${#QGW_StockEditions_Array[@]}"
-      [[ $ShowQGetLists ]] && { echo "List E Full "; echo "$QGW_Editions_StockListString"; echo; }
-      [[ $ShowQGetLists ]] && { echo; declare -p QGW_StockEditions_Array; echo; }
+    if [[ $QG_Modpath ]]; then
+      printColor "\n\n  [a-z] to zoom or switch zoom  [fl] to filter  [number] to select    [H] help  [R] refresh  [T] test all  [B] back to main menus   [Q] quit"
     else
-      QGW_Releases_ListRaw="$QGW_ReleasesEditions_ListRaw"
+      printColor "\n\n  [a-z] to zoom or switch zoom, or OS [item number] for download or browsing OS website  [H] help  [R] REFRESH  [B] back to main menus   [Q] quit"
+    fi
+    printf "\n\n"
+
+    [[ $QGW_List_NumSelected_Next ]] && QGW_List_NumSelected="$QGW_List_NumSelected_Next"
+    QGW_VerifiedList_NumSelected=
+
+    [[ ! $QGW_List_NumSelected ]] && read -rp "  >  "  QGW_List_NumSelected
+
+    if [[ $QGW_List_NumSelected == "H" ]]; then  QGW_List_NumSelected= ; show_qqX_general_help ; GT_Help=1
+
+    elif [[ ${QGW_List_NumSelected^^} == "HF" ]]; then  QGW_List_NumSelected= ; show_qqX_general_help "f" ; GT_Help=1
+
+    elif [[ ${QGW_List_NumSelected,,} == "all" ]] && [[ $QG_Modpath ]]; then
+      refresh_load_listing_filters
+      VM_ListingFilter="all" ; FilterInfo=
+      load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
+    elif [[ ${QGW_List_NumSelected,,} == "fl" ]] && [[ $QG_Modpath ]]; then
+      refresh_load_listing_filters
+      while true ; do
+        qqLselect= ; local fNum=0 ; FilterInfo=
+        while [[ ${VM_ListingArray[fNum]} ]]; do
+          [[ ${VM_ListingArray[fNum]} == "${VM_ListingFilter,,}" ]] && break
+          ((fNum+=1))
+        done
+        printf "\n  FilterDefault (%s) is editable in the general settings file ... " "$VM_ListingFilterDefault_Display"
+        printf "\n\n  Some listed distros may have releases that offer other options. Some lists may overlap with others.\n\n"
+        print_quickget_and_folder_choices  "VM_ListingArray" HL "$fNum"
+        printf "\n\n  CURRENT FILTER  "
+        printColor "=  %s  =" "${VM_ListingFilter^^}"
+        printf "  %s" "${VM_Listing_Info[$VM_ListingFilter,info]}"
+        printColor "\n\n  [number] to reselect"
+        printf "   [enter] to return or continue"
+        printf "\n\n"
+        read -rp "  >  " qqLselect
+        VM_ListingArrayCount="${#VM_ListingArray[@]}"
+        if [[ $(tr -cd '[:digit:]' <<< "$qqLselect") ]] && (( 0 < qqLselect && qqLselect <= VM_ListingArrayCount )); then
+          VM_ListingFilter="${VM_ListingArray[qqLselect-1]}"
+        fi
+        if [[ ! $qqLselect ]]; then
+          [[ $VM_ListingFilter == "all" || $VM_ListingFilter == "desktop" ]] && break
+          FilterInfo="${VM_Listing_Info[$VM_ListingFilter,info]}" ; break
+        fi
+      done
+      load_QGW_OS_Array ;  refresh_QWG_selector "no-set"
+
+    elif [[ $QGW_List_NumSelected == "B" ]] || [[ ${QGW_List_NumSelected,,} == "vm" ]]; then printf "\n\n" ; GT_Exit=1 ; break
+
+    elif [[ $QGW_List_NumSelected == "Q" ]]; then  sleep 0.3 ; exit directly
+
+    elif [[ ${QGW_List_NumSelected^^} == "FS" ]] ; then
+      CodingHotSwap="FreeSpirit" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
+    elif [[ ${QGW_List_NumSelected^^} == "FB" ]] ; then
+      CodingHotSwap="FreeBird" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
+    elif [[ ${QGW_List_NumSelected^^} == "HB" ]] ; then
+      CodingHotSwap="HomeBird" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
+    elif [[ "${QGW_List_NumSelected,,}" == cust* ]] ; then
+      CodingHotSwap="Custom" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
+    elif [[ "${QGW_List_NumSelected,,}" == dev* ]] ; then
+      CodingHotSwap="Dev" ; SettingsFileAdjusted=1 ; CodingHotSwapShow=1 ; refresh_sources_and_load_VM_arrays
+
+    elif [[ $QGW_List_NumSelected == "R"  ]]; then  test_internet_is_up ; function_quick_get_wrap ; break
+
+    elif [[ $QGW_List_NumSelected == "T"  ]] && [[ $QG_Modpath ]] ; then
+      run_distro_tests_UI "test-all" ; function_quick_get_wrap ; break
+
+    elif [[ "$QGW_List_NumSelected" == [a-z] ]]; then
+
+      print_quickget_and_folder_choices  "QGW_OS_Array" "$QGW_List_NumSelected"
+
+      if [[ $QGW_List_NumSelected == "u" ]]; then
+        printf "  and ... \n\n"
+        print_quickget_and_folder_choices  "QGW_OS_Array" "UbuntuOthers"
+      fi
+
+      if [[ $QGW_List_NumSelected == "m" ]]; then
+        printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
+        i=1 ; M=
+        for M in "${QGW_OS_Array[@]}" ; do
+          if [[ "$M" == *"linuxmint"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$M" ; fi
+          if [[ "$M" == *"lmde"* ]]; then printf "    %s)  linuxmint debian" "$i" ; fi
+          ((i++))
+        done
+      fi
+      i= ; M=
+
+      if [[ $QGW_List_NumSelected == "s" ]]; then
+        printf "\n\n  and ...  %-${QGW_List_Arr_ItemLength}s" " "
+        i=1 ; S=
+        for S in "${QGW_OS_Array[@]}" ; do
+          if [[ "$S" == *"opensuse"* ]]; then printf "  %s)  %-${QGW_List_Arr_ItemLength}s" "$i" "$S" ; fi
+          ((i++))
+        done
+      fi
+      i= ; S=
+
+    else
+
+      # clean up and zero any unrecognised values eg. XYZ ... should only be integers left at this point
+      QGW_List_NumSelected="$(tr -cd "[:digit:]" <<< "$QGW_List_NumSelected")"
+
+      if [[ ! $QGW_List_NumSelected ]] || [[ $QGW_List_NumSelected -gt "${#QGW_OS_Array[@]}" ]]; then
+
+        printColor "\n\n  Request Not Recognised \n\n"
+        sleep 0.5
+        refresh_QWG_selector
+
+      else
+
+        QGW_VerifiedList_NumSelected="$QGW_List_NumSelected"
+        QGW_OS_Arr_NumSelected=$((QGW_List_NumSelected-1))
+        QGW_OS_Arr_NameSelected="${QGW_OS_Array[QGW_OS_Arr_NumSelected]}"
+
+        if [[ $QGW_OS_Arr_NameSelected == "freedos" ]]; then
+          QGW_OS_Arr_NameDisplay="free dos"
+        elif [[ ${QGW_OS_Arr_NameSelected: -3} == "-os" ]]; then
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%???}"
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} os"
+        elif [[ ${QGW_OS_Arr_NameSelected: -2} == "os" ]]; then
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%??}"
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} os"
+        elif [[ ${QGW_OS_Arr_NameSelected:0:4} == "open" ]]; then
+          # all openxxx, at 07/2024, don't have any spaces
+          QGW_OS_Arr_NameDisplay="$QGW_OS_Arr_NameSelected"
+        elif [[ ${QGW_OS_Arr_NameSelected: -3} == "bsd" ]]; then
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%???}"
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} bsd"
+        elif [[ ${QGW_OS_Arr_NameSelected: -5} == "linux" ]]; then
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected%?????}"
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay} linux"
+        elif [[ ${QGW_OS_Arr_NameSelected:0:5} == "linux" ]]; then
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected#?????}"
+          QGW_OS_Arr_NameDisplay="linux ${QGW_OS_Arr_NameDisplay}"
+        elif [[ ${QGW_OS_Arr_NameSelected:0:3} == "kde" ]]; then
+          QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameSelected#???}"
+          QGW_OS_Arr_NameDisplay="kde ${QGW_OS_Arr_NameDisplay}"
+        else
+          QGW_OS_Arr_NameDisplay="$QGW_OS_Arr_NameSelected"
+        fi
+
+        iso_get_message ; printf "\n\n"
+
+        QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay^^}"
+        [[ "$QGW_OS_Arr_NameDisplay" == 'TRUENAS'* ]] && QGW_OS_Arr_NameDisplay="${QGW_OS_Arr_NameDisplay/TRUE/True}"
+
+        ## INFO TEXT
+
+        QGW_OS_HomePage= ; QGW_OS_InfoText= ; QGW_OS_Info= ; QGW_OS_RelNotes= ; QGW_OS_Login=
+        QGW_OS_Info_ARR=()
+
+        printColor "\n  INFO:"
+        printf  "  %s"  "$QGW_OS_Arr_NameDisplay"
+
+        if [[ $QG_Modpath ]]; then
+          QGW_OS_Info="$(quickget --info-line "$QGW_OS_Arr_NameSelected")"
+          QGW_OS_Info="$(tr '|' '\n' <<< "$QGW_OS_Info")"
+          mapfile -t QGW_OS_Info_ARR <<< "$QGW_OS_Info"
+          QGW_OS_Login= ; QGW_OS_HomePage= ; QGW_OS_InfoText=
+          [[ "${#QGW_OS_Info_ARR[@]}" != "4" ]] && printColor "\n\n  INTERNAL ERROR: QuickGet info-listing has incorrect element count ... "
+          QGW_OS_Login="${QGW_OS_Info_ARR[1]}"
+          QGW_OS_HomePage="${QGW_OS_Info_ARR[2]}"
+          QGW_OS_InfoText="${QGW_OS_Info_ARR[3]}"
+        fi
+
+        if [[ ! $QGW_OS_Info ]] && [[ "$QG_SourcePath" ]] ; then  #  REVIEW
+          printf "\n\n  Using Upstream Data .... \n\n"
+          "$QG_SourcePath" --show "$QGW_OS_Arr_NameSelected"
+        fi
+
+        if [[ $QGW_OS_InfoText ]]; then
+          if [[ ! $QGW_OS_Login ]] || [[ $QGW_OS_Login == "-" ]]; then printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_InfoText"
+          elif [[ $QGW_OS_Login ]]; then
+            printf "\n\n  Distro Login:  %s"  "$QGW_OS_Login" ; printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_InfoText"
+          fi
+        else printf "\n\n  Info not available .... ?? \n\n"
+        fi
+
+        if [[ $QG_Modpath ]]; then
+          QGW_OS_RelNotes= ; QGW_OS_Mod_Notes=
+          ## RELEASE NOTES (if present)
+          QGW_OS_RelNotes="$(quickget --rel-notes "$QGW_OS_Arr_NameSelected")"
+          if [[ $QGW_OS_RelNotes ]] ; then
+            printColor "\n\n  Release Notes:"
+            printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_RelNotes"
+          fi
+          ## MOD NOTES (if present)
+          if [[ "$QGW_OS_Arr_NameSelected" == *'buntu'* ]]; then
+            # all ubuntu and variants use same the routine
+            QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "ubuntu(" "$QG_Modpath" | grep '#' )"
+          else QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected}(" "$QG_Modpath" | grep '#' )"
+          fi
+          if [[ ! $QGW_OS_Mod_Notes ]]; then
+            # re-check in case function has bracket space
+            QGW_OS_Mod_Notes="$(grep -m 1 -B 3 "${QGW_OS_Arr_NameSelected} (" "$QG_Modpath" | grep '#' )"
+          fi
+          printColor "\n\n  qqX Mods given to upstream quickGet:"
+          if [[ $QGW_OS_Mod_Notes ]]; then printf "\n\n" ; fmt -u -w "$(tput cols)" <<< "  $QGW_OS_Mod_Notes"
+          else printf "\n\n  None made or Notes not present in file '%s'\n" ".../${QE_SourceVersion,,}/qqX_quickGet_mods"
+          fi
+          [[ $QGW_OS_RelNotes || $QGW_OS_Mod_Notes ]] && printf "\n"
+        fi
+
+
+
+        ## Release note, EXTRA MESSAGES, web-scrapes and tests, where needed
+
+        if [[ "$QGW_OS_Arr_NameSelected" == "macos"* ]]; then
+          printColor "\n  [W] A Mac OS installation walk-thru is available via the qqX wiki \n"
+          # Check for recurrent Ryzen problems, using GPU test from 'quickreport'
+          # Taken from report output in quickEmu Mac issue #1742
+          if [[ "$(lspci | grep -i vga | cut -d':' -f3)" == *'Ryzen 4000/5000 Mobile Series'* ]]; then
+            printColor "\n  WARNING  Ryzen 4000/5000 Mobile Series have been reported as unable to run MacOS (may affect this computer)"
+            printf "\n\n  qqX Conf Mods may help?  See upstream quickemu issue archives for more details ... \n\n"
+          fi
+          if ! check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
+            if ! check_cpu_flag sse4_1 ; then
+              printColor "\n\n\n  INSTALLATION NOT POSSIBLE: MacOS requires a CPU with at least SSE 4.1 support \n\n"
+            elif check_cpu_flag sse4_2 && ! check_cpu_flag avx2 ; then
+              printColor "\n\n  Try MacOS MONTEREY or BIG SUR, newer versions require at least AVX2\n\n"
+            elif check_cpu_flag sse4_1 ; then
+              printColor "\n\n  If downloadable, MacOS MOJAVE may still be possible ?\n\n"
+            fi
+          fi
+        fi
+
+        if [[ "$QGW_OS_Arr_NameSelected" == "kali"* ]]; then
+          KaliTorrent="$(curl -qsLf https://kali.download/base-images/current/ | grep -s 'live-amd' | tr '"' '\n' | grep -m 1 torrent)"
+          [[ $KaliTorrent ]] && printf "  Mod: Use link here >>  https://kali.download/base-images/current/%s \n\n" "$KaliTorrent"
+        fi
+
+        if [[ "$QGW_OS_Arr_NameSelected" == "kolibri"* ]] && [[ ! $(type -p 7z) ]]; then
+          printColor "\n\n  >>  WARNING:  A command line '7zip'/'p7zip' installation is needed for this distro download ... "
+          printColor "\n\n  >>  Some host distros will need 'p7zip-plugins' \n"
+        fi
+
+        if [[ "$QGW_OS_Arr_NameSelected" == "dragonflybsd"* ]] && [[ ! $(type -p bzip2) ]]; then
+          printColor "\n\n  >>  WARNING:  A command line 'bzip2' installation is needed for this distro download ... \n"
+        fi
+
+        if [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]] && [[ ! $(type -p mkisofs) ]]; then
+          printColor "\n\n  >>  WARNING:  For Windows downloads, an installation of 'mkisofs' via: genisoimage, cdrtools, cdrkit or xorriso is required \n"
+        fi
+
+        # End of extra messages
+
+        QGW_OS_HomePage_Working=
+        if [[ $QGW_OS_HomePage ]]; then
+          printColor "\n  ---------------------------------------------------------------------------- "
+          printf "\n\n  Checking Distro HOME PAGE (max 6 tries)  \n\n"
+          printf "" > "/tmp/qmod-dl-homepage-report.txt"
+          {
+            printf "  HomePage = %s"  "$QGW_OS_HomePage"
+            # note this 'HomePage =' line gets grepped (awk) for 'http' at a later point
+            if [[ "$QGW_OS_Arr_NameSelected" == "windows"* ]]; then printf " (checks disabled to avoid anti-bot problems)"
+            elif curl --disable -sLf --retry 3 --retry-max-time 2 --retry-delay 0 --max-time 6 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working)"; QGW_OS_HomePage_Working=1
+            elif curl --disable -sLf --retry 3 --retry-max-time 3 --retry-delay 1 --max-time 12 --head --output /dev/null "$QGW_OS_HomePage" ; then  printf " (working, slowly ...)"; QGW_OS_HomePage_Working=1
+            else
+              printf "\n\n  Downloads might work but HOME PAGE LINK APPEARS BROKEN or SITE IS DOWN"
+              if grep -qs -e 'OPENED stream' <<< "$(curl --disable -v -sLf --retry 2 --retry-max-time 2 --retry-delay 0 --max-time 4 --head "$QGW_OS_HomePage" 2>&1)" ; then
+                printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the homepage   [t] test distro availability"
+              fi
+            fi
+          } >> "/tmp/qmod-dl-homepage-report.txt"
+        fi
+        show_distro_homepage_check_results
+        break
+
+      fi
+
     fi
 
-    [[ $ShowQGetLists ]] && { echo "Raw R "; echo "$QGW_Releases_ListRaw"; echo; }
-    [[ $ShowQGetLists ]] && { echo "Raw E "; echo "$QGW_Editions_StockListRaw"; echo; }
-    [[ $ShowQGetLists ]] && { echo "List E "; echo "$QGW_Editions_StockList"; echo; }
+    [[ $Loop_Diagnostics ]] && printf "\n\n End of Quickget first loop, stage 1:" &&  main_loop_diagnostics
 
-    # quickget outputs with a tab separator which is cut -d default
-    QGW_Releases_ListRaw="$(cut -f2- <<< "$QGW_Releases_ListRaw" | tr ' ' '\n' )"
-    [[ $ShowQGetLists ]] && { echo "List R raw"; echo "$QGW_Releases_ListRaw"; echo; }
+    if [[ $CodingHotSwapShow || $GT_Help ]]; then
+      show_QWG_header ; show_hot_swap_line
+      # different versions have different distro selections
+      load_QGW_OS_Array ; print_quickget_and_folder_choices  "QGW_OS_Array"
+      GT_Help=
+    fi
 
-    # try to make sure the list is not just empty space
-    QGW_Releases_List="$(grep -E ^'[[:graph:]]' <<< "$QGW_Releases_ListRaw" )"
-    [[ $ShowQGetLists ]] && { echo "List R "; echo "$QGW_Releases_List"; echo; }
+    # End point of main OS selection loop
+    QGW_List_NumSelected=
 
-    mapfile -t QGW_Releases_Array <<< "$QGW_Releases_List"
-    [[ $ShowQGetLists ]] && { echo; declare -p QGW_Releases_Array; echo; }
+    [[ $Loop_Diagnostics ]] && printf "\n\n End of Quickget first loop, stage 2:" &&  main_loop_diagnostics
 
+  done
+
+
+  if [[ $GT_Exit ]]; then
+    QGW_List_NumSelected_Next=
+    clear_main_gt_start_vars
+    return
   fi
+
+  printColor "\n\n  ---------------------------------------------------------------------------- "
+  printf "\n\n  Checking releases > may need to check on-line and may take time\n\n"
+
+  declare -ga QGW_Releases_Array=() ; declare -ga QGW_Editions_Array=() ; declare -ga QGW_StockEditions_Array=()
+  QGW_ReleasesEditions_ListRaw= ; QGW_Releases_ListRaw= ; QGW_Releases_List=
+  QGW_Editions_StockList= ; QGW_Editions_StockListRaw= ; QGW_Editions_StockListString= ; QGW_Editions_StockListTotal="0"
+
+  # Running checks in the background (&) means that we can stop the process if it hangs
+  # as some Quickget data is obtained dynamically using web checks ...
+  printf "" > "/tmp/quickget-releases-data.txt"
+  quickget "$QGW_OS_Arr_NameSelected" > "/tmp/quickget-releases-data.txt" &
+  sleep 0.5
+  [[ $ShowQGetLists ]] && { echo "Check 1"; (pgrep -af bash | grep quickget &); echo; }
+  DataPID="$(pgrep -af bash | grep quickget | head -n 1 | cut -d' ' -f1 2>/dev/null)"
+  [[ $ShowQGetLists ]] && { echo; echo "DataPID: '${DataPID}'"; echo; }
+  DataCount="0"
+  QGW_ChkLoop=
+  while true; do
+    if grep -qs 'ERROR' "/tmp/quickget-releases-data.txt"; then
+      QGW_ReleasesEditions_ListRaw="$(grep -A 10 Releases "/tmp/quickget-releases-data.txt" | grep -B 10 ERROR | grep -v ERROR )"
+      break
+    fi
+    [[ $ShowQGetLists ]] && { echo "Check loop Releases $DataCount"; (ps -ef | grep bash | grep quickget); echo; }
+    read -rt 0.5  QGW_ChkLoop
+    ((DataCount+=1))
+    [[ "$DataCount" == '20' ]] && printf "  Continuing to check ...\n\n"
+    [[ "$DataCount" == '40' ]] && printf "  Servers are busy or anti-bot slow-downs may be in place ...\n\n"
+    [[ "$DataCount" == '80' ]] && printf "  Continuing to try. Some distros may sometimes take a bit longer ... \n\n  [c] cancel now and retry later? \n\n  >  "
+    [[ "$DataCount" == '150' && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
+    # use posix '-n' test here or switching focus back from a dev side-terminal will trigger the read function
+    [[ -n $QGW_ChkLoop && $DataPID ]] && { kill "$DataPID" &>/dev/null ; break; }
+    [[ -n $QGW_ChkLoop ]] && break
+  done
+
+  [[ $ShowQGetLists ]] && { echo "Raw RE "; echo "$QGW_ReleasesEditions_ListRaw"; echo; }
+
+  QGW_EditionsFunction=
+  if [[ "$QGW_ReleasesEditions_ListRaw" == *'Languages'* ]]; then
+    # is Windows (has its own internal array)
+    QGW_Releases_ListRaw="$(grep -B 10  Languages  <<< "$QGW_ReleasesEditions_ListRaw" | grep -v Languages)"
+  elif [[ "$QGW_ReleasesEditions_ListRaw" == *'Editions'* ]]; then
+    QGW_Releases_ListRaw="$(grep -B 10  Editions  <<< "$QGW_ReleasesEditions_ListRaw" | grep -v Editions)"
+    # also get editions stock list for later > some releases have different editions available
+    QGW_Editions_StockListRaw="$(grep -A 10  Editions  <<< "$QGW_ReleasesEditions_ListRaw")"
+    [[ $QGW_Editions_StockListRaw ]] &&  QGW_EditionsFunction=1
+    # quickget will auto-start if no editions are available, so flag-up and only check if function is present
+    QGW_Editions_StockList="$(cut -f2- <<< "$QGW_Editions_StockListRaw"| tr ' ' '\n')"
+    # try to make sure the list is not just empty space
+    QGW_Editions_StockList="$(grep -E ^'[[:graph:]]' <<< "$QGW_Editions_StockList" )"
+    mapfile -t QGW_StockEditions_Array <<< "$QGW_Editions_StockList"
+    QGW_Editions_StockListString="${QGW_StockEditions_Array[*]}"
+    QGW_Editions_StockListTotal="${#QGW_StockEditions_Array[@]}"
+    [[ $ShowQGetLists ]] && { echo "List E Full "; echo "$QGW_Editions_StockListString"; echo; }
+    [[ $ShowQGetLists ]] && { echo; declare -p QGW_StockEditions_Array; echo; }
+  else
+    QGW_Releases_ListRaw="$QGW_ReleasesEditions_ListRaw"
+  fi
+
+  [[ $ShowQGetLists ]] && { echo "Raw R "; echo "$QGW_Releases_ListRaw"; echo; }
+  [[ $ShowQGetLists ]] && { echo "Raw E "; echo "$QGW_Editions_StockListRaw"; echo; }
+  [[ $ShowQGetLists ]] && { echo "List E "; echo "$QGW_Editions_StockList"; echo; }
+
+  # quickget outputs with a tab separator which is cut -d default
+  QGW_Releases_ListRaw="$(cut -f2- <<< "$QGW_Releases_ListRaw" | tr ' ' '\n' )"
+  [[ $ShowQGetLists ]] && { echo "List R raw"; echo "$QGW_Releases_ListRaw"; echo; }
+
+  # try to make sure the list is not just empty space
+  QGW_Releases_List="$(grep -E ^'[[:graph:]]' <<< "$QGW_Releases_ListRaw" )"
+  [[ $ShowQGetLists ]] && { echo "List R "; echo "$QGW_Releases_List"; echo; }
+
+  mapfile -t QGW_Releases_Array <<< "$QGW_Releases_List"
+  [[ $ShowQGetLists ]] && { echo; declare -p QGW_Releases_Array; echo; }
+
+
+  ###############################################################################
+
 
   function choose_QGW_release {
 
     [[ $GT_Exit ]] && return
-    [[ $xxMainMenuZsync ]] && return
 
     while true ; do
 
@@ -1161,7 +1154,6 @@ function_quick_get_wrap ()  {
   function choose_QGW_edition {
 
     [[ $GT_Exit ]] && return
-    [[ $xxMainMenuZsync ]] && return
 
     if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
 
@@ -1382,42 +1374,6 @@ function_quick_get_wrap ()  {
     else test_iso_url
     fi
 
-    if [[ $xxxxMainMenuZsync && $xxZsync_Updatable_ISO ]]; then
-
-      if [[ ! $Zsync_OS_Name || ! $Zsync_Release_Name  ]]; then
-        printColor "\n\n  ERROR  Variables for OS Name &/or Release NOT found \n\n"
-      else
-        printf "\n\n  Updating the live boot development iso with any changes"
-        if [[ $LastZsync -lt 360000 ]]; then  # 100 hrs
-          printColor "\n\n  Shouldn't take too long to synchronize"
-          printColor " - last updated only %d hrs ago"  "$((LastZsync/3600))"
-        elif [[ $LastZsync -lt 1036800 ]]; then # 12 days
-          printColor "\n\n  May take a short while to compare & synchronize"
-          printColor " - last updated over %d days ago"  "$((LastZsync/86400))"
-        else
-          printColor "\n\n  May take a while to compare & synchronize"
-          printColor " - last updated over %d days ago"  "$((LastZsync/86400))"
-        fi
-        if [[ $LastZsync -gt 3456000 ]]; then # 40 days
-          printf "\n\n  Deletion and re-download can sometimes be quicker ...."
-        fi
-        ZsyncDownload=1
-      fi
-
-    elif [[ "$QGW_DownloadSelection" == *'ubuntu'* ]] && [[ "$QGW_DownloadSelection" == *'xxdaily'* ]]; then
-      printColor "\n\n  ** may download with some kind of NAMING variance ** "
-      ZsyncDownload=1
-
-    else  ZsyncDownload=
-    fi
-
-    if [[ $xxMainMenuZsync ]] && [[ $xxZsync_Updatable_ISO && $Zsync_OS_Name ]]; then
-        QWG_Conf_Dir="$VM_Conf_Dir"
-        ZsyncDownload=1
-    else
-      QWG_Conf_Dir="$Default_VM_Folder"
-    fi
-
     # GET READY to start download
     # clear any accidental double pressing of the enter key to avoid any auto-starts
     read -r -t 0.2
@@ -1425,15 +1381,14 @@ function_quick_get_wrap ()  {
     read -r -t 0.1
     QGW_OverWriteAllow=
     QGW_DownloadStart=
+    QWG_Conf_Dir="$Default_VM_Folder"
     printf "\n\n"
 
     while true ; do
 
       [[ $Loop_Diagnostics ]] && main_loop_diagnostics
 
-      if [[ $xxMainMenuZsync ]]; then
-        QGW_OverWriteAlert=1
-      elif [[ ! $QGW_Download_BadLink ]]; then
+      if [[ ! $QGW_Download_BadLink ]]; then
         printf "  ---------------------------------------------------------------------------- \n\n"
         show_current_group_folder_list
         printf "\n\n\n"
@@ -1448,24 +1403,21 @@ function_quick_get_wrap ()  {
         printf "\n"
       fi
 
-      # If NOT sync updating, list other copies of similar VM's in the target folder
-      if [[ ! $ZsyncDownload ]]; then
-        SimilarVMs=
-        SimilarVM_ShorterCheck=
-        QGW_OverWriteAlert=
-        DailyVMsPresent=
-        HyphenatedNewname=
-        check_new_vm_folder_name  "$QWG_NewVM_Name"
-        # and display download method / options where available
-        if [[ ! $xxMainMenuZsync ]] && grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
-          printf "\n\n  [sp] for serial/parallel toggle"
-          if grep -qs 'curl-no-para' "$QG_Modpath"; then
-            if [[ $Curl_NoPara ]]; then printf "  > Downloads are set to serial mode"
-            else printf "  > qqX has enabled download multiplexing"
-            fi
+      # List other copies of similar VM's in the target folder
+      SimilarVMs=
+      SimilarVM_ShorterCheck=
+      QGW_OverWriteAlert=
+      DailyVMsPresent=
+      HyphenatedNewname=
+      check_new_vm_folder_name  "$QWG_NewVM_Name"
+      # and display download method / options where available
+      if grep -qs -e '--parallel' <<< "$(curl --help all)" ; then
+        printf "\n\n  [sp] for serial/parallel toggle"
+        if grep -qs 'curl-no-para' "$QG_Modpath"; then
+          if [[ $Curl_NoPara ]]; then printf "  > Downloads are set to serial mode"
+          else printf "  > qqX has enabled download multiplexing"
           fi
         fi
-
       fi
 
       if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
@@ -1497,7 +1449,7 @@ function_quick_get_wrap ()  {
       else
 
         if [[ $QGW_OverWriteAlert ]];then
-          [[ ! $xxMainMenuZsync ]] && printColor "\n\n  Files are present. Resume download or overwrite? "
+          printColor "\n\n  Files are present. Resume download or overwrite? "
           if [[ "$(ls -oh "$QWG_Conf_Dir/$QWG_NewVM_Name" 2>/dev/null)" ]]; then
             printColor "\n\n  Folder: %s \n\n" "$QWG_NewVM_Name"
             ls -oh "$QWG_Conf_Dir/$QWG_NewVM_Name"
@@ -1558,21 +1510,13 @@ function_quick_get_wrap ()  {
         b)
           clear_main_gt_start_vars
           QGW_List_NumSelected_Next=
-          if [[ $xxMainMenuZsync ]]; then
-            xxMainMenuZsync=
-          else
-            Zsync_OS_Name=
-            Zsync_Release_Name=
-            function_quick_get_wrap
-          fi
+          function_quick_get_wrap
           return
         ;;
 
         e)
           QGW_Edition_Arr_NumSelected=
           QGW_Edition_Arr_NameSelected=
-          Zsync_OS_Name=
-          Zsync_Release_Name=
           QGW_DownloadStart=
           QGW_DownloadSelection=
           QGW_Download_BadLink=
@@ -1588,8 +1532,6 @@ function_quick_get_wrap ()  {
           QGW_Release_Arr_NameSelected=
           QGW_Edition_Arr_NumSelected=
           QGW_Edition_Arr_NameSelected=
-          Zsync_OS_Name=
-          Zsync_Release_Name=
           QGW_DownloadStart=
           QGW_DownloadSelection=
           QGW_Download_BadLink=
@@ -1634,7 +1576,7 @@ function_quick_get_wrap ()  {
           if [[ $QGW_Download_BadLink ]]; then
             QGW_BadLink_ReTest=1 ; test_iso_url
           else
-            if [[ $QGW_OverWriteAlert ]] && [[ ! $xxMainMenuZsync ]]; then
+            if [[ $QGW_OverWriteAlert ]]; then
               printf "  RECONFIRMATION is required  >>  %s"  "$QWG_NewVM_Name"
               printf "\n\n  [enter] to go back" ; printColor "   [yes] to confirm \n\n"
               read -rp "  >  "  ISO_OvWr
@@ -1692,7 +1634,7 @@ function_quick_get_wrap ()  {
 
     printf "\n\n\n  May take a moment to start and pauses may occur if servers are slow"
     printf "\n\n  Parallel downloads are only possible where upstream server multiplexing is supplied\n"
-    [[ ! $xxMainMenuZsync ]] && printf "\n\n  The downloader has been set to AUTO-RESUME and to pick up where it left off \n"
+    printf "\n\n  The downloader has been set to AUTO-RESUME and to pick up where it left off \n"
     printColor "\n\n  Use [c] to STOP ALL current downloads, [d] to delete "
     printColor "\n\n  Or  [c] then [r] to force a restart on a new server or to force a download re-check ..."
     if [[ "$QGW_OS_Arr_NameSelected"  == "windows"* ]]; then
@@ -1858,35 +1800,33 @@ function_quick_get_wrap ()  {
   NewVM_Conf_File=
   QGW_FolderDelete=
 
-  # STANDARD DOWNLOAD folder check the theoretical name ...
-  if [[ ! $ZsyncDownload ]]; then
-    if [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}-${QGW_Edition_Arr_NameSelected}" ]]; then
-      NewVM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}-${QGW_Edition_Arr_NameSelected}"
-    elif [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}" ]]; then
-      NewVM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}"
-    elif [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}" ]]; then
-      NewVM_InstanceName="${QGW_OS_Arr_NameSelected}"
+  # Folder check the theoretical name ...
+  if [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}-${QGW_Edition_Arr_NameSelected}" ]]; then
+    NewVM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}-${QGW_Edition_Arr_NameSelected}"
+  elif [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}" ]]; then
+    NewVM_InstanceName="${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}"
+  elif [[ -d "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}" ]]; then
+    NewVM_InstanceName="${QGW_OS_Arr_NameSelected}"
+  fi
+  #  file check  .conf
+  if [[ -f "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}.conf" ]]; then
+    NewVM_Conf_File="${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}.conf"
+  elif [[ -f "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}.conf" ]]; then
+    NewVM_Conf_File="${QGW_OS_Arr_NameSelected}.conf"
+  elif [[ -f "${QWG_Conf_Dir}/${NewVM_InstanceName}.conf" ]]; then
+    NewVM_Conf_File="${NewVM_InstanceName}.conf"
+  fi
+  if [[ -d "$NewVM_InstanceName" ]]; then
+    if [[ $(du -t 10k "$NewVM_InstanceName") ]]; then QGW_DownloadStopped= ; else QGW_DownloadStopped=1
     fi
-    #  file check  .conf
-    if [[ -f "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}.conf" ]]; then
-      NewVM_Conf_File="${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}-${QGW_Release_Arr_NameSelected}.conf"
-    elif [[ -f "${QWG_Conf_Dir}/${QGW_OS_Arr_NameSelected}.conf" ]]; then
-      NewVM_Conf_File="${QGW_OS_Arr_NameSelected}.conf"
-    elif [[ -f "${QWG_Conf_Dir}/${NewVM_InstanceName}.conf" ]]; then
+  elif [[ ! -d "$NewVM_InstanceName" ]]; then
+    # Quickget final name output can vary from expected. qqX ver 1.11 adds an output into the freespirit code
+    if grep -sq 'NewVM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
+      source "/tmp/qe_new_vm_name.txt"
       NewVM_Conf_File="${NewVM_InstanceName}.conf"
-    fi
-    if [[ -d "$NewVM_InstanceName" ]]; then
-      if [[ $(du -t 10k "$NewVM_InstanceName") ]]; then QGW_DownloadStopped= ; else QGW_DownloadStopped=1
-      fi
-    elif [[ ! -d "$NewVM_InstanceName" ]]; then
-      # Quickget final name output can vary from expected. qqX ver 1.11 adds an output into the freespirit code
-      if grep -sq 'NewVM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
-        source "/tmp/qe_new_vm_name.txt"
-        NewVM_Conf_File="${NewVM_InstanceName}.conf"
-        QGW_DownloadStopped=
-      else
-        QGW_DownloadStopped=1
-      fi
+      QGW_DownloadStopped=
+    else
+      QGW_DownloadStopped=1
     fi
   fi
 
@@ -1937,12 +1877,9 @@ function_quick_get_wrap ()  {
 
   elif [[ ! -d "$NewVM_InstanceName" ]]; then
 
-    if [[ $ZsyncDownload ]]; then ZsyncDownload=
-    else
-      printf "  NO Folder/Download found ... %s "  "$NewVM_InstanceName"
-      if [[ -e "$NewVM_Conf_File" ]]; then printf "\n .conf file created:  %s "  "$(basename "$NewVM_Conf_File")"
-      else printf "\n .conf file NOT created or found %s "  "$(basename "$NewVM_Conf_File")"
-      fi
+    printf "  NO Folder/Download found ... %s "  "$NewVM_InstanceName"
+    if [[ -e "$NewVM_Conf_File" ]]; then printf "\n .conf file created:  %s "  "$(basename "$NewVM_Conf_File")"
+    else printf "\n .conf file NOT created or found %s "  "$(basename "$NewVM_Conf_File")"
     fi
 
     if [[ $QGW_DownloadStopped ]]; then
@@ -1977,10 +1914,7 @@ function_quick_get_wrap ()  {
     NewFileTuneUp_JustDone=1
   elif [[ $QGW_FolderDelete == "d" ]]; then  sleep 1
   else
-    [[ $xxZsync_Updatable_ISO ]] && printf "\e[3A\r"
-    if [[ ! $xxMainMenuZsync ]] && [[ ! $ZsyncDownload ]]; then
-      printColor "\n\n  [enter] to continue or return \n\n" ; read -rp "  > "
-    fi
+    printColor "\n\n  [enter] to continue or return \n\n" ; read -rp "  > "
     printf "\n\n"
     return
   fi

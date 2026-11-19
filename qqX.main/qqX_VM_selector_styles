@@ -27,7 +27,6 @@ vm_selector_init_common () {
   VM_PairsCount="$((VM_ElementCount/2))"
   VM_Array_LastIndex="$((VM_PairsCount-1))"
 
-  ZsyncDistrosFound=
   LiveDistrosFound=
   SymLinksPresent=
   MSR_DistrosFound=
