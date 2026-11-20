@@ -6,7 +6,7 @@ Adds fixes, tools and improvements to the popular [Quickemu](https://github.com/
 
 -----
 
-> After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue [#11](https://github.com/qqxproject/qqX/issues/11)
+> After lots of headache with qemu, quickemu, virtmanager etc, I finally found this which worked for me. Thank you. @YehiaEhab17 - issue #11
 
 -----
 
