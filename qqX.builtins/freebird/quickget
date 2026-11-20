@@ -3677,7 +3677,10 @@ function open_homepage() {
 }
 
 function create_vm() {
+
     # shellcheck disable=SC2206
+    # qqX note, this questionable upstream URL_HASH routine not touched,
+    # in case other connected things break ...
     local URL_HASH=(${1// / })
     local URL="${URL_HASH[0]}"
     local HASH="${URL_HASH[1]}"
@@ -3685,6 +3688,11 @@ function create_vm() {
     #echo "${URL}"
     #echo "${ISO}"
     #echo "${HASH}"
+
+    ## add qqX name tweaks, if present
+    if [[ $(type -t "mods_vmpathname_${OS}") == function ]]; then
+        "mods_vmpathname_${OS}"
+    fi
     web_get "${URL}" "${VM_PATH}"
     if [ -n "${HASH}" ]; then
         check_hash "${ISO}" "${HASH}"
@@ -3748,7 +3756,10 @@ function create_config() {
     local INPUT="${2}"
     local FIXED_ISO=""
 
+    ## qqX - this upstream 'OS' declaration seems wrong and would force a guest_type bypass in 'make_vm_config'
+    #  but the whole of this function gets modded later ....
     OS="custom"
+
     if ! mkdir "${VM_PATH}" 2>/dev/null; then
         echo "ERROR! Could not create directory: ${VM_PATH}. Please verify that it does not already exist"
         exit 1
@@ -3943,7 +3954,7 @@ case "${1}" in
     --version|-version)
         ## NB The matching 'qqX_quickGet_mods' file is required
         # when moving FreeBird/Freespirit builtins ##
-        echo "4.99.01"
+        echo "4.99.02"
         exit 0;;
     --help|-help|--h|-h)
         help_message

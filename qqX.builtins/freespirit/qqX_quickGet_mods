@@ -60,10 +60,11 @@
 ## 1: LISTS and FILTERS
 ## 2: INFO and NOTES (distro oneliners)
 ## 3: RELEASES, EDITIONS and DOWNLOAD URLS
-## 4: GUEST TYPES
-## 5: CONFIGURATION
-## 6: FINALIZING
-## 7: DOWNLOAD XL (special cases)
+## 4: NAME TWEAKS
+## 5: GUEST TYPES
+## 6: CONFIGURATION
+## 7: FINALIZING
+## 8: DOWNLOAD XL (special cases)
 ##    OTHER FUNCTIONS
 
 ##########################################
@@ -544,7 +545,7 @@ function editions_fedora() {
     fi
 }
 function get_fedora() {
-    local HASH="" ISO="" JSON="" URL="" RelSearch=""
+    local HASH="" ISO="" JSON="" URL="" RelSearch="" RawDate=""
     if [[ $RELEASE == "rawhide" ]]; then
         tr '"' '\n' < "/tmp/qGet_RawhideData.txt" | grep -v Labs | grep -vi server | grep -vi every | grep -vi soas | grep 'x86_64.iso' \
         | grep -m 1 -E "$EDITION"
@@ -1344,16 +1345,30 @@ function get_zorin() {
 
 ##########################################
 
-## 4: GUEST TYPES
+## 4: NAME TWEAKS
+
+# Use for tweaks to VM Instance Name just prior to starting the download, using upstream var: 'VM_PATH'
+# Add in the format of "mods_vmpathname_${OS} ()"
+
+mods_vmpathname_fedora() {
+    if [[ "$VM_PATH" == *'rawhide'* ]]; then
+        # add date to name
+        local  RawDate=""; RawDate="$(date +%Y-%b-%d)"
+        VM_PATH="${VM_PATH/'fedora-rawhide'/"fd-rawhide-$RawDate"}"
+    fi
+}
+
+##########################################
+
+## 5: GUEST TYPES
 
 # Needed only for special case instructions, such as non-iso
 # Use for new qqX listed distros or for case overwrites
 # Add in the format of "mods_guest_type_${OS} ()"
 
-
 ##########################################
 
-## 5: CONFIGURATION
+## 6: CONFIGURATION
 
 # Needed only for special case instructions, such as needs legacy boot etc
 # Use for new qqX listed distros or for case overwrites
@@ -1365,7 +1380,7 @@ mods_config_dragonflybsd () {
 
 ##########################################
 
-## 6: FINALIZING
+## 7: FINALIZING
 
 # Needed only for special case instructions, such as decompression routines
 # Use for new qqX listed distros or for 'case' overwrites
@@ -1391,7 +1406,7 @@ mods_finalize_batocera () {
 
 ##########################################
 
-## 7: DOWNLOAD XL
+## 8: DOWNLOAD XL
 # For special and oversized 'get' functions or "get_${OS} ()" overwrites, eg Windows or Mac
 # Normally place 'get' functions next to releases and editions
 
@@ -1420,7 +1435,8 @@ create_config() {
 
     local VM_PATH="${1}" INPUT="${2}" FIXED_ISO=""
 
-    OS="custom"
+    # OS="custom" # remove this upstream line, as it seems very wrong and would force a guest_type bypass in 'make_vm_config' (??)
+
     if ! mkdir "${VM_PATH}" 2>/dev/null; then
         echo "ERROR! Could not create directory: ${VM_PATH}. Please verify that it does not already exist"
         exit 1
