@@ -118,12 +118,13 @@ main_menu_messages () {
   fi
 }
 
-buntu_daily_live_load_up_chk_and_msgs () {
+## Specific Messages
 
+buntu_daily_live_load_up_chk_and_msgs () {
   if [[ ! $HideLoadUpNotices ]]; then
     if [[ ! $LatestDailyUpdate ]]; then
       # only check once, unless data was not available
-      DailyData= ; LatestDailyUpdate=
+      local DailyData="" LatestDailyUpdate="" DailyName=""
       printf "\n\n\n  Checking for updates ... "
       DailyName="${VM_InstanceName/'-daily'/@/}" ; DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
       [[ "$DailyName" == *'-20'* ]] && DailyName="${DailyName/'-20'/@/}" &&  DailyName="$(cut -d '@' -f1 <<< "$DailyName")"
@@ -144,16 +145,43 @@ buntu_daily_live_load_up_chk_and_msgs () {
     fi
     if [[ $LatestDailyUpdate ]]; then
       # but still show results if menu is refreshed (until time-out is reached)
-      printf "\n\n  Latest Ubuntu 'daily' update is"
-      printf "\n  %s " "$LatestDailyUpdate"
+      printf "\n\n  Latest dev update is %s " "$LatestDailyUpdate"
       printf "\n  Use [gt] to download a new spin, leave this one here, or [del] to delete ...\n"
-    else printf "\n\n  Latest Ubuntu 'daily' update data not available ...\n"
+    else printf "\n\n  Latest Ubuntu 'daily' update not available ...\n"
+    fi
+  fi
+}
+
+rawhide_load_up_chk_and_msgs () {
+  if [[ ! $HideLoadUpNotices ]]; then
+    if [[ ! $LatestDailyUpdate ]]; then
+      # only check once, unless data was not available
+      local DailyData="" LatestDailyUpdate="" DailyName=""
+      printf "\n\n\n  Checking for updates ... "
+      # unless renamed, should follow std pattern eg. fd-rawhide-2026-Nov-20-COSMIC-Live
+      DailyName="$(cut -d '-' -f6- <<< "$VM_InstanceName")"
+      DailyData="$(curl -qsLf https://openqa.fedoraproject.org/nightlies.html)"
+      sleep 2
+      if [[ ! $DailyData ]]; then
+        DailyData="$(curl -qsLf https://openqa.fedoraproject.org/nightlies.html)"
+        sleep 2
+      fi
+      if [[ ! $DailyData ]]; then printf " Rawhide Server not reached ..."
+      else
+        LatestDailyUpdate="$(tr '"' '\n' <<< "$DailyData" | grep -vi labs | grep -vi server | grep -vi every | grep -vi soas \
+        | grep -vi iot | grep -vi cloud | grep -vi container | tr '/' '\n' | grep -s 'x86_64.iso' | grep "$DailyName" 2>/dev/null)"
+      fi
+    fi
+    if [[ $LatestDailyUpdate ]]; then
+      # but still show results if menu is refreshed (until time-out is reached)
+      printf "\n\n  Latest dev update is %s " "$LatestDailyUpdate"
+      printf "\n  Use [gt] to download a new spin, leave this one here, or [del] to delete ...\n"
+    else printf "\n\n  Latest Fedora Rawhide update not available > more details at https://openqa.fedoraproject.org/nightlies.html \n"
     fi
   fi
 }
 
 show_latest_news () {
-
   if [[ ! $HideLoadUpNotices ]]; then
     local LastNewsReading="" HideNewsAlert="" MuteNewsAlert="" HighlightNewsAlert="" LatestEpochNewsDate=""
     LatestEpochNewsDate="$(date -d "$qqX_LatestNewsDate" +%s)"

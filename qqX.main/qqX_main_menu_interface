@@ -335,6 +335,9 @@ else
       # 11/2026 re-checked and works for transistion from 'stonking' to 'tenacious' ...
       buntu_daily_live_load_up_chk_and_msgs
     fi
+    if [[ "$VM_InstanceName" == *'rawhide'* ]]; then
+      rawhide_load_up_chk_and_msgs
+    fi
 
     if [[ $ShowTxTexts ]]; then printColor  "\n\n  [tx] %s" "$MainTxOptionLine"
     else printf  "\n\n  [tx] %s" "$MainTxOptionLine"
