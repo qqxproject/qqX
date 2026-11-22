@@ -97,6 +97,22 @@ if [ -z "$(command -v bash)" ] || [ "$(echo "$BASH_VERSION" | cut -d. -f1)" -lt 
   fi
 fi
 
+# A standard folder '/tmp' should exist. This is hardcoded in multiple places, including in the upstream code.
+# A plain group sub-folder of 'qqX' is used, rather than a session indexed one, as there are several process separated scripts
+# between which global vars and session vars are overly difficult to transfer. Ditto for setup_and_install.
+if [ ! -d "/tmp/qqX" ]; then
+  mmkdir "/tmp/qqX" || { printf "\n\n  ERROR: Unable to create folder '/tmp/qqX' \n
+  The standard system folder '/tmp' should be be accessible. \n\n"; sleep 10; exit 1; }
+fi
+if [ ! -d "/tmp/qqX" ] && [ ! -t 1 ]; then
+  if [ -n "$(command -v notify-send)" ]; then
+    notify-send -t 8000  -a qqX "ERROR: Unable to create '/tmp/qqX'" "The standard system folder should be be accessible." 2>/dev/null &
+  elif [ -n "$(command -v zenity)" ]; then
+    zenity --notification --timeout=8 --title="qqX" --text="ERROR: Unable to create '/tmp/qqX' \n\nThe standard system folder should be be accessible." 2>/dev/null &
+  fi
+  exit 1
+fi
+
 # Check we are in the right place:
 # The Posix caller in the main folder will look in the system folder for this script
 # BUT as the system_installer was originally designed to work from the main folder, we need to move there if calling it directly
