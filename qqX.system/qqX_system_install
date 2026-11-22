@@ -811,9 +811,9 @@ if [[ ! $SkipMkLauncher ]]; then
   fi
 
   while true; do
-    if [[ "$(cat "/tmp/qqX.termlist" 2>/dev/null)"  ]]; then
+    if [[ "$(cat "/tmp/qqX/qqX.termlist" 2>/dev/null)"  ]]; then
 
-      mapfile -t TermChooseArr <<< "$(cat "/tmp/qqX.termlist" 2>/dev/null)"
+      mapfile -t TermChooseArr <<< "$(cat "/tmp/qqX/qqX.termlist" 2>/dev/null)"
       UserTerm="${TermChooseArr[0]}"
       printColor "\n\n  Found:"
       i=0 ; n=1

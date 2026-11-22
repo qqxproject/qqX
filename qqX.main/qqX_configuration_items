@@ -476,7 +476,7 @@ qqX_edit_settings() {
         if [[ $ConfEdit_Select == "n" ]] || [[ $ConfEdit_Select == "N" ]] ; then  custom_conf_notes
         elif [[ $ConfEdit_Select == "d" ]] ; then
           printColor "\n\n  Standard Quickemu hard-coded defaults: \n"
-          grep -s -B 200 ACCESS "/tmp/qmod-qe-all-vars-temp" | grep -v -e ACCESS -e MAIN -e Lowercase
+          grep -s -B 200 ACCESS "/tmp/qqX/qmod-qe-all-vars-temp" | grep -v -e ACCESS -e MAIN -e Lowercase
         elif [[ $ConfEdit_Select == "t" ]] ; then   function_config_tune_up "$VM_Conf_Dir/$VM_Conf_File" ; break
         elif [[ $ConfEdit_Select == "b" ]] ; then  break
         else
@@ -627,7 +627,7 @@ function refresh_conf_vars_and_values {
     unset -n "sound_duplex"
 
     # then reset
-    source  "/tmp/qmod-qe-rw-vars-temp"
+    source  "/tmp/qqX/qmod-qe-rw-vars-temp"
 
 
     # load_bios_mode_defaults  # REVIEW

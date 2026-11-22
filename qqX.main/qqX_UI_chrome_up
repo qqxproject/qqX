@@ -26,14 +26,14 @@
 
 
 # non-color ECHO TRAP, mainly designed to capture the technical output that quickemu doesn't send to log file
-printf "\n"  > "/tmp/qqX_echo_output.log"
+printf "\n"  > "/tmp/qqX/qqX_echo_output.log"
 
 echo () {
 
   if [[ $UseCustomBootArgs ]]; then
-    command echo "$@" >>  "/tmp/qqX_echo_output.log" ;
+    command echo "$@" >>  "/tmp/qqX/qqX_echo_output.log" ;
   else
-    command echo "$@" | tee -a  "/tmp/qqX_echo_output.log" ;
+    command echo "$@" | tee -a  "/tmp/qqX/qqX_echo_output.log" ;
   fi
 
 }
@@ -186,7 +186,7 @@ file_manager_not_found_message () {
 
 show_qqX_title_bar() {
 
-  if [[ ! $LatestQEMU ]] && grep -qsE ^'[0-9]' "/tmp/latest-qemu.txt"; then  LatestQEMU="$(cat "/tmp/latest-qemu.txt")"; fi
+  if [[ ! $LatestQEMU ]] && grep -qsE ^'[0-9]' "/tmp/qqX/latest-qemu.txt"; then  LatestQEMU="$(cat "/tmp/qqX/latest-qemu.txt")"; fi
 
   qqX_logo_printf_title  "$qqX_title" ;  printf "\n"
   printf "\n\n  Currently wrapping:  QEMU %s" "$QEMU_VER_LONG"

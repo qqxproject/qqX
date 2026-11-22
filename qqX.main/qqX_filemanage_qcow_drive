@@ -36,8 +36,8 @@ else  qqf_CmdLineStart=
 fi
 
 # make sure any settings edits have finished writing, see https://askubuntu.com/questions/624244/determinate-if-a-file-is-already-opened#624274
-while grep -qs "/tmp/qqX_nbd_vars" <<< "$(ps aux)" ; do sleep 1 ; done
-source "/tmp/qqX_nbd_vars"
+while grep -qs "/tmp/qqX/qqX_nbd_vars" <<< "$(ps aux)" ; do sleep 1 ; done
+source "/tmp/qqX/qqX_nbd_vars"
 source "$qqX_MainFolder/qqX_UI_chrome_up"
 source "$qqX_MainFolder/qqX_main_translation"
 
@@ -329,9 +329,9 @@ while true; do
     (nohup &> /dev/null  "$FileManager"  "$VM_Conf_Dir" & ) || file_manager_not_found_message
   elif [[ $qf_DriveSelect == "r" ]]; then
     if [[ $qqf_Input_Drivepath ]]; then
-      printf "\n qqf_Input_Drivepath=\"%s\" \n" "$qqf_Input_Drivepath" >> "/tmp/qqX_nbd_vars"
+      printf "\n qqf_Input_Drivepath=\"%s\" \n" "$qqf_Input_Drivepath" >> "/tmp/qqX/qqX_nbd_vars"
     fi
-    source "/tmp/qqX_nbd_vars" ; load_qf_defaults ; HideRefreshMsgs=1
+    source "/tmp/qqX/qqX_nbd_vars" ; load_qf_defaults ; HideRefreshMsgs=1
   elif [[ $qf_DriveSelect == "tx" ]]; then main_translation_menu
   elif [[ $qf_DriveSelect == "q" ]]; then printf "\n" ; exit directly
   else

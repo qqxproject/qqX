@@ -42,7 +42,7 @@ if grep -qs 'time-v7' <<< "$(uuidgen --help)"; then
   # v7 is better but not available on slower moving distros like linux mint ...
 else  qqX_SessionID="$(uuidgen -t)"
 fi
-qqX_SessionFile="/tmp/qqX_session_$qqX_SessionID"
+qqX_SessionFile="/tmp/qqX/qqX_session_$qqX_SessionID"
 printf '#!/bin/bash' > "$qqX_SessionFile"
 chmod +x "$qqX_SessionFile"
 sleep 0.2

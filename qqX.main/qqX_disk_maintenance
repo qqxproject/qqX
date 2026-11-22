@@ -629,7 +629,7 @@ function create_new_drives {
               # do a grep -c (count) & make sure that other than in comments (#) there is only one entry that is possible
               SharedDriveSettingsLine="$(grep -s -n 'SharedDrive=' "$qqX_SettingsFile" | grep -v '#' | cut -d ':' -f 1)"
               printf "\n\n  Backing up settings file to /tmp and changing line %s \n\n"  "$SharedDriveSettingsLine"
-              eval cp "$qqX_SettingsFile"  "/tmp/qqX_settings.$(date +%s).old"     # REVIEW add awk version?
+              eval cp "$qqX_SettingsFile"  "/tmp/qqX/qqX_settings.$(date +%s).old"     # REVIEW add awk version?
               eval sed -i \'"$SharedDriveSettingsLine" c\ SharedDrive=\""$Default_VM_Folder"/SharedDrive/shared.qcow2\"\'  "$qqX_SettingsFile"
 
             else
@@ -779,7 +779,7 @@ qcow2_filemanagement_launcher () {
     # see https://github.com/lxqt/qterminal/issues/488
     # and setup and install script
     # REVIEW outputs correctly but all location/name combos fail, tested on qterminal versions 1.4 & 2.3
-    TermConf_Tmp="/tmp/qq-qterminal.ini"
+    TermConf_Tmp="/tmp/qqX/qq-qterminal.ini"
     # sed -i is not always present, use grep.
     # But not 'grep -i' as lower case 'size=@' is separate from other camelCase entries with *Size=@
     qterminalCurrentSize="$(grep 'size=@' "$TermConf_User" | cut -d'(' -f2 | tr -d ')')"
@@ -840,10 +840,10 @@ qcow2_filemanagement_launcher () {
       printf "\n NoClear=\"%s\"" "$NoClear"
       printf "\n Trace_InputVars=\"%s\"" "$Trace_InputVars"
       printf "\n"
-    } > "/tmp/qqX_nbd_vars"
+    } > "/tmp/qqX/qqX_nbd_vars"
   fi
 
-  if [[ $Trace_InputVars ]]; then printf "\n\n NBD transfer Vars: \n"; cat "/tmp/qqX_nbd_vars"; echo; fi
+  if [[ $Trace_InputVars ]]; then printf "\n\n NBD transfer Vars: \n"; cat "/tmp/qqX/qqX_nbd_vars"; echo; fi
 
   if [[ $qqf_StandaloneInfo ]]; then
     if [[ $Trace_InputVars ]]; then echo " returning via: qqf_StandaloneInfo"  ; echo  ;  read -rp "  [enter] to continue  >  "; echo; fi

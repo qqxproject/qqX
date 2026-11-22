@@ -185,8 +185,8 @@ print_quickget_and_folder_choices () {
 
 function show_distro_homepage_check_results {
   # runs during start of function_quick_get_wrap and gets included at end of 'function test_iso_url' too
-  if [[ $(cat "/tmp/qmod-dl-homepage-report.txt" 2>/dev/null) ]]; then
-    cat "/tmp/qmod-dl-homepage-report.txt"
+  if [[ $(cat "/tmp/qqX/qmod-dl-homepage-report.txt" 2>/dev/null) ]]; then
+    cat "/tmp/qqX/qmod-dl-homepage-report.txt"
   fi
 }
 
@@ -207,18 +207,18 @@ function test_iso_url {
     DL_Url= ; DL_FileName= ; DL_PotentialSize= ; DL_PotentialOkay= ; DL_PotentialHtml= ; DL_SlowMsg=
     DataPID= ; SECONDS=0
     printf "\n\n  Checking download link .... \n\n"
-    printf "" > "/tmp/qmod-dl-url" ; printf "" > "/tmp/qmod-dl-size"
+    printf "" > "/tmp/qqX/qmod-dl-url" ; printf "" > "/tmp/qqX/qmod-dl-size"
     if [[ $QG_Modpath ]]; then
       quickget " --quiet-check $QGW_DownloadSelection"
     else
-      quickget " --url $QGW_DownloadSelection" > "/tmp/qmod-dl-url"
+      quickget " --url $QGW_DownloadSelection" > "/tmp/qqX/qmod-dl-url"
     fi
     sleep 1
     [[ $ShowQGetLists ]] && { echo "Check Command:"; (ps -ef | grep bash | grep quickget); echo; }
     while true ; do
       [[ $ShowQGetLists ]] && echo "Secs: $SECONDS"
-      if [[ $(cat "/tmp/qmod-dl-url" 2>/dev/null) ]]; then
-        DL_Url="$(tr -cd '[:graph:]'  < "/tmp/qmod-dl-url")"
+      if [[ $(cat "/tmp/qqX/qmod-dl-url" 2>/dev/null) ]]; then
+        DL_Url="$(tr -cd '[:graph:]'  < "/tmp/qqX/qmod-dl-url")"
         break
       elif [[ "$SECONDS" -ge 90 ]]; then
         while true; do
@@ -241,7 +241,7 @@ function test_iso_url {
       fi
       sleep 0.5 ; [[ $ShowQGetLists ]] && echo "$SECONDS"
     done
-    [[ $ShowQGetLists ]] && { echo ; echo "DL_Url: $DL_Url"; echo; cat "/tmp/qmod-dl-url"; echo; }
+    [[ $ShowQGetLists ]] && { echo ; echo "DL_Url: $DL_Url"; echo; cat "/tmp/qqX/qmod-dl-url"; echo; }
 
     if [[ ! $DL_Url ]]; then
       printColor "  QuickGet is unable to provide a link, or has been timed-out ..."; QGW_Download_BadLink=1
@@ -273,28 +273,28 @@ function test_iso_url {
       done
       [[ $ShowQGetLists ]] && { echo ; echo "DL_FileName: $DL_FileName"; echo; }
       if [[ $QG_Modpath ]]; then
-        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_check_pipe:" ; echo ; cat "/tmp/qGet_check_pipe.txt" ; echo ; fi
-        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_QuietResult:" ; echo ; cat "/tmp/qGet_QuietResult.txt" ; echo ; fi
-        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_webget_report:" ; echo ; cat "/tmp/qGet_webget_report.txt" ; echo ; fi
-        if [[ -e "/tmp/qGet_check_pipe.txt" ]]; then cp -f "/tmp/qGet_check_pipe.txt" "/tmp/qmod-dl-size" ; fi
+        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_check_pipe:" ; echo ; cat "/tmp/qqX/qGet_check_pipe.txt" ; echo ; fi
+        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_QuietResult:" ; echo ; cat "/tmp/qqX/qGet_QuietResult.txt" ; echo ; fi
+        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_webget_report:" ; echo ; cat "/tmp/qqX/qGet_webget_report.txt" ; echo ; fi
+        if [[ -e "/tmp/qqX/qGet_check_pipe.txt" ]]; then cp -f "/tmp/qqX/qGet_check_pipe.txt" "/tmp/qqX/qmod-dl-size" ; fi
       else
-        curl --disable -sLf --head --retry 8 --connect-timeout 2  --location-trusted --output "/tmp/qmod-dl-size" "$DL_Url" &
+        curl --disable -sLf --head --retry 8 --connect-timeout 2  --location-trusted --output "/tmp/qqX/qmod-dl-size" "$DL_Url" &
         wait "$!"
-        if [[ ! $(cat "/tmp/qmod-dl-size" 2>/dev/null) ]]; then
+        if [[ ! $(cat "/tmp/qqX/qmod-dl-size" 2>/dev/null) ]]; then
           sleep 2 ; printf "  and a second time ........ \n\n"
-          curl --disable -sLf --head --retry 8 --connect-timeout 2 --keepalive-time 1 --location-trusted --output "/tmp/qmod-dl-size" "$DL_Url" &
+          curl --disable -sLf --head --retry 8 --connect-timeout 2 --keepalive-time 1 --location-trusted --output "/tmp/qqX/qmod-dl-size" "$DL_Url" &
           wait "$!"
         fi
       fi
-      if [[ $(cat "/tmp/qmod-dl-size" 2>/dev/null) ]]; then
-        DL_PotentialHtml="$(grep -s -i 'content-type' "/tmp/qmod-dl-size" | grep -i html )"
-        DL_PotentialSize="$(grep -s -i 'content-length' "/tmp/qmod-dl-size" | tail -n 1 | tr -cd '[:digit:]')"
-        DL_PotentialOkay="$(grep -s -i 'content-type' "/tmp/qmod-dl-size" | grep -i application )"
-        [[ $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -si 'HTTP/' "/tmp/qmod-dl-size" | grep 200)"
+      if [[ $(cat "/tmp/qqX/qmod-dl-size" 2>/dev/null) ]]; then
+        DL_PotentialHtml="$(grep -s -i 'content-type' "/tmp/qqX/qmod-dl-size" | grep -i html )"
+        DL_PotentialSize="$(grep -s -i 'content-length' "/tmp/qqX/qmod-dl-size" | tail -n 1 | tr -cd '[:digit:]')"
+        DL_PotentialOkay="$(grep -s -i 'content-type' "/tmp/qqX/qmod-dl-size" | grep -i application )"
+        [[ $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -si 'HTTP/' "/tmp/qqX/qmod-dl-size" | grep 200)"
         if [[ ! $DL_PotentialHtml ]]; then
-          [[ ! $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -s -i 'Vary:' "/tmp/qmod-dl-size" | grep -i 'Accept-Encoding' )"
-          [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i 'Iso: PASS' "/tmp/qGet_QuietResult.txt")"
-          [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i -e 'Using webget > PASS' "/tmp/qGet_webget_report.txt")"
+          [[ ! $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -s -i 'Vary:' "/tmp/qqX/qmod-dl-size" | grep -i 'Accept-Encoding' )"
+          [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i 'Iso: PASS' "/tmp/qqX/qGet_QuietResult.txt")"
+          [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i -e 'Using webget > PASS' "/tmp/qqX/qGet_webget_report.txt")"
         fi
         [[ $DL_PotentialSize ]] && [[ ! $DL_PotentialOkay ]] && DL_PotentialSize=
       fi
@@ -550,7 +550,7 @@ run_distro_tests_UI () {
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
     elif [[ $TestDistros == "M" ]]; then
       printf "\n\n"
-      qGet_ModsListFile="/tmp/qGet.ModsList.@$(date +%s).$(date +%Y.%b.%d).txt"
+      qGet_ModsListFile="/tmp/qqX/qGet.ModsList.@$(date +%s).$(date +%Y.%b.%d).txt"
       printf "" > "$qGet_ModsListFile"
       for D in "${QGW_OS_Array[@]}"; do grep -s -m 1 -B 3 "${D}(" "$QG_Modpath" | tee -a "$qGet_ModsListFile" 2>/dev/null ; done
       printf "\n\n  Saved to:  %s" "$qGet_ModsListFile"
@@ -572,9 +572,9 @@ run_distro_tests_UI () {
       fi
       printf "\n"
       # NB: 'ChkLog' is the matching qGet_mod var which runs in a separate process, with both using the same log files
-      if [[ $TestDistros == "vm" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check --mirrors "$1"
-      elif [[ $TestDistros == "v" ]]; then TestLog="/tmp/qGet_FullResult.txt" ; quickget --full-check "$1"
-      else TestLog="/tmp/qGet_CompactResult.txt" ; quickget --compact-check "$1"
+      if [[ $TestDistros == "vm" ]]; then TestLog="/tmp/qqX/qGet_FullResult.txt" ; quickget --full-check --mirrors "$1"
+      elif [[ $TestDistros == "v" ]]; then TestLog="/tmp/qqX/qGet_FullResult.txt" ; quickget --full-check "$1"
+      else TestLog="/tmp/qqX/qGet_CompactResult.txt" ; quickget --compact-check "$1"
       fi
       while pgrep -af bash | grep -q 'quickget' ; do
         sleep 0.5
@@ -607,8 +607,8 @@ run_distro_tests_UI () {
         printColor "\n  All Tests Successfully Passed"
         qGet_TestSynopis="All Tests Successfully Passed"
       fi
-      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qGet-test.${1^^}.e$(date +%s).$(date +%b.%d).txt"
-      else qGet_TestSynopis_File="/tmp/qGet.test.ALL.@$(date +%s).$(date +%Y.%b.%d).txt"
+      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qqX/qGet-test.${1^^}.e$(date +%s).$(date +%b.%d).txt"
+      else qGet_TestSynopis_File="/tmp/qqX/qGet.test.ALL.@$(date +%s).$(date +%Y.%b.%d).txt"
       fi
       printf "\n\n%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  > "$qGet_TestSynopis_File"
       [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
@@ -919,7 +919,7 @@ function_quick_get_wrap ()  {
         if [[ $QGW_OS_HomePage ]]; then
           printColor "\n  ---------------------------------------------------------------------------- "
           printf "\n\n  Checking Distro HOME PAGE (max 6 tries)  \n\n"
-          printf "" > "/tmp/qmod-dl-homepage-report.txt"
+          printf "" > "/tmp/qqX/qmod-dl-homepage-report.txt"
           {
             printf "  HomePage = %s"  "$QGW_OS_HomePage"
             # note this 'HomePage =' line gets grepped (awk) for 'http' at a later point
@@ -932,7 +932,7 @@ function_quick_get_wrap ()  {
                 printf "\n\n  BOT CHECKS are possibly present ....  [w] to try and open the homepage   [t] test distro availability"
               fi
             fi
-          } >> "/tmp/qmod-dl-homepage-report.txt"
+          } >> "/tmp/qqX/qmod-dl-homepage-report.txt"
         fi
         show_distro_homepage_check_results
         break
@@ -973,8 +973,8 @@ function_quick_get_wrap ()  {
 
   # Running checks in the background (&) means that we can stop the process if it hangs
   # as some Quickget data is obtained dynamically using web checks ...
-  printf "" > "/tmp/quickget-releases-data.txt"
-  quickget "$QGW_OS_Arr_NameSelected" > "/tmp/quickget-releases-data.txt" &
+  printf "" > "/tmp/qqX/quickget-releases-data.txt"
+  quickget "$QGW_OS_Arr_NameSelected" > "/tmp/qqX/quickget-releases-data.txt" &
   sleep 0.5
   [[ $ShowQGetLists ]] && { echo "Check 1"; (pgrep -af bash | grep quickget &); echo; }
   DataPID="$(pgrep -af bash | grep quickget | head -n 1 | cut -d' ' -f1 2>/dev/null)"
@@ -982,8 +982,8 @@ function_quick_get_wrap ()  {
   DataCount="0"
   QGW_ChkLoop=
   while true; do
-    if grep -qs 'ERROR' "/tmp/quickget-releases-data.txt"; then
-      QGW_ReleasesEditions_ListRaw="$(grep -A 10 Releases "/tmp/quickget-releases-data.txt" | grep -B 10 ERROR | grep -v ERROR )"
+    if grep -qs 'ERROR' "/tmp/qqX/quickget-releases-data.txt"; then
+      QGW_ReleasesEditions_ListRaw="$(grep -A 10 Releases "/tmp/qqX/quickget-releases-data.txt" | grep -B 10 ERROR | grep -v ERROR )"
       break
     fi
     [[ $ShowQGetLists ]] && { echo "Check loop Releases $DataCount"; (ps -ef | grep bash | grep quickget); echo; }
@@ -1207,17 +1207,17 @@ function_quick_get_wrap ()  {
         if [[ $QGW_EditionsFunction ]]; then
           # Check the editions list specific to the selected release
           # running checks in the background (&) means that we can stop the process if it hangs (as with releases check)
-          printf "" > "/tmp/quickget-editions-data.txt"
-          quickget "$QGW_OS_Arr_NameSelected" "$QGW_Release_Arr_NameSelected" > "/tmp/quickget-editions-data.txt" &
+          printf "" > "/tmp/qqX/quickget-editions-data.txt"
+          quickget "$QGW_OS_Arr_NameSelected" "$QGW_Release_Arr_NameSelected" > "/tmp/qqX/quickget-editions-data.txt" &
           sleep 0.3
           [[ $ShowQGetLists ]] && { echo "Check 1"; (pgrep -af bash | grep quickget &); echo; }
           DataPID="$(pgrep -af bash | grep quickget | head -n 1 | cut -d' ' -f1 2>/dev/null)"
           [[ $ShowQGetLists ]] && { echo; echo "DataPID: '${DataPID}'"; echo; }
           DataCount="0"; QGW_ChkLoop=
           while true; do
-            grep -qs 'not a supported' "/tmp/quickget-editions-data.txt" && QGW_EditionsError=1 && break
-            if grep -qs 'ERROR! You must specify an edition' "/tmp/quickget-editions-data.txt"; then
-              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- | paste -s -d ' ' )"
+            grep -qs 'not a supported' "/tmp/qqX/quickget-editions-data.txt" && QGW_EditionsError=1 && break
+            if grep -qs 'ERROR! You must specify an edition' "/tmp/qqX/quickget-editions-data.txt"; then
+              QGW_Editions_ListRaw="$(grep -A 10 Editions "/tmp/qqX/quickget-editions-data.txt" | grep -B 10 ERROR | grep -v ERROR | cut -f2- | paste -s -d ' ' )"
               break
             fi
             [[ $ShowQGetLists ]] && { echo "Check loop Editions $DataCount"; (ps -ef | grep bash | grep quickget); echo; }
@@ -1369,7 +1369,7 @@ function_quick_get_wrap ()  {
       printf "\n\n  Microsoft servers may not report back accurately, may block repeat attempts or may need manual download ... \n\n"
       show_distro_homepage_check_results
       # clear any previous distro tmps that test_iso would have made
-      printf "" > "/tmp/qmod-dl-url" ; printf "" > "/tmp/qmod-dl-size"
+      printf "" > "/tmp/qqX/qmod-dl-url" ; printf "" > "/tmp/qqX/qmod-dl-size"
       DL_PotentialOkay=1
     else test_iso_url
     fi
@@ -1657,7 +1657,7 @@ function_quick_get_wrap ()  {
 
     # qqX ver 1.11 adds an output file into the freespirit code to see if an output folder has been produced
     # as the Quickget final name output can vary from expected.
-    printf "" > "/tmp/qe_new_vm_name.txt"
+    printf "" > "/tmp/qqX/qe_new_vm_name.txt"
 
     printf "\n\n\n\n\n"
     printf "\e[3A\r"
@@ -1732,12 +1732,12 @@ function_quick_get_wrap ()  {
         run_distro_download
       else
         ResumeDL=
-        # qqX mods to quickget will output a finalized folder name to "/tmp/qe_new_vm_name.txt"
+        # qqX mods to quickget will output a finalized folder name to "/tmp/qqX/qe_new_vm_name.txt"
         # but this may need to contain more than just the principle download item
         # so determining whether the download is fully complete can be problematic.
         DL_SizeAlready=
         DL_PercentageDone=
-        QWG_FinalName="$(cut -d'"' -f2 < /tmp/qe_new_vm_name.txt 2>/dev/null | tr -cd '[:print:]')"
+        QWG_FinalName="$(cut -d'"' -f2 < /tmp/qqX/qe_new_vm_name.txt 2>/dev/null | tr -cd '[:print:]')"
         if [[ $DL_PotentialSize && $QWG_FinalName && $DL_FileName ]] && [[ "$DL_FileName" == *'.iso' || "$DL_FileName" == *'.img' ]]; then
           DL_SizeAlready="$(du -b "$QWG_Conf_Dir/$QWG_FinalName/$DL_FileName" 2>/dev/null | awk '{print $1}' | tr -cd '[:digit:]')"
           if [[ $DL_PotentialSize -ge 1 && $DL_SizeAlready -ge 1 ]]; then
@@ -1821,8 +1821,8 @@ function_quick_get_wrap ()  {
     fi
   elif [[ ! -d "$NewVM_InstanceName" ]]; then
     # Quickget final name output can vary from expected. qqX ver 1.11 adds an output into the freespirit code
-    if grep -sq 'NewVM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
-      source "/tmp/qe_new_vm_name.txt"
+    if grep -sq 'NewVM_InstanceName' "/tmp/qqX/qe_new_vm_name.txt" ; then
+      source "/tmp/qqX/qe_new_vm_name.txt"
       NewVM_Conf_File="${NewVM_InstanceName}.conf"
       QGW_DownloadStopped=
     else
@@ -1906,7 +1906,7 @@ function_quick_get_wrap ()  {
     VM_Conf_File="$(basename "$NewVM_Conf_File")"
     refresh_sources_and_load_VM_arrays
     NewFileTuneUp=1
-    [[ "$(cat "/tmp/qmod-dl-url")" ]] && cp "/tmp/qmod-dl-url" "$VM_Conf_Dir/$VM_InstanceName/dl-url.txt"
+    [[ "$(cat "/tmp/qqX/qmod-dl-url")" ]] && cp "/tmp/qqX/qmod-dl-url" "$VM_Conf_Dir/$VM_InstanceName/dl-url.txt"
     function_config_tune_up  "$VM_Conf_Dir/$VM_Conf_File"
     # make sure values have been read, and at the least basic in case the tune up utility gets skipped
     refresh_conf_vars_and_values

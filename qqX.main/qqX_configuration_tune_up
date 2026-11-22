@@ -67,9 +67,9 @@ function_config_tune_up ()  {
     sleep 100
   fi
 
-  TuneUpTmpCopy="/tmp/TuneUpTargetCopy.tmp"
-  TuneUpTmpOriginal="/tmp/TuneUpTargetOriginal.tmp"
-  TuneUpTargetDraft="/tmp/TuneUpTargetDraft.tmp"
+  TuneUpTmpCopy="/tmp/qqX/TuneUpTargetCopy.tmp"
+  TuneUpTmpOriginal="/tmp/qqX/TuneUpTargetOriginal.tmp"
+  TuneUpTargetDraft="/tmp/qqX/TuneUpTargetDraft.tmp"
   cp  "$TuneUpTargetFile"  "$TuneUpTmpOriginal"
 
   # Possibly twice, but check paths as this script might be running for the first time on a brand new installation

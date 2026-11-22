@@ -165,69 +165,69 @@ scan_folders_list_and_add_VMs () {
 scan_VM_Array_for_sizes () {
 
   # human set for report
-  printf "" > "/tmp/qqX.Sizes.qcow.txt"
-  printf "" > "/tmp/qqX.Sizes.qcow.F.txt"
-  printf "" > "/tmp/qqX.Sizes.iso.txt"
-  printf "" > "/tmp/qqX.Sizes.iso.F.txt"
+  printf "" > "/tmp/qqX/qqX.Sizes.qcow.txt"
+  printf "" > "/tmp/qqX/qqX.Sizes.qcow.F.txt"
+  printf "" > "/tmp/qqX/qqX.Sizes.iso.txt"
+  printf "" > "/tmp/qqX/qqX.Sizes.iso.F.txt"
   local i=0
   ArrFolderPath=
   while [[ ${VM_Array[$i,0]} ]]; do
     ArrFolderFile="${VM_Array[$i,0]}/${VM_Array[$i,1]}"
     ArrFolder="${ArrFolderFile/'.conf'/}"
     if [[ $ArrFolderPath && -e "$ArrFolderFile" ]] && [[ $ArrFolderPath != "${VM_Array[$i,0]}" ]]; then
-      printf "\n" >> "/tmp/qqX.Sizes.qcow.F.txt" ; printf "\n" >> "/tmp/qqX.Sizes.iso.F.txt"
+      printf "\n" >> "/tmp/qqX/qqX.Sizes.qcow.F.txt" ; printf "\n" >> "/tmp/qqX/qqX.Sizes.iso.F.txt"
     fi
     du -d 4 -t 100M -h -a "$ArrFolder" 2>/dev/null | grep qcow | awk '{ printf "\n%-6s %s", $1, $2 }'\
-    | tee -a "/tmp/qqX.Sizes.qcow.txt" -a "/tmp/qqX.Sizes.qcow.F.txt" &> /dev/null
+    | tee -a "/tmp/qqX/qqX.Sizes.qcow.txt" -a "/tmp/qqX/qqX.Sizes.qcow.F.txt" &> /dev/null
     du -d 4 -t 30M -h -a "$ArrFolder" 2>/dev/null | grep -e 'iso' -e 'img' | awk '{ printf "\n%-6s %s", $1, $2 }'\
-    | tee -a "/tmp/qqX.Sizes.iso.txt" -a "/tmp/qqX.Sizes.iso.F.txt" &> /dev/null
+    | tee -a "/tmp/qqX/qqX.Sizes.iso.txt" -a "/tmp/qqX/qqX.Sizes.iso.F.txt" &> /dev/null
     # https://www.gnu.org/software/gawk/manual/html_node/Printf-Examples.html
     ArrFolderPath="${VM_Array[$i,0]}"
     ((i+=1))
   done
   if [[ $SharedDrive ]]; then
     ArrFolder="$(dirname "$SharedDrive")"
-    printf "\n" >> "/tmp/qqX.Sizes.iso.txt"
+    printf "\n" >> "/tmp/qqX/qqX.Sizes.iso.txt"
     du -d 4 -t 100M -h -a "$ArrFolder" 2>/dev/null | grep qcow | awk '{ printf "\n%-6s %s", $1, $2 }'\
-    | tee -a "/tmp/qqX.Sizes.qcow.txt" -a "/tmp/qqX.Sizes.qcow.F.txt" &> /dev/null
+    | tee -a "/tmp/qqX/qqX.Sizes.qcow.txt" -a "/tmp/qqX/qqX.Sizes.qcow.F.txt" &> /dev/null
     du -d 4 -t 30M -h -a "$ArrFolder" 2>/dev/null | grep -e 'iso' -e 'img' | awk '{ printf "%-6s %s\n", $1, $2 }'\
-    | tee -a "/tmp/qqX.Sizes.iso.txt" -a "/tmp/qqX.Sizes.iso.F.txt" &> /dev/null
+    | tee -a "/tmp/qqX/qqX.Sizes.iso.txt" -a "/tmp/qqX/qqX.Sizes.iso.F.txt" &> /dev/null
   fi
 
-  BackUpQcowPresent="$(grep -cs '.OLD.qcow2' "/tmp/qqX.Sizes.qcow.txt")"
+  BackUpQcowPresent="$(grep -cs '.OLD.qcow2' "/tmp/qqX/qqX.Sizes.qcow.txt")"
   [[ $BackUpQcowPresent == "0" ]] && BackUpQcowPresent=
 
   # machine set for calcs
   # both cases avoid using du with -L otherwise symbolically linked instances will cause double counts when totalling storage
-  printf "" > "/tmp/qqX.Sizes.qcow.K.txt"
-  printf "" > "/tmp/qqX.Sizes.iso.K.txt"
+  printf "" > "/tmp/qqX/qqX.Sizes.qcow.K.txt"
+  printf "" > "/tmp/qqX/qqX.Sizes.iso.K.txt"
   i=0
   while [[ ${VM_Array[$i,0]} ]]; do
     ArrFolderFile="${VM_Array[$i,0]}/${VM_Array[$i,1]}"
     ArrFolder="${ArrFolderFile/'.conf'/}"
-    du -d 4 -t 100M -a "$ArrFolder" 2>/dev/null | sort -nr | grep qcow >> "/tmp/qqX.Sizes.qcow.K.txt"
-    du -d 4 -t 30M -a "$ArrFolder" 2>/dev/null | sort -nr | grep -e 'iso' -e 'img' >> "/tmp/qqX.Sizes.iso.K.txt"
+    du -d 4 -t 100M -a "$ArrFolder" 2>/dev/null | sort -nr | grep qcow >> "/tmp/qqX/qqX.Sizes.qcow.K.txt"
+    du -d 4 -t 30M -a "$ArrFolder" 2>/dev/null | sort -nr | grep -e 'iso' -e 'img' >> "/tmp/qqX/qqX.Sizes.iso.K.txt"
     ((i+=1))
   done
 
   if [[ $SharedDrive ]]; then
     ArrFolder="$(dirname "$SharedDrive")"
-    du -d 4 -t 100M -a "$ArrFolder" 2>/dev/null | sort -nr | grep qcow >> "/tmp/qqX.Sizes.qcow.K.txt"
-    du -d 4 -t 30M -a "$ArrFolder" 2>/dev/null | sort -nr | grep -e 'iso' -e 'img' >> "/tmp/qqX.Sizes.iso.K.txt"
+    du -d 4 -t 100M -a "$ArrFolder" 2>/dev/null | sort -nr | grep qcow >> "/tmp/qqX/qqX.Sizes.qcow.K.txt"
+    du -d 4 -t 30M -a "$ArrFolder" 2>/dev/null | sort -nr | grep -e 'iso' -e 'img' >> "/tmp/qqX/qqX.Sizes.iso.K.txt"
   fi
 
-  if [[ $(cat "/tmp/qqX.Sizes.qcow.K.txt" 2>/dev/null ) ]]; then
-    TotalQcow2_SizesCount="$(grep -Ec ^'[1-9]' "/tmp/qqX.Sizes.qcow.K.txt" 2>/dev/null)"
-    TotalQcow2_Sizes="$(grep -E ^'[1-9]' < "/tmp/qqX.Sizes.qcow.K.txt" | awk '{print $1}' | paste -sd+ | bc -l  2>/dev/null)"
+  if [[ $(cat "/tmp/qqX/qqX.Sizes.qcow.K.txt" 2>/dev/null ) ]]; then
+    TotalQcow2_SizesCount="$(grep -Ec ^'[1-9]' "/tmp/qqX/qqX.Sizes.qcow.K.txt" 2>/dev/null)"
+    TotalQcow2_Sizes="$(grep -E ^'[1-9]' < "/tmp/qqX/qqX.Sizes.qcow.K.txt" | awk '{print $1}' | paste -sd+ | bc -l  2>/dev/null)"
     TotalQcow2_Sizes="$(bc <<< "scale=2; $TotalQcow2_Sizes/1000000")"
   else
     TotalQcow2_Sizes="0"
     TotalQcow2_SizesCount="0"
   fi
 
-  if [[ $(cat "/tmp/qqX.Sizes.iso.K.txt" 2>/dev/null ) ]]; then
-    Total_ISO_SizesCount="$(grep -Ec ^'[1-9]' "/tmp/qqX.Sizes.iso.K.txt" 2>/dev/null)"
-    Total_ISO_Sizes="$(grep -E ^'[1-9]' < "/tmp/qqX.Sizes.iso.K.txt" | awk '{print $1}' | paste -sd+ | bc -l  2>/dev/null)"
+  if [[ $(cat "/tmp/qqX/qqX.Sizes.iso.K.txt" 2>/dev/null ) ]]; then
+    Total_ISO_SizesCount="$(grep -Ec ^'[1-9]' "/tmp/qqX/qqX.Sizes.iso.K.txt" 2>/dev/null)"
+    Total_ISO_Sizes="$(grep -E ^'[1-9]' < "/tmp/qqX/qqX.Sizes.iso.K.txt" | awk '{print $1}' | paste -sd+ | bc -l  2>/dev/null)"
     Total_ISO_Sizes="$(bc <<< "scale=2; $Total_ISO_Sizes/1000000")"
   else
     Total_ISO_Sizes="0"
@@ -237,46 +237,46 @@ scan_VM_Array_for_sizes () {
 
 show_VM_Array_sizes_text () {
 
-  printf ""  > "/tmp/qqX.Sizes.Disparity.qcow.txt"
+  printf ""  > "/tmp/qqX/qqX.Sizes.Disparity.qcow.txt"
   [[ $VM_ElementCount -ge "36" ]] && printf "\n  Checking ... \n\n"
-  mapfile -t SizesScanArr < "/tmp/qqX.Sizes.qcow.txt"
+  mapfile -t SizesScanArr < "/tmp/qqX/qqX.Sizes.qcow.txt"
   for SSArrChk in "${SizesScanArr[@]}"; do
     SSArrChk_Disk="$(awk '{print $2}' <<< "$SSArrChk")"
     check_if_disk_needs_a_cleanup "$SSArrChk_Disk"
-    [[ $DiskDisparity -ge "1" ]] && printf "SIZE DISPARITY: %s \n\n" "$SSArrChk_Disk"  >> "/tmp/qqX.Sizes.Disparity.qcow.txt"
+    [[ $DiskDisparity -ge "1" ]] && printf "SIZE DISPARITY: %s \n\n" "$SSArrChk_Disk"  >> "/tmp/qqX/qqX.Sizes.Disparity.qcow.txt"
   done
-  [[ ! $(cat "/tmp/qqX.Sizes.Disparity.qcow.txt") ]] &&  printf "No disk size disparity problems found \n\n"   >> "/tmp/qqX.Sizes.Disparity.qcow.txt"
+  [[ ! $(cat "/tmp/qqX/qqX.Sizes.Disparity.qcow.txt") ]] &&  printf "No disk size disparity problems found \n\n"   >> "/tmp/qqX/qqX.Sizes.Disparity.qcow.txt"
 
-  printf "\nDisk by Size: \n\n" > "/tmp/qqX.SizesTotals.txt"
+  printf "\nDisk by Size: \n\n" > "/tmp/qqX/qqX.SizesTotals.txt"
   {
-    if [[ $(cat "/tmp/qqX.Sizes.qcow.txt") ]]; then  sort -hr "/tmp/qqX.Sizes.qcow.txt"
+    if [[ $(cat "/tmp/qqX/qqX.Sizes.qcow.txt") ]]; then  sort -hr "/tmp/qqX/qqX.Sizes.qcow.txt"
     else printf "\nNo distros have yet been installed to disk"
     fi
     printf "\n"
-    cat "/tmp/qqX.Sizes.Disparity.qcow.txt"
+    cat "/tmp/qqX/qqX.Sizes.Disparity.qcow.txt"
     printf "\nISO by Size: \n\n"
-    if [[ $(cat "/tmp/qqX.Sizes.iso.txt") ]]; then  sort -hr "/tmp/qqX.Sizes.iso.txt"
+    if [[ $(cat "/tmp/qqX/qqX.Sizes.iso.txt") ]]; then  sort -hr "/tmp/qqX/qqX.Sizes.iso.txt"
     else printf "\nNo ISOs are present"
     fi
     if [[ $BackUpQcowPresent ]]; then
       printf "\nBackups: \n\n"
-      grep -s '.OLD.qcow2' "/tmp/qqX.Sizes.qcow.txt"
+      grep -s '.OLD.qcow2' "/tmp/qqX/qqX.Sizes.qcow.txt"
       printf "\n"
     fi
     printf "\nTotal Storage:  Drives %s (%s)  ISO's %s (%s)" "${TotalQcow2_Sizes}G" "$TotalQcow2_SizesCount" "${Total_ISO_Sizes}G" "$Total_ISO_SizesCount"
     printf "\n\n\nDisk by Folder: \n"
-    if [[ "$(cat "/tmp/qqX.Sizes.qcow.F.txt" 2>/dev/null)" ]]; then
-      cat -s "/tmp/qqX.Sizes.qcow.F.txt" ; printf "\n\n"
+    if [[ "$(cat "/tmp/qqX/qqX.Sizes.qcow.F.txt" 2>/dev/null)" ]]; then
+      cat -s "/tmp/qqX/qqX.Sizes.qcow.F.txt" ; printf "\n\n"
     fi
     printf "\nISO by Folder: \n"
-    cat -s "/tmp/qqX.Sizes.iso.F.txt"
+    cat -s "/tmp/qqX/qqX.Sizes.iso.F.txt"
     printf "\n\n"
     printf "Total Storage:  Drives %s (%s)  ISO's %s (%s)" "${TotalQcow2_Sizes}G" "$TotalQcow2_SizesCount" "${Total_ISO_Sizes}G" "$Total_ISO_SizesCount"
     printf "\n\n"
-  }>> "/tmp/qqX.SizesTotals.txt"
+  }>> "/tmp/qqX/qqX.SizesTotals.txt"
 
   sleep 0.5
-  (nohup &> /dev/null  "$TextEditor" "/tmp/qqX.SizesTotals.txt" & ) || texteditor_not_found_message
+  (nohup &> /dev/null  "$TextEditor" "/tmp/qqX/qqX.SizesTotals.txt" & ) || texteditor_not_found_message
 }
 
 check_net_mode () {

@@ -57,7 +57,7 @@ CompactVersion=
 # Array output:
 # When embedding in Bash scripts, the array '${fvOutputArr[*]}' is accessible by default
 # via the global (-g) declaration at the function start
-# Additionally, full embedded or standalone will automatically output to '/tmp/fv-arr.txt'
+# Additionally, full embedded or standalone will automatically output to '/tmp/qqX/fv-arr.txt'
 # in a plain text column format, creating a transfer file that can be be mapped by most scripts.
 # Or, when using $PATH controlled standalones, an alternative array filepath may be specified here.
 FvArrFilePath=
@@ -530,7 +530,7 @@ floatversion ()  {
   fi
 
   if [[ $FvArrFilePath ]]; then printf "%s\n" "${fvOutputArr[@]}" > "$FvArrFilePath"
-  else printf "%s\n" "${fvOutputArr[@]}" > "/tmp/fv-arr.txt"
+  else printf "%s\n" "${fvOutputArr[@]}" > "/tmp/qqX/fv-arr.txt"
   fi
 
 }

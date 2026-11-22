@@ -27,5 +27,5 @@
 #  Variance theoretically can exist in the functioning of nbd file mounting routines
 #  so some distro desktop combinations may need some form of custom tweaking ??
 
-source "/tmp/qqX_nbd_vars"
+source "/tmp/qqX/qqX_nbd_vars"
 source "$qqX_MainFolder/qqX_filemanage_qcow_drive"

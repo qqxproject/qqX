@@ -58,14 +58,14 @@ function quickemu {
   #  These bits are basically the remaining sections of the original quickemu code.
   #  The earlier original code sections are all functions that have now been loaded, as is, or modified
 
-  if [[ ! -e "/tmp/qmod-case-temp" ]] || [[ ! -e "/tmp/qmod-actions-temp" ]] || [[ ! -e "/tmp/qmod-boot-temp" ]]; then
+  if [[ ! -e "/tmp/qqX/qmod-case-temp" ]] || [[ ! -e "/tmp/qqX/qmod-actions-temp" ]] || [[ ! -e "/tmp/qqX/qmod-boot-temp" ]]; then
 
     printColor "\n\n ERROR qqX restart needed \n\n"  ; sleep 5
 
   else
 
     # keep running quickemu 'case' checks for matches:
-    while [[ $1 ]]; do source "/tmp/qmod-case-temp"
+    while [[ $1 ]]; do source "/tmp/qqX/qmod-case-temp"
     done
     shift  $#
 
@@ -73,7 +73,7 @@ function quickemu {
     # & if not yet given, decide on action
     #  https://unix.stackexchange.com/questions/18981/how-to-unset-the-positional-parameters
 
-    # Quickemu normally 'SOURCES-IN' the .conf file at the start of "/tmp/qmod-actions-temp"
+    # Quickemu normally 'SOURCES-IN' the .conf file at the start of "/tmp/qqX/qmod-actions-temp"
     # BUT from qqX ver. 1.5 this happens at the end of qqX function 'VM_loader_selector_and_menu'
     # So, some setting confirmations and overides can be placed here, others go into the modded function 'vm_boot'
 
@@ -86,7 +86,7 @@ function quickemu {
     fi
     fixed_iso="$Mounted_ISO"
     [[ $guest_os == "macos" ]] && [[ ! $cpu_cores ]] && cpu_cores=8
-    source "/tmp/qmod-actions-temp"
+    source "/tmp/qqX/qmod-actions-temp"
 
     # return if quickemu found conf errors (via exit trap)
     if [[ $RouteToMenus ]]; then
@@ -290,14 +290,14 @@ function quickemu {
       else
         # These logs only get cleared just before running, so stay until a boot sequence is run, irrespective of
         # whether the run is made as [v] verbose & terminated
-        printf "" > "/tmp/qqX_echo_output.log"
+        printf "" > "/tmp/qqX/qqX_echo_output.log"
         printf "" > "$QemuErrorLog"
         printf "" > "$VM_Conf_Dir/$VM_InstanceName/$VM_InstanceName.log"
         [[ $Loop_Diagnostics ]] && printf "\n\n pre-sourcing qmod-boot :" &&  main_loop_diagnostics && printf "\n\n"
         # Run BOOT SEQUENCE via modded function vm_boot from pre-sourced file 'qmod-function-vm_boot-new-temp'
         # which also includes verbose load routines and break sequence
         sleep 1
-        source "/tmp/qmod-boot-temp"
+        source "/tmp/qqX/qmod-boot-temp"
         VM_ExecBoot=
         if [[ $BreakAtVerboseArgs ]]; then
           SpicyPID="$(pgrep spicy)"

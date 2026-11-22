@@ -213,9 +213,9 @@ function distro_release_notes {
 
 # TRANSFER FILES may also be implemented:
 # See 'editions_anduinos' for a more complex example script and 'get_pclinuxos' for simpler cases
-    ReleaseDataLog="/tmp/qGet.Mods.REL.data.txt"
-    EditionsDataLog="/tmp/qGet.Mods.ED.data.txt"
-    GetDataLog="/tmp/qGet.Mods.GET.data.txt"
+    ReleaseDataLog="/tmp/qqX/qGet.Mods.REL.data.txt"
+    EditionsDataLog="/tmp/qqX/qGet.Mods.ED.data.txt"
+    GetDataLog="/tmp/qqX/qGet.Mods.GET.data.txt"
 
 # Quickget's legacy behaviour is to return a 'STOCK LIST' of editions when no release is supplied ...
 # This probably has room for improvement but a list should be given.
@@ -1532,7 +1532,7 @@ function web_pipe_json {
 ## ADD
 # Check the file headers. To be used for returns of 0 or 1 with pipe to log file,
 function check_pipe {
-    printf "" > "/tmp/qGet_check_pipe.txt"
+    printf "" > "/tmp/qqX/qGet_check_pipe.txt"
     local Args=("${@}")
     if [[ ! "${Args[*]}" ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'Missing Args for function check_pipe' "$ChkLog" ; then
@@ -1540,12 +1540,12 @@ function check_pipe {
         fi
         return 1
     fi
-    curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2  --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
-    if ! grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
-        printf "" > "/tmp/qGet_check_pipe.txt"
-        curl --disable -sLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qGet_check_pipe.txt"
+    curl --disable -sLf --head --retry 16 --retry-max-time 2 --connect-timeout 2  --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qqX/qGet_check_pipe.txt"
+    if ! grep -si 'HTTP/' "/tmp/qqX/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then
+        printf "" > "/tmp/qqX/qGet_check_pipe.txt"
+        curl --disable -sLf --head --retry 8 --retry-max-time 4 --connect-timeout 4 --keepalive-time 2 --location-trusted --max-time 30 "${Args[@]}" > "/tmp/qqX/qGet_check_pipe.txt"
     fi
-    if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1 ; fi
+    if grep -si 'HTTP/' "/tmp/qqX/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1 ; fi
 }
 # where HTTP/ 200 = success (with size data etc as readable) and 404 = not found = fail
 # --location-trusted means extend secure connection to the mirror or to the CDN otherwise 302 redirects will lose https.
@@ -1595,14 +1595,14 @@ function web_get() {
             # 'get_$OS' should output two args; a filepath URL, followed a checksum number
             #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
             #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
-            printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+            printf "%s" "$GetLine" > "/tmp/qqX/qGet-test-all-GetLine.txt"
             # Leave as mirror URL, if available from above, if Check Mirrors requested. Otherwise reset.
             [[ ! $CheckMirrors ]] && URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
             HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
             [[ "$HASH" == *'://'* ]] && HASH=
         fi
         CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
-        printf "Using webget > %s %s" "$CHECK" "$URL" > "/tmp/qGet_webget_report.txt"
+        printf "Using webget > %s %s" "$CHECK" "$URL" > "/tmp/qqX/qGet_webget_report.txt"
         test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
         exit 0
     elif [ "${OPERATION}" == "download" ]; then
@@ -1615,8 +1615,8 @@ function web_get() {
     #  Allow qqX or any external process to pick up the FINALIZED VM-NAME
     # - avoids overwrites eg windows 'unattended'
     # - external proc should clear this file before starting so the grep test will function
-    if ! grep -sq 'NewVM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
-        printf "NewVM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
+    if ! grep -sq 'NewVM_InstanceName' "/tmp/qqX/qe_new_vm_name.txt" ; then
+        printf "NewVM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qqX/qe_new_vm_name.txt"
     fi
     if [[ ${OS} != windows && ${OS} != macos && ${OS} != windows-server ]]; then
         echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}" ; echo "- URL: ${URL}"
@@ -1649,7 +1649,7 @@ function web_check {
         fi
     done
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
-    printf "%s" "$URL" > "/tmp/qmod-dl-url"
+    printf "%s" "$URL" > "/tmp/qqX/qmod-dl-url"
     if [[ ! $URL ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
             printf "ERROR: No URL > Possible initial lookup or server problem\n\n" >> "$ChkLog"
@@ -1661,7 +1661,7 @@ function web_check {
         fi
         return 1
     fi
-    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
+    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qqX/qGet_check_pipe.txt"
     if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
     else return 1
     fi
@@ -1736,13 +1736,13 @@ function test_all {
                         printf "ERROR: %s  %-12s  >  Editions function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
                         return 1
                     fi
-                    printf "" > "/tmp/qGet-test-all-GetLine.txt"
+                    printf "" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     SECONDS=0
-                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]] ; do
+                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]] ; do
                         GetLine=$(get_"${OS}" "$RELEASE")
-                        printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                        printf "%s" "$GetLine" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     done
-                    if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
+                    if [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]]; then
                         printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
                         return 1
                     fi
@@ -1787,13 +1787,13 @@ function test_all {
                     [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
                     test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
                 elif [ "${OPERATION}" == "test" ]; then
-                    printf "" > "/tmp/qGet-test-all-GetLine.txt"
+                    printf "" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     SECONDS=0
-                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]] ; do
+                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]] ; do
                         GetLine=$(get_"${OS}" "$RELEASE")
-                        printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                        printf "%s" "$GetLine" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     done
-                    if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
+                    if [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]]; then
                         printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
                         return 1
                     fi
@@ -1838,7 +1838,7 @@ function test_all {
 # effectively being able to bypass selected original Quickget case statements, or add new ones ...
 
 QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors= ; SingleCheck=
-printf "Webget NOT used\n" > "/tmp/qGet_webget_report.txt"
+printf "Webget NOT used\n" > "/tmp/qqX/qGet_webget_report.txt"
 
 case "${1}" in
     --info-line)
@@ -1851,7 +1851,7 @@ case "${1}" in
         CheckMirrors=1 ; shift
     ;;
     --full-check|--check|-check)
-        FullCheckOps=1 ; ChkLog="/tmp/qGet_FullResult.txt" ; printf "" > "$ChkLog"
+        FullCheckOps=1 ; ChkLog="/tmp/qqX/qGet_FullResult.txt" ; printf "" > "$ChkLog"
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
         if [[ ! $1 ]]; then
@@ -1868,10 +1868,10 @@ case "${1}" in
         fi ;;
     --quiet-check|--compact-check)
         if [[ $1 == "--quiet-check" ]]; then
-            QuietOps=1 ; ChkLog="/tmp/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
+            QuietOps=1 ; ChkLog="/tmp/qqX/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
         fi
         if [[ $1 == "--compact-check" ]]; then
-            CompactOps=1 ; ChkLog="/tmp/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
+            CompactOps=1 ; ChkLog="/tmp/qqX/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
         fi
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
@@ -1894,9 +1894,9 @@ case "${1}" in
         printf "\n\n----------------------------- ./quickget -------------------------------"
         printf "\n\n  --info-line       Output the OS info line in raw field separated format for alternative processing"
         printf "\n\n  --rel-notes       Output the additional release and installation notes, if supplied"
-        printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qGet_FullResult.txt\""
-        printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
-        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log check image URL(s) to file \"/tmp/qGet_QuietResult.txt\""
+        printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qqX/qGet_FullResult.txt\""
+        printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qqX/qGet_CompactResult.txt\""
+        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log check image URL(s) to file \"/tmp/qqX/qGet_QuietResult.txt\""
         printf "\n\n  --mirrors         Add-on for the above tests, to show info on possible mirror services. Omit for more generalized testing."
         printf "\n\n  Without a specified 'OS' will run a complete 'test_all' whilst with 'OS' will test all releases and editions of that specified."
         printf "\n\n  Lastly, 2 or 3 part final descriptor checks will route through 'web_get' and will output plain results, without a log filename reminder."

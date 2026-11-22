@@ -92,9 +92,9 @@ if [[ ! $qqX_SelfChk_Run ]]; then
   qqX_LatestNewsDate=
   qqX_Newest_Tag= ; qqX_Newest_TagText=
   qqX_UpdateAvail=
-  qqX_Upd_VarsTmpFile="/tmp/qqX.upd.chk.txt"
+  qqX_Upd_VarsTmpFile="/tmp/qqX/qqX.upd.chk.txt"
   printf ""  > "$qqX_Upd_VarsTmpFile"
-  qqX_Latest_ReleaseFile="/tmp/latest-qqX"
+  qqX_Latest_ReleaseFile="/tmp/qqX/latest-qqX"
   [[ -e $qqX_Latest_ReleaseFile ]] && rm "$qqX_Latest_ReleaseFile" 2>/dev/null
   qqX_SelfChk_Run=1
 fi
@@ -174,17 +174,17 @@ check_for_qqX_updates() {
   fi
 
   # All TAGS, released or not. Use head -n1, not fv -M, to make sure dev tags don't take priority over beta  (dev NOT to be used for pre-release)
-  [[ -e "/tmp/qqXtags.txt"  ]] && rm "/tmp/qqXtags.txt"
-  curl -qsLf -m 30 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqXtags.txt"
-  qqX_Newest_Tag="$(grep -s '/tags/' "/tmp/qqXtags.txt" | head -n1 | fv -f -M -Q)"
-  qqX_Newest_TagText="$(grep -s -e 'text-small color-fg-muted"' "/tmp/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
+  [[ -e "/tmp/qqX/qqXtags.txt"  ]] && rm "/tmp/qqX/qqXtags.txt"
+  curl -qsLf -m 30 "https://github.com/qqxproject/qqX/tags" > "/tmp/qqX/qqXtags.txt"
+  qqX_Newest_Tag="$(grep -s '/tags/' "/tmp/qqX/qqXtags.txt" | head -n1 | fv -f -M -Q)"
+  qqX_Newest_TagText="$(grep -s -e 'text-small color-fg-muted"' "/tmp/qqX/qqXtags.txt"  | cut -d'>' -f2 | grep -m 1 -e '[[:print:]]')"
 
   # qqX announcements
-  [[ -e "/tmp/qqXnews.txt"  ]] && rm "/tmp/qqXnews.txt"
-  curl -qsLf -m 30  "https://github.com/qqxproject/qqX/discussions/categories/announcements" > "/tmp/qqXnews.txt"
-  if [[ -e "/tmp/qqXnews.txt" ]]; then
-    qqX_LatestNewsTitle="$(grep -s -e '/discussions/[[:digit:]]' "/tmp/qqXnews.txt" | grep -m 1 hovercard | tr '"' '\n' | grep '>' | cut -d'<' -f1 | cut -d'>' -f2)"
-    qqX_LatestNewsDate="$(grep -s 'relative-time' "/tmp/qqXnews.txt"  | tr '"' '\n' | grep -e '/relative' | grep -v github | cut -d'<' -f1 | cut -d'>' -f2 | head -n 1 | tr -d ',')"
+  [[ -e "/tmp/qqX/qqXnews.txt"  ]] && rm "/tmp/qqX/qqXnews.txt"
+  curl -qsLf -m 30  "https://github.com/qqxproject/qqX/discussions/categories/announcements" > "/tmp/qqX/qqXnews.txt"
+  if [[ -e "/tmp/qqX/qqXnews.txt" ]]; then
+    qqX_LatestNewsTitle="$(grep -s -e '/discussions/[[:digit:]]' "/tmp/qqX/qqXnews.txt" | grep -m 1 hovercard | tr '"' '\n' | grep '>' | cut -d'<' -f1 | cut -d'>' -f2)"
+    qqX_LatestNewsDate="$(grep -s 'relative-time' "/tmp/qqX/qqXnews.txt"  | tr '"' '\n' | grep -e '/relative' | grep -v github | cut -d'<' -f1 | cut -d'>' -f2 | head -n 1 | tr -d ',')"
   fi
   local LatestEpochNewsDate="" LastNewsReading="" EpochDateNow=""
   EpochDateNow="$(date +%s)"
@@ -247,8 +247,8 @@ function check_beta_alert_count {
 
 # Runs in the background. qqX will run this once.
 function find_latest_qemu_version {
-  printf "" > "/tmp/latest-qemu.txt"
-  { floatversion --full -M "$(curl --disable -sLf --retry 3 --max-time 8 "https://github.com/qemu/qemu/tags" | grep -s 'Link--primary')" 2>/dev/null; } > "/tmp/latest-qemu.txt"
+  printf "" > "/tmp/qqX/latest-qemu.txt"
+  { floatversion --full -M "$(curl --disable -sLf --retry 3 --max-time 8 "https://github.com/qemu/qemu/tags" | grep -s 'Link--primary')" 2>/dev/null; } > "/tmp/qqX/latest-qemu.txt"
 }
 
 function download_new_release {

@@ -239,9 +239,9 @@ function distro_release_notes {
 
 # TRANSFER FILES may also be implemented:
 # See 'get_pclinuxos' for simpler case
-    ReleaseDataLog="/tmp/qGet.Mods.REL.data.txt"
-    EditionsDataLog="/tmp/qGet.Mods.ED.data.txt"
-    GetDataLog="/tmp/qGet.Mods.GET.data.txt"
+    ReleaseDataLog="/tmp/qqX/qGet.Mods.REL.data.txt"
+    EditionsDataLog="/tmp/qqX/qGet.Mods.ED.data.txt"
+    GetDataLog="/tmp/qqX/qGet.Mods.GET.data.txt"
 
 # Quickget's legacy behaviour is to return a 'STOCK LIST' of editions when no release is supplied ...
 # This probably has room for improvement but a list should be given.
@@ -1428,10 +1428,10 @@ download_windows_workstation() {
 
         # Make log for dev analysis
         { echo; date; echo; echo "$url"; echo
-        } >  "/tmp/qe_win_dl_log.txt"
+        } >  "/tmp/qqX/qe_win_dl_log.txt"
 
         { echo "I18N Lang: $I18N"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         # MOD update to 04/2026 versions  (needs to match the user agent in function web_get)
         local user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
@@ -1443,7 +1443,7 @@ download_windows_workstation() {
         session_id="$(uuidgen)"
 
         { echo "$user_agent"; echo; uuidparse "$session_id"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         # Get product edition ID for latest release of given Windows version
         # Product edition ID: This specifies both the Windows release (e.g. 22H2) and edition ("multi-edition" is default, either Home/Pro/Edu/etc., we select "Pro" in the answer files) in one number
@@ -1468,7 +1468,7 @@ download_windows_workstation() {
         # @ 04/2026 further ddos problems
 
         { echo; date; echo "iso_download_page_html:"; echo; echo "$iso_download_page_html"; echo ; echo "End of Page"; echo
-        } >  "/tmp/qe_win_dl_page_html.txt"
+        } >  "/tmp/qqX/qe_win_dl_page_html.txt"
 
         echo -n " - Getting Product edition ID: "
         # tr: Filter for only numerics to prevent HTTP parameter injection
@@ -1477,7 +1477,7 @@ download_windows_workstation() {
         echo "$product_edition_id"
 
         { echo "product_edition_id:"; echo; echo "$product_edition_id"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         echo " - Permit Session ID: $session_id"
         # Permit Session ID
@@ -1494,7 +1494,7 @@ download_windows_workstation() {
         local profile="606624d44113"
 
         { echo "profile:"; echo; echo "$profile"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         echo -n " - Getting language SKU ID: "
         # Get language -> skuID association table
@@ -1505,13 +1505,13 @@ download_windows_workstation() {
         }
 
         { echo; date; echo "language_skuid_table_json - FULL "; echo; echo "$language_skuid_table_json"; echo ; echo "End of Page"; echo
-        } >  "/tmp/qe_win_dl_lang_table full.txt"
+        } >  "/tmp/qqX/qe_win_dl_lang_table full.txt"
 
         { echo "language_skuid_table_cmd:"; echo; echo "$language_skuid_table_cmd"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         { echo "language_skuid_table_json:"; echo; echo "$language_skuid_table_json"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         sku_id="$(echo "${language_skuid_table_json}" | jq -r '.Skus[] | select(.LocalizedLanguage=="'"${I18N}"'" or .Language=="'"${I18N}"'").Id')"
         echo "$sku_id"
@@ -1520,7 +1520,7 @@ download_windows_workstation() {
         echo " - And a few human seconds here .... " ; sleep "$RndNum"
 
         { echo "sku_id:"; echo; echo "$sku_id"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         echo " - Getting ISO download link..."
 
@@ -1538,10 +1538,10 @@ download_windows_workstation() {
         echo " - And some more, hopefully successful, human seconds before we start .... " ; sleep "$RndNum"
 
         { echo "iso_download_link_cmd:"; echo; echo "$iso_download_link_cmd"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         { echo "iso_download_link_json:"; echo; echo "$iso_download_link_json"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
         local failed=0
         if ! [ "$iso_download_link_json" ]; then
             # This should only happen if there's been some change to how this API works
@@ -1573,7 +1573,7 @@ download_windows_workstation() {
         iso_download_link="$(echo "${iso_download_link_json}" | jq -r '.ProductDownloadOptions[].Uri' | grep x64)"
 
         { echo "iso_download_link - filtered:"; echo; echo "$iso_download_link"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         if ! [ "$iso_download_link" ]; then
             # This should only happen if there's been some change to the download endpoint web address
@@ -1587,7 +1587,7 @@ download_windows_workstation() {
 
         FILE_NAME="$(echo "$iso_download_link" | cut -d'?' -f1 | cut -d'/' -f5)"
         { echo "FILE_NAME"; echo; echo "$FILE_NAME"; echo
-        } >>  "/tmp/qe_win_dl_log.txt"
+        } >>  "/tmp/qqX/qe_win_dl_log.txt"
 
         web_get "${iso_download_link}" "${VM_PATH}" "${FILE_NAME}"
     fi
@@ -2012,7 +2012,7 @@ function web_check {
         fi
     done
     # check is standard *.* filename or Ubuntu SUMS file, not an html web page or such ...
-    printf "%s" "$URL" > "/tmp/qmod-dl-url"
+    printf "%s" "$URL" > "/tmp/qqX/qmod-dl-url"
     if [[ ! $URL ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'ERROR: No URL' "$ChkLog" ; then
             printf "ERROR: No URL > Possible initial lookup or server problem\n\n" >> "$ChkLog"
@@ -2024,7 +2024,7 @@ function web_check {
         fi
         return 1
     fi
-    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qGet_check_pipe.txt"
+    # returns 0 or 1, plus check_pipe outputs header to log file "/tmp/qqX/qGet_check_pipe.txt"
     if check_pipe "${HEADERS[@]}" "${URL}" ; then return 0
     else return 1
     fi
@@ -2033,7 +2033,7 @@ function web_check {
 ## ADD
 # Check the file headers. To be used for returns of 0 or 1 WITH PIPE TO LOG FILE,
 function check_pipe {
-    printf "" > "/tmp/qGet_check_pipe.txt"
+    printf "" > "/tmp/qqX/qGet_check_pipe.txt"
     if [[ ! "$1" ]]; then
         if [[ $ChkLog ]] && ! grep -qs 'Missing Args for function check_pipe' "$ChkLog" ; then
             printf "\nERROR: Missing Args for function check_pipe\n" >> "$ChkLog"
@@ -2042,16 +2042,16 @@ function check_pipe {
     fi
     # NB check_pipe --head output is used for size grep in quick_reroute script
     # Also > direction output is more stable than curl's --output method
-    curl -qsLf --head --location-trusted --max-time 10 "$@" > "/tmp/qGet_check_pipe.txt" &
+    curl -qsLf --head --location-trusted --max-time 10 "$@" > "/tmp/qqX/qGet_check_pipe.txt" &
     wait "$!" ; sleep 0.5
-    if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0
+    if grep -si 'HTTP/' "/tmp/qqX/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0
     else
-        cp "/tmp/qGet_check_pipe.txt" "/tmp/qGet_check_pipe_fail.txt"
-        printf "" > "/tmp/qGet_check_pipe.txt"
+        cp "/tmp/qqX/qGet_check_pipe.txt" "/tmp/qqX/qGet_check_pipe_fail.txt"
+        printf "" > "/tmp/qqX/qGet_check_pipe.txt"
         local USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
-        curl -qsLf --head --location-trusted --retry 3 --retry-max-time 2 --max-time 20  --user-agent "${USER_AGENT}" "$@" > "/tmp/qGet_check_pipe.txt" &
+        curl -qsLf --head --location-trusted --retry 3 --retry-max-time 2 --max-time 20  --user-agent "${USER_AGENT}" "$@" > "/tmp/qqX/qGet_check_pipe.txt" &
         wait "$!" ; sleep 1
-        if grep -si 'HTTP/' "/tmp/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1
+        if grep -si 'HTTP/' "/tmp/qqX/qGet_check_pipe.txt" | tail -n 1 | grep -q 200; then return 0 ; else return 1
         fi
     fi
 }
@@ -2124,14 +2124,14 @@ function web_get() {
             # 'get_$OS' should output two args; a filepath URL, followed a checksum number
             #  but additionally add mirror URL, if available or possible, to check the state of the mirror service,
             #  noting that mirrors can block in the time gap between the location of a mirror URL and testing it.
-            printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+            printf "%s" "$GetLine" > "/tmp/qqX/qGet-test-all-GetLine.txt"
             # Leave as mirror URL, if available from above, if Check Mirrors requested. Otherwise reset.
             [[ ! $CheckMirrors ]] && URL=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $1}')
             HASH=$(tr -cd '[:print:]' <<< "$GetLine" | awk '{print $2}')
             [[ "$HASH" == *'://'* ]] && HASH=
         fi
         CHECK=$(web_check "${URL}" && echo "PASS" || echo "FAIL")
-        printf "Using webget > %s %s" "$CHECK" "$URL" > "/tmp/qGet_webget_report.txt"
+        printf "Using webget > %s %s" "$CHECK" "$URL" > "/tmp/qqX/qGet_webget_report.txt"
         test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}" "${CHECK}" "$HASH"
         exit 0
     elif [ "${OPERATION}" == "download" ]; then
@@ -2144,8 +2144,8 @@ function web_get() {
     #  Allow qqX or any external process to pick up the FINALIZED VM-NAME
     # - avoids overwrites eg windows 'unattended'
     # - external proc should clear this file before starting so the grep test will function
-    if ! grep -sq 'NewVM_InstanceName' "/tmp/qe_new_vm_name.txt" ; then
-        printf "NewVM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qe_new_vm_name.txt"
+    if ! grep -sq 'NewVM_InstanceName' "/tmp/qqX/qe_new_vm_name.txt" ; then
+        printf "NewVM_InstanceName=\"%s\" \n" "$(basename "$DIR")" > "/tmp/qqX/qe_new_vm_name.txt"
     fi
     if [[ ${OS} != windows && ${OS} != macos && ${OS} != windows-server ]]; then
         echo "Downloading $(pretty_name "${OS}") ${RELEASE} ${EDITION}" ; echo "- URL: ${URL}"
@@ -2257,15 +2257,15 @@ function test_all {
                         fi
                         return 1
                     fi
-                    printf "" > "/tmp/qGet-test-all-GetLine.txt"
+                    printf "" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     SECONDS=0
-                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]] ; do
+                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]] ; do
                         if [[ $OS == "ubuntu-server" ]]; then GetLine=$(get_ubuntu-server "$RELEASE")
                         else GetLine=$(get_"${OS}" "$RELEASE")
                         fi
-                        printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                        printf "%s" "$GetLine" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     done
-                    if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
+                    if [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]]; then
                         if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
                         else printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
                         fi
@@ -2312,13 +2312,13 @@ function test_all {
                     [[ ! $URL ]] && printf "\nERROR: No URL from function %s\n" "get_${OS}"
                     test_result "${OS}" "${RELEASE}" "${EDITION}" "${URL}"
                 elif [ "${OPERATION}" == "test" ]; then
-                    printf "" > "/tmp/qGet-test-all-GetLine.txt"
+                    printf "" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     SECONDS=0
-                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]] ; do
+                    while [[ $SECONDS -lt 60 ]] && [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]] ; do
                         GetLine=$(get_"${OS}" "$RELEASE")
-                        printf "%s" "$GetLine" > "/tmp/qGet-test-all-GetLine.txt"
+                        printf "%s" "$GetLine" > "/tmp/qqX/qGet-test-all-GetLine.txt"
                     done
-                    if [[ ! $(cat "/tmp/qGet-test-all-GetLine.txt") ]]; then
+                    if [[ ! $(cat "/tmp/qqX/qGet-test-all-GetLine.txt") ]]; then
                         if [[ $QuietOps ]]; then printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" >> "$ChkLog"
                         else printf "ERROR: %s  %-12s  >  Get function FAIL \n" "$OS" "$RELEASE" | tee -a "$ChkLog"
                         fi
@@ -2368,7 +2368,7 @@ function test_all {
 # effectively being able to bypass selected original Quickget case statements, or add new ones ...
 
 QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors= ; SingleCheck=
-printf "Webget NOT used\n" > "/tmp/qGet_webget_report.txt"
+printf "Webget NOT used\n" > "/tmp/qqX/qGet_webget_report.txt"
 
 case "${1}" in
     --info-line)
@@ -2381,7 +2381,7 @@ case "${1}" in
         CheckMirrors=1 ; shift
     ;;
     --full-check|--check|-check)
-        FullCheckOps=1 ; ChkLog="/tmp/qGet_FullResult.txt" ; printf "" > "$ChkLog"
+        FullCheckOps=1 ; ChkLog="/tmp/qqX/qGet_FullResult.txt" ; printf "" > "$ChkLog"
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
         if [[ ! $1 ]]; then
@@ -2398,10 +2398,10 @@ case "${1}" in
         fi ;;
     --quiet-check|--compact-check)
         if [[ $1 == "--quiet-check" ]]; then
-            QuietOps=1 ; ChkLog="/tmp/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
+            QuietOps=1 ; ChkLog="/tmp/qqX/qGet_QuietResult.txt" ; printf "" > "$ChkLog"
         fi
         if [[ $1 == "--compact-check" ]]; then
-            CompactOps=1 ; ChkLog="/tmp/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
+            CompactOps=1 ; ChkLog="/tmp/qqX/qGet_CompactResult.txt" ; printf "" > "$ChkLog"
         fi
         OPERATION="test" ; shift
         [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
@@ -2425,9 +2425,9 @@ case "${1}" in
         printf "\n\n----------------------------- ./quickget -------------------------------"
         printf "\n\n  --info-line       Output the OS info line in raw field separated format for alternative processing"
         printf "\n\n  --rel-notes       Output the additional release and installation notes, if supplied"
-        printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qGet_FullResult.txt\""
-        printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qGet_CompactResult.txt\""
-        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log checks to file \"/tmp/qGet_QuietResult.txt\""
+        printf "\n\n  --full-check      [os] [release] [edition] : Full Hash/Iso to StdOut, plus log to file \"/tmp/qqX/qGet_FullResult.txt\""
+        printf "\n\n  --compact-check   [os] [release] [edition] : Short line StdOut, plus log to file \"/tmp/qqX/qGet_CompactResult.txt\""
+        printf "\n\n  --quiet-check     [os] [release] [edition] : Only log checks to file \"/tmp/qqX/qGet_QuietResult.txt\""
         printf "\n\n  --mirrors         Add-on for the above tests, to show info on possible mirror services. Omit for more generalized testing."
         printf "\n\n  --arch            including --check-all-arch:  Arm hosts and arch checks are not currently supported"
         printf "\n\n  Without a specified 'OS' will run a complete 'test_all' whilst with 'OS' will test all releases and editions of that specified."

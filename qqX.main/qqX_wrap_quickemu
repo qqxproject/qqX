@@ -73,8 +73,8 @@ function find_quickemu_source_functions_and_vars {
 
   # Ignore first bits, bash check & locale preamble etc.
   # QE starts into setting out the functions almost straight away.
-  grep -m 1 -A 3000 'function' "$QE_SourcePath" | grep -B 3000 '### MAIN' | head -n -1  > "/tmp/qmod-functions-temp"
-  source "/tmp/qmod-functions-temp"
+  grep -m 1 -A 3000 'function' "$QE_SourcePath" | grep -B 3000 '### MAIN' | head -n -1  > "/tmp/qqX/qmod-functions-temp"
+  source "/tmp/qqX/qmod-functions-temp"
 
   # Source any function overwrites
   [[ -e "$QE_Modpath" ]] && source "$QE_Modpath"
@@ -82,10 +82,10 @@ function find_quickemu_source_functions_and_vars {
   ## Quickemu Variables (set & clear)
   #  have to be cleared before every call to quickemu as the base code is normally set to be run once & exit
 
-  grep -A 300 '### MAIN' "$QE_SourcePath"| grep -B 300 'QEMU_VER_LONG=' | head -n -1  > "/tmp/qmod-qe-all-vars-temp"
+  grep -A 300 '### MAIN' "$QE_SourcePath"| grep -B 300 'QEMU_VER_LONG=' | head -n -1  > "/tmp/qqX/qmod-qe-all-vars-temp"
 
-  grep -B 300 'LAUNCHER=' "/tmp/qmod-qe-all-vars-temp" | head -n -2  > "/tmp/qmod-qe-rw-vars-temp"
-  grep -A 300 'VERSION=' "/tmp/qmod-qe-all-vars-temp" | tail -n +2  >> "/tmp/qmod-qe-rw-vars-temp"
+  grep -B 300 'LAUNCHER=' "/tmp/qqX/qmod-qe-all-vars-temp" | head -n -2  > "/tmp/qqX/qmod-qe-rw-vars-temp"
+  grep -A 300 'VERSION=' "/tmp/qqX/qmod-qe-all-vars-temp" | tail -n +2  >> "/tmp/qqX/qmod-qe-rw-vars-temp"
 
   # BUT don't source as this yet as it is only a repeat of qe-rw-vars-temp
   # with QEMU_IMG checker which has been replaced (during the initialization of qqX)
@@ -93,7 +93,7 @@ function find_quickemu_source_functions_and_vars {
 
   # Quickemu 4.9.5 adds in a few lines after the readonly ....
 
-  source  "/tmp/qmod-qe-rw-vars-temp"
+  source  "/tmp/qqX/qmod-qe-rw-vars-temp"
 
   # Separate the re-writeable vars  # NB: not all vars are listed by the quickemu script ...
   # Also NB: the quickemu variables QEMU= etc for qemu versioning get carried out separately by qqX so that machine switching can happen
@@ -109,7 +109,7 @@ find_quickemu_source_functions_and_vars
 function load_quickemu_special_vars {
   SpecialVarCheckArr=("LAUNCHER" "DISK_MIN_SIZE" "VERSION")
   for SpecialLine in "${SpecialVarCheckArr[@]}"; do
-    SpecialLine="$(grep "${SpecialLine}=" "/tmp/qmod-qe-all-vars-temp")"
+    SpecialLine="$(grep "${SpecialLine}=" "/tmp/qqX/qmod-qe-all-vars-temp")"
     SpecialLine="${SpecialLine/'readonly '/}"
     eval "$SpecialLine"
   done
@@ -133,16 +133,16 @@ function  load_mod_quickemu_boot {
   # of the fork variant quickget script that is used by the built-ins:
   # https://github.com/qqxproject/quickemu/blob/freespirit-next/quickget
 
-  declare -f vm_boot  >  "/tmp/qmod-function-vm_boot-orig-temp"
-  grep -B 500 -m 1 'MACHINE_TYPE=' "/tmp/qmod-function-vm_boot-orig-temp"  >  "/tmp/qmod-function-vm_boot-interim-temp"
+  declare -f vm_boot  >  "/tmp/qqX/qmod-function-vm_boot-orig-temp"
+  grep -B 500 -m 1 'MACHINE_TYPE=' "/tmp/qqX/qmod-function-vm_boot-orig-temp"  >  "/tmp/qqX/qmod-function-vm_boot-interim-temp"
 
 # add-in CUSTOM VARS here, as replacement values, using same method as for the final boot section
 # no indent on 'cat' & EOV lines or it fails:
 
-cat << 'EOV' >> "/tmp/qmod-function-vm_boot-interim-temp"
+cat << 'EOV' >> "/tmp/qqX/qmod-function-vm_boot-interim-temp"
 
     # Overide specified quickemu defaults,  though not all may be done here.
-    # Quickemu normally sources in the .conf file at the start of "/tmp/qmod-actions-temp"  (see function 'quickemu')
+    # Quickemu normally sources in the .conf file at the start of "/tmp/qqX/qmod-actions-temp"  (see function 'quickemu')
     # BUT from qqX ver. 1.5 this happens at the end of 'VM_loader_selector_and_menu'
 
     [[ $QEMU_Default_MachineType ]] &&  MACHINE_TYPE="$QEMU_Default_MachineType"
@@ -156,19 +156,19 @@ EOV
 # no indent on 'cat' & EOV or it fails
 
   # then continue with the remainder
-  grep -A 1500 -m 1 'MACHINE_TYPE=' "/tmp/qmod-function-vm_boot-orig-temp" | tail -n +2  >>  "/tmp/qmod-function-vm_boot-interim-temp"
+  grep -A 1500 -m 1 'MACHINE_TYPE=' "/tmp/qqX/qmod-function-vm_boot-orig-temp" | tail -n +2  >>  "/tmp/qqX/qmod-function-vm_boot-interim-temp"
 
   # except the pid control code, as qqX handles that bit
-  grep -B 1500 'SHELL_ARGS//Quickemu Project' "/tmp/qmod-function-vm_boot-interim-temp" >  "/tmp/qmod-function-vm_boot-new-temp"
+  grep -B 1500 'SHELL_ARGS//Quickemu Project' "/tmp/qqX/qmod-function-vm_boot-interim-temp" >  "/tmp/qqX/qmod-function-vm_boot-new-temp"
 
 
 ## ADD-IN extra code  ( place between the first EOF line & the brace that closes the tail trimmed boot function, just before the second EOF)
 
 # See https://stackoverflow.com/questions/22697688/how-to-cat-eof-a-file-containing-code     (@ 2024/04 use quote EOF, not escape)
 
-printf "\n\n   if true; then \n\n"  >> "/tmp/qmod-function-vm_boot-new-temp"
+printf "\n\n   if true; then \n\n"  >> "/tmp/qqX/qmod-function-vm_boot-new-temp"
 
-cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
+cat << 'EOF' >> "/tmp/qqX/qmod-function-vm_boot-new-temp"
 
     # Show all the compiled qemu & swmtp arguments as a human readable list
     # both to a log file and to screen   (Args & Args/HW record are defined after the VM selection or re-selection)
@@ -316,7 +316,7 @@ cat << 'EOF' >> "/tmp/qmod-function-vm_boot-new-temp"
     fi
 
 
-    mapfile -t QE_echo_Arr < "/tmp/qqX_echo_output.log"
+    mapfile -t QE_echo_Arr < "/tmp/qqX/qqX_echo_output.log"
 
     { printf "\nQUICKEMU SCREEN OUTPUT & other ...  \n"
 
@@ -365,7 +365,7 @@ EOF
 
   # End of boot modding. Now add the modded boot code as the new function 'vm_boot'
 
-  source "/tmp/qmod-function-vm_boot-new-temp"
+  source "/tmp/qqX/qmod-function-vm_boot-new-temp"
 
 }
 
@@ -376,26 +376,26 @@ load_mod_quickemu_boot
 function load_quickemu_cases_and_actions {
 
   ## Add in the standard parameter cases
-  grep -A 1000 '# Take command line arguments' "$QE_SourcePath" > "/tmp/qmod-endof-file-temp"
+  grep -A 1000 '# Take command line arguments' "$QE_SourcePath" > "/tmp/qqX/qmod-endof-file-temp"
 
   # note ' case' with space, otherwise grep can pick up the word "Lowercase"
-  grep -A 1000 -m 1 ' case' "/tmp/qmod-endof-file-temp" | grep -B 1000 -m 1 'esac' > "/tmp/qmod-case-temp"
+  grep -A 1000 -m 1 ' case' "/tmp/qqX/qmod-endof-file-temp" | grep -B 1000 -m 1 'esac' > "/tmp/qqX/qmod-case-temp"
 
   ##  Add in the standard actions ( also where quickemu sources in the .conf file )
 
-  # Quickemu normally sources in the .conf file at the start of "/tmp/qmod-actions-temp"  (see function 'quickemu')
+  # Quickemu normally sources in the .conf file at the start of "/tmp/qqX/qmod-actions-temp"  (see function 'quickemu')
   # BUT from qqX ver. 1.5 this happens at the end of 'VM_loader_selector_and_menu'
 
   if [[ $QE_498_Script ]]; then
-    grep -A 1000 -m 1 'esac' "/tmp/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'LOOP in {1..' | head -n -7  > "/tmp/qmod-actions-conf-source-temp"
+    grep -A 1000 -m 1 'esac' "/tmp/qqX/qmod-endof-file-temp" | tail -n +4 | grep -B 1000 'LOOP in {1..' | head -n -7  > "/tmp/qqX/qmod-actions-conf-source-temp"
   else
     printColor "\n\n  INTERNAL ERROR  QE_498_Script Check  >  wrap quickemu > function 'load_quickemu_cases_and_actions' \n\n" ; sleep 1000
   fi
 
-  grep -v 'source' "/tmp/qmod-actions-conf-source-temp" > "/tmp/qmod-actions-temp"
+  grep -v 'source' "/tmp/qqX/qmod-actions-conf-source-temp" > "/tmp/qqX/qmod-actions-temp"
 
   if [[ $QE_498_Script ]]; then
-    grep -A 200 'fileshare_param_check' "/tmp/qmod-endof-file-temp" | tail -n +2   > "/tmp/qmod-boot-temp"
+    grep -A 200 'fileshare_param_check' "/tmp/qqX/qmod-endof-file-temp" | tail -n +2   > "/tmp/qqX/qmod-boot-temp"
   fi
 
 }

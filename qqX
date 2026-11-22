@@ -130,6 +130,12 @@ if [[ ! -d "$qqX_LibraryFolder" ]]; then echo; echo "  ERROR: qqX library not fo
 # Read secure folder for custom user scripts, which should be admin safe eg. "/usr/share/qqX/qqX.custom"
 qqX_CustomFolder="$(dirname "$qqX_MainFolder")""/qqX.custom"
 
+# However, standard folder '/tmp' should exist. This is hardcoded in multiple places, including in the upstream code.
+# A plain group folder of 'qqX' is used, rather than a session indexed one, as there are several process separated scripts
+# between which global vars and session vars are overly difficult to transfer.
+if [[ ! -d "/tmp/qqX" ]]; then
+  mkdir "/tmp/qqX" || { echo; echo "  ERROR: Unable to create folder /tmp/qqX"; echo; sleep 10; exit 1; }
+fi
 # qqF standalone  > CL launched running of qcow2 file management utility (using main qqX to refresh the nbd vars)
 # early launch following the location of 'qqX_MainFolder' (and guessed filemanager)
 if [[ $1 == "--qqf" ]]; then
@@ -140,7 +146,7 @@ if [[ $1 == "--qqf" ]]; then
   { printf "\n qqX_MainFolder=\"%s\"" "$qqX_MainFolder"
     printf "\n qqX_CustomFolder=\"%s\"" "$qqX_CustomFolder"
     printf "\n FileManager=\"%s\"" "xdg-open"
-  } > "/tmp/qqX_nbd_vars"
+  } > "/tmp/qqX/qqX_nbd_vars"
   if [[ -e "$qqX_CustomFolder/custom_filemanage_qcow_drive" ]]; then
     "$qqX_CustomFolder/custom_filemanage_qcow_drive" --qqf ; exit
   else "$qqX_MainFolder/qqX_filemanage_qcow_drive" --qqf ; exit
@@ -165,7 +171,7 @@ VM_ExecBoot=
 Extra_QE_Params=
 
 # Set location of .conf log. May be present from any previous session but don't normally clear it until multi-instance issues have been approved
-ConfClearanceLog="/tmp/qqX_ConfClearance_Log.txt"
+ConfClearanceLog="/tmp/qqX/qqX_ConfClearance_Log.txt"
 [[ ! -e "$ConfClearanceLog" ]] && printf "" > "$ConfClearanceLog"
 
 # LOAD qqX main

@@ -81,8 +81,8 @@
 # This terminal check list also needs to be available for the standard upgrader script:
 if [ "$1" = "MakeTermList" ]; then MakeTermList=1 ; shift ; else MakeTermList= ; fi
 
-printf "" > "/tmp/qqX.termlist"
-if [ -n "$UserTerm" ]; then  printf "%s\n" "$UserTerm" > "/tmp/qqX.termlist"
+printf "" > "/tmp/qqX/qqX.termlist"
+if [ -n "$UserTerm" ]; then  printf "%s\n" "$UserTerm" > "/tmp/qqX/qqX.termlist"
 fi
 
 # Use 'set' to make an array of usable terminals
@@ -92,7 +92,7 @@ set -- "$@" "ptyxis" "kgx" "alacritty" "kitty" "ghostty" "foot"
 
 # Check through the array and output a list of those possibly found, using 'command -v'  (not 'type -p' which is Bash)
 while [ -n "$1" ] ; do
-  if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX.termlist"
+  if [ -n "$(command -v "$1")" ] ; then printf "%s\n" "$1" >> "/tmp/qqX/qqX.termlist"
   fi
   shift
 done
@@ -104,7 +104,7 @@ if [ -n "$MakeTermList" ]; then exit ; fi
 
 # Priority listing should have placed the top entry as being the most main stream and being one with sufficient size.
 # At this stage we are just looking for something reliable to run the actual terminal selection script.
-if [ -n "$(cat "/tmp/qqX.termlist")" ]; then UserTerm="$(head -n 1 "/tmp/qqX.termlist")"
+if [ -n "$(cat "/tmp/qqX/qqX.termlist")" ]; then UserTerm="$(head -n 1 "/tmp/qqX/qqX.termlist")"
 fi
 
 # If there is still nothing, try a barrel scrape for something running that might have 'term' in the name ...
@@ -157,7 +157,7 @@ elif [ "$UserTerm" = "qterminal" ]; then
   # and QF 'qcow2_filemanagement_launcher'
   if [ -e "$HOME/.config/qterminal.org/qterminal.ini" ]; then
     TermConf_User="$HOME/.config/qterminal.org/qterminal.ini"
-    TermConf_Tmp="/tmp/qq-qterminal.ini"
+    TermConf_Tmp="/tmp/qqX/qq-qterminal.ini"
     # sed -i is not always present, use grep.
     # But not 'grep -i' as lower case 'size=@' is separate from other camelCase entries with *Size=@
     grep -B 500 'size=@' "$TermConf_User" | head -n -1 > "$TermConf_Tmp"
@@ -172,7 +172,7 @@ elif [ "$UserTerm" = "alacritty" ]; then
   # create profile for geometry
   if [ -e "$HOME/.config/alacritty/alacritty.toml" ]; then
     TermConf_User="$HOME/.config/alacritty/alacritty.toml"
-    TermConf_Tmp="/tmp/qq-alacritty.toml"
+    TermConf_Tmp="/tmp/qqX/qq-alacritty.toml"
     # sed -i is not always present, use grep.
     grep -B 500 'window.dimensions' "$TermConf_User" > "$TermConf_Tmp"
     { echo "columns = 160" ; echo "lines = 50"; } >> "$TermConf_Tmp"
