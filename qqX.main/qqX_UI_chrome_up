@@ -119,10 +119,15 @@ function exit {
 
   if [[ $1 == "directly" ]]; then
     printf "\n  Stopping current qqX process .... \n\n"
-    sleep 1.2 ; tput cnorm ; tput clear
-    [[ $CurrentQQ_Terminal ]] && kill -15 "$CurrentQQ_Terminal"
-    command exit
-
+    ExitTrap=
+    #  11/2026 confirmation added to avoid accidental one-way fatalities
+    printColor "  [enter] to quit   [c] to cancel  \n\n"
+    read -rp  "  >  "  ExitTrap
+    if [[ !  $ExitTrap ]]; then
+      sleep 1.2 ; tput cnorm ; tput clear
+      [[ $CurrentQQ_Terminal ]] && kill -15 "$CurrentQQ_Terminal"
+      command exit
+    fi
   elif [[ $1 ]] && [[ ! $NoExit ]]; then
     ExitTrap=
     printf "\n\n"
