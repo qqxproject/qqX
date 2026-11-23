@@ -136,7 +136,7 @@ buntu_daily_live_load_up_chk_and_msgs () {
       fi
       if [[ ! $DailyData ]]; then printf " Ubuntu Server not reached ..."
       else
-        # with help from Claude on this little bit ....
+        # finds the latest daily, and not from the 'dangerous' list, with a little help from Claude ....
         LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
         | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
         | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
