@@ -521,7 +521,7 @@ run_distro_tests_UI () {
     return
   fi
   while true; do
-        [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
+    [[ $QE_SourceVersion != "FreeSpirit" ]] && printf "\n\n  Using %s:  >> FreeSpirit usually has the latest fixes and additions ...." "$QE_SourceVersion"
     if [[ $1 ]]; then
       printColor "\n\n  THIS TEST: "
       printf "checks every listed release and edition of "
@@ -550,7 +550,7 @@ run_distro_tests_UI () {
     elif [[ $TestDistros == "B" ]]; then ExitTestToMain=1 ; break
     elif [[ $TestDistros == "M" ]]; then
       printf "\n\n"
-      qGet_ModsListFile="/tmp/qqX/qGet.ModsList.@$(date +%s).$(date +%Y.%b.%d).txt"
+      qGet_ModsListFile="/tmp/qqX/qGet.ModsList.@$(date +%Y.%b.%d).txt"
       printf "" > "$qGet_ModsListFile"
       for D in "${QGW_OS_Array[@]}"; do grep -s -m 1 -B 3 "${D}(" "$QG_Modpath" | tee -a "$qGet_ModsListFile" 2>/dev/null ; done
       printf "\n\n  Saved to:  %s" "$qGet_ModsListFile"
@@ -607,14 +607,19 @@ run_distro_tests_UI () {
         printColor "\n  All Tests Successfully Passed"
         qGet_TestSynopis="All Tests Successfully Passed"
       fi
-      if [[ $1 ]]; then qGet_TestSynopis_File="/tmp/qqX/qGet-test.${1^^}.e$(date +%s).$(date +%b.%d).txt"
-      else qGet_TestSynopis_File="/tmp/qqX/qGet.test.ALL.@$(date +%s).$(date +%Y.%b.%d).txt"
+      if [[ $1 ]]; then qGet_TestSynopis_FileOne="/tmp/qqX/qGet-test.${1^^}.@$(date +%Y.%b.%d).txt"
+      else qGet_TestSynopis_FileOne="/tmp/qqX/qGet.test.ALL.@$(date +%Y.%b.%d).txt"
       fi
+      qGet_TestSynopis_File="$qGet_TestSynopis_FileOne" ; i=2
+      while [[ -e "$qGet_TestSynopis_File" ]] ; do
+        qGet_TestSynopis_File="${qGet_TestSynopis_FileOne/@/@$i.}"
+        ((i ++)); ((i > 21)) && break
+      done
       printf "\n\n%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  > "$qGet_TestSynopis_File"
       [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
       printf "\n\n" >> "$qGet_TestSynopis_File"
       [[ ! $1 ]] && printf "%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  >> "$qGet_TestSynopis_File"
-      printf "\n\n  Analysis Log File: '%s'" "$qGet_TestSynopis_File"
+      printf "\n\n  Date Stamped Analysis Log File: '%s'" "$qGet_TestSynopis_File"
       printf "\n"
     fi
     TestDistros=
