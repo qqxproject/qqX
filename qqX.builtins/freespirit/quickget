@@ -247,9 +247,8 @@ function error_not_supported_lang() {
 }
 
 function error_not_supported_argument() {
-    echo "ERROR! Not supported argument"
-    echo "To see all possible arguments, use:"
-    echo "   quickget -h  or  quickget --help"
+    echo; echo "ERROR Not a quickget supported argument: $1"
+    echo "See quickget --help for notes"
     exit 1
 }
 
@@ -4003,7 +4002,7 @@ case "${1}" in
     --list-csv|-list-csv|list|list_csv) list_csv;;
     --list-json|-list-json|list_json) list_json;;
     --list|-list) list_supported;;
-    -*) error_not_supported_argument;;
+    -*) error_not_supported_argument "$*";;
 esac
 
 if [ -n "${1}" ]; then

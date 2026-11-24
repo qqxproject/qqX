@@ -572,9 +572,22 @@ run_distro_tests_UI () {
       fi
       printf "\n"
       # NB: 'ChkLog' is the matching qGet_mod var which runs in a separate process, with both using the same log files
-      if [[ $TestDistros == "vm" ]]; then TestLog="/tmp/qqX/qGet_FullResult.txt" ; quickget --full-check --mirrors "$1"
-      elif [[ $TestDistros == "v" ]]; then TestLog="/tmp/qqX/qGet_FullResult.txt" ; quickget --full-check "$1"
-      else TestLog="/tmp/qqX/qGet_CompactResult.txt" ; quickget --compact-check "$1"
+      # But make sure the log is cleared here too, before starting, in case of quickget errors and of an old log file still being present
+      if [[ $TestDistros == "vm" ]]; then
+        TestLog="/tmp/qqX/qGet_FullResult.txt"; printf "" > "$TestLog"
+        if grep -qs -e 'hide-log' "$QG_Modpath"; then quickget  --hide-log --mirrors --full-check "$1"
+        else quickget --mirrors --full-check "$1"
+        fi
+      elif [[ $TestDistros == "v" ]]; then
+        TestLog="/tmp/qqX/qGet_FullResult.txt" ; printf "" > "$TestLog"
+        if grep -qs -e 'hide-log' "$QG_Modpath"; then quickget --hide-log --full-check "$1"
+        else quickget --full-check "$1"
+        fi
+      else
+        TestLog="/tmp/qqX/qGet_CompactResult.txt" ; printf "" > "$TestLog"
+        if grep -qs -e 'hide-log' "$QG_Modpath"; then quickget --hide-log --compact-check "$1"
+        else quickget --compact-check "$1"
+        fi
       fi
       while pgrep -af bash | grep -q 'quickget' ; do
         sleep 0.5
@@ -602,24 +615,28 @@ run_distro_tests_UI () {
         printColor "\n  FAIL: \n"
         printf "\n  Empty Log File ??  > possible internal issue ??"
         qGet_TestSynopis="Empty Log File ??  > possible internal issue ??"
-      elif grep -qs PASS "$TestLog" ; then
+      elif ! grep -qs FAIL "$TestLog" && grep -qs PASS "$TestLog" ; then
         # at this point, is not empty and at least one PASS present, without errors or fails
-        printColor "\n  All Tests Successfully Passed"
+        printColor "  All Tests Successfully Passed"
         qGet_TestSynopis="All Tests Successfully Passed"
       fi
-      if [[ $1 ]]; then qGet_TestSynopis_FileOne="/tmp/qqX/qGet-test.${1^^}.@$(date +%Y.%b.%d).txt"
-      else qGet_TestSynopis_FileOne="/tmp/qqX/qGet.test.ALL.@$(date +%Y.%b.%d).txt"
+      if [[ $1 ]]; then
+        qGet_TestSynopis_File="/tmp/qqX/qGet-test.${1^^}.@$(date +%Y.%b.%d).txt"
+      else
+        qGet_TestSynopis_FileOne="/tmp/qqX/qGet.test.ALL.@$(date +%Y.%b.%d).txt"
+        qGet_TestSynopis_File="$qGet_TestSynopis_FileOne" ; i=2
+        while [[ -e "$qGet_TestSynopis_File" ]] ; do
+          qGet_TestSynopis_File="${qGet_TestSynopis_FileOne/@/@$i.}"
+          ((i ++)); ((i > 21)) && break
+        done
       fi
-      qGet_TestSynopis_File="$qGet_TestSynopis_FileOne" ; i=2
-      while [[ -e "$qGet_TestSynopis_File" ]] ; do
-        qGet_TestSynopis_File="${qGet_TestSynopis_FileOne/@/@$i.}"
-        ((i ++)); ((i > 21)) && break
-      done
       printf "\n\n%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  > "$qGet_TestSynopis_File"
       [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
       printf "\n\n" >> "$qGet_TestSynopis_File"
       [[ ! $1 ]] && printf "%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  >> "$qGet_TestSynopis_File"
-      printf "\n\n  Date Stamped Analysis Log File: '%s'" "$qGet_TestSynopis_File"
+      if [[ $(head -n 10 "$qGet_TestSynopis_File") ]] && ! grep -qs "ERROR: No log contents" "$qGet_TestSynopis_File"; then
+        printf "\n\n  Analysis Log File: '%s'" "$qGet_TestSynopis_File"
+      fi
       printf "\n"
     fi
     TestDistros=
