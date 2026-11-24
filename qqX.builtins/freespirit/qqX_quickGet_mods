@@ -278,6 +278,12 @@ function distro_release_notes {
 
 ##########################################
 
+## qqX > this function moved here to control possible upstream overwrites
+function handle_missing() {
+    case "${OS}" in
+        xxfedora) true ;;
+    esac
+}
 
 ## 11/2025 UPDATE and make DYNAMIC
 function releases_alma() {
