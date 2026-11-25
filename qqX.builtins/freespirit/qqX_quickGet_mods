@@ -292,7 +292,7 @@ function releases_alma() {
     web_pipe "https://repo.almalinux.org/almalinux/" | grep -s -e 'href="[[:digit:]]' | grep -v "\." | cut -d'"' -f2 | tr -d '/' | sort -nr | paste -d' ' -s
 }
 
-## 11/2025 FIX the original FreeSpirit mod to stop pre-release Alpine dev work getting listed
+## 01/2025 made DYNAMIC and 11/2025 add filter for pre-release Alpine dev work
 function releases_alpine() {
     CurrAlp="$(web_pipe "https://alpinelinux.org/downloads/" | grep -s 'Current Alpine' | fv -M -Q | cut -d '.' -f 1,2)"
     ListAlp="$(web_pipe "https://dl-cdn.alpinelinux.org/alpine/" | fv -M 6 -Q --col)"
@@ -318,7 +318,7 @@ function get_alpine() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## 04/2026 Re-ADD upstream deletion
+## 04/2026 Re-ADD due to upstream deletion
 function releases_antix() {
     echo latest
 }
@@ -1249,8 +1249,8 @@ function get_trisquel() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## 10/2026 REFACTOR for errors where versions are missing
-  # General FIXES, FIX daily-live grep, tidy-up of hardcoded obsolete tests eg 'jammy-live' and 'md5'
+## 10/2026 REFACTORED for quickemu errors where versions are missing
+    # General FIXES, FIX daily-live grep, tidy-up of hardcoded obsolete tests eg 'jammy-live' and 'md5'
 function releases_ubuntu() {
     local UbuntuRecentVersions="" DailyData="" LatestDailyVer="" LatestOfficialVer=""
     # daily-live gets similar repeat in 'get_ubuntu' as calls to Quickget are separate ...
@@ -1268,11 +1268,11 @@ function releases_ubuntu() {
     echo "$UbuntuRecentVersions daily-live"
 }
 ## 10/2026  # Upstream use of https://api.launchpad.net/devel/ubuntu/series makes big presumption that everything follows the main pattern
-  # But it doesn't, eg. Mate 26.04 .... So grep each OS individually, and FOR FAIRLY RECENT ONLY, not some huge archiving ....
-  # AND for Ubuntu itself; 'cdimage.ubuntu.com' has become neglected with many folders missing the important iso's
-  # which now seem to be located at 'releases.ubuntu.com' eg https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ has NO AMD iso's
-  # Also REMOVE zsync as getting too problematic ... zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}" # make_vm_config "${OS}"
-  # Plus ubuntu server can now be integrated
+    # But it doesn't, eg. Mate 26.04 .... So grep each OS individually, and FOR FAIRLY RECENT ONLY, not some huge archiving ....
+    # AND for Ubuntu itself; 'cdimage.ubuntu.com' has become neglected with many folders missing the important iso's
+    # which now seem to be located at 'releases.ubuntu.com' eg https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ has NO AMD iso's
+    # Also REMOVE zsync as getting too problematic ... zsync_get "${URL}/${ISO}" "${VM_PATH}" "${OS}" # make_vm_config "${OS}"
+    # Plus ubuntu server can now be integrated
 function get_ubuntu() {
     local ISO="" HASH="" URL="" RelData="" RelMax=""  DailyData="" LatestDailyVer="" LatestDailyName=""
     VM_PATH="${OS}-${RELEASE}"
@@ -2349,7 +2349,7 @@ function test_all {
             else printf "\nOS > %s:\n\n" "${OS^^}"
             fi
             } >> "$ChkLog"
-        else printf "\nTest All - Internal ERROR: Check Log not found\n\n" >> "$ChkLog"
+        else printf "\nTest All - Internal ERROR: Check Log not found\n\n"
         fi
         [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" >> "$ChkLog" && return
     else
@@ -2362,8 +2362,13 @@ function test_all {
         fi
         [[ ! $OS ]] && printf "\nTest All - OS data not found ...?? \n\n" && return
     fi
+
     local CHECK="" ; local FUNC="${OS}" ; local GetLine="" ; local URL="" ; local HASH="" ; local EDITION= ; local RELEASE=
-    [[ "${OS}" == *ubuntu* ]] && [[ "${OS}" != "xxubuntu-server" ]] &&  FUNC="ubuntu"
+    [[ "${OS}" == *ubuntu* ]] &&  FUNC="ubuntu"
+
+    # where 'qqX_quickGet_modsPath' and 'ChkLog' are from quickget
+    OsMods="$(grep -s -m1 -B3 "${FUNC}(" "$qqX_quickGet_modsPath" | grep '#' )"
+    [[ $OsMods ]] && printf "Mods  %s \n\n" "$OsMods" | tee -a "$ChkLog"
 
     if [[ $(type -t "releases_${FUNC}") == function ]]; then
         SECONDS=0
@@ -2499,6 +2504,11 @@ function test_all {
 QuietOps= ; CompactOps= ; FullCheckOps= ; CheckMirrors= ; HideLog= ; SingleCheck=
 printf "Webget NOT used\n" > "/tmp/qqX/qGet_webget_report.txt"
 
+print_qqXdyn_log_note () {
+    printf " \n\n# Unlike upstream, which may report success on hard-coded older releases,
+    \n# qqX includes checksums and DYNAMIC algorithms to where possible give the actual latest: \n\n"  >> "$ChkLog"
+}
+
 while [[ $1 ]]; do
 
     case "${1}" in
@@ -2515,10 +2525,11 @@ while [[ $1 ]]; do
             CheckMirrors=1 ; shift
         ;;
         --full-check|--check|-check)
-            FullCheckOps=1 ; ChkLog="/tmp/qqX/qGet_FullResult.txt" ; printf "" > "$ChkLog"
-            OPERATION="test" ; shift
+            FullCheckOps=1 ; ChkLog="/tmp/qqX/qGet_FullResult.txt"
+            shift ;  printf "" > "$ChkLog" ; OPERATION="test"
             [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
             [[ $1 == "--hide-log" ]] && HideLog=1 && shift
+            print_qqXdyn_log_note
             if [[ ! $1 ]]; then
                 for OS in $(os_support); do
                     os_supported ; test_all "${OS}"
@@ -2535,7 +2546,8 @@ while [[ $1 ]]; do
             if [[ $1 == "--quiet-check" ]]; then QuietOps=1 ; ChkLog="/tmp/qqX/qGet_QuietResult.txt"
             else CompactOps=1 ; ChkLog="/tmp/qqX/qGet_CompactResult.txt"
             fi
-            shift;  printf "" > "$ChkLog" ; OPERATION="test"
+            shift ;  printf "" > "$ChkLog" ; OPERATION="test"
+            print_qqXdyn_log_note
             [[ $1 == "--mirrors" ]] && CheckMirrors=1 && shift
             [[ $1 == "--hide-log" ]] && HideLog=1 && shift
             if [[ ! $1 ]]; then

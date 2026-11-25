@@ -3887,13 +3887,6 @@ if [ ! -x "${CURL}" ]; then
 fi
 CURL_VERSION=$("${CURL}" --version | head -n 1 | cut -d' ' -f2)
 
-mapfile -t -d':' PathArr <<< "$PATH"
-for QGP in "${PathArr[@]}"; do
-    [[ -e "$QGP/qqX_quickGet_mods" ]] && source "$QGP/qqX_quickGet_mods" && break
-done
-
-#TODO: Deprecate `list`, `list_csv`, and `list_json` in favor of `--list`, `--list-csv`, and `--list-json`
-
 # Function to process --arch flag
 function parse_arch_flag() {
     if [ "${1}" == "--arch" ] || [ "${1}" == "-arch" ]; then
@@ -3911,6 +3904,17 @@ function parse_arch_flag() {
 if parse_arch_flag "${1}" "${2}"; then
     shift 2
 fi
+
+# add in qqX Mods and function overwrites
+mapfile -t -d':' PathArr <<< "$PATH"
+for QGP in "${PathArr[@]}"; do
+    if [[ -e "$QGP/qqX_quickGet_mods" ]]; then
+        # shellcheck disable="SC2034"
+        qqX_quickGet_modsPath="$QGP/qqX_quickGet_mods"
+        source "$QGP/qqX_quickGet_mods"
+        break
+    fi
+done
 
 case "${1}" in
     --download|-download)

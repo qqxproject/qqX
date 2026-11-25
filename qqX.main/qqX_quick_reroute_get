@@ -552,6 +552,7 @@ run_distro_tests_UI () {
       printf "\n\n"
       qGet_ModsListFile="/tmp/qqX/qGet.ModsList.@$(date +%Y.%b.%d).txt"
       printf "" > "$qGet_ModsListFile"
+      # checks for modded functions ending with OS name eg. releases_fedora()
       for D in "${QGW_OS_Array[@]}"; do grep -s -m 1 -B 3 "${D}(" "$QG_Modpath" | tee -a "$qGet_ModsListFile" 2>/dev/null ; done
       printf "\n\n  Saved to:  %s" "$qGet_ModsListFile"
       printf "\n\n"
@@ -570,7 +571,9 @@ run_distro_tests_UI () {
         printf "\n\n  Expect possible short pauses between distros, and possibly between editions, on slower servers"
         printColor "\n\n  A Pass/Fail summary will be supplied"
       fi
-      printf "\n"
+      printf " \n\n  Unlike upstream, which may report success on hard-coded older releases,"
+      printf    "\n  qqX includes checksums and DYNAMIC algorithms to where possible give the actual latest \n"
+
       # NB: 'ChkLog' is the matching qGet_mod var which runs in a separate process, with both using the same log files
       # But make sure the log is cleared here too, before starting, in case of quickget errors and of an old log file still being present
       if [[ $TestDistros == "vm" ]]; then
@@ -596,19 +599,22 @@ run_distro_tests_UI () {
         printColor "\n\n  ERROR: No log contents ?"
         qGet_TestSynopis="ERROR: No log contents  > possible server issue ??"
         [[ $1 ]] && printf "\n\n  Can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
-      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -q -e ^'[[:alnum:]]' ; then
-        printColor "\n  FAILS DETECTED: \n"
+      elif grep -qs FAIL "$TestLog" || grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' \
+        | grep -v '#' | grep -q -e ^'[[:alnum:]]' ; then
+        printColor "\n  FAILS POSSIBLY DETECTED \n"
         # shows the straightforward fails, followed by any obscure possible error lines
-        qGet_TestSynopis="$(grep FAIL "$TestLog")"
-        qGet_TestSynopisTwo="$(grep -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -e ^'[[:alnum:]]')"
+        qGet_TestSynopis="$(grep -s FAIL "$TestLog")"
+        qGet_TestSynopisTwo="$(grep -s -v PASS "$TestLog" | grep -v FAIL | grep -v SKIP | grep -v 'OS >' | grep -v '#' | grep -e ^'[[:alnum:]]')"
         if [[ $qGet_TestSynopis ]]; then
           [[ $qGet_TestSynopisTwo ]] && printf -v qGet_TestSynopis "%s\n\n%s" "$qGet_TestSynopis" "$qGet_TestSynopisTwo"
         elif [[ $qGet_TestSynopisTwo ]] ; then qGet_TestSynopis="$qGet_TestSynopisTwo"
         fi
+        # no need to print the fails again, unless it's a long list of checks and scrolling would be needed,
+        # otherwise show the error if it's something textual and obscure
         if [[ "$(grep -sc -e ^'[[:alnum:]]' "$TestLog")" -gt 20 ]]; then printf "\n%s\n" "$qGet_TestSynopis"
         else
-          qGet_TestSynopisRedux="$(grep -sv Checksum <<< "$qGet_TestSynopis" | grep -e ^'[[:alnum:]]')"
-          printf "\n%s\n" "$qGet_TestSynopisRedux"
+          qGet_TestSynopisRedux="$(grep -sv Checksum <<< "$qGet_TestSynopis" | grep -e ^'[[:alnum:]]' | grep -v '#')"
+          [[ $qGet_TestSynopisRedux ]] && printf "\n%s\n" "$qGet_TestSynopisRedux"
         fi
         printColor "\n  Fails can sometimes be caused by the servers  > RE-CHECK, even next day, before raising issues"
       elif ! grep -q -e ^'[[:alnum:]]' "$TestLog" ; then
@@ -634,7 +640,7 @@ run_distro_tests_UI () {
       [[ -e $TestLog ]] && cat "$TestLog" >> "$qGet_TestSynopis_File"
       printf "\n\n" >> "$qGet_TestSynopis_File"
       [[ ! $1 ]] && printf "%s  %s \n\n%s \n\n" "$QE_SourceVersion" "$(date)" "$qGet_TestSynopis"  >> "$qGet_TestSynopis_File"
-      if [[ $(head -n 10 "$qGet_TestSynopis_File") ]] && ! grep -qs "ERROR: No log contents" "$qGet_TestSynopis_File"; then
+      if [[ $(head -n 50 "$qGet_TestSynopis_File") ]] && ! grep -qs "ERROR: No log contents" "$qGet_TestSynopis_File"; then
         printf "\n\n  Analysis Log File: '%s'" "$qGet_TestSynopis_File"
       fi
       printf "\n"
