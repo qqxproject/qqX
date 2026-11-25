@@ -2325,17 +2325,17 @@ function test_result {
         if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
         elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
         else printf "%-30s %s ERROR\n" "${OsShort}" "${URL}"
-        fi } >> "$ChkLog"
+        fi ; } >> "$ChkLog"
     elif [[ $CompactOps ]]; then {
         if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
         elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-40s\n" "$HashTest" "${RESULT}" "${OS}"
         else printf "%-40s %s ERROR\n" "${OS}" "${URL}"
-        fi } | tee -a "$ChkLog"
+        fi ; } | tee -a "$ChkLog"
     else {
         if [[ ! $OS ]]; then printf "Missing OS data: FAIL\n"
         elif [[ "${RESULT}" ]]; then printf "Checksum: %-4s   Iso: %s   %-30s  %s  %s \n" "$HashTest" "${RESULT}" "${OsShort}" "${URL}" "$HASH"
         else printf "%-30s %s ERROR\n" "${OsShort}" "${URL}"
-        fi } | tee -a "$ChkLog"
+        fi ; } | tee -a "$ChkLog"
     fi
 }
 
@@ -2588,6 +2588,12 @@ while [[ $1 ]]; do
         --arch|--check-all-arch|-arch|-check-all-arch)
             printf   "\n  qqX:  See https://qqxproject.org/Advanced/Custom-Machine-Types for help with running Arm, Risc-V or other guests on X86 hosts."
             printf "\n\n  Arm hosts and Arch checks are however not currently supported.\n\n"
+            exit
+        ;;
+
+        --url)
+            printf   "\n  qqX:  use --full-check [os] [release] [edition] and pipe to awk '{print \$6}' \n\n "
+            # causes internal conflicts with the modded test routines
             exit
         ;;
 

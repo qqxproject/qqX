@@ -197,37 +197,48 @@ function test_iso_url {
   # clear any accidental initial double pressing of the enter key
   read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1 ; read -r -t 0.1
 
-  if ! grep -q -e '--url' "$QG_SourcePath" ; then
-
-    # quickget --url is from  4.9.3  onwards
-    printColor "\n\n  Link cannot be checked ... "; QGW_Download_BadLink=
-
+  DL_Url= ; DL_FileName= ; DL_PotentialSize= ; DL_PotentialOkay= ; DL_PotentialHtml= ; DL_SlowMsg=
+  DataPID= ; SECONDS=0
+  printf "\n\n  Checking download link .... \n\n"
+  printf "" > "/tmp/qqX/qmod-dl-url" ; printf "" > "/tmp/qqX/qmod-dl-size"
+  if [[ $QG_Modpath ]]; then
+    quickget " --quiet-check $QGW_DownloadSelection"
   else
-
-    DL_Url= ; DL_FileName= ; DL_PotentialSize= ; DL_PotentialOkay= ; DL_PotentialHtml= ; DL_SlowMsg=
-    DataPID= ; SECONDS=0
-    printf "\n\n  Checking download link .... \n\n"
-    printf "" > "/tmp/qqX/qmod-dl-url" ; printf "" > "/tmp/qqX/qmod-dl-size"
-    if [[ $QG_Modpath ]]; then
-      quickget " --quiet-check $QGW_DownloadSelection"
-    else
-      quickget " --url $QGW_DownloadSelection" > "/tmp/qqX/qmod-dl-url"
+    quickget " --url $QGW_DownloadSelection" > "/tmp/qqX/qmod-dl-url"
+  fi
+  sleep 1
+  [[ $ShowQGetLists ]] && { echo "Check Command:"; (ps -ef | grep bash | grep quickget); echo; }
+  while true ; do
+    [[ $ShowQGetLists ]] && echo "Secs: $SECONDS"
+    if [[ $(cat "/tmp/qqX/qmod-dl-url" 2>/dev/null) ]]; then
+      DL_Url="$(tr -cd '[:graph:]'  < "/tmp/qqX/qmod-dl-url")"
+      break
+    elif [[ "$SECONDS" -ge 90 ]]; then
+      while true; do
+        DataPID="$(pgrep -af bash | grep -e 'quickget --quiet-check' | head -n 1 | cut -d' ' -f1 2>/dev/null)"
+        [[ $ShowQGetLists ]] && { echo; echo "DataPID: ${DataPID}"; echo; }
+        if [[ $DataPID ]]; then kill "$DataPID" &>/dev/null
+        else break
+        fi
+      done
+      break
+    elif [[ "$SECONDS" -ge 30 ]] && [[ ! $DL_SlowMsg ]]; then
+      printf "  Slow Server or anti-bot slow-downs ....\n\n" ; DL_SlowMsg=1
     fi
-    sleep 1
-    [[ $ShowQGetLists ]] && { echo "Check Command:"; (ps -ef | grep bash | grep quickget); echo; }
-    while true ; do
-      [[ $ShowQGetLists ]] && echo "Secs: $SECONDS"
-      if [[ $(cat "/tmp/qqX/qmod-dl-url" 2>/dev/null) ]]; then
-        DL_Url="$(tr -cd '[:graph:]'  < "/tmp/qqX/qmod-dl-url")"
-        break
-      elif [[ "$SECONDS" -ge 90 ]]; then
-        while true; do
-          DataPID="$(pgrep -af bash | grep -e 'quickget --url' | head -n 1 | cut -d' ' -f1 2>/dev/null)"
-          [[ $ShowQGetLists ]] && { echo; echo "DataPID: ${DataPID}"; echo; }
-          if [[ $DataPID ]]; then kill "$DataPID" &>/dev/null
-          else break
-          fi
-        done
+    sleep 0.5 ; [[ $ShowQGetLists ]] && echo "$SECONDS"
+  done
+  [[ $ShowQGetLists ]] && { echo ; echo "DL_Url: $DL_Url"; echo; cat "/tmp/qqX/qmod-dl-url"; echo; }
+
+  if [[ ! $DL_Url ]]; then
+    printColor "  QuickGet is unable to provide a link, or has been timed-out ..."; QGW_Download_BadLink=1
+    iso_get_message
+  else
+    DL_FileName="$(basename "$DL_Url")" ; SECONDS=0
+    printf "  Checking download size .... \n\n"
+    [[ $ShowQGetLists ]] && pgrep -af bash | grep -q -e 'quickget --quiet-check'
+    while pgrep -af bash | grep -q -e 'quickget --quiet-check' ; do
+      sleep 0.5 ; [[ $ShowQGetLists ]] && echo "$SECONDS"
+      if [[ $SECONDS -ge 30 ]]; then
         while true; do
           DataPID="$(pgrep -af bash | grep -e 'quickget --quiet-check' | head -n 1 | cut -d' ' -f1 2>/dev/null)"
           [[ $ShowQGetLists ]] && { echo; echo "DataPID: ${DataPID}"; echo; }
@@ -236,108 +247,74 @@ function test_iso_url {
           fi
         done
         break
-      elif [[ "$SECONDS" -ge 30 ]] && [[ ! $DL_SlowMsg ]]; then
-        printf "  Slow Server or anti-bot slow-downs ....\n\n" ; DL_SlowMsg=1
       fi
-      sleep 0.5 ; [[ $ShowQGetLists ]] && echo "$SECONDS"
     done
-    [[ $ShowQGetLists ]] && { echo ; echo "DL_Url: $DL_Url"; echo; cat "/tmp/qqX/qmod-dl-url"; echo; }
-
-    if [[ ! $DL_Url ]]; then
-      printColor "  QuickGet is unable to provide a link, or has been timed-out ..."; QGW_Download_BadLink=1
-      iso_get_message
+    [[ $ShowQGetLists ]] && { echo ; echo "DL_FileName: $DL_FileName"; echo; }
+    if [[ $QG_Modpath ]]; then
+      if [[ $ShowQGetLists ]]; then echo ; echo "qGet_check_pipe:" ; echo ; cat "/tmp/qqX/qGet_check_pipe.txt" ; echo ; fi
+      if [[ $ShowQGetLists ]]; then echo ; echo "qGet_QuietResult:" ; echo ; cat "/tmp/qqX/qGet_QuietResult.txt" ; echo ; fi
+      if [[ $ShowQGetLists ]]; then echo ; echo "qGet_webget_report:" ; echo ; cat "/tmp/qqX/qGet_webget_report.txt" ; echo ; fi
+      if [[ -e "/tmp/qqX/qGet_check_pipe.txt" ]]; then cp -f "/tmp/qqX/qGet_check_pipe.txt" "/tmp/qqX/qmod-dl-size" ; fi
     else
-      DL_FileName="$(basename "$DL_Url")" ; SECONDS=0
-      printf "  Checking download size .... \n\n"
-      [[ $ShowQGetLists ]] && pgrep -af bash | grep -q -e 'quickget --url'
-      [[ $ShowQGetLists ]] && pgrep -af bash | grep -q -e 'quickget --quiet-check'
-      while pgrep -af bash | grep -q -e 'quickget --url' || pgrep -af bash | grep -q -e 'quickget --quiet-check' ; do
-        sleep 0.5 ; [[ $ShowQGetLists ]] && echo "$SECONDS"
-        if [[ $SECONDS -ge 30 ]]; then
-          while true; do
-            DataPID="$(pgrep -af bash | grep -e 'quickget --url' | head -n 1 | cut -d' ' -f1 2>/dev/null)"
-            [[ $ShowQGetLists ]] && { echo; echo "DataPID: ${DataPID}"; echo; }
-            if [[ $DataPID ]]; then kill "$DataPID" &>/dev/null
-            else break
-            fi
-          done
-          while true; do
-            DataPID="$(pgrep -af bash | grep -e 'quickget --quiet-check' | head -n 1 | cut -d' ' -f1 2>/dev/null)"
-            [[ $ShowQGetLists ]] && { echo; echo "DataPID: ${DataPID}"; echo; }
-            if [[ $DataPID ]]; then kill "$DataPID" &>/dev/null
-            else break
-            fi
-          done
-          break
-        fi
-      done
-      [[ $ShowQGetLists ]] && { echo ; echo "DL_FileName: $DL_FileName"; echo; }
-      if [[ $QG_Modpath ]]; then
-        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_check_pipe:" ; echo ; cat "/tmp/qqX/qGet_check_pipe.txt" ; echo ; fi
-        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_QuietResult:" ; echo ; cat "/tmp/qqX/qGet_QuietResult.txt" ; echo ; fi
-        if [[ $ShowQGetLists ]]; then echo ; echo "qGet_webget_report:" ; echo ; cat "/tmp/qqX/qGet_webget_report.txt" ; echo ; fi
-        if [[ -e "/tmp/qqX/qGet_check_pipe.txt" ]]; then cp -f "/tmp/qqX/qGet_check_pipe.txt" "/tmp/qqX/qmod-dl-size" ; fi
-      else
-        curl --disable -sLf --head --retry 8 --connect-timeout 2  --location-trusted --output "/tmp/qqX/qmod-dl-size" "$DL_Url" &
+      curl --disable -sLf --head --retry 8 --connect-timeout 2  --location-trusted --output "/tmp/qqX/qmod-dl-size" "$DL_Url" &
+      wait "$!"
+      if [[ ! $(cat "/tmp/qqX/qmod-dl-size" 2>/dev/null) ]]; then
+        sleep 2 ; printf "  and a second time ........ \n\n"
+        curl --disable -sLf --head --retry 8 --connect-timeout 2 --keepalive-time 1 --location-trusted --output "/tmp/qqX/qmod-dl-size" "$DL_Url" &
         wait "$!"
-        if [[ ! $(cat "/tmp/qqX/qmod-dl-size" 2>/dev/null) ]]; then
-          sleep 2 ; printf "  and a second time ........ \n\n"
-          curl --disable -sLf --head --retry 8 --connect-timeout 2 --keepalive-time 1 --location-trusted --output "/tmp/qqX/qmod-dl-size" "$DL_Url" &
-          wait "$!"
-        fi
       fi
-      if [[ $(cat "/tmp/qqX/qmod-dl-size" 2>/dev/null) ]]; then
-        DL_PotentialHtml="$(grep -s -i 'content-type' "/tmp/qqX/qmod-dl-size" | grep -i html )"
-        DL_PotentialSize="$(grep -s -i 'content-length' "/tmp/qqX/qmod-dl-size" | tail -n 1 | tr -cd '[:digit:]')"
-        DL_PotentialOkay="$(grep -s -i 'content-type' "/tmp/qqX/qmod-dl-size" | grep -i application )"
-        [[ $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -si 'HTTP/' "/tmp/qqX/qmod-dl-size" | grep 200)"
-        if [[ ! $DL_PotentialHtml ]]; then
-          [[ ! $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -s -i 'Vary:' "/tmp/qqX/qmod-dl-size" | grep -i 'Accept-Encoding' )"
-          [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i 'Iso: PASS' "/tmp/qqX/qGet_QuietResult.txt")"
-          [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i -e 'Using webget > PASS' "/tmp/qqX/qGet_webget_report.txt")"
-        fi
-        [[ $DL_PotentialSize ]] && [[ ! $DL_PotentialOkay ]] && DL_PotentialSize=
+    fi
+    if [[ $(cat "/tmp/qqX/qmod-dl-size" 2>/dev/null) ]]; then
+      DL_PotentialHtml="$(grep -s -i 'content-type' "/tmp/qqX/qmod-dl-size" | grep -i html )"
+      DL_PotentialSize="$(grep -s -i 'content-length' "/tmp/qqX/qmod-dl-size" | tail -n 1 | tr -cd '[:digit:]')"
+      DL_PotentialOkay="$(grep -s -i 'content-type' "/tmp/qqX/qmod-dl-size" | grep -i application )"
+      [[ $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -si 'HTTP/' "/tmp/qqX/qmod-dl-size" | grep 200)"
+      if [[ ! $DL_PotentialHtml ]]; then
+        [[ ! $DL_PotentialOkay ]] && DL_PotentialOkay="$(grep -s -i 'Vary:' "/tmp/qqX/qmod-dl-size" | grep -i 'Accept-Encoding' )"
+        [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i 'Iso: PASS' "/tmp/qqX/qGet_QuietResult.txt")"
+        [[ ! $DL_PotentialOkay ]] && [[ $QG_Modpath ]] && DL_PotentialOkay="$(grep -s -i -e 'Using webget > PASS' "/tmp/qqX/qGet_webget_report.txt")"
       fi
+      [[ $DL_PotentialSize ]] && [[ ! $DL_PotentialOkay ]] && DL_PotentialSize=
+    fi
 
-      if [[ $DL_PotentialOkay ]]; then
-        printColor "  Appears to be Okay \n\n"; QGW_Download_BadLink=
-      else
-        printColor "  May not be working correctly.  Try anyway? \n\n"; QGW_Download_BadLink=
-      fi
-      if [[ $DL_PotentialSize ]]; then
-        [[ $ShowQGetLists ]] && { echo ; echo "DL_PotentialSize: $DL_PotentialSize"; echo; }
-        DL_HumanSize="$(numfmt --to=iec "$DL_PotentialSize")"
-        printf "  Reported size: %s   %s" "$DL_HumanSize" "$(basename "$DL_Url")"
-        printf "\n"
-      elif [[ $QGW_Download_BadLink ]]; then
-        printf "  Reported size not available ...."
-        [[ $DL_PotentialHtml ]] && printf "\n\n  Check website or switch release/edition"
-        printf "\n\n"
-        iso_get_message ; show_distro_homepage_check_results
-      else
-        if [[ $DL_PotentialOkay ]]; then printf "  but reported size not available ?? " ; else printf "  Reported size not available ..." ; fi
-        [[ $DL_PotentialHtml ]] && printf "\n\n  Check website or switch release/edition"
-        printf "\n\n"
-        iso_get_message ; show_distro_homepage_check_results
-      fi
-      if [[ "$QGW_DownloadSelection" == *'daily'* ]] && [[ "$QGW_DownloadSelection" == *'buntu'* ]]; then
-        # 10/2026 Also See the routines in QGet Mods and main menu messages
-        # 11/2026 re-checked and works for transistion from 'stonking' to 'tenacious' ...
-        DailyData= ; LatestDailyUpdate=
-        printf "\n\n\n  Checking for version/date references ... "
-        DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${QGW_OS_Arr_NameSelected}.json")"
-        sleep 4
-        [[ ! $DailyData ]] && printf " Ubuntu Server not reached ..."
-        # finds the latest daily, and not from the 'dangerous' list, with a little help from Claude ....
-        LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
-        | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
-        | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
-        | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData"  2>/dev/null)"
-        if [[ $LatestDailyUpdate ]]; then
-          printf "\n\n  Latest 'daily' update was "
-          printf "\n  %s \n" "$LatestDailyUpdate"
-        else printf "\n\n  Latest 'daily' update data not available ...\n"
-        fi
+    if [[ $DL_PotentialOkay ]]; then
+      printColor "  Appears to be Okay \n\n"; QGW_Download_BadLink=
+    else
+      printColor "  May not be working correctly.  Try anyway? \n\n"; QGW_Download_BadLink=
+    fi
+    if [[ $DL_PotentialSize ]]; then
+      [[ $ShowQGetLists ]] && { echo ; echo "DL_PotentialSize: $DL_PotentialSize"; echo; }
+      DL_HumanSize="$(numfmt --to=iec "$DL_PotentialSize")"
+      printf "  Reported size: %s   %s" "$DL_HumanSize" "$(basename "$DL_Url")"
+      printf "\n"
+    elif [[ $QGW_Download_BadLink ]]; then
+      printf "  Reported size not available ...."
+      [[ $DL_PotentialHtml ]] && printf "\n\n  Check website or switch release/edition"
+      printf "\n\n"
+      iso_get_message ; show_distro_homepage_check_results
+    else
+      if [[ $DL_PotentialOkay ]]; then printf "  but reported size not available ?? " ; else printf "  Reported size not available ..." ; fi
+      [[ $DL_PotentialHtml ]] && printf "\n\n  Check website or switch release/edition"
+      printf "\n\n"
+      iso_get_message ; show_distro_homepage_check_results
+    fi
+    if [[ "$QGW_DownloadSelection" == *'daily'* ]] && [[ "$QGW_DownloadSelection" == *'buntu'* ]]; then
+      # 10/2026 Also See the routines in QGet Mods and main menu messages
+      # 11/2026 re-checked and works for transistion from 'stonking' to 'tenacious' ...
+      DailyData= ; LatestDailyUpdate=
+      printf "\n\n\n  Checking for version/date references ... "
+      DailyData="$(curl -qsLf "http://cdimage.ubuntu.com/streams/v1/com.ubuntu.cdimage.daily:${QGW_OS_Arr_NameSelected}.json")"
+      sleep 4
+      [[ ! $DailyData ]] && printf " Ubuntu Server not reached ..."
+      # finds the latest daily, and not from the 'dangerous' list, with a little help from Claude ....
+      LatestDailyUpdate="$(jq -r ' [ .products | to_entries[] | select(.key | test(":daily-live:[^:]+:amd64$")) | (.key | split(":")[3]) as $rel
+      | .value.versions | to_entries[] | .key as $v | .value.items.iso // empty | select(.path | endswith("amd64.iso"))
+      | {rel: $rel, v: $v, path} ] | (map(.rel) | max) as $newest_rel | map(select(.rel == $newest_rel)) | (map(.v) | max) as $newest_v
+      | .[] | select(.v == $newest_v) | "\($newest_v[0:8] | strptime("%Y%m%d") | strftime("%Y-%b-%d")) \(.path)" ' <<< "$DailyData"  2>/dev/null)"
+      if [[ $LatestDailyUpdate ]]; then
+        printf "\n\n  Latest 'daily' update was "
+        printf "\n  %s \n" "$LatestDailyUpdate"
+      else printf "\n\n  Latest 'daily' update data not available ...\n"
       fi
     fi
   fi
