@@ -1285,9 +1285,10 @@ function get_ubuntu() {
         LatestDailyName="$(jq --arg Latest "$LatestDailyVer" -r '.products[] | select(.arch=="amd64") | select(.image_type=="daily-live") | select(.release_title==$Latest).release' <<< "$DailyData")"
         # eg http://cdimage.ubuntu.com/ubuntu-mate/stonking/daily-live/current/SHA256SUMS
         URL="http://cdimage.ubuntu.com/$OS/$LatestDailyName/daily-live/current"
-        # using separate greps for 'amd' and 'iso' as can have versioning eg. 'amd64v3.iso'
-        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep -s server | grep amd64 | grep iso | grep -v beta)
-        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep -s desktop | grep amd64 | grep iso  | grep -v beta)
+        # using greps to avoid v3 and the would be needed v3 cpu tests, as it's only a VM
+        # eg http://cdimage.ubuntu.com/ubuntu/tenacious/daily-live/current/tenacious-desktop-amd64v3.iso
+        if [[ $OS == "ubuntu-server" ]]; then RelData=$(web_pipe "${URL}/SHA256SUMS" | grep -s server | grep 'amd64.iso' | grep -v beta)
+        else RelData=$(web_pipe "${URL}/SHA256SUMS" | grep -s desktop | grep 'amd64.iso' | grep -v beta)
         fi
         ISO=$(cut -d'*' -f2 <<<"$RelData")
         HASH=$(cut -d' ' -f1 <<<"$RelData")
@@ -1318,11 +1319,9 @@ function get_ubuntu() {
 
 ## 10/2026 General FIXES and tidy-up
 function get_ubuntu-server() {
-    #printf "\n\n  INTERNAL ERROR - 'get_ubuntu-server' functions should now be integrated into 'get_ubuntu' \n\n"
     get_ubuntu "$*"
 }
 function releases_ubuntu-server() {
-    #printf "\n\n  INTERNAL ERROR - 'releases_ubuntu-server' functions should now be integrated into 'releases_ubuntu' \n\n"
     releases_ubuntu "$*"
 }
 ## 10/2026 remove zsync
