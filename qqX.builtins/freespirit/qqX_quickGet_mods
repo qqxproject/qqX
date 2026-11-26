@@ -320,7 +320,7 @@ function get_alpine() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## 04/2026 Re-ADD due to upstream deletion
+## 04/2026 Re-ADD due to upstream deletion and reconfigure dynamics
 function releases_antix() {
     echo latest
 }
@@ -517,7 +517,7 @@ function get_devuan() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## 06/2025 REDUCE release count - over 20 is too many, and 10/2026 improve and FIX the grep
+## 06/2025 REDUCED release count - over 20 is too many, and 10/2026 improve and FIX the grep
 function releases_dragonflybsd() {
    web_pipe "https://mirror-master.dragonflybsd.org/iso-images/" | grep x86_64 | grep iso.bz2 | fv -M 5 -qs
 }
@@ -534,8 +534,7 @@ function releases_easyos() {
     echo "${ALL_RELEASES}"
 }
 
-## 01/2026  MADE DYNAMIC for latest (and fix hash)
-  # 10/2026 UPDATED for new servers and add a tweak for the base64 changes that crept in
+## 01/2026 made DYNAMIC and 10/2026 UPDATED for new servers and the base64 naming changes
 function releases_elementary() {
     echo latest
 }
@@ -547,6 +546,11 @@ function get_elementary() {
     BaseUrl="https://dl.elementaryos.org"
     Base64Bit="$(date +%s | basenc -i --base64url)" ; Base64Bit="${Base64Bit/'o='/==}"
     echo "${BaseUrl}/$Base64Bit/${ISO} ${HASH}"
+}
+
+## 04/2025 made DYNAMIC
+function releases_endeavouros() {
+    floatversion -qs -M 4 "$(web_pipe "https://mirrors.gigenet.com/endeavouros/iso/" | grep -s href | grep -s iso)"
 }
 
 ## 11/2026 - REFACTORED with improved jq greps and new added releases and versions, plus add Rawhide (testing)
@@ -724,7 +728,7 @@ function get_kde-linux() {
     echo "${BaseUrl}/${ISO} ${HASH}"
 }
 
-## 08/2025  FIX for omit dirs only having an RC sub-folder
+## 04/2025 made DYNAMIC and 08/2025 add FIX for omitted dirs only having an RC sub-folder
 function releases_linuxlite() {
     local ReleasesList="" ReleasesTrue="" i="0" c="0"  Url=""
     ReleasesList="$(web_pipe "https://sourceforge.net/projects/linux-lite/files/" | grep -s 'class="name' | floatversion -M 5 -qs)"
@@ -931,10 +935,9 @@ function get_opensuse() {
     echo "$URL/${ISO} $HASH"
 }
 
-## 08/2025 FIX - make sure integers -gt 9 can be used ...
+## 04/2025 made DYNAMIC  08/2025 FIX -to make sure integers -gt 9 can be used ...
 # eg. 6.10 and 10.0 > OracleLinux-R6-U10-Server-x86_64-dvd.iso and OracleLinux-R10-U0-x86_64-dvd.iso
 function releases_oraclelinux() {
-    #echo 9.3 9.2 9.1 9.0 8.9 8.8 8.7 8.6 8.5 8.4 7.9 7.8 7.7
     floatversion -qs -M 4  "$(web_pipe "https://yum.oracle.com/oracle-linux-isos.html" | grep -s -e '<td><strong>')"
 }
 function get_oraclelinux() {
@@ -1029,6 +1032,11 @@ function editions_popos() {
     elif [[ $RELEASE == "22.04" ]]; then echo "intel nvidia"
     else echo "generic intel nvidia"
    fi
+}
+
+## 04/2025 made DYNAMIC
+function releases_proxmox-ve() {
+    floatversion -M 3 -qs "$(web_pipe "https://enterprise.proxmox.com/iso/" | grep -s proxmox-ve)"
 }
 
 ## UPDATE to new storage  (08/2026)
@@ -1264,7 +1272,10 @@ function get_tinycore() {
     echo "${URL}/${ISO} ${HASH}"
 }
 
-## 08/2025  FIXED hash checker - base is now 256
+## 04/2025 made DYNAMIC  08/2025  FIXED hash checker - updated to sha256
+function releases_trisquel() {
+    floatversion -M 4 -qs "$(web_pipe "https://mirrors.ocf.berkeley.edu/trisquel-images/" | grep -s 'amd64.iso' | tr '"' '\n' | grep -s tris)"
+}
 function get_trisquel() {
     local HASH="" ; local ISO="" ;local URL="https://mirrors.ocf.berkeley.edu/trisquel-images"
     case ${EDITION} in
@@ -1354,6 +1365,11 @@ function releases_ubuntu-server() {
 ## 10/2026 remove zsync
 function zsync_get() {
     printf "\n\n  INTERNAL ERROR - 'zsync_get' functions have now been discontinued \n\n"
+}
+
+## 04/2026 made DYNAMIC and 04/2025 updated to new number system
+function releases_vanillaos() {
+    floatversion -qs -M 3 "$(web_pipe "https://github.com/Vanilla-OS/live-iso/tags" | grep -s 'Link--primary')"
 }
 
 ## 06/2025  FIXED invalid VOID folders (use 'current' only as some folders have variants)
