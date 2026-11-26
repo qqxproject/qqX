@@ -180,6 +180,7 @@ function os_info {
         peppermint)       INFO="PeppermintOS|-|https://peppermintos.com/|Bare-bones XFCE, no firewall, browser, office or media player; based on either Devuan or Debian, for EOL older computers";;
         popos)            INFO="Pop!_OS|-|https://pop.system76.com/|System 76's in-house Ubuntu LTS based distro with 24.04 introducing their new 'Cosmic' desktop (Coded in Rust)";;
         slint)            INFO="Slint|-|https://slint.fr/|BLIND-FRIENDLY, easy-to-use, versatile Linux distribution for 64-bit computers. Slint is based on Slackware and borrows tools from Salix. Maintainer: Didier Spaier.";;
+        spirallinux)      INFO="SpiralLinux|-|https://github.com/SpiralLinux/SpiralLinux-project|Small footprint selection of Linux spins built from Debian GNU/Linux, with a focus on simplicity and out-of-the-box usability.";;
         solus)            INFO="Solus|-|https://getsol.us/|General usage distro and the original home of the Budgie desktop";;
         trisquel)         INFO="Trisquel|-|https://trisquel.info/|The free GNU operating system, with the kernel GNU Linux-libre. Choice of 3 desktops or the 'Sugar' learning environment.";;
         tinycore)         INFO="Tiny Core Linux|-|http://www.tinycorelinux.net/|Nomadic ultra small graphical desktop operating system capable of booting from cdrom, pendrive, or frugally from a hard drive.";;
@@ -219,6 +220,7 @@ function distro_release_notes {
         porteus)          RelNotes="07/2026 > Slick distro worth trying, but last release 09/2023 ... " ;;
         rockylinux)       RelNotes="Also available in Server versions. For major release upgrades, run a fresh install. Also see https://wiki.almalinux.org/Comparison.html";;
         sparkylinux)      RelNotes="07/2025 Older specialist versions: 'gameover' 'multimedia' and 'rescue' are available via manual download";;
+        spirallinux)      RelNotes="11/2026 Community interest remains BUT no maintainer updates for 3 years ... ";;
         tails)            RelNotes="Checksum not given... only pgp sigs - If security is critical, see https://tails.net/install/expert/index.en.html#install";;
         tinycore)         RelNotes="Core is 32 bit 17Mb CLI, Tiny is 23Mb whilst Plus is up to around 230Mb. Select Pure for 64 bit.";;
         *buntu*)          RelNotes="Even number .04's are Long Term Support for Ubuntu supported software.  Daily-live is development from the latest version. See Archives for older versions.";;
@@ -1209,19 +1211,24 @@ function get_sparkylinux() {
     echo "${URL}/${ISO}" "${HASH}"
 }
 
-## 07/2025 TWEAKED to avoid spamming on test_all routines
+## 04/2025 made DYNAMIC with 11/2026 updated test_all routine; but to REVIEW for removal due to distro inactivity
 function releases_spirallinux() {
-    Spiral_Latest="$(web_pipe "https://sourceforge.net/projects/spirallinux/files/" | grep -s 'class="name' | fv -M -Q)"
     echo latest
 }
 function editions_spirallinux() {
     echo Plasma XFCE Mate LXQt Gnome Budgie Cinnamon Builder
 }
 function get_spirallinux() {
-    local HASH="" ; local LATEST="$Spiral_Latest"
-    [[ ! $LATEST ]] &&  LATEST="$(web_pipe "https://sourceforge.net/projects/spirallinux/files/" | grep -s 'class="name' | fv -M -Q)"
-    local ISO="SpiralLinux_${EDITION}_${LATEST}_x86-64.iso"
-    local URL="https://sourceforge.net/projects/spirallinux/files/${LATEST}"
+    local URL="" ISO="" HASH="" LatestVer=""
+    # avoid checking server 8 times on test_all routines
+    if [[ ! $LatestVer ]] && [[ -e "/tmp/qqX/qGetSpiralData.txt" ]]; then
+        LatestVer="$(cat "/tmp/qqX/qGetSpiralData.txt")"
+    else
+        LatestVer="$(web_pipe "https://sourceforge.net/projects/spirallinux/files/" | grep -s 'class="name' | fv -M -Q)"
+        echo "$LatestVer" > "/tmp/qqX/qGetSpiralData.txt"
+    fi
+    local ISO="SpiralLinux_${EDITION}_${LatestVer}_x86-64.iso"
+    local URL="https://sourceforge.net/projects/spirallinux/files/${LatestVer}"
     HASH=$(web_pipe 'https://sourceforge.net/projects/spirallinux/rss?path=/' | grep "${ISO}" | grep 'md5' | cut -d'<' -f3 | cut -d'>' -f2)
     echo "${URL}/${ISO}" "${HASH}"
 }
